@@ -377,7 +377,6 @@ fi
 export LESS=-iRFXMx4
 
 # Export variables.
-export EDITOR=nano
 export PAGER=less
 
 typeset -gaU cdpath fpath mailpath path

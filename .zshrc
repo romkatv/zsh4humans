@@ -121,12 +121,23 @@ elif [[ -x /usr/libexec/pk-command-not-found && -S /var/run/dbus/system_bus_sock
 elif [[ -x /run/current-system/sw/bin/command-not-found ]]; then
   function command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
 elif (( $+commands[brew] )); then
-  function command_not_found_handler() {
-    emulate -L zsh
-    unfunction command_not_found_handler
-    local init
-    init="$(brew command-not-found-init 2>/dev/null)" && eval $init || return 127
-    command_not_found_handler "$@"
+  () {
+    emulate -L zsh -o extended_glob
+    [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
+    local repo
+    repo="$(brew --repository 2>/dev/null)" || return
+    [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
+    autoload -Uz is-at-least
+    function command_not_found_handler() {
+      emulate -L zsh
+      local msg
+      if msg="$(brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
+        >&2 print -r -- $msg
+      elif is-at-least 5.3; then
+        >&2 print -r -- "zsh: command not found: $1"
+      fi
+      return 127
+    }
   }
 fi
 
@@ -391,6 +402,11 @@ zstyle '*' single-ignored show
 zstyle ':completion:*:(rm|kill|diff):*' ignore-line other
 zstyle ':completion:*:rm:*' file-patterns '*:all-files'
 zstyle ':completion:*:*:*:*:processes' command 'ps -A -o pid,user,command -w'
+
+# Enable iTerm2 shell integration if available.
+if [[ $TERM_PROGRAM == iTerm.app && -e ~/.iterm2_shell_integration.zsh ]]; then
+  source ~/.iterm2_shell_integration.zsh
+fi
 
 # Initialize prompt. Type `p10k configure` or edit ~/.p10k.zsh to customize it.
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh

@@ -176,7 +176,7 @@ fi
 function z4h-fzf-history-widget() {
   emulate -L zsh -o pipefail
   local preview='zsh -dfc "setopt extended_glob; echo - \${\${1#*[0-9] }## #}" -- {}'
-  (( $+commands[bat] )) && preview+='| bat -l bash --color always -pp'
+  (( $+commands[bat] )) && preview+=' | bat -l bash --color always -pp'
   local selected
   selected="$(
     fc -rl 1 |
@@ -190,10 +190,6 @@ function z4h-fzf-history-widget() {
 }
 
 # Widgets for changing current working directory.
-function z4h-cd-back() { z4h-cd-rotate +1 }
-function z4h-cd-forward() { z4h-cd-rotate -0 }
-function z4h-cd-up() { cd .. && z4h-redraw-prompt }
-
 function z4h-redraw-prompt() {
   emulate -L zsh
   local f
@@ -203,7 +199,6 @@ function z4h-redraw-prompt() {
   zle .reset-prompt
   zle -R
 }
-
 function z4h-cd-rotate() {
   emulate -L zsh
   while (( $#dirstack )) && ! pushd -q $1 &>/dev/null; do
@@ -213,6 +208,9 @@ function z4h-cd-rotate() {
     z4h-redraw-prompt
   fi
 }
+function z4h-cd-back() { z4h-cd-rotate +1 }
+function z4h-cd-forward() { z4h-cd-rotate -0 }
+function z4h-cd-up() { cd .. && z4h-redraw-prompt }
 
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
 
@@ -393,7 +391,7 @@ autoload -Uz compinit
 compinit -d ${XDG_CACHE_HOME:-~/.cache}/.zcompdump-$ZSH_VERSION
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'
 zstyle ':completion::complete:*' use-cache on
-zstyle ':completion::complete:*' cache-path ${XDG_CACHE_HOME:-$HOME/.cache}/.zcompcache-$ZSH_VERSION
+zstyle ':completion::complete:*' cache-path ${XDG_CACHE_HOME:-$HOME/.cache}/zcompcache-$ZSH_VERSION
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' completer _complete
 zstyle ':completion:*:*:-subscript-:*' tag-order indexes parameters

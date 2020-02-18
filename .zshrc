@@ -275,16 +275,16 @@ bindkey -e                     # enable emacs keymap (sorry, vi users)
 
 FZF_COMPLETION_TRIGGER=''                                # ctrl-t goes to fzf whenever possible
 fzf_default_completion=z4h-expand-or-complete-with-dots  # ctrl-t falls back to tab
-source $Z4H_DIR/junegunn/fzf/shell/completion.zsh        # load fzf-completion
-source $Z4H_DIR/junegunn/fzf/shell/key-bindings.zsh      # load fzf-cd-widget
+z4h source $Z4H_DIR/junegunn/fzf/shell/completion.zsh    # load fzf-completion
+z4h source $Z4H_DIR/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
 bindkey -r '^[c'                                         # remove unwanted binding
 
-FZF_TAB_PREFIX=                             # remove '·'
-FZF_TAB_SHOW_GROUP=brief                    # show group headers only for duplicate options
-FZF_TAB_SINGLE_GROUP=()                     # no colors and no header for a single group
-FZF_TAB_CONTINUOUS_TRIGGER='alt-enter'      # alt-enter to accept and trigger another completion
-bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
-source $Z4H_DIR/Aloxaf/fzf-tab/fzf-tab.zsh  # load fzf-tab-complete
+FZF_TAB_PREFIX=                                 # remove '·'
+FZF_TAB_SHOW_GROUP=brief                        # show group headers only for duplicate options
+FZF_TAB_SINGLE_GROUP=()                         # no colors and no header for a single group
+FZF_TAB_CONTINUOUS_TRIGGER='alt-enter'          # alt-enter to accept and trigger another completion
+bindkey '\t' expand-or-complete                 # fzf-tab reads it during initialization
+z4h source $Z4H_DIR/Aloxaf/fzf-tab/fzf-tab.zsh  # load fzf-tab-complete
 
 # If NumLock is off, translate keys to make them appear the same as with NumLock on.
 bindkey -s '^[OM' '^M'  # enter
@@ -425,16 +425,16 @@ zstyle ':completion:*:*:*:*:processes' command 'ps -A -o pid,user,command -w'
 
 # Enable iTerm2 shell integration if available.
 if [[ $TERM_PROGRAM == iTerm.app && -e ~/.iterm2_shell_integration.zsh ]]; then
-  source ~/.iterm2_shell_integration.zsh
+  z4h source ~/.iterm2_shell_integration.zsh
 fi
 
 # Initialize prompt. Type `p10k configure` or edit ~/.p10k.zsh to customize it.
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 source $Z4H_DIR/romkatv/powerlevel10k/powerlevel10k.zsh-theme
 
-source $Z4H_DIR/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+z4h source $Z4H_DIR/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 # zsh-syntax-highlighting must be loaded after all widgets have been defined.
-source $Z4H_DIR/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
+z4h source $Z4H_DIR/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
 autoload -Uz zmv zcp zln run-help              # enable a bunch of awesome zsh commands
 (( $+aliases[run-help] )) && unalias run-help  # make alt-h binding more useful

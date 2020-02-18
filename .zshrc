@@ -1,5 +1,6 @@
 if (( _z4h_initialized )); then
-  print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u ${Z4H_ZSH//\%/%%}%f instead of %F{2}source%f %U~/.zshrc%u"}
+  emulate zsh -o no_auto_name_dirs -c 'print -ru2 -- \
+    ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U${(D%):-%x}%u"}'
   return 1
 fi
 
@@ -42,9 +43,9 @@ function z4h() {
     zsh-users/zsh-syntax-highlighting  # https://github.com/zsh-users/zsh-syntax-highlighting
     zsh-users/zsh-autosuggestions      # https://github.com/zsh-users/zsh-autosuggestions
     zsh-users/zsh-completions          # https://github.com/zsh-users/zsh-completions
-    romkatv/powerlevel10k              # https://github.com/zsh-users/romkatv/powerlevel10k
-    Aloxaf/fzf-tab                     # https://github.com/zsh-users/Aloxaf/fzf-tab
-    junegunn/fzf                       # https://github.com/zsh-users/junegunn/fzf
+    romkatv/powerlevel10k              # https://github.com/romkatv/powerlevel10k
+    Aloxaf/fzf-tab                     # https://github.com/Aloxaf/fzf-tab
+    junegunn/fzf                       # https://github.com/junegunn/fzf
   )
 
   {
@@ -99,7 +100,7 @@ function z4h() {
   } always {
     (( $? )) || return
     local retry
-    (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u ${Z4H_ZSH//\%/%%}%f to retry"
+    (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u zsh%f to retry"
     print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
   }
 }
@@ -279,7 +280,7 @@ zle_highlight=('paste:none')   # disable highlighting of text pasted into the co
 HISTSIZE=1000000000                        # infinite command history
 SAVEHIST=1000000000                        # infinite command history
 
-bindkey -e                     # enable emacs keymap (sorry, vi users)
+bindkey -e  # enable emacs keymap (sorry, vi users)
 
 FZF_COMPLETION_TRIGGER=''                                # ctrl-t goes to fzf whenever possible
 fzf_default_completion=z4h-expand-or-complete-with-dots  # ctrl-t falls back to tab
@@ -431,7 +432,6 @@ zstyle ':completion:*' squeeze-slashes true
 zstyle '*' single-ignored show
 zstyle ':completion:*:(rm|kill|diff):*' ignore-line other
 zstyle ':completion:*:rm:*' file-patterns '*:all-files'
-zstyle ':completion:*:*:*:*:processes' command 'ps -A -o pid,user,command -w'
 
 # Enable iTerm2 shell integration if available.
 if [[ $TERM_PROGRAM == iTerm.app && -e ~/.iterm2_shell_integration.zsh ]]; then
@@ -439,8 +439,8 @@ if [[ $TERM_PROGRAM == iTerm.app && -e ~/.iterm2_shell_integration.zsh ]]; then
 fi
 
 # Initialize prompt. Type `p10k configure` or edit .p10k.zsh to customize it.
-[[ -f ${ZDOTDIR:-~}/.p10k.zsh ]] && source ${ZDOTDIR:-~}/.p10k.zsh
-source $Z4H_DIR/romkatv/powerlevel10k/powerlevel10k.zsh-theme
+[[ -e ${ZDOTDIR:-~}/.p10k.zsh ]] && z4h source ${ZDOTDIR:-~}/.p10k.zsh
+z4h source $Z4H_DIR/romkatv/powerlevel10k/powerlevel10k.zsh-theme
 
 z4h source $Z4H_DIR/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 # zsh-syntax-highlighting must be loaded after all widgets have been defined.

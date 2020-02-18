@@ -8,9 +8,19 @@ emulate zsh
 : ${Z4H_DIR:=${XDG_CACHE_HOME:-~/.cache}/zsh4humans}  # cache directory
 : ${Z4H_UPDATE_DAYS=13}                               # update dependencies this often
 
-# Installs or updates dependencies.
-function z4h-update() {
+function z4h() {
   emulate -L zsh
+
+  case $ARGC-$1 in
+    1-init)   local -i update=0;;
+    1-update) local -i update=1;;
+    *)
+      >&2 print -r -- ${(%):-"usage: %F{2}z4h%f %Binit%b|%Bupdate%b|%Bsource%b"}
+      return 1
+    ;;
+  esac
+
+  (( _z4h_initialized && ! update )) && exec zsh
 
   # GitHub projects to clone.
   local github_repos=(
@@ -24,7 +34,6 @@ function z4h-update() {
 
   {
     # Check if update is required.
-    local -i update=_z4h_initialized
     if [[ $update == 0 && -d $Z4H_DIR && $Z4H_UPDATE_DAYS == <-> ]]; then
       zmodload zsh/stat zsh/datetime
       local -a last_update_ts
@@ -71,11 +80,11 @@ function z4h-update() {
     (( $? )) || return
     local retry
     (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u zsh%f to retry"
-    >&2 print -r -- ${(%):-"%F{3}z4h%f: %F{1}failed to install or update dependencies%f$retry"}
+    >&2 print -r -- ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
   }
 }
 
-z4h-update || return
+z4h init || return
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]

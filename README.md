@@ -25,6 +25,5 @@ Edit `~/.zshrc`.
 ## Updating
 
 You'll be prompted to update dependencies (zsh-syntax-highlighting, fzf, etc.) every two weeks when
-starting Zsh. You can also force update with `z4h-update`.
-
-There is no update mechanism for `~/.zshrc` itself.
+starting Zsh. You can also force update with `z4h update`. There is no update mechanism for `.zshrc`
+itself.

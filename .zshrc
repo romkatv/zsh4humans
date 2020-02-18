@@ -275,9 +275,9 @@ WORDCHARS=''                   # only alphanums make up words in word-based zle 
 ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab completion
 zle_highlight=('paste:none')   # disable highlighting of text pasted into the command line
 
-HISTFILE=~/.zsh_history        # save command history in this file
-HISTSIZE=1000000000            # infinite command history
-SAVEHIST=1000000000            # infinite command history
+: ${HISTFILE:=${ZDOTDIR:-~}/.zsh_history}  # save command history in this file
+HISTSIZE=1000000000                        # infinite command history
+SAVEHIST=1000000000                        # infinite command history
 
 bindkey -e                     # enable emacs keymap (sorry, vi users)
 
@@ -438,8 +438,8 @@ if [[ $TERM_PROGRAM == iTerm.app && -e ~/.iterm2_shell_integration.zsh ]]; then
   z4h source ~/.iterm2_shell_integration.zsh
 fi
 
-# Initialize prompt. Type `p10k configure` or edit ~/.p10k.zsh to customize it.
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+# Initialize prompt. Type `p10k configure` or edit .p10k.zsh to customize it.
+[[ -f ${ZDOTDIR:-~}/.p10k.zsh ]] && source ${ZDOTDIR:-~}/.p10k.zsh
 source $Z4H_DIR/romkatv/powerlevel10k/powerlevel10k.zsh-theme
 
 z4h source $Z4H_DIR/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh

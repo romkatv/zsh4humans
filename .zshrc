@@ -278,7 +278,6 @@ zle_highlight=('paste:none')   # disable highlighting of text pasted into the co
 HISTFILE=~/.zsh_history        # save command history in this file
 HISTSIZE=1000000000            # infinite command history
 SAVEHIST=1000000000            # infinite command history
-HISTFILESIZE=1000000000        # infinite command history
 
 bindkey -e                     # enable emacs keymap (sorry, vi users)
 

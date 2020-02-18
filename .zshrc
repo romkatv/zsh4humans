@@ -189,6 +189,7 @@ function z4h-down-line-or-beginning-search-local() {
 }
 
 function z4h-expand-alias() { zle _expand_alias || true }
+function z4h-run-help() { zle run-help || true }
 
 zmodload zsh/terminfo
 if (( $+terminfo[rmam] && $+terminfo[smam] )); then
@@ -241,7 +242,8 @@ function z4h-cd-back() { z4h-cd-rotate +1 }
 function z4h-cd-forward() { z4h-cd-rotate -0 }
 function z4h-cd-up() { cd .. && z4h-redraw-prompt }
 
-autoload -Uz up-line-or-beginning-search down-line-or-beginning-search
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search run-help
+(( $+aliases[run-help] )) && unalias run-help  # make alt-h binding more useful
 
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
@@ -253,6 +255,7 @@ zle -N z4h-cd-back
 zle -N z4h-cd-forward
 zle -N z4h-cd-up
 zle -N z4h-fzf-history-widget
+zle -N z4h-run-help
 
 zmodload zsh/terminfo
 if (( terminfo[colors] >= 256 )); then
@@ -344,6 +347,8 @@ bindkey '\t'      z4h-expand-or-complete-with-dots        # tab        fzf-tab c
 bindkey '^[[1;3B' fzf-cd-widget                           # alt+down   fzf cd
 bindkey '^T'      fzf-completion                          # ctrl+t     fzf file completion
 bindkey '^R'      z4h-fzf-history-widget                  # ctrl+r     fzf history
+bindkey '^[h'     z4h-run-help                            # alt+h      help for the cmd at cursor
+bindkey '^[H'     z4h-run-help                            # alt+H      help for the cmd at cursor
 
 # Tell zsh-autosuggestions how to handle different widgets.
 typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
@@ -442,8 +447,7 @@ z4h source $Z4H_DIR/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 # zsh-syntax-highlighting must be loaded after all widgets have been defined.
 z4h source $Z4H_DIR/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
-autoload -Uz zmv zcp zln run-help              # enable a bunch of awesome zsh commands
-(( $+aliases[run-help] )) && unalias run-help  # make alt-h binding more useful
+autoload -Uz zmv zcp zln # enable a bunch of awesome zsh commands
 
 # Aliases.
 alias diff='diff --color=auto'

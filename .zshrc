@@ -1,10 +1,11 @@
 if (( _z4h_initialized )); then
-  print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
+  print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u ${Z4H_ZSH//\%/%%}%f instead of %F{2}source%f %U~/.zshrc%u"}
   return 1
 fi
 
 emulate zsh
 
+: ${Z4H_ZSH:=${${0#-}:-zsh}}                          # command to start zsh (usually `zsh`)
 : ${Z4H_DIR:=${XDG_CACHE_HOME:-~/.cache}/zsh4humans}  # cache directory
 : ${Z4H_UPDATE_DAYS=13}                               # update dependencies this often
 
@@ -34,7 +35,7 @@ function z4h() {
     ;;
   esac
 
-  (( _z4h_initialized && ! update )) && exec zsh
+  (( _z4h_initialized && ! update )) && exec -- $Z4H_ZSH
 
   # GitHub projects to clone.
   local github_repos=(
@@ -49,21 +50,20 @@ function z4h() {
   {
     # Check if update is required.
     if [[ $update == 0 && -d $Z4H_DIR && $Z4H_UPDATE_DAYS == <-> ]]; then
-      zmodload zsh/stat zsh/datetime
+      zmodload zsh/stat zsh/datetime || return
       local -a last_update_ts
       if ! zstat -A last_update_ts +mtime -- $Z4H_DIR/.last-update-ts 2>/dev/null ||
          (( EPOCHSECONDS - last_update_ts[1] >= 86400 * Z4H_UPDATE_DAYS )); then
         local REPLY
         read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && update=1
         print -u2
-        (( update )) || print -ru2 -- ${(%):-"%F{3}z4h%f: type %F{2}z4h-update%f to update"}
+        (( update )) || print -ru2 -- ${(%):-"%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"}
       fi
     fi
 
-    (( update )) && print -ru2 -- ${(%):-"%F{3}z4h%f: updating depencencies..."}
-
     if [[ ! -d $Z4H_DIR ]]; then
-      mkdir -p $Z4H_DIR || return
+      zmodload -F zsh/files b:zf_mkdir || return
+      zf_mkdir -p -- $Z4H_DIR || return
       update=1
     fi
 
@@ -71,29 +71,35 @@ function z4h() {
     local repo
     for repo in $github_repos; do
       if [[ -d $Z4H_DIR/$repo ]]; then
-        (( ! update )) || >&2 git -C $Z4H_DIR/$repo pull || return
+        if (( update )); then
+          print -ru2 -- ${(%):-"%F{3}z4h%f: updating %B${repo//\%/%%}%b"}
+          >&2 git -C $Z4H_DIR/$repo pull --recurse-submodules -j 8 || return
+        fi
       else
-        >&2 git clone --depth=1 https://github.com/$repo.git $Z4H_DIR/$repo || return
+        print -ru2 -- ${(%):-"%F{3}z4h%f: installing %B${repo//\%/%%}%b"}
+        >&2 git clone --depth=1 --recurse-submodules -j 8 -- \
+          https://github.com/$repo.git $Z4H_DIR/$repo || return
       fi
     done
 
     # Download fzf binary.
     if [[ ! -e $Z4H_DIR/junegunn/fzf/bin/fzf || $update == 1 ]]; then
+      print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %F{2}fzf%f binary"}
       >&2 $Z4H_DIR/junegunn/fzf/install --bin || return
     fi
 
     (( update )) && print -n >$Z4H_DIR/.last-update-ts
 
     if (( _z4h_initialized )); then
-       print -ru2 -- ${(%):-"%F{3}z4h%f: restarting zsh..."}
-      exec zsh
+      print -ru2 -- ${(%):-"%F{3}z4h%f: restarting zsh"}
+      exec -- $Z4H_ZSH
     else
       typeset -gri _z4h_initialized=1
     fi
   } always {
     (( $? )) || return
     local retry
-    (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u zsh%f to retry"
+    (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u ${Z4H_ZSH//\%/%%}%f to retry"
     print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
   }
 }

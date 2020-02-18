@@ -413,10 +413,10 @@ export LESS=-iRFXMx4
 export PAGER=less
 
 typeset -gaU cdpath fpath mailpath path
-fpath+=$Z4H_DIR/zsh-users/zsh-completions/src
+fpath+=($Z4H_DIR/zsh-users/zsh-completions/src)
 
 # Extend PATH.
-path+=$Z4H_DIR/junegunn/fzf/bin
+path+=($Z4H_DIR/junegunn/fzf/bin)
 
 # Initialize completions.
 autoload -Uz compinit

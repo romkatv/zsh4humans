@@ -14,6 +14,20 @@ function z4h() {
   case $ARGC-$1 in
     1-init)   local -i update=0;;
     1-update) local -i update=1;;
+    2-source)
+      [[ -r $2 ]] || return
+      if [[ ! $2.zwc -nt $2 && -w ${2:h} ]]; then
+        zmodload -F zsh/files b:zf_mv b:zf_rm || return
+        local tmp=$2.tmp.$$.zwc
+        {
+          zcompile -R -- $tmp $2 && zf_mv -f -- $tmp $2.zwc || return
+        } always {
+          (( $? )) && zf_rm -f $tmp
+        }
+      fi
+      source -- $2
+      return
+    ;;
     *)
       print -ru2 -- ${(%):-"usage: %F{2}z4h%f %Binit%b|%Bupdate%b|%Bsource%b"}
       return 1

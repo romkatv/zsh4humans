@@ -1,5 +1,5 @@
 if (( _z4h_initialized )); then
-  >&2 print -r -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
+  print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
   return 1
 fi
 
@@ -15,7 +15,7 @@ function z4h() {
     1-init)   local -i update=0;;
     1-update) local -i update=1;;
     *)
-      >&2 print -r -- ${(%):-"usage: %F{2}z4h%f %Binit%b|%Bupdate%b|%Bsource%b"}
+      print -ru2 -- ${(%):-"usage: %F{2}z4h%f %Binit%b|%Bupdate%b|%Bsource%b"}
       return 1
     ;;
   esac
@@ -41,12 +41,12 @@ function z4h() {
          (( EPOCHSECONDS - last_update_ts[1] >= 86400 * Z4H_UPDATE_DAYS )); then
         local REPLY
         read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && update=1
-        >&2 print
-        (( update )) || >&2 print ${(%):-"%F{3}z4h%f: type %F{2}z4h-update%f to update"}
+        print -u2
+        (( update )) || print -ru2 -- ${(%):-"%F{3}z4h%f: type %F{2}z4h-update%f to update"}
       fi
     fi
 
-    (( update )) && >&2 print -r -- ${(%):-"%F{3}z4h%f: updating depencencies..."}
+    (( update )) && print -ru2 -- ${(%):-"%F{3}z4h%f: updating depencencies..."}
 
     if [[ ! -d $Z4H_DIR ]]; then
       mkdir -p $Z4H_DIR || return
@@ -71,7 +71,7 @@ function z4h() {
     (( update )) && print -n >$Z4H_DIR/.last-update-ts
 
     if (( _z4h_initialized )); then
-       >&2 print -r -- ${(%):-"%F{3}z4h%f: restarting zsh..."}
+       print -ru2 -- ${(%):-"%F{3}z4h%f: restarting zsh..."}
       exec zsh
     else
       typeset -gri _z4h_initialized=1
@@ -80,7 +80,7 @@ function z4h() {
     (( $? )) || return
     local retry
     (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u zsh%f to retry"
-    >&2 print -r -- ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
+    print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
   }
 }
 
@@ -141,9 +141,9 @@ elif (( $+commands[brew] )); then
       emulate -L zsh
       local msg
       if msg="$(brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
-        >&2 print -r -- $msg
+        print -ru2 -- $msg
       elif is-at-least 5.3; then
-        >&2 print -r -- "zsh: command not found: $1"
+        print -ru2 -- "zsh: command not found: $1"
       fi
       return 127
     }

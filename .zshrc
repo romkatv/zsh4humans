@@ -1,6 +1,5 @@
 if (( _z4h_initialized )); then
-  emulate zsh -o no_auto_name_dirs -c 'print -ru2 -- \
-    ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U${(D%):-%x}%u"}'
+  print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
   return 1
 fi
 

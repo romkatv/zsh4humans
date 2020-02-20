@@ -454,9 +454,13 @@ z4h source $Z4H_DIR/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.pl
 autoload -Uz zmv zcp zln # enable a bunch of awesome zsh commands
 
 # Aliases.
-alias diff='diff --color=auto'
+if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD
+  alias diff='diff --color=auto'
+  alias ls='ls --color=auto'
+else
+  alias ls='ls -G'
+fi
 alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
-alias ls='ls --color=auto'
 alias tree='tree -aC -I .git'
 
 # Enable decent options. See http://zsh.sourceforge.net/Doc/Release/Options.html.

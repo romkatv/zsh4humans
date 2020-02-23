@@ -141,14 +141,18 @@ _z4h-set-term-title-precmd
 }
 
 # Enable command_not_found_handler if possible.
-if [[ -e /etc/zsh_command_not_found ]]; then
+if (( $+functions[command_not_found_handler] )); then
+  # already installed
+elif [[ -e /etc/zsh_command_not_found ]]; then
   source /etc/zsh_command_not_found
 elif [[ -e /usr/share/doc/pkgfile/command-not-found.zsh ]]; then
   source /usr/share/doc/pkgfile/command-not-found.zsh
 elif [[ -x /usr/libexec/pk-command-not-found && -S /var/run/dbus/system_bus_socket ]]; then
-  function command_not_found_handler() { /usr/libexec/pk-command-not-found "$@"; }
+  command_not_found_handler() { /usr/libexec/pk-command-not-found "$@" }
+elif [[ -x /data/data/com.termux/files/usr/libexec/termux/command-not-found ]]; then
+  command_not_found_handler() { /data/data/com.termux/files/usr/libexec/termux/command-not-found "$@" }
 elif [[ -x /run/current-system/sw/bin/command-not-found ]]; then
-  function command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
+  command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
 elif (( $+commands[brew] )); then
   () {
     emulate -L zsh -o extended_glob

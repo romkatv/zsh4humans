@@ -1,6 +1,6 @@
 # Zsh for Humans
 
-Single-file configuration for Zsh with sane defaults.
+Single-file configuration for Zsh >= 5.1 with sane defaults.
 
 ## Installation
 

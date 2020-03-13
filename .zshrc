@@ -116,12 +116,12 @@ fi
 # When a command is running, display it in the terminal title.
 function _z4h-set-term-title-preexec() {
   emulate -L zsh
-  print -rn -- $'\e]0;'${(V)1}$'\e\\' >$TTY
+  print -rn -- $'\e]0;'${(V)1}$'\a' >$TTY
 }
 # When no command is running, display the current directory in the terminal title.
 function _z4h-set-term-title-precmd() {
   emulate -L zsh
-  print -rn -- $'\e]0;'${(V%):-"%~"}$'\e\\' >$TTY
+  print -rn -- $'\e]0;'${(V%):-"%~"}$'\a' >$TTY
 }
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _z4h-set-term-title-preexec

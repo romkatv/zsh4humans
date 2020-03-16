@@ -459,13 +459,14 @@ autoload -Uz zmv zcp zln # enable a bunch of awesome zsh commands
 
 # Aliases.
 if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD
-  alias diff='diff --color=auto'
-  alias ls='ls --color=auto'
+  # Don't define aliases for commands that point to busybox.
+  [[ ${${:-diff}:c:A:t} == busybox* ]] || alias diff='diff --color=auto'
+  [[ ${${:-ls}:c:A:t}   == busybox* ]] || alias ls='ls --color=auto'
 else
-  alias ls='ls -G'
+  [[ ${${:-ls}:c:A:t}   == busybox* ]] || alias ls='ls -G'
 fi
-alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
-alias tree='tree -aC -I .git'
+[[ ${${:-grep}:c:A:t}   == busybox* ]] || alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
+[[ ${${:-tree}:c:A:t}   == busybox* ]] || alias tree='tree -aC -I .git'
 
 # Enable decent options. See http://zsh.sourceforge.net/Doc/Release/Options.html.
 emulate zsh                    # restore default options just in case something messed them up

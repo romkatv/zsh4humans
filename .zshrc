@@ -30,7 +30,7 @@ function z4h() {
       return
     ;;
     *)
-      print -ru2 -- ${(%):-"usage: %F{2}z4h%f %Binit%b|%Bupdate%b|%Bsource%b"}
+      print -ru2 -- ${(%):-"usage: %F{2}z4h%f [%Binit%b]|[%Bupdate%b]|[%Bsource%b %Ufile%u]"}
       return 1
     ;;
   esac
@@ -48,24 +48,22 @@ function z4h() {
   )
 
   {
-    # Check if update is required.
-    if [[ $update == 0 && -d $Z4H_DIR && $Z4H_UPDATE_DAYS == <-> ]]; then
+    if [[ ! -e $Z4H_DIR/.last-update-ts ]]; then
+      zmodload -F zsh/files b:zf_mkdir || return
+      zf_mkdir -p -- $Z4H_DIR || return
+      print -n >$Z4H_DIR/.last-update-ts || return
+    elif [[ $update == 0 && $Z4H_UPDATE_DAYS == <-> ]]; then
+      # Check if update is required.
       zmodload zsh/stat zsh/datetime || return
       local -a last_update_ts
-      if ! zstat -A last_update_ts +mtime -- $Z4H_DIR/.last-update-ts 2>/dev/null ||
+      if zstat -A last_update_ts +mtime -- $Z4H_DIR/.last-update-ts 2>/dev/null &&
          (( EPOCHSECONDS - last_update_ts[1] >= 86400 * Z4H_UPDATE_DAYS )); then
         local REPLY
         read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && update=1
         print -u2
         (( update )) || print -ru2 -- ${(%):-"%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"}
+        print -n >$Z4H_DIR/.last-update-ts || return
       fi
-    fi
-
-    zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
-
-    if [[ ! -d $Z4H_DIR ]]; then
-      zf_mkdir -p -- $Z4H_DIR || return
-      update=1
     fi
 
     # Clone or update all repositories.
@@ -77,10 +75,12 @@ function z4h() {
         >&2 git -C $Z4H_DIR/$repo pull || return
       elif (( $+commands[git] )); then
         print -ru2 -- ${(%):-"%F{3}z4h%f: cloning %B${repo//\%/%%}%b"}
+        zmodload -F zsh/files b:zf_rm || return
         zf_rm -rf -- $Z4H_DIR/$repo || return
         >&2 git clone --depth=1 -- https://github.com/$repo.git $Z4H_DIR/$repo || return
       else
         print -ru2 -- ${(%):-"%F{3}z4h%f: downloading %B${repo//\%/%%}%b"}
+        zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
         zf_mkdir -p -- $Z4H_DIR/${repo:h}
         if (( $+commands[curl] )); then
           curl -fsSL -- https://github.com/$repo/archive/master.tar.gz || return
@@ -101,8 +101,6 @@ function z4h() {
       ( cd $Z4H_DIR/junegunn/fzf && >&2 BASH_SOURCE=. exec -a sh $Z4H_ZSH install --bin ) || return
     fi
 
-    (( update )) && print -n >$Z4H_DIR/.last-update-ts
-
     if (( _z4h_initialized )); then
       print -ru2 -- ${(%):-"%F{3}z4h%f: restarting zsh"}
       exec -- $Z4H_ZSH
@@ -113,7 +111,7 @@ function z4h() {
     (( $? )) || return
     local retry
     (( _z4h_initialized )) || retry="; type %F{2}%Uexec%u zsh%f to retry"
-    print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
+    print -rlu2 -- '' ${(%):-"%F{3}z4h%f: %F{1}failed to pull dependencies%f$retry"}
   }
 }
 

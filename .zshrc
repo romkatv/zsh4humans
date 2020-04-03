@@ -189,8 +189,8 @@ fi
 #
 # This is a replacement for interactive `ssh [ssh-options] [user@]hostname`
 # that fires up Zsh on the remote machine with your local configs. The remote
-# machine must have login shell compatible with the Bourne shell and internet
-# connection. Nothing else is required.
+# machine must have login shell compatible with the Bourne shell (sh, bash,
+# zsh, ash, dash, etc.) and internet connection. Nothing else is required.
 #
 # Here's what zssh does:
 #
@@ -198,8 +198,8 @@ fi
 #      and sends them to the remote machine. Local zsh history does NOT get
 #      sent over.
 #   2. Extracts these files to ~/.cache/zsh4humans.ssh/.dotfiles on the remote
-#      machine and sets ZDOTDIR to the path to this directory to instruct Zsh
-#      to read configuration files from it.
+#      machine and points ZDOTDIR to this directory to instruct Zsh to read
+#      configuration files from it.
 #   3. If there is no Zsh on the remote machine, zssh installs the latest
 #      version to `~/.zsh-bin`.
 #   4. Sets Z4H_SSH environment variable to '1'. You can use it throughout
@@ -210,7 +210,7 @@ fi
 # fast as normal ssh.
 #
 # Command history persists on the remote machine but Zsh config files (.zshrc
-# and .p10k.zsh) get deleted when you log out.
+# and .p10k.zsh) get deleted when SSH connection terminates.
 function zssh() {
   emulate -L zsh -o pipefail -o extended_glob
 

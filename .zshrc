@@ -10,7 +10,7 @@ emulate zsh -o posix_argzero -c ': ${Z4H_ZSH:=${${0#-}:-zsh}}' # command to star
 : ${Z4H_UPDATE_DAYS=13}                                        # update dependencies this often
 
 function z4h() {
-  emulate -L zsh
+  emulate -L zsh -o pipe_fail
 
   case $ARGC-$1 in
     1-init)   local -i update=0;;
@@ -61,8 +61,9 @@ function z4h() {
       fi
     fi
 
+    zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
+
     if [[ ! -d $Z4H_DIR ]]; then
-      zmodload -F zsh/files b:zf_mkdir || return
       zf_mkdir -p -- $Z4H_DIR || return
       update=1
     fi
@@ -70,14 +71,27 @@ function z4h() {
     # Clone or update all repositories.
     local repo
     for repo in $github_repos; do
-      if [[ -d $Z4H_DIR/$repo ]]; then
-        if (( update )); then
-          print -ru2 -- ${(%):-"%F{3}z4h%f: updating %B${repo//\%/%%}%b"}
-          >&2 git -C $Z4H_DIR/$repo pull || return
-        fi
-      else
-        print -ru2 -- ${(%):-"%F{3}z4h%f: installing %B${repo//\%/%%}%b"}
+      [[ -d $Z4H_DIR/$repo && $update == 0 ]] && continue
+      if [[ -d $Z4H_DIR/$repo/.git && $+commands[git] == 1 ]]; then
+        print -ru2 -- ${(%):-"%F{3}z4h%f: updating %B${repo//\%/%%}%b"}
+        >&2 git -C $Z4H_DIR/$repo pull || return
+      elif (( $+commands[git] )); then
+        print -ru2 -- ${(%):-"%F{3}z4h%f: cloning %B${repo//\%/%%}%b"}
+        zf_rm -rf -- $Z4H_DIR/$repo || return
         >&2 git clone --depth=1 -- https://github.com/$repo.git $Z4H_DIR/$repo || return
+      else
+        print -ru2 -- ${(%):-"%F{3}z4h%f: downloading %B${repo//\%/%%}%b"}
+        zf_mkdir -p -- $Z4H_DIR/${repo:h}
+        if (( $+commands[curl] )); then
+          curl -fsSL -- https://github.com/$repo/archive/master.tar.gz || return
+        elif (( $+commands[wget] )); then
+          wget -O- -- https://github.com/$repo/archive/master.tar.gz || return
+        else
+          print -ru2 -- "%F{3}z4h%f: please install %F{2}git%f, %F{2}curl%f or %F{2}wget%f"
+          return 1
+        fi | tar -C $Z4H_DIR/${repo:h} -xz || return
+        zf_rm -rf -- $Z4H_DIR/$repo || return
+        zf_mv -- $Z4H_DIR/$repo-master $Z4H_DIR/$repo || return
       fi
     done
 

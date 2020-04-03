@@ -428,7 +428,7 @@ typeset -gaU cdpath fpath mailpath path
 fpath+=($Z4H_DIR/zsh-users/zsh-completions/src)
 
 # Extend PATH.
-path+=($Z4H_DIR/junegunn/fzf/bin)
+path+=($Z4H_DIR/junegunn/fzf/bin ${Z4H_ZSH:h})
 
 # Initialize completions.
 autoload -Uz compinit

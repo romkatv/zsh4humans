@@ -192,7 +192,9 @@ function z4h-down-line-or-beginning-search-local() {
   zle .set-local-history 0
 }
 
-function z4h-expand-alias() { zle _expand_alias || true }
+function z4h-beginning-of-buffer() { CURSOR=0 }
+function z4h-end-of-buffer() { CURSOR=$(($#BUFFER  + 1)) }
+function z4h-expand() { zle _expand_alias || zle .expand-word || true }
 function z4h-run-help() { zle run-help || true }
 
 zmodload zsh/terminfo
@@ -209,16 +211,17 @@ fi
 # fzf-history-widget with duplicate removal, preview and syntax highlighting (requires `bat`).
 function z4h-fzf-history-widget() {
   emulate -L zsh -o pipefail
-  local preview='zsh -dfc "setopt extended_glob; echo - \${\${1#*[0-9] }## #}" -- {}'
+  local preview='printf "%s" {}'
   (( $+commands[bat] )) && preview+=' | bat -l bash --color always -pp'
-  local selected
-  selected="$(
-    fc -rl 1 |
-    awk '!_[substr($0, 8)]++' |
-    fzf +m -n2..,.. --tiebreak=index --cycle --height=80% --preview-window=down:30%:wrap \
-      --query=$LBUFFER --preview=$preview)"
+  local cmd
+  cmd="$(print -rNC1 -- "${(@u)history}" |
+    fzf --read0 --no-multi --tiebreak=index --cycle --height=80% \
+      --preview-window=down:40%:wrap --preview=$preview          \
+      --bind '?:toggle-preview,ctrl-h:backward-kill-word' --query=$LBUFFER)"
   local -i ret=$?
-  [[ -n "$selected" ]] && zle vi-fetch-history -n $selected
+  if [[ $ret == 0 && -n "$cmd" ]]; then
+    zle .vi-fetch-history -n $(($#history - ${${history[@]}[(ie)$cmd]} + 1))
+  fi
   zle .reset-prompt
   return ret
 }
@@ -251,7 +254,9 @@ autoload -Uz up-line-or-beginning-search down-line-or-beginning-search run-help
 
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
-zle -N z4h-expand-alias
+zle -N z4h-expand
+zle -N z4h-beginning-of-buffer
+zle -N z4h-end-of-buffer
 zle -N z4h-expand-or-complete-with-dots
 zle -N z4h-up-line-or-beginning-search-local
 zle -N z4h-down-line-or-beginning-search-local
@@ -340,7 +345,7 @@ bindkey '^_'      undo                                    # ctrl+/     undo
 bindkey '^\'      redo                                    # ctrl+\     redo
 bindkey '^[[1;5A' up-line-or-beginning-search             # ctrl+up    prev cmd in global history
 bindkey '^[[1;5B' down-line-or-beginning-search           # ctrl+down  next cmd in global history
-bindkey '^ '      z4h-expand-alias                        # ctrl+space expand alias
+bindkey '^ '      z4h-expand                              # ctrl+space expand alias/glob/parameter
 bindkey '^[[1;3D' z4h-cd-back                             # alt+left   cd into the prev directory
 bindkey '^[[1;3C' z4h-cd-forward                          # alt+right  cd into the next directory
 bindkey '^[[1;3A' z4h-cd-up                               # alt+up     cd ..
@@ -350,27 +355,27 @@ bindkey '^T'      fzf-completion                          # ctrl+t     fzf file 
 bindkey '^R'      z4h-fzf-history-widget                  # ctrl+r     fzf history
 bindkey '^[h'     z4h-run-help                            # alt+h      help for the cmd at cursor
 bindkey '^[H'     z4h-run-help                            # alt+H      help for the cmd at cursor
+bindkey '^[[1;5H' z4h-beginning-of-buffer                 # ctrl-home  go to the beginning of buffer
+bindkey '^[[1;5F' z4h-end-of-buffer                       # ctrl-end   go to the end of buffer
 
 # Tell zsh-autosuggestions how to handle different widgets.
 typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
-typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(end-of-line vi-end-of-line vi-add-eol)
+typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
+  end-of-line
+  vi-end-of-line
+  vi-add-eol
+  z4h-end-of-buffer
+  # Uncomment these two lines if you want right arrow to accept the whole autosuggestion.
+  # forward-char
+  # vi-forward-char
+)
 typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
-  history-search-forward
-  history-search-backward
-  history-beginning-search-forward
-  history-beginning-search-backward
-  history-substring-search-up
-  history-substring-search-down
+  accept-line
   up-line-or-beginning-search
   down-line-or-beginning-search
-  up-line-or-history
-  down-line-or-history
-  accept-line
+  up-line-or-beginning-search-local
+  down-line-or-beginning-search-local
   z4h-fzf-history-widget
-  z4h-up-line-or-beginning-search-local
-  z4h-down-line-or-beginning-search-local
-  z4h-expand-alias
-  fzf-tab-complete
 )
 typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
   forward-word
@@ -381,7 +386,7 @@ typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
   vi-forward-blank-word-end
   vi-find-next-char
   vi-find-next-char-skip
-  forward-char            # right arrow accepts a single character; press end to accept to the end
+  forward-char
   vi-forward-char
 )
 typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(
@@ -393,7 +398,8 @@ typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(
   yank
   yank-pop
   zle-\*
-  expand-or-complete
+  redisplay
+  fzf-tab-complete
 )
 
 # Use lesspipe if available. It allows you to use less on binary files (zip archives, etc.).

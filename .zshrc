@@ -73,12 +73,11 @@ function z4h() {
       if [[ -d $Z4H_DIR/$repo ]]; then
         if (( update )); then
           print -ru2 -- ${(%):-"%F{3}z4h%f: updating %B${repo//\%/%%}%b"}
-          >&2 git -C $Z4H_DIR/$repo pull --recurse-submodules || return
+          >&2 git -C $Z4H_DIR/$repo pull || return
         fi
       else
         print -ru2 -- ${(%):-"%F{3}z4h%f: installing %B${repo//\%/%%}%b"}
-        >&2 git clone --depth=1 --recurse-submodules -- \
-          https://github.com/$repo.git $Z4H_DIR/$repo || return
+        >&2 git clone --depth=1 -- https://github.com/$repo.git $Z4H_DIR/$repo || return
       fi
     done
 

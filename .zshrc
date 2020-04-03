@@ -148,7 +148,7 @@ _z4h-set-term-title-precmd
   (( $+commands[locale] )) || return
   local loc=(${(@M)$(locale -a):#*.(utf|UTF)(-|)8})
   (( $#loc )) || return
-  LC_ALL=${loc[(r)(#i)C.UTF(-|)8]:-${loc[(r)(#i)en_US.UTF(-|)8]:-$loc[1]}}
+  export LC_ALL=${loc[(r)(#i)C.UTF(-|)8]:-${loc[(r)(#i)en_US.UTF(-|)8]:-$loc[1]}}
 }
 
 # Enable command_not_found_handler if possible.
@@ -184,6 +184,88 @@ elif (( $+commands[brew] )); then
     }
   }
 fi
+
+# Usage: zssh [ssh-options] [user@]hostname
+#
+# This is a replacement for interactive `ssh [ssh-options] [user@]hostname`
+# that fires up Zsh on the remote machine with your local configs. The remote
+# machine must have login shell compatible with the Bourne shell and internet
+# connection. Nothing else is required.
+#
+# Here's what zssh does:
+#
+#   1. Archives Zsh config files (.zshrc and .p10k.zsh) on the local machine
+#      and sends them to the remote machine. Local zsh history does NOT get
+#      sent over.
+#   2. Extracts these files to ~/.cache/zsh4humans.ssh/.dotfiles on the remote
+#      machine and sets ZDOTDIR to the path to this directory to instruct Zsh
+#      to read configuration files from it.
+#   3. If there is no Zsh on the remote machine, zssh installs the latest
+#      version to `~/.zsh-bin`.
+#   4. Sets Z4H_SSH environment variable to '1'. You can use it throughout
+#      zshrc to perform various initialization steps conditionally, depending
+#      on whether zshrc is being sourced on your local or remote machine.
+#
+# The first login to a remote machine may take some time. After that it's as
+# fast as normal ssh.
+#
+# Command history persists on the remote machine but Zsh config files (.zshrc
+# and .p10k.zsh) get deleted when you log out.
+function zssh() {
+  emulate -L zsh -o pipefail -o extended_glob
+
+  # Copy these files and directories (relative to $ZDOTDIR, which defaults to
+  # $HOME) from local machine to remote. Silently skip files that don't exist.
+  local local_files=(.zshrc .p10k.zsh)
+
+  # If there is no zsh on the remote machine, install this.
+  local zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
+
+  if (( ARGC == 0 )); then
+    print -ru2 -- 'usage: ssh.zsh [ssh-options] [user@]hostname'
+    return 1
+  fi
+
+  # Tar, compress and base64-encode the subset of $local_files that actually exist.
+  local dump
+  dump=$(cd -- ${ZDOTDIR:-~} && tar -czhT <(print -rl -- $^local_files(N)) | base64) || return
+
+  ssh -t "$@" '
+    set -ue
+
+    export Z4H_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans.ssh
+    export ZDOTDIR="$Z4H_DIR"/.dotfiles
+    export HISTFILE="$Z4H_DIR"/.zsh_history
+    export Z4H_SSH=1
+
+    rm -rf -- "$ZDOTDIR"
+    mkdir -p -- "$Z4H_DIR" "$ZDOTDIR"
+    touch -- "$HISTFILE"
+    chmod 700 -- "$Z4H_DIR" "$ZDOTDIR"
+    chmod 600 -- "$HISTFILE"
+
+    # Delete dotfiles when SSH connetion terminates. Keep Zsh plugins and history.
+    trap '\''rm -rf -- "$ZDOTDIR"'\'' INT QUIT TERM EXIT ILL PIPE HUP
+
+    ( cd -- "$ZDOTDIR" && printf "%s" '${(q)dump//$'\n'}' | base64 -d | tar -xz )
+
+    # If there is no local Zsh, install the latest version to ~/.zsh-bin.
+    if ! command -v zsh >/dev/null 2>&1; then
+      if [ ! -d ~/.zsh-bin ]; then
+        if command -v curl >/dev/null 2>&1; then
+          curl -fsSL -- '${(q)zsh_url}' | sh
+        else
+          wget -O- -- '${(q)zsh_url}' | sh
+        fi
+        [ -d ~/.zsh-bin ]
+      fi
+      export PATH="$PATH:$HOME/.zsh-bin/bin"
+    fi
+
+    # Ignore LANG and LC_* variables that may have been sent over. The remote machine
+    # may not have the requested locale installed. Let zshrc figure out which locale to use.
+    LC_ALL=C zsh -il'
+}
 
 # The same as up-line-or-beginning-search but for local history.
 function z4h-up-line-or-beginning-search-local() {
@@ -475,7 +557,7 @@ z4h source $Z4H_DIR/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 # zsh-syntax-highlighting must be loaded after all widgets have been defined.
 z4h source $Z4H_DIR/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
 
-autoload -Uz zmv zcp zln # enable a bunch of awesome zsh commands
+autoload -Uz zmv # enable zmv command (type `zmv` for usage)
 
 # Aliases.
 if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD

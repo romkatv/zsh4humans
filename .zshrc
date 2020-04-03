@@ -88,6 +88,14 @@ function z4h() {
       >&2 $Z4H_DIR/junegunn/fzf/install --bin || return
     fi
 
+    if (( $+commands[dircolors] )); then
+      >$Z4H_DIR/dircolors.sh dircolors --sh ~/.dir_colors(N) || return
+    else
+      >$Z4H_DIR/dircolors.sh print -lr -- \
+        'export LS_COLORS="di=34:ln=35:so=32:pi=33:ex=31:bd=36;01:cd=33;01:su=31;40;07:sg=36;40;07:tw=32;40;07:ow=33;40;07:"' \
+        'export LSCOLORS="exfxcxdxbxGxDxabagacad"' || return
+    fi
+
     (( update )) && print -n >$Z4H_DIR/.last-update-ts
 
     if (( _z4h_initialized )); then
@@ -291,12 +299,10 @@ z4h source $Z4H_DIR/junegunn/fzf/shell/completion.zsh    # load fzf-completion
 z4h source $Z4H_DIR/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
 bindkey -r '^[c'                                         # remove unwanted binding
 
-FZF_TAB_PREFIX=                                 # remove '·'
-FZF_TAB_SHOW_GROUP=brief                        # show group headers only for duplicate options
-FZF_TAB_SINGLE_GROUP=()                         # no colors and no header for a single group
-FZF_TAB_CONTINUOUS_TRIGGER='alt-enter'          # alt-enter to accept and trigger another completion
-bindkey '\t' expand-or-complete                 # fzf-tab reads it during initialization
-z4h source $Z4H_DIR/Aloxaf/fzf-tab/fzf-tab.zsh  # load fzf-tab-complete
+zstyle ':fzf-tab:*' prefix ''                    # remove '·'
+zstyle ':fzf-tab:*' continuous-trigger alt-enter # alt-enter to accept and trigger next completion
+bindkey '\t' expand-or-complete                  # fzf-tab reads it during initialization
+z4h source $Z4H_DIR/Aloxaf/fzf-tab/fzf-tab.zsh   # load fzf-tab-complete
 
 # If NumLock is off, translate keys to make them appear the same as with NumLock on.
 bindkey -s '^[OM' '^M'  # enter
@@ -426,9 +432,11 @@ path+=($Z4H_DIR/junegunn/fzf/bin)
 autoload -Uz compinit
 compinit -d ${XDG_CACHE_HOME:-~/.cache}/.zcompdump-$ZSH_VERSION
 
+# Define LS_COLORS (and LSCOLORS on some systems).
+source $Z4H_DIR/dircolors.sh
+
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'
-zstyle ':completion:*:descriptions'     format          '[%d]'
 zstyle ':completion:*'                  completer       _complete
 zstyle ':completion:*:*:-subscript-:*'  tag-order       indexes parameters
 zstyle ':completion:*'                  squeeze-slashes true
@@ -437,6 +445,7 @@ zstyle ':completion:*:(rm|kill|diff):*' ignore-line     other
 zstyle ':completion:*:rm:*'             file-patterns   '*:all-files'
 zstyle ':completion::complete:*'        use-cache       on
 zstyle ':completion::complete:*'        cache-path      ${XDG_CACHE_HOME:-$HOME/.cache}/zcompcache-$ZSH_VERSION
+zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
 # Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit

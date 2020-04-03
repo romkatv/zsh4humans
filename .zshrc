@@ -429,7 +429,6 @@ path+=($Z4H_DIR/junegunn/fzf/bin)
 autoload -Uz compinit
 compinit -d ${XDG_CACHE_HOME:-~/.cache}/.zcompdump-$ZSH_VERSION
 
-
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'
 zstyle ':completion:*'                  completer       _complete

@@ -23,7 +23,7 @@ function z4h() {
         {
           zcompile -R -- $tmp $2 && zf_mv -f -- $tmp $2.zwc || return
         } always {
-          (( $? )) && zf_rm -f $tmp
+          (( $? )) && zf_rm -f -- $tmp
         }
       fi
       source -- $2

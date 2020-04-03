@@ -533,7 +533,7 @@ autoload -Uz compinit
 compinit -d ${XDG_CACHE_HOME:-~/.cache}/.zcompdump-$ZSH_VERSION
 
 compdef _directories md
-(( $+_comps[ssh] )) && compdef $_comps[ssh] zssh=ssh
+compdef zssh=ssh
 
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'

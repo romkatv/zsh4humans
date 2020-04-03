@@ -88,14 +88,6 @@ function z4h() {
       >&2 $Z4H_DIR/junegunn/fzf/install --bin || return
     fi
 
-    if (( $+commands[dircolors] )); then
-      >$Z4H_DIR/dircolors.sh dircolors --sh ~/.dir_colors(N) || return
-    else
-      >$Z4H_DIR/dircolors.sh print -lr -- \
-        'export LS_COLORS="di=34:ln=35:so=32:pi=33:ex=31:bd=36;01:cd=33;01:su=31;40;07:sg=36;40;07:tw=32;40;07:ow=33;40;07:"' \
-        'export LSCOLORS="exfxcxdxbxGxDxabagacad"' || return
-    fi
-
     (( update )) && print -n >$Z4H_DIR/.last-update-ts
 
     if (( _z4h_initialized )); then
@@ -422,6 +414,11 @@ export LESS=-iRFXMx4
 # Export variables.
 export PAGER=less
 
+# LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
+export LS_COLORS="rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:\
+or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:"
+export LSCOLORS="ExGxFxdaCxDaDahbadacec"
+
 typeset -gaU cdpath fpath mailpath path
 fpath+=($Z4H_DIR/zsh-users/zsh-completions/src)
 
@@ -432,8 +429,6 @@ path+=($Z4H_DIR/junegunn/fzf/bin)
 autoload -Uz compinit
 compinit -d ${XDG_CACHE_HOME:-~/.cache}/.zcompdump-$ZSH_VERSION
 
-# Define LS_COLORS (and LSCOLORS on some systems).
-source $Z4H_DIR/dircolors.sh
 
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'

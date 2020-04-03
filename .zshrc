@@ -267,6 +267,10 @@ function zssh() {
     LC_ALL=C zsh -il'
 }
 
+function md() {
+  [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1"
+}
+
 # The same as up-line-or-beginning-search but for local history.
 function z4h-up-line-or-beginning-search-local() {
   emulate -L zsh
@@ -527,6 +531,9 @@ path+=($Z4H_DIR/junegunn/fzf/bin ${Z4H_ZSH:h})
 # Initialize completions.
 autoload -Uz compinit
 compinit -d ${XDG_CACHE_HOME:-~/.cache}/.zcompdump-$ZSH_VERSION
+
+compdef _directories md
+(( $+_comps[ssh] )) && compdef $_comps[ssh] zssh=ssh
 
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'

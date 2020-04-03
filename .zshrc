@@ -84,7 +84,7 @@ function z4h() {
     # Download fzf binary.
     if [[ ! -e $Z4H_DIR/junegunn/fzf/bin/fzf || $update == 1 ]]; then
       print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %F{2}fzf%f binary"}
-      >&2 $Z4H_DIR/junegunn/fzf/install --bin || return
+      ( cd $Z4H_DIR/junegunn/fzf && >&2 BASH_SOURCE=. exec -a sh $Z4H_ZSH install --bin ) || return
     fi
 
     (( update )) && print -n >$Z4H_DIR/.last-update-ts

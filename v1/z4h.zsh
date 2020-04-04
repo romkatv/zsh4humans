@@ -197,6 +197,7 @@ function z4h() {
       print -Pru2 -- "%F{3}z4h%f: deleting %B\$Z4H%b (%U${Z4H//\%/%%}%u)."
       zmodload -F zsh/files b:zf_rm || return
       zf_rm -rf -- $Z4H
+      print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
       exec -- $_z4h_exe
       return
     ;;
@@ -269,7 +270,7 @@ function z4h() {
           fi
         fi
 
-        if [[ $2 == update ]]; then
+        if [[ $1 == update ]]; then
           print -Pru2 -- "%F{3}z4h%f: restarting zsh"
           exec -- $_z4h_exe || return
         fi

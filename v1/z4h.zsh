@@ -68,7 +68,7 @@ if (( ! $+_z4h_exe )); then
       return 1
     fi
   fi
-  typeset -gr _z4h_exe
+  typeset -gr _z4h_exe=${_z4h_exe:A}
 fi
 
 if (( _z4h_prelude_status == 2 )); then
@@ -169,13 +169,13 @@ function z4h() {
         rm -rf -- "$ZDOTDIR"
         mkdir -p -- "$Z4H" "$ZDOTDIR"
         touch -- "$HISTFILE"
-        chmod 700 -- "$Z4H" "$ZDOTDIR"
-        chmod 600 -- "$HISTFILE"
+        chmod 700 "$Z4H" "$ZDOTDIR"
+        chmod 600 "$HISTFILE"
 
         # Delete dotfiles when SSH connetion terminates. Keep Zsh plugins and command history.
         trap '\''rm -rf -- "$ZDOTDIR"'\'' INT QUIT TERM EXIT ILL PIPE HUP
 
-        ( cd -- "$ZDOTDIR" && printf "%s" '${(q)dump//$'\n'}' | base64 -d | tar -xz )
+        ( cd -- "$ZDOTDIR" && printf "%s" '${(q)dump//$'\n'}' | base64 --decode | tar -xz ) || exit
 
         if [ ! -e "$ZDOTDIR"/.zshrc ]; then
           if command -v curl >/dev/null 2>&1; then
@@ -308,7 +308,7 @@ function z4h() {
           }
           if [[ $REPLY != y ]]; then
             print -rn >$Z4H/.no-check-login-shell || return
-            >>$TTY print -Pr -- "Won't ask again unless %U\$Z4H/.no-check-login-shell%u is deleted."
+            >>$TTY print -Pr -- "Won't ask again until %U\$Z4H/.no-check-login-shell%u is deleted."
             return 1
           fi
           query="Try again?"

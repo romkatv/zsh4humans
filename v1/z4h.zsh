@@ -15,7 +15,7 @@ z4h_prelude() {
         return
       fi
       # The current interpreter is non-interactive Zsh >= 5.4. Execute interactive.
-      emulate zsh -o posix_argzero -c 'exec -- ${${0#-}:c:a} -i'
+      emulate zsh -o posix_argzero -c 'exec -- ${${0:/(-|)zsh/$SHELL}:c:a} -i'
     fi
   fi
   if ! command -v zsh >/dev/null 2>&1 || ! zsh -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]'; then

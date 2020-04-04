@@ -26,7 +26,7 @@ fi
 # Code above this line should not assume the current shell is Zsh. Below this line we are in Zsh.
 
 zstyle :z4h:    auto-update      ask  # 'ask': ask to update; 'no': disable auto-update
-zstyle :z4h:    auto-update-days 13   # auto-update this often; has no effect if auto-update is 'no'
+zstyle :z4h:    auto-update-days 28   # auto-update this often; has no effect if auto-update is 'no'
 # Bind alt-arrows or ctrl-arrows to change current directory? The other key modifier will get bound
 # to cursor movement by words.
 zstyle :z4h:    cd-key           alt  

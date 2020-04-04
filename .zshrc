@@ -26,21 +26,23 @@ fi
 
 # Code above this line should not assume the current shell is Zsh. Below this line we are in Zsh.
 
-zstyle :z4h:    auto-update      ask  # 'ask': ask to update; 'no': disable auto-update
-zstyle :z4h:    auto-update-days 28   # auto-update this often; has no effect if auto-update is 'no'
-# Bind alt-arrows or ctrl-arrows to change current directory? The other key modifier will get bound
+# 'ask': ask to update; 'no': disable auto-update.
+zstyle :z4h:    auto-update      ask
+# Auto-update this often; has no effect if auto-update is 'no'.
+zstyle :z4h:    auto-update-days 28
+# Bind alt-arrows or ctrl-arrows to change current directory? The other key modifier will be bound
 # to cursor movement by words.
-zstyle :z4h:    cd-key           alt  
+zstyle :z4h:    cd-key           alt
 # `z4h ssh` copies these files (relative to $ZDOTDIR, wich defaults to $HOME) to the remote host.
 # Type `z4h ssh` to learn more about this feature.
 zstyle :z4h:ssh dotfiles         .zshrc .p10k.zsh
 # Right-arrow key accepts one character (partial-accept) or the whole autosuggestion (accept)?
-zstyle :z4h:autosuggestions forward-char accept
+zstyle :z4h:autosuggestions forward-char partial-accept
 # Z4H_SSH is 1 when zshrc is being sourced on the remove host by `z4h ssh`.
 if (( Z4H_SSH )); then
   zstyle :z4h: check-login-shell no   # don't check login shell when working remotely via `z4h ssh`
 else
-  zstyle :z4h: check-login-shell yes  # when working locally, check that login shell is zsh
+  zstyle :z4h: check-login-shell yes  # when working locally, do check that login shell is zsh
 fi
 
 z4h install || return  # install or update core dependencies (fzf, zsh-autosuggestions, etc.)
@@ -64,6 +66,7 @@ path=(~/bin $path)
 # Use additional Git repositories pulled in with `z4h clone ...`.
 z4h source $Z4H/ohmyzsh/ohmyzsh/lib/diagnostics.zsh                         # just an example
 z4h source $Z4H/ohmyzsh/ohmyzsh/plugins/emoji-clock/emoji-clock.plugin.zsh  # just an example
+fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)                            # just an example
 
 # Source additional local files.
 if [[ $LC_TERMINAL == iTerm2 ]]; then

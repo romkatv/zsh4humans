@@ -453,7 +453,6 @@ function z4h() {
   autoload -Uz add-zsh-hook                       || return
   add-zsh-hook preexec z4h-set-term-title-preexec || return
   add-zsh-hook precmd z4h-set-term-title-precmd   || return
-  z4h-set-term-title-precmd                       || return
 
   # If the current locale isn't UTF-8, change it to an UTF-8 one.
   # Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
@@ -790,8 +789,9 @@ function z4h() {
   zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
   # Initialize prompt. Type `p10k configure` or edit .p10k.zsh to customize it.
-  [[ -e ${ZDOTDIR:-~}/.p10k.zsh ]] && z4h source ${ZDOTDIR:-~}/.p10k.zsh
   z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
+  z4h source ${ZDOTDIR:-~}/.p10k.zsh
+  z4h-set-term-title-precmd || return
 
   z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 
@@ -863,5 +863,4 @@ function z4h() {
   setopt PATH_DIRS               # perform path search even on command names with slashes
   setopt SHARE_HISTORY           # write and import history on every command
   setopt C_BASES                 # print hex/oct numbers as 0xFF/077 instead of 16#FF/8#77
-  setopt NO_PROMPT_CR            # TODO: Is this needed?
 }

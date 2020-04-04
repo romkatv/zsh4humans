@@ -292,7 +292,7 @@ function z4h() {
 
       >>$TTY print -Pr -- "%F{3}z4h%f: the current shell isn't your login shell"
       >>$TTY print -Pr -- ""
-      >>$TTY print -Pr -- "  Current shell (%B\$0%b)    %F{2}${_z4h_exe//\%/%%}%f"
+      >>$TTY print -Pr -- "  Current shell         %F{2}${_z4h_exe//\%/%%}%f"
       >>$TTY print -Pr -- "  Login shell (%B\$SHELL%b)  %F{2}${SHELL//\%/%%}%f"
 
       trap '' INT

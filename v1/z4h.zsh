@@ -25,7 +25,7 @@ z4h_prelude() {
       if command -v curl >/dev/null 2>&1; then
         install="$(curl -fsSL -- "$zsh_url")"
       elif command -v wget >/dev/null 2>&1; then
-        install="$(wget -qO- -- "$zsh_url")"
+        install="$(wget -O- -- "$zsh_url")"
       else
         >&2 echo 'z4h: please install `curl` or `wget`'
         return 1
@@ -71,7 +71,7 @@ function _z4h_clone() {
     if (( $+commands[curl] )); then
       curl -fsSL -- https://github.com/$repo/archive/master.tar.gz || return
     elif (( $+commands[wget] )); then
-      wget -qO- -- https://github.com/$repo/archive/master.tar.gz || return
+      wget -O- -- https://github.com/$repo/archive/master.tar.gz || return
     else
       print -Pru2 -- "%F{3}z4h%f: please install %F{2}git%f, %F{2}curl%f or %F{2}wget%f"
       return 1
@@ -154,7 +154,7 @@ function z4h() {
           if command -v curl >/dev/null 2>&1; then
             curl -fsSLo "$ZDOTDIR"/.zshrc -- '${(q)Z4H_URL}'/.zshrc
           elif command -v wget >/dev/null 2>&1; then
-            wget -qO "$ZDOTDIR"/.zshrc -- '${(q)Z4H_URL}'/.zshrc
+            wget -O "$ZDOTDIR"/.zshrc -- '${(q)Z4H_URL}'/.zshrc
           else
             >&2 echo "z4h: please install `curl` or `wget` on the remote host"
             exit 1
@@ -162,7 +162,7 @@ function z4h() {
         fi
 
         source "$ZDOTDIR"/.zshrc'
-      ssh -t "${@:2}" ${${cmd#$'\n'}//[[:space:]]##/" "}
+      ssh -t "${@:2}" ${${cmd#$'\n'}// ##/ }
       return
     ;;
 
@@ -218,7 +218,7 @@ function z4h() {
           if (( $+commands[curl] )); then
             curl -fsSL -- $Z4H_URL/z4h.zsh || return
           elif (( $+commands[wget] )); then
-            wget -qO- -- $Z4H_URL/z4h.zsh || return
+            wget -O- -- $Z4H_URL/z4h.zsh || return
           else
             print -Pru2 -- "%F{3}z4h%f: please install %F{2}curl%f or %F{2}wget%f"
             return 1

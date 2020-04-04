@@ -13,7 +13,7 @@ if [ ! -e "$Z4H"/z4h.zsh ]; then
   if command -v curl >/dev/null 2>&1; then
     curl -fsSLo "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
   elif command -v wget >/dev/null 2>&1; then
-    wget -qO    "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
+    wget -O     "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
   else
     >&2 echo 'z4h: please install `curl` or `wget`'
     return 1
@@ -32,7 +32,7 @@ zstyle :z4h:    auto-update-days 28   # auto-update this often; has no effect if
 zstyle :z4h:    cd-key           alt  
 # `z4h ssh` copies these files (relative to $ZDOTDIR, wich defaults to $HOME) to the remote host.
 # Type `z4h ssh` to learn more about this feature.
-zstyle :z4h:ssh dofiles          .zshrc .p10k.zsh
+zstyle :z4h:ssh dotfiles         .zshrc .p10k.zsh
 # Right-arrow key accepts one character (partial-accept) or the whole autosuggestion (accept)?
 zstyle :z4h:autosuggestions forward-char accept
 # Z4H_SSH is 1 when zshrc is being sourced on the remove host by `z4h ssh`.

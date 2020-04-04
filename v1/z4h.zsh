@@ -48,7 +48,9 @@ fi
 
 emulate zsh
 
-(( $+_z4h_zsh )) || emulate zsh -o posix_argzero -c 'typeset -gr _z4h_zsh=${${0:/-zsh/$SHELL}:c:a}'
+if (( ! $+_z4h_zsh )); then
+  emulate zsh -o posix_argzero -c 'typeset -gr _z4h_zsh=${${0:/(-|)zsh/$SHELL}:c:a}'
+fi
 
 zmodload zsh/zutil || return
 

@@ -2,7 +2,6 @@
 # the current process with Zsh >= 5.4. If there is no Zsh >= 5.4, z4h_prelude
 # installs the latest version to ~/.zsh-bin.
 z4h_prelude() {
-  set -ue
   local v="${ZSH_VERSION-}"
   local v1="${v%%.*}"
   local v2="${v#*.}"
@@ -12,10 +11,11 @@ z4h_prelude() {
       if [[ -o interactive ]]; then
         # The current interpreter is interactive Zsh >= 5.4. Proceed with initialization.
         set +ue
-        return
+        return 0
       fi
-      # The current interpreter is non-interactive Zsh >= 5.4. Execute interactive.
-      emulate zsh -o posix_argzero -c 'exec -- ${${0:/(-|)zsh/$SHELL}:c:a} -i'
+      # The current interpreter is non-interactive Zsh >= 5.4. Need to execute interactive.
+      # Will continue below. It's more convenient because we know we are in Zsh.
+      return 2
     fi
   fi
   if ! command -v zsh >/dev/null 2>&1 || ! zsh -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]'; then
@@ -23,33 +23,58 @@ z4h_prelude() {
       # There is no suitable Zsh. Install the latest version to ~/.zsh-bin.
       local install zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
       if command -v curl >/dev/null 2>&1; then
-        install="$(curl -fsSL -- "$zsh_url")"
+        install="$(curl -fsSL -- "$zsh_url")" || return 1
       elif command -v wget >/dev/null 2>&1; then
-        install="$(wget -O- -- "$zsh_url")"
+        install="$(wget -O- -- "$zsh_url")"   || return 1
       else
         >&2 echo 'z4h: please install `curl` or `wget`'
         return 1
       fi
       >&2 echo 'z4h: installing zsh to ~/.zsh-bin'
-      ( set +ue -- -q; eval "$install" )
+      ( set -- -q; eval "$install" ) || return 1
     fi
     export PATH="$HOME/.zsh-bin/bin:$PATH"
   fi
   # The current interpreter is not Zsh >= 5.4. Execute Zsh >= 5.4.
-  exec zsh -i
+  exec zsh -i || return 1
 }
-z4h_prelude || exit
-unset -f z4h_prelude
 
-if (( $+functions[z4h] )); then
+z4h_prelude
+_z4h_prelude_status=$?
+unset -f z4h_prelude
+[ $_z4h_prelude_status = 1 ] && return 1
+
+if (( ${+functions[z4h]} )); then
   print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
+  unset _z4h_prelude_status
   return 1
 fi
 
 emulate zsh
 
-if (( ! $+_z4h_zsh )); then
-  emulate zsh -o posix_argzero -c 'typeset -gr _z4h_zsh=${${0:/(-|)zsh/$SHELL}:c:a}'
+if (( ! $+_z4h_exe )); then
+  if [[ -x /proc/self/exe ]]; then
+    _z4h_exe=/proc/self/exe
+  else
+    emulate zsh -o posix_argzero -c 'typeset -g _z4h_exe=${0#-}'
+    if [[ $SHELL == /* && ${SHELL:t} == $_z4h_exe && -x $SHELL ]]; then
+      _z4h_exe=$SHELL
+    elif (( $+commands[$_z4h_exe] )); then
+      _z4h_exe=$commands[$_z4h_exe]
+    elif [[ -x $_z4h_exe ]]; then
+      _z4h_exe=${_z4h_exe:a}
+    else
+      print -Pru2 -- "%F{3}z4h%f: %F{1}unable to find path to zsh%f"
+      return 1
+    fi
+  fi
+  typeset -gr _z4h_exe
+fi
+
+if (( _z4h_prelude_status == 2 )); then
+  exec -- $_z4h_exe -i || return
+else
+  unset _z4h_prelude_status
 fi
 
 zmodload zsh/zutil || return
@@ -172,7 +197,7 @@ function z4h() {
       print -Pru2 -- "%F{3}z4h%f: deleting %B\$Z4H%b (%U${Z4H//\%/%%}%u)."
       zmodload -F zsh/files b:zf_rm || return
       zf_rm -rf -- $Z4H
-      exec -- $_z4h_zsh
+      exec -- $_z4h_exe
       return
     ;;
 
@@ -246,7 +271,7 @@ function z4h() {
 
         if [[ $2 == update ]]; then
           print -Pru2 -- "%F{3}z4h%f: restarting zsh"
-          exec -- $_z4h_zsh || return
+          exec -- $_z4h_exe || return
         fi
       } always {
         if (( $? )); then
@@ -259,20 +284,20 @@ function z4h() {
 
       # Check whether the current shell is the login shell. If not, offer to change login shell.
       (( UID && EUID )) && zstyle -t :z4h: check-login-shell || return 0
-      [[ -n $SHELL && $SHELL != $_z4h_zsh && $_z4h_zsh == /* && ${SHELL:A} != ${_z4h_zsh:A} &&
-        -x ${_z4h_zsh:A} && ! -e $Z4H/.no-check-login-shell && $+commands[chsh] == 1 &&
+      [[ -n $SHELL && $SHELL != $_z4h_exe && $_z4h_exe == /* && ${SHELL:A} != ${_z4h_exe:A} &&
+        -x ${_z4h_exe:A} && ! -e $Z4H/.no-check-login-shell && $+commands[chsh] == 1 &&
         -r /etc/shells ]] || return 0
       [[ $+commands[sudo] == 1 ||
-        "$(</etc/shells)" == *((#s)|$'\n')($_z4h_zsh|${_z4h_zsh:A})((#e)|$'\n')* ]] || return 0
+        "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
 
       >>$TTY print -Pr -- "%F{3}z4h%f: the current shell isn't your login shell"
       >>$TTY print -Pr -- ""
-      >>$TTY print -Pr -- "  Current shell (%B\$0%b)    %F{2}${_z4h_zsh//\%/%%}%f"
+      >>$TTY print -Pr -- "  Current shell (%B\$0%b)    %F{2}${_z4h_exe//\%/%%}%f"
       >>$TTY print -Pr -- "  Login shell (%B\$SHELL%b)  %F{2}${SHELL//\%/%%}%f"
 
       trap '' INT
       (
-        local query="Change login shell to %F{2}${_z4h_zsh//\%/%%}%f?"
+        local query="Change login shell to %F{2}${_z4h_exe//\%/%%}%f?"
         while true; do
           {
             local REPLY=n
@@ -287,17 +312,17 @@ function z4h() {
             return 1
           fi
           query="Try again?"
-          if [[ "$(</etc/shells)" != *((#s)|$'\n')($_z4h_zsh|${_z4h_zsh:A})((#e)|$'\n')* ]]; then
-            >>$TTY print -Pr -- "Adding %F{2}${_z4h_zsh//\%/%%}%f to %U/etc/shells%u."
-            sudo tee -a /etc/shells >/dev/null <<<$_z4h_zsh || continue
+          if [[ "$(</etc/shells)" != *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]]; then
+            >>$TTY print -Pr -- "Adding %F{2}${_z4h_exe//\%/%%}%f to %U/etc/shells%u."
+            sudo tee -a /etc/shells >/dev/null <<<$_z4h_exe || continue
             >$TTY print
           fi
-          >>$TTY print -Pr -- "Changing login shell to %F{2}${_z4h_zsh//\%/%%}%f."
-          chsh -s $_z4h_zsh || continue
-          >>$TTY print -Pr -- "Changed login shell to %F{2}${_z4h_zsh//\%/%%}%f."
+          >>$TTY print -Pr -- "Changing login shell to %F{2}${_z4h_exe//\%/%%}%f."
+          chsh -s $_z4h_exe || continue
+          >>$TTY print -Pr -- "Changed login shell to %F{2}${_z4h_exe//\%/%%}%f."
           return 0
         done
-      ) && export SHELL=$_z4h_zsh
+      ) && export SHELL=$_z4h_exe
 
       return 0
     ;;
@@ -788,7 +813,7 @@ function z4h() {
   fpath+=($Z4H/zsh-users/zsh-completions/src)
 
   # Extend PATH.
-  [[ $commands[zsh] == $_z4h_zsh ]] || path=(${_z4h_zsh:h} $path)
+  [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
   path+=($Z4H/junegunn/fzf/bin)
 
   # Configure completions.

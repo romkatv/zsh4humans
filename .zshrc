@@ -52,7 +52,7 @@ emulate zsh
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-~/.cache}
 
 : ${Z4H_DIR:=${XDG_CACHE_HOME:-~/.cache}/zsh4humans} # cache directory; can be deleted
-: ${Z4H_UPDATE_DAYS=13}                              # update dependencies this often
+: ${Z4H_UPDATE_DAYS=28}                              # update dependencies this often
 : ${Z4H_CHECK_LOGIN_SHELL:=1}                        # check whether zsh is login shell
 
 # Main zsh4humans function. Type `z4h help` for usage.
@@ -143,12 +143,12 @@ function z4h() {
         update)
           print -Pr -- "usage: %F{2}z4h%f %Bupdate%b"
           print -Pr -- ""
-          print -Pr -- "Update all dependencies (zsh-autosuggestions, powerlevel10k, etc.)."
+          print -Pr -- "Update all dependencies (fzf, zsh-autosuggestions, etc.)."
         ;;
         reset)
           print -Pr -- "usage: %F{2}z4h%f %Breset%b"
           print -Pr -- ""
-          print -Pr -- "Reinstall all dependencies (zsh-autosuggestions, powerlevel10k, etc.)."
+          print -Pr -- "Reinstall all dependencies (fzf, zsh-autosuggestions, etc.)."
         ;;
         source)
           print -Pr -- "usage: %F{2}z4h%f %Bsource%b %Ufile%u"

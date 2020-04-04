@@ -306,11 +306,11 @@ function z4h() {
         return 1
       fi
       if (( ! $+Z4H_UPDATE )); then
-        print -Pru2 -- "%F{3}z4h%f: %Bclone%b cannot be called before %Binstall%b"
+        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
         return 1
       fi
       if (( $+_z4h_initialized )); then
-        print -Pru2 -- "%F{3}z4h%f: %Bclone%b cannot be called after %Binit%b"
+        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
         return 1
       fi
       typeset -ga _z4h_extra_repos
@@ -335,12 +335,18 @@ function z4h() {
         init)
           print -Pr -- "usage: %F{2}z4h%f %Binit%b"
           print -Pr -- ""
-          print -Pr -- "(Re)initialize Zsh."
+          print -Pr -- "Initialize Zsh. Should be called just once from %U.zshrc%u."
         ;;
         reset)
           print -Pr -- "usage: %F{2}z4h%f %Breset%b"
           print -Pr -- ""
           print -Pr -- "Reinstall all dependencies (fzf, zsh-autosuggestions, etc.)."
+        ;;
+        clone)
+          print -Pr -- "usage: %F{2}z4h%f %Bclone%b %Uusername/repository%u"
+          print -Pr -- ""
+          print -Pr -- "Clone a repository from GitHub. Can be called from %U.zshrc%u between"
+          print -Pr -- "%Binstall%b and %Binit%b."
         ;;
         source)
           print -Pr -- "usage: %F{2}z4h%f %Bsource%b %Ufile%u"
@@ -357,18 +363,20 @@ function z4h() {
           print -Pr -- ""
           print -Pr -- "Here's what %F{2}z4h%f %Bssh%b does in more detail:"
           print -Pr -- ""
-          print -Pr -- "  1. Archives Zsh config files (%U.zshrc%u and %U.p10k.zsh%u) on the local"
-          print -Pr -- "     host and sends them to the remote host. Local Zsh history does NOT get"
-          print -Pr -- "     sent over."
-          print -Pr -- "  2. Extracts these files to %U~/.cache/zsh4humans.ssh/.dotfiles%u on the"
+          print -Pr -- "  1. Archives Zsh config files (%U.zshrc%u and %U.p10k.zsh%u by default,"
+          print -Pr -- "     see %F{2}zstyle%f %B:z4h:ssh dotfiles%b in your %U.zshrc%u) on the"
+          print -Pr -- "     local host and sends them to the remote host. Local Zsh history does"
+          print -Pr -- "     NOT get sent over."
+          print -Pr -- "  2. Extracts these files to %U~/.cache/zsh4humans.ssh/dotfiles%u on the"
           print -Pr -- "     remote host and points %BZDOTDIR%b to this directory to instruct Zsh"
           print -Pr -- "     to read configuration files from it."
           print -Pr -- "  3. Sets %BZ4H_SSH%b environment variable to %B1%b. You can use it"
           print -Pr -- "     throughout %U.zshrc%u to perform various initialization steps"
           print -Pr -- "     conditionally, depending on whether %U.zshrc%u is being sourced on the"
           print -Pr -- "     local or remote host."
-          print -Pr -- "  4. Sources %U.zshrc%u. %F{2}z4h_prelude%f takes care of installing Zsh to"
-          print -Pr -- "     %U~/.zsh-bin%u if necessary."
+          print -Pr -- "  4. Sources %U.zshrc%u, which immediately sources %Uz4h.zsh%u. The latter"
+          print -Pr -- "     takes care of installing Zsh to %U~/.zsh-bin%u and replacing the"
+          print -Pr -- "     current process if necessary."
           print -Pr -- ""
           print -Pr -- "The first login to a remote host may take some time. After that it's as"
           print -Pr -- "fast as normal %F{2}ssh%f."
@@ -390,8 +398,12 @@ function z4h() {
     ;;
 
     1-init)
+      if (( ! $+Z4H_UPDATE )); then
+        print -Pru2 -- "%F{3}z4h%f: %F{1}init%f cannot be called before %Binstall%b"
+        return 1
+      fi
       if (( _z4h_initialized )); then
-        print -Pru2 "%F{3}z4h%f: %Binit%b cannot be called more than once"
+        print -Pru2 "%F{3}z4h%f: %F{1}init%f cannot be called more than once"
         return 1
       fi
     ;;
@@ -402,6 +414,7 @@ function z4h() {
       print -Pru$fd -- "           %Bupdate%b"
       print -Pru$fd -- "           %Binit%b"
       print -Pru$fd -- "           %Breset%b"
+      print -Pru$fd -- "           %Bclone%b %Uusername/repository%u"
       print -Pru$fd -- "           %Bsource%b %Ufile%u"
       print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
       print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"

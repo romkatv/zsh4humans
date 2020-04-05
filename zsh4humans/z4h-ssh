@@ -80,5 +80,5 @@ cmd+='; trap '\''rm -f -- '${(j. .)remove_files}' || :; _z4h_ssh_teardown'\'' IN
 cmd+='; if echo "Cg==" | base64 -d 2>/dev/null; then _z4h_base64d=-d; else _z4h_base64d=-D; fi'
 cmd+='; '${(j.; .)write_files}
 cmd+='; unset _z4h_tmpdir _z4h_base64d _z4h_dstdir'
-cmd+='; ( set +ue; unset -f _z4h_ssh_teardown; source "$ZDOTDIR"/.zshrc )'
+cmd+='; ( set +ue; unset -f _z4h_ssh_teardown; . "$ZDOTDIR"/.zshrc )'
 ssh -t "$@" $cmd

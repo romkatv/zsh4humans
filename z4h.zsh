@@ -703,6 +703,13 @@ function z4h() {
 
   bindkey -e  # enable emacs keymap (sorry, vi users)
 
+  if [[ ${commands[find]:A} == /busybox* ]]; then
+    local fs=
+  else
+    local fs="-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc"
+  fi
+  : ${FZF_ALT_C_COMMAND:="command find -L . -mindepth 1 \( -path '*/\.*' "$fs" \) -prune -o -type d -print 2>/dev/null | cut -b3-"}
+
   FZF_COMPLETION_TRIGGER=''                                # alt-j goes to fzf whenever possible
   fzf_default_completion=z4h-expand-or-complete-with-dots  # alt-j falls back to tab
   z4h source $Z4H/junegunn/fzf/shell/completion.zsh        # load fzf-completion

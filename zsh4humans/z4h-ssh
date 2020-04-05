@@ -72,6 +72,7 @@ autoload +X z4h-ssh-remote-setup z4h-ssh-remote-teardown
 zmodload zsh/parameter || return
 
 local cmd='set -ue || exit'
+cmd+='; umask o-w'
 cmd+='; _z4h_tmpdir="$(mktemp -d ${TMPDIR:-/tmp}/z4h-ssh.XXXXXXXXXX)"'
 cmd+='; _z4h_ssh_setup() { '$functions[z4h-ssh-remote-setup]$'\n}'
 cmd+='; _z4h_ssh_setup; unset -f _z4h_ssh_setup'

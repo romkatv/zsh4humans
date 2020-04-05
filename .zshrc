@@ -7,6 +7,9 @@ export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 # Cache directory. Gets recreated when deleted.
 : "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"
 
+# Do not create world-writable files by default.
+umask o-w
+
 # Fetch z4h.zsh if it doesn't yet exist and source it.
 if [ ! -e "$Z4H"/z4h.zsh ]; then
   mkdir -p -- "$Z4H" || return

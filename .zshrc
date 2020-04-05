@@ -6,7 +6,7 @@ export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 # later when updating.
 : "${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v1}"
 
-# Cache directory. Gets recreated when deleted.
+# Cache directory. Gets recreated if deleted.
 : "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"
 
 # Do not create world-writable files by default.
@@ -18,7 +18,7 @@ if [ ! -e "$Z4H"/z4h.zsh ]; then
   >&2 echo "z4h: downloading z4h.zsh"
   if command -v curl >/dev/null 2>&1; then
     curl -fsSLo "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
-  elif command -v wget >/dev/null 2>&1; then
+  else
     wget -O     "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
   fi
   mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return

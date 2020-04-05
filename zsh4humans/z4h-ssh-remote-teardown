@@ -1,1 +1,1 @@
-find -- "$ZDOTDIR" -name '*.zwc' -exec rm -f -- '{}' ';'
+[ ! -d "$ZDOTDIR" ] || find -- "$ZDOTDIR" -name '*.zwc' -exec rm -f -- '{}' ';'

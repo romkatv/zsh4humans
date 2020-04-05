@@ -634,6 +634,15 @@ function z4h() {
   function z4h-cd-forward() { z4h-cd-rotate -0 }
   function z4h-cd-up() { cd .. && z4h-redraw-prompt }
 
+  function z4h-autosuggest-accept() {
+    emulate -L zsh
+    local cursor=$CURSOR
+    zle autosuggest-accept
+    CURSOR=$cursor
+  }
+
+  function z4h-do-nothing() {}
+
   autoload -Uz up-line-or-beginning-search down-line-or-beginning-search run-help || return
   (( $+aliases[run-help] )) && unalias run-help  # make alt-h binding more useful
 
@@ -649,6 +658,8 @@ function z4h() {
   zle -N z4h-cd-forward
   zle -N z4h-cd-up
   zle -N z4h-fzf-history-widget
+  zle -N z4h-autosuggest-accept
+  zle -N z4h-do-nothing
   zle -N z4h-run-help
 
   zmodload zsh/terminfo || return
@@ -675,16 +686,18 @@ function z4h() {
 
   bindkey -e  # enable emacs keymap (sorry, vi users)
 
-  FZF_COMPLETION_TRIGGER=''                                # ctrl-t goes to fzf whenever possible
-  fzf_default_completion=z4h-expand-or-complete-with-dots  # ctrl-t falls back to tab
-  z4h source $Z4H/junegunn/fzf/shell/completion.zsh    # load fzf-completion
-  z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
-  bindkey -r '^[c'                                         # remove unwanted binding
+  FZF_COMPLETION_TRIGGER=''                                # alt-j goes to fzf whenever possible
+  fzf_default_completion=z4h-expand-or-complete-with-dots  # alt-j falls back to tab
+  z4h source $Z4H/junegunn/fzf/shell/completion.zsh        # load fzf-completion
+  z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh      # load fzf-cd-widget
 
   zstyle ':fzf-tab:*' prefix ''                    # remove '·'
   zstyle ':fzf-tab:*' continuous-trigger alt-enter # alt-enter to accept and trigger next completion
   bindkey '\t' expand-or-complete                  # fzf-tab reads it during initialization
-  z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh   # load fzf-tab-complete
+  z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh       # load fzf-tab-complete
+
+  # Delete all existing keymaps and reset to the default state.
+  bindkey -d
 
   # If NumLock is off, translate keys to make them appear the same as with NumLock on.
   bindkey -s '^[OM' '^M'  # enter
@@ -707,10 +720,6 @@ function z4h() {
   bindkey -s '^[[1~' '^[[H'  # home
   bindkey -s '^[[4~' '^[[F'  # end
 
-  # Do nothing on pageup and pagedown. Better than printing '~'.
-  bindkey -s '^[[5~' ''
-  bindkey -s '^[[6~' ''
-
   bindkey '^[[D'    backward-char                           # left       move cursor one char backward
   bindkey '^[[C'    forward-char                            # right      move cursor one char forward
   bindkey '^[[A'    z4h-up-line-or-beginning-search-local   # up         prev command in local history
@@ -725,14 +734,18 @@ function z4h() {
   bindkey '^[[3;3~' kill-word                               # alt+del    delete next word
   bindkey '^K'      kill-line                               # ctrl+k     delete line after cursor
   bindkey '^J'      backward-kill-line                      # ctrl+j     delete line before cursor
-  bindkey '^N'      kill-buffer                             # ctrl+n     delete all lines
+  bindkey '^[n'     kill-buffer                             # alt+n      delete all lines
+  bindkey '^[N'     kill-buffer                             # alt+N      delete all lines
+  bindkey '^[m'     z4h-autosuggest-accept                  # alt+m      accept autosuggestion
+  bindkey '^[M'     z4h-autosuggest-accept                  # alt+M      accept autosuggestion
   bindkey '^_'      undo                                    # ctrl+/     undo
-  bindkey '^\'      redo                                    # ctrl+\     redo
+  bindkey '^[\'     redo                                    # alt+/      redo
   bindkey '^[[1;5A' up-line-or-beginning-search             # ctrl+up    prev cmd in global history
   bindkey '^[[1;5B' down-line-or-beginning-search           # ctrl+down  next cmd in global history
   bindkey '^ '      z4h-expand                              # ctrl+space expand alias/glob/parameter
   bindkey '\t'      z4h-expand-or-complete-with-dots        # tab        fzf-tab completion
-  bindkey '^T'      fzf-completion                          # ctrl+t     fzf file completion
+  bindkey '^[j'     fzf-completion                          # alt-j      fzf file completion
+  bindkey '^[J'     fzf-completion                          # alt-J      fzf file completion
   bindkey '^R'      z4h-fzf-history-widget                  # ctrl+r     fzf history
   bindkey '^[h'     z4h-run-help                            # alt+h      help for the cmd at cursor
   bindkey '^[H'     z4h-run-help                            # alt+H      help for the cmd at cursor
@@ -740,6 +753,8 @@ function z4h() {
   bindkey '^[[1;3H' z4h-beginning-of-buffer                 # alt-home   go to the beginning of buffer
   bindkey '^[[1;5F' z4h-end-of-buffer                       # ctrl-end   go to the end of buffer
   bindkey '^[[1;3F' z4h-end-of-buffer                       # alt-end    go to the end of buffer
+  bindkey '^[[5~'   z4h-do-nothing                          # pageup     do nothing
+  bindkey '^[[6~'   z4h-do-nothing                          # pageup     do nothing
 
   if zstyle -t :z4h: cd-key ctrl; then
     bindkey '^[[1;3D' backward-word                         # alt+left   go backward one word
@@ -788,6 +803,8 @@ function z4h() {
     zle-\*
     redisplay
     fzf-tab-complete
+    z4h-autosuggest-accept
+    autosuggest-accept
   )
   typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
     z4h-end-of-buffer

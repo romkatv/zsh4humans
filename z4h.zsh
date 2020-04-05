@@ -703,7 +703,7 @@ function z4h() {
 
   bindkey -e  # enable emacs keymap (sorry, vi users)
 
-  if [[ ${commands[find]:A} == /busybox* ]]; then
+  if [[ ${commands[find]:A} == */busybox* ]]; then
     local fs=
   else
     local fs="-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc"

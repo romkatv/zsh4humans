@@ -27,29 +27,29 @@ fi
 # Code above this line should not assume the current shell is Zsh. Below this line we are in Zsh.
 
 # 'ask': ask to update; 'no': disable auto-update.
-zstyle :z4h:    auto-update      ask
+zstyle :z4h: auto-update                 ask
 # Auto-update this often; has no effect if auto-update is 'no'.
-zstyle :z4h:    auto-update-days 28
+zstyle :z4h: auto-update-days            28
 # Bind alt-arrows or ctrl-arrows to change current directory? The other key modifier will be bound
 # to cursor movement by words.
-zstyle :z4h:    cd-key           alt
+zstyle :z4h: cd-key                      alt
 # `z4h ssh` copies these files (relative to $ZDOTDIR, wich defaults to $HOME) to the remote host.
 # Type `z4h ssh` to learn more about this feature.
-zstyle :z4h:ssh dotfiles         .zshrc .p10k.zsh
+zstyle :z4h:ssh dotfiles                 .zshrc .p10k.zsh
 # Right-arrow key accepts one character (partial-accept) or the whole autosuggestion (accept)?
 zstyle :z4h:autosuggestions forward-char partial-accept
-# Z4H_SSH is 1 when zshrc is being sourced on the remove host by `z4h ssh`.
-if (( Z4H_SSH )); then
-  zstyle :z4h: check-login-shell no   # don't check login shell when working remotely via `z4h ssh`
-else
-  zstyle :z4h: check-login-shell yes  # when working locally, do check that login shell is zsh
-fi
 
 z4h install || return  # install or update core dependencies (fzf, zsh-autosuggestions, etc.)
 
 # Clone additional Git repositories from GitHub. This doesn't do anything apart from cloning the
 # repository and keeping it up-to-date. Cloned files can be used after `z4h init`.
 z4h clone ohmyzsh/ohmyzsh  # ohmyzsh is just an example; you can delete it if you don't need it
+
+# Z4H_SSH is 1 when zshrc is being sourced on the remove host by `z4h ssh`.
+if (( ! Z4H_SSH )); then
+  # When working locally, check that user's login shell is zsh and offer to change it if it isn't.
+  z4h chsh
+fi
 
 z4h init || return  # initialize zsh; after this point console I/O is unavailable
 
@@ -76,7 +76,7 @@ fi
 # Autoload functions.
 autoload -Uz zmv
 
-# Define functions.
+# Define functions and completions.
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 compdef _directories md
 

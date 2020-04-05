@@ -202,8 +202,8 @@ function z4h() {
       return
     ;;
 
-    1-install) typeset -gi Z4H_UPDATE=0;|
-    1-update)  typeset -gi Z4H_UPDATE=1;|
+    1-install) : ${Z4H_UPDATE=0};|
+    1-update)  : ${Z4H_UPDATE=1};|
     1-install|1-update)
       # GitHub projects to clone.
       local github_repos=(
@@ -232,7 +232,7 @@ function z4h() {
               {
                 read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && Z4H_UPDATE=1
               } always {
-                print >>$TTY
+                [[ -w $TTY ]] && print >>$TTY || print -u2
               }
               (( Z4H_UPDATE )) || print -Pru2 -- "%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"
               print -n >$Z4H/.last-update-ts || return
@@ -240,7 +240,7 @@ function z4h() {
           fi
         fi
 
-        if (( Z4H_UPDATE )) && [[ -n $Z4H_URL ]]; then
+        if (( Z4H_UPDATE == 1 )) && [[ -n $Z4H_URL ]]; then
           print -Pru2 -- "%F{3}z4h%f: updating %Uinit.zsh%u"
           zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
           if (( $+commands[curl] )); then
@@ -252,11 +252,17 @@ function z4h() {
             return 1
           fi >"$Z4H"/z4h.zsh.$$ || return
           zf_mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return
+          print -Pru2 -- "%F{3}z4h%f: restarting zsh"
+          Z4H_UPDATE=2 exec -- $_z4h_exe || return
+        fi
+
+        if (( Z4H_UPDATE == 2 )); then
+          typeset +x -gi Z4H_UPDATE=1
         fi
 
         # Clone or update all repositories.
         local repo
-        for repo in $github_repos $_z4h_extra_repos; do
+        for repo in $github_repos; do
           _z4h_clone $repo || return
         done
 
@@ -283,11 +289,40 @@ function z4h() {
         fi
       }
 
+      return 0
+    ;;
+
+    2-clone)
+      if [[ -z $2 || $2 == *:* ]]; then
+        print -Pru2 -- "%F{3}z4h%f: %Bclone%b argument must be %Uuser/repo%u: %F{1}${2//\%/%%}%f"
+        return 1
+      fi
+      if [[ -z ${Z4H_UPDATE:#2} ]]; then
+        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
+        return 1
+      fi
+      if (( $+_z4h_initialized )); then
+        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
+        return 1
+      fi
+      _z4h_clone $2
+      return
+    ;;
+
+    1-chsh)
+      if [[ -z ${Z4H_UPDATE:#2} ]]; then
+        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
+        return 1
+      fi
+      if (( $+_z4h_initialized )); then
+        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
+        return 1
+      fi
       # Check whether the current shell is the login shell. If not, offer to change login shell.
-      (( UID && EUID )) && zstyle -t :z4h: check-login-shell || return 0
+      (( UID && EUID )) || return 0
       [[ -n $SHELL && $SHELL != $_z4h_exe && $_z4h_exe == /* && ${SHELL:A} != ${_z4h_exe:A} &&
-        -x ${_z4h_exe:A} && ! -e $Z4H/.no-check-login-shell && $+commands[chsh] == 1 &&
-        -r /etc/shells ]] || return 0
+        -x ${_z4h_exe:A} && ! -e $Z4H/.no-chsh && $+commands[chsh] == 1 &&
+        -r /etc/shells && -w $TTY ]] || return 0
       [[ $+commands[sudo] == 1 ||
         "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
 
@@ -308,8 +343,8 @@ function z4h() {
             >>$TTY print -l -- '' ''
           }
           if [[ $REPLY != y ]]; then
-            print -rn >$Z4H/.no-check-login-shell || return
-            >>$TTY print -Pr -- "Won't ask again until %U\$Z4H/.no-check-login-shell%u is deleted."
+            print -rn >$Z4H/.no-chsh || return
+            >>$TTY print -Pr -- "Won't ask again until %U\$Z4H/.no-chsh%u is deleted."
             return 1
           fi
           query="Try again?"
@@ -325,24 +360,6 @@ function z4h() {
         done
       ) && export SHELL=$_z4h_exe
 
-      return 0
-    ;;
-
-    2-clone)
-      if [[ -z $2 || $2 == *:* ]]; then
-        print -Pru2 -- "%F{3}z4h%f: %Bclone%b argument must be %Uuser/repo%u: %F{1}${2//\%/%%}%f"
-        return 1
-      fi
-      if (( ! $+Z4H_UPDATE )); then
-        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
-        return 1
-      fi
-      if (( $+_z4h_initialized )); then
-        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
-        return 1
-      fi
-      typeset -ga _z4h_extra_repos
-      _z4h_extra_repos+=($2)
       return 0
     ;;
 
@@ -412,6 +429,12 @@ function z4h() {
           print -Pr -- "Command history persists on the remote host but Zsh config files"
           print -Pr -- "(%U.zshrc%u and %U.p10k.zsh%u) get deleted when SSH connection terminates."
         ;;
+        chsh)
+          print -Pr -- "usage: %F{2}z4h%f %Bchsh%b"
+          print -Pr -- ""
+          print -Pr -- "Check whether current user's login shell is %F{2}zsh%f. If not, offer to"
+          print -Pr -- "change login shell."
+        ;;
         help)
           print -Pr -- "usage: %F{2}z4h%f %Bhelp%b [%Ucommand%u]"
           print -Pr -- ""
@@ -426,7 +449,7 @@ function z4h() {
     ;;
 
     1-init)
-      if (( ! $+Z4H_UPDATE )); then
+      if [[ -z ${Z4H_UPDATE:#2} ]]; then
         print -Pru2 -- "%F{3}z4h%f: %F{1}init%f cannot be called before %Binstall%b"
         return 1
       fi
@@ -445,18 +468,13 @@ function z4h() {
       print -Pru$fd -- "           %Bclone%b %Uusername/repository%u"
       print -Pru$fd -- "           %Bsource%b %Ufile%u"
       print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
+      print -Pru$fd -- "           %Bchsh%b"
       print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"
       return ret
     ;;
   esac
 
   typeset -gri _z4h_initialized=1
-
-  # Clone or update repositories registered with `z4h clone`.
-  local repo
-  for repo in $_z4h_extra_repos; do
-    _z4h_clone $repo || return
-  done
 
   # Enable Powerlevel10k instant prompt.
   if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then

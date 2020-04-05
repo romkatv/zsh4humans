@@ -768,8 +768,8 @@ function z4h() {
   bindkey '^[[1;5B' down-line-or-beginning-search           # ctrl+down  next cmd in global history
   bindkey '^ '      z4h-expand                              # ctrl+space expand alias/glob/parameter
   bindkey '\t'      z4h-expand-or-complete-with-dots        # tab        fzf-tab completion
-  bindkey '^[j'     fzf-completion                          # alt-j      fzf file completion
-  bindkey '^[J'     fzf-completion                          # alt-J      fzf file completion
+  bindkey '^[f'     fzf-completion                          # alt-f      fzf file completion
+  bindkey '^[F'     fzf-completion                          # alt-F      fzf file completion
   bindkey '^R'      z4h-fzf-history-widget                  # ctrl+r     fzf history
   bindkey '^[h'     z4h-run-help                            # alt+h      help for the cmd at cursor
   bindkey '^[H'     z4h-run-help                            # alt+H      help for the cmd at cursor

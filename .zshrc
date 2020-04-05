@@ -15,9 +15,6 @@ if [ ! -e "$Z4H"/z4h.zsh ]; then
     curl -fsSLo "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
   elif command -v wget >/dev/null 2>&1; then
     wget -O     "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
-  else
-    >&2 echo 'z4h: please install `curl` or `wget`'
-    return 1
   fi
   mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return
 fi

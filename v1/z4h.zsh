@@ -52,10 +52,6 @@ fi
 
 emulate zsh
 
-zmodload zsh/zutil || return
-
-: ${ZDOTDIR:=~}
-
 if (( ! $+_z4h_exe )); then
   if [[ -x /proc/self/exe ]]; then
     _z4h_exe=/proc/self/exe
@@ -81,32 +77,85 @@ else
   unset _z4h_prelude_status
 fi
 
-function _z4h_clone() {
-  [[ -d $Z4H/$1 && $Z4H_UPDATE == 0 ]] && return
+zmodload zsh/zutil || return
 
-  local repo=$1
-  if [[ -d $Z4H/$repo/.git && $+commands[git] == 1 ]]; then
+() {
+  emulate -L zsh -o extended_glob -o prompt_percent -o no_prompt_subst -o no_prompt_bang
+  if [[ -n $ZDOTDIR && $ZDOTDIR != /* ]]; then
+    print -Pru2 -- "%F{3}z4h%f: invalid %BZDOTDIR%b: %F{1}${ZDOTDIR//\%/%%}%f"
+    return 1
+  fi
+  if [[ $Z4H != /* ]]; then
+    print -Pru2 -- "%F{3}z4h%f: invalid %BZ4H%b: %F{1}${Z4H//\%/%%}%f"
+    return 1
+  fi
+  if [[ $1 != $Z4H/z4h.zsh ]]; then
+    print -Pru2 -- "%F{3}z4h%f: confusing %Uz4h.zsh%u location: %F{1}${1//\%/%%}%f"
+    return 1
+  fi
+  if [[ $Z4H_URL != https://raw.githubusercontent.com/*/zsh4humans/v[^/]##* ]]; then
+    print -Pru2 -- "%F{3}z4h%f: invalid %BZ4H_URL%b: %F{1}${Z4H_URL//\%/%%}%f"
+    return 1
+  fi
+
+  : ${ZDOTDIR:=~}
+  typeset -gr _z4h_param_pat=$'ZDOTDIR=$ZDOTDIR\0Z4H=$Z4H\0Z4H_URL=$Z4H_URL'
+  typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
+} ${${(%):-%x}:a} || return 1
+
+function _z4h_clone() {
+  [[ -d $1 && $Z4H_UPDATE == 0 ]] && return
+
+  local dst=$1
+  local repo=$2
+  local branch=$3
+  if [[ -d $dst/.git && $+commands[git] == 1 ]]; then
     print -Pru2 -- "%F{3}z4h%f: updating %B${repo//\%/%%}%b"
-    >&2 git -C $Z4H/$repo pull || return
+    >&2 git -C $dst pull || return
   elif (( $+commands[git] )); then
     print -Pru2 -- "%F{3}z4h%f: cloning %B${repo//\%/%%}%b"
-    zmodload -F zsh/files b:zf_rm || return
-    zf_rm -rf -- $Z4H/$repo || return
-    >&2 git clone --depth=1 -- https://github.com/$repo.git $Z4H/$repo || return
+    zmodload -F zsh/files b:zf_rm b:zf_mv || return
+    local old=$dst.old.$$
+    local new=$dst.new.$$
+    {
+      >&2 git clone -b $branch --depth=1 -- https://github.com/$repo.git $new || return
+      [[ ! -e $dst ]] || zf_mv -- $dst $old || return
+      zf_mv -- $new $dst
+    } always {
+      rm -rf -- $old $new
+    }
   else
     print -Pru2 -- "%F{3}z4h%f: downloading %B${repo//\%/%%}%b"
     zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
-    zf_mkdir -p -- $Z4H/${repo:h}
-    if (( $+commands[curl] )); then
-      curl -fsSL -- https://github.com/$repo/archive/master.tar.gz || return
-    elif (( $+commands[wget] )); then
-      wget -O- -- https://github.com/$repo/archive/master.tar.gz || return
-    else
-      print -Pru2 -- "%F{3}z4h%f: please install %F{2}git%f, %F{2}curl%f or %F{2}wget%f"
-      return 1
-    fi | tar -C $Z4H/${repo:h} -xz || return
-    zf_rm -rf -- $Z4H/$repo || return
-    zf_mv -- $Z4H/$repo-master $Z4H/$repo || return
+    local new=$dst.old.$$
+    local new=$dst.new.$$
+    {
+      zf_mkdir -p -- ${dst:h} $new
+      local url=https://github.com/$repo/archive/$branch.tar.gz
+      local err
+      if (( $+commands[curl] )); then
+        err="$(curl -fsSLo $new/dump.tar.gz -- $url)"
+      elif (( $+commands[wget] )); then
+        err="$(wget -qO $new/dump.tar.gz -- $url)"
+      else
+        print -Pru2 -- "%F{3}z4h%f: please install %F{1}git%f, %F{1}curl%f or %F{1}wget%f"
+        return 1
+      fi
+      if (( $? )); then
+        print -ru2 -- $err
+        print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+        return 1
+      fi
+      ( cd -- $new && tar -xzf dump.tar.gz ) || return
+      if [[ ! -d $new/${repo:t}-$branch ]]; then
+        print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
+        return 1
+      fi
+      [[ ! -e $dst ]] || zf_mv -- $dst $old || return
+      zf_mv -- $new/${repo:t}-$branch $dst
+    } always {
+      zf_rm -rf -- $old $new
+    }
   fi
 }
 
@@ -139,19 +188,6 @@ function compdef() {
   _z4h_compdef+=("${(pj:\0:)@}")
 }
 
-function z4h-ssh-remote-setup() {
-  local dir="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans.ssh
-  export Z4H="$dir"/cache
-  export ZDOTDIR="$dir"/dotfiles
-  export HISTFILE="$ZDOTDIR"/.zsh_history
-  export Z4H_SSH=1
-  export LC_ALL=C
-}
-
-function z4h-ssh-remote-teardown() {
-  find -- "$ZDOTDIR" -name '*.zwc' -exec rm -f -- '{}' ';'
-}
-
 # Main zsh4humans function. Type `z4h help` for usage.
 function z4h() {
   [[ "$ARGC-$1" != 2-source ]] || {
@@ -164,89 +200,28 @@ function z4h() {
   emulate -L zsh
   setopt typeset_silent pipe_fail extended_glob prompt_percent no_prompt_subst no_prompt_bang
 
+  if [[ ${(e)_z4h_param_pat} != $_z4h_param_sig ]]; then
+    print -Pru2 -- "%F{3}z4h%f: core parameters have unexpectedly changed"
+    local -a old=(${(0)_z4h_param_sig})
+    local -a new=(${(0)${(e)_z4h_param_pat}})
+    local diff_old=(${new:|old})
+    local diff_new=(${old:|new})
+    print -Pru2 -- ""
+    print -Pru2 -- "%F{2}Expected:%f"
+    print -Pru2 -- ""
+    print -lru2 -- "  "$^diff_old
+    print -Pru2 -- ""
+    print -Pru2 -- "%F{1}Found:%f"
+    print -Pru2 -- ""
+    print -lru2 -- "  "$^diff_new
+    print -Pru2 -- ""
+    print -Pru2 -- "Restore the parameters or restart Zsh with %F{2}%Uexec%u zsh%f."
+    return 1
+  fi
+
   case $ARGC-$1 in
     <2->-ssh)
-      local -a files
-      if ! zstyle -a :z4h:ssh:${@[-1]} files files; then
-        files=(
-          $ZDOTDIR/.zshrc             '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
-          $ZDOTDIR/.p10k.zsh          '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
-          $ZDOTDIR/.p10k-portable.zsh '$ZDOTDIR/' overwrite=1,remove=1,persist=0
-        )
-      fi
-      if (( $#files % 3 )); then
-        print -Pru2 -- "%F{3}z4h%f: wrong number of elements in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}$#files%f"
-        return 1
-      fi
-
-      local -a write_files
-      local -a remove_files
-      local src flags dst
-      for src dst flags in "${files[@]}"; do
-        if [[ ${src:t} == *'"'* ]]; then
-          print -Pru2 -- "%F{3}z4h%f: bad path in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${src//\%/%%}%f"
-          return 1
-        fi
-        if [[ -n ${(@)${(s:,:)flags}:#(overwrite|remove|persist)=[01]} ]]; then
-          print -Pru2 -- "%F{3}z4h%f: bad flags in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${flags//\%/%%}%f"
-          return 1
-        fi
-        local -i overwrite=1 remove=1 persist=0
-        eval ${flags//,/; }
-        if [[ $dst == (|*'"'*) ]]; then
-          print -Pru2 -- "%F{3}z4h%f: bad path in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${dst//\%/%%}%f"
-          return 1
-        fi
-        [[ $dst == */ ]] && dst+=${src:t}
-
-        local write=':'
-
-        if [[ -e $src ]]; then
-          if [[ ! -f $src ]]; then
-            print -Pru2 -- "%F{3}z4h%f: not a file: %F{red}${src//\%/%%}%f"
-            return 1
-          fi
-
-          local dump
-          dump="${$(cd -- ${src:h} && tar -czh -- ${src:t} | base64)//$'\n'}" || return
-
-          write+='; (cd -- "$_z4h_tmpdir" && echo "'$dump'" | base64 $_z4h_base64d | tar -xz) || exit'
-          if [[ -x $src ]]; then
-            write+='; chmod 700 "$_z4h_tmpdir/'${src:t}'"'
-          else
-            write+='; chmod 600 "$_z4h_tmpdir/'${src:t}'"'
-          fi
-          write+='; _z4h_dstdir="$(dirname -- "'$dst'")"'
-          write+='; if [ ! -d "$_z4h_dstdir" ]; then mkdir -p -- "$_z4h_dstdir"; chmod 700 "$_z4h_dstdir"; fi'
-          if (( overwrite )); then
-            write+='; mv -f -- "$_z4h_tmpdir/'${src:t}'" "'$dst'"'
-          else
-            write+='; mv -- "$_z4h_tmpdir/'${src:t}'" "'$dst'"'
-            write='if [ ! -e "'$dst'" ]; then '$write'; fi'
-          fi
-        elif (( remove )); then
-          write+='; rm -f -- "'$dst'"'
-        fi
-
-        write='if [ -d "'$dst'" ]; then >&2 printf "z4h: file is a directory: %s" "'$dst'"; exit 1; fi; '$write
-        write_files+=($write)
-        (( persist )) || remove_files+=('"'$dst'"')
-      done
-
-      autoload +X z4h-ssh-remote-setup z4h-ssh-remote-teardown
-      zmodload zsh/parameter || return
-
-      local cmd='set -ue || exit'
-      cmd+='; _z4h_tmpdir="$(mktemp -d ${TMPDIR:-/tmp}/z4h-ssh.XXXXXXXXXX)"'
-      cmd+='; _z4h_ssh_setup() { '$functions[z4h-ssh-remote-setup]$'\n}'
-      cmd+='; _z4h_ssh_setup; unset -f _z4h_ssh_setup'
-      cmd+='; _z4h_ssh_teardown() { '$functions[z4h-ssh-remote-teardown]$'\n}'
-      cmd+='; trap '\''rm -f -- '${(j. .)remove_files}' || :; _z4h_ssh_teardown'\'' INT QUIT TERM EXIT ILL PIPE HUP'
-      cmd+='; if echo "Cg==" | base64 -d 2>/dev/null; then _z4h_base64d=-d; else _z4h_base64d=-D; fi'
-      cmd+='; '${(j.; .)write_files}
-      cmd+='; unset _z4h_tmpdir _z4h_base64d _z4h_dstdir'
-      cmd+='; ( set +ue; unset -f _z4h_ssh_teardown; source "$ZDOTDIR"/.zshrc )'
-      ssh -t "${@:2}" $cmd
+      autoload -Uz z4h-ssh && z4h-ssh "${@:2}"
       return
     ;;
 
@@ -259,7 +234,16 @@ function z4h() {
       return
     ;;
 
-    1-install) : ${Z4H_UPDATE=0};|
+    1-install)
+      if [[ -d $Z4H/zsh4humans ]]; then
+        typeset -gaU fpath
+        fpath+=($Z4H/zsh4humans)
+        : ${Z4H_UPDATE=0}
+      else
+        Z4H_UPDATE=1
+      fi
+    ;|
+
     1-update)  : ${Z4H_UPDATE=1};|
     1-install|1-update)
       # GitHub projects to clone.
@@ -297,19 +281,10 @@ function z4h() {
           fi
         fi
 
-        if (( Z4H_UPDATE == 1 )) && [[ -n $Z4H_URL ]]; then
-          print -Pru2 -- "%F{3}z4h%f: updating %Uinit.zsh%u"
-          zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
-          if (( $+commands[curl] )); then
-            curl -fsSL -- $Z4H_URL/z4h.zsh || return
-          elif (( $+commands[wget] )); then
-            wget -O- -- $Z4H_URL/z4h.zsh || return
-          else
-            print -Pru2 -- "%F{3}z4h%f: please install %F{2}curl%f or %F{2}wget%f"
-            return 1
-          fi >"$Z4H"/z4h.zsh.$$ || return
-          zf_mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return
-          print -Pru2 -- "%F{3}z4h%f: restarting zsh"
+        if (( Z4H_UPDATE == 1 )); then
+          print -Pru2 -- "%F{3}z4h%f: updating %Uromkatv/zsh4humans%u"
+          _z4h_clone $Z4H/zsh4humans romkatv/zsh4humans "$Z4H_URL" || return
+          print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
           Z4H_UPDATE=2 exec -- $_z4h_exe || return
         fi
 
@@ -320,7 +295,7 @@ function z4h() {
         # Clone or update all repositories.
         local repo
         for repo in $github_repos; do
-          _z4h_clone $repo || return
+          _z4h_clone $Z4H/$repo $repo master || return
         done
 
         # Download fzf binary.
@@ -334,7 +309,7 @@ function z4h() {
         fi
 
         if [[ $1 == update ]]; then
-          print -Pru2 -- "%F{3}z4h%f: restarting zsh"
+          print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
           exec -- $_z4h_exe || return
         fi
       } always {
@@ -362,7 +337,7 @@ function z4h() {
         print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
         return 1
       fi
-      _z4h_clone $2
+      _z4h_clone $Z4H/$2 $2 master
       return
     ;;
 
@@ -456,51 +431,8 @@ function z4h() {
           print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
         ;;
         ssh)
-          print -Pr -- "usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
-          print -Pr -- ""
-          print -Pr -- "Connect to the remote host over SSH and start Zsh with local configs."
-          print -Pr -- "The remote host must have login shell compatible with the Bourne shell"
-          print -Pr -- "(sh, bash, zsh, ash, dash, etc.) and internet connection. Nothing else"
-          print -Pr -- "is required."
-          print -Pr -- ""
-          print -Pr -- "Here's what %F{2}z4h%f %Bssh%b does in more detail:"
-          print -Pr -- ""
-          print -Pr -- "  1. Archives Zsh config files on the local host and sends them to the"
-          print -Pr -- "     remote host."
-          print -Pr -- "  2. Extracts Zsh config files on the remote host and sets %BZDOTDIR%b"
-          print -Pr -- "     to instruct Zsh to read them."
-          print -Pr -- "  3. Sources %U.zshrc%u, which immediately sources %Uz4h.zsh%u. The latter"
-          print -Pr -- "     takes care of installing Zsh to %U~/.zsh-bin%u and replacing the"
-          print -Pr -- "     current shell process if necessary."
-          print -Pr -- ""
-          print -Pr -- "The list of files copied to the remote host is defined with %F{2}zstyle%f."
-          print -Pr -- "Here's the default value:"
-          print -Pr -- ""
-          print -Pr -- "  %F{2}zstyle%f %F{3}':z4h:ssh:*'%f files                                                \\"
-          print -Pr -- "    \$ZDOTDIR/.zshrc             %F{3}'\$ZDOTDIR/'%f overwrite=1,remove=1,persist=0 \\"
-          print -Pr -- "    \$ZDOTDIR/.p10k.zsh          %F{3}'\$ZDOTDIR/'%f overwrite=1,remove=1,persist=0 \\"
-          print -Pr -- "    \$ZDOTDIR/.p10k-portable.zsh %F{3}'\$ZDOTDIR/'%f overwrite=1,remove=1,persist=0"
-          print -Pr -- ""
-          print -Pr -- "Each triplet defines a file on the local host, its desired location on the"
-          print -Pr -- "remote host and flags. If both local and the remote files exist, %Boverwrite=1%b"
-          print -Pr -- "causes the remote file to be overwritten. If local file doesn't exist but"
-          print -Pr -- "the remote file does, %Bremove=1%b causes the remove file to be deleted."
-          print -Pr -- "All remote files marked with %Bpersist=0%b get deleted when SSH connection"
-          print -Pr -- "terminates."
-          print -Pr -- ""
-          print -Pr -- "The last segment in the %F{2}zstyle%f context (the snippet above has %F{3}*%f in its"
-          print -Pr -- "place) is the last argument of %F{2}z4h%f %Bssh%b. It allows you to copy different"
-          print -Pr -- "files to different remote hosts."
-          print -Pr -- ""
-          print -Pr -- "When SSH connection is established, function %F{2}z4h-ssh-remote-setup%f is"
-          print -Pr -- "invoked to initialize environment. You can override it. By default it sets"
-          print -Pr -- "%BZ4H_SSH=1%b, which lets you perform conditional initialization in %U.zshrc%u."
-          print -Pr -- ""
-          print -Pr -- "Similarly, when SSH connection is terminated, %F{2}z4h-ssh-remote-teardown%f"
-          print -Pr -- "is called."
-          print -Pr -- ""
-          print -Pr -- "The first login to a remote host may take some time. After that it's as"
-          print -Pr -- "fast as normal %F{2}ssh%f."
+          autoload -Uz z4h-help-ssh && z4h-help-ssh
+          return
         ;;
         chsh)
           print -Pr -- "usage: %F{2}z4h%f %Bchsh%b"

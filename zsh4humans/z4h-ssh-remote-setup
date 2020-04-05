@@ -1,0 +1,6 @@
+local dir="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans.ssh
+export Z4H="$dir"/cache
+export ZDOTDIR="$dir"/dotfiles
+export HISTFILE="$ZDOTDIR"/.zsh_history
+export Z4H_SSH=1
+export LC_ALL=C

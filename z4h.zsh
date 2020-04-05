@@ -151,12 +151,13 @@ function _z4h_clone() {
         return 1
       fi
       ( cd -- $new && tar -xzf dump.tar.gz ) || return
-      if [[ ! -d $new/${repo:t}-$branch ]]; then
+      local dirs=($new/${repo:t}-*(N/))
+      if (( $#dirs != 1 )); then
         print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
         return 1
       fi
       [[ ! -e $dst ]] || zf_mv -- $dst $old || return
-      zf_mv -- $new/${repo:t}-$branch $dst
+      zf_mv -- $dirs[1] $dst
     } always {
       zf_rm -rf -- $old $new
     }

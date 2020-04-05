@@ -1,13 +1,13 @@
 # Export XDG environment variables. Other environment variables are exported later (see below).
 export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 
-# Cache directory. Can be deleted. When zshrc is sourced by `z4h ssh` on a remote host, this
-# variable is already set to ${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans.ssh.
-: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"
-
-# URL of the base config. Used during initial installation and later when updating.
+# URL of zsh4humans repository. Used during initial installation and later when updating.
 : "${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v1}"
 
+# Cache directory. Gets recreated when deleted.
+: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"
+
+# Fetch z4h.zsh if it doesn't yet exist and source it.
 if [ ! -e "$Z4H"/z4h.zsh ]; then
   mkdir -p -- "$Z4H" || return
   >&2 echo "z4h: downloading z4h.zsh"
@@ -19,9 +19,8 @@ if [ ! -e "$Z4H"/z4h.zsh ]; then
   mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return
 fi
 
+# Code prior to this line should not assume the current shell is Zsh. Afterwards we are in Zsh.
 . "$Z4H"/z4h.zsh || return
-
-# Code above this line should not assume the current shell is Zsh. Below this line we are in Zsh.
 
 # 'ask': ask to update; 'no': disable auto-update.
 zstyle :z4h: auto-update                 ask
@@ -39,7 +38,8 @@ zstyle ':z4h:ssh:*' files                                                \
   $ZDOTDIR/.p10k.zsh          '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
   $ZDOTDIR/.p10k-portable.zsh '$ZDOTDIR/' overwrite=1,remove=1,persist=0
 
-z4h install || return  # install or update core dependencies (fzf, zsh-autosuggestions, etc.)
+# Install or update core dependencies (fzf, zsh-autosuggestions, etc.).
+z4h install || return
 
 # Clone additional Git repositories from GitHub. This doesn't do anything apart from cloning the
 # repository and keeping it up-to-date. Cloned files can be used after `z4h init`.
@@ -51,7 +51,9 @@ if (( ! Z4H_SSH )); then
   z4h chsh
 fi
 
-z4h init || return  # initialize zsh; after this point console I/O is unavailable
+# Initialize Zsh. After this point console I/O is unavailable. Everything that requires user
+# interaction or can perform network I/O must be done above. Everything else is best done below.
+z4h init || return
 
 # Enable emacs (-e) or vi (-v) keymap.
 bindkey -e

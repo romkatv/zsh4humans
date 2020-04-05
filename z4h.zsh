@@ -131,7 +131,7 @@ function _z4h_clone() {
   else
     print -Pru2 -- "%F{3}z4h%f: downloading %B${repo//\%/%%}%b"
     zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
-    local new=$dst.old.$$
+    local old=$dst.old.$$
     local new=$dst.new.$$
     {
       zf_mkdir -p -- ${dst:h} $new

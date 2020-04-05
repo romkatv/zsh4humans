@@ -103,6 +103,9 @@ zmodload zsh/zutil || return
   typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
 } ${${(%):-%x}:a} || return 1
 
+typeset -gaU cdpath fpath mailpath path
+[[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
+
 function _z4h_clone() {
   [[ -d $1 && $Z4H_UPDATE == 0 ]] && return
 
@@ -241,7 +244,7 @@ function z4h() {
 
     1-install)
       if [[ -d $Z4H/zsh4humans ]]; then
-        typeset -gaU fpath
+        path=($Z4H/bin $path)
         fpath+=($Z4H/zsh4humans)
         typeset +x -gi Z4H_UPDATE
       else
@@ -323,6 +326,8 @@ function z4h() {
         fi
       }
 
+      fpath+=($Z4H/zsh-users/zsh-completions/src)
+      path+=($Z4H/junegunn/fzf/bin)
       return 0
     ;;
 
@@ -856,13 +861,6 @@ function z4h() {
   LS_COLORS+='cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:'
   LS_COLORS+='st=37;44:ex=01;32:'
   export LSCOLORS='ExGxFxdaCxDaDahbadacec'
-
-  typeset -gaU cdpath fpath mailpath path
-  fpath+=($Z4H/zsh-users/zsh-completions/src)
-
-  # Extend PATH.
-  [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-  path+=($Z4H/junegunn/fzf/bin)
 
   # Configure completions.
   zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'

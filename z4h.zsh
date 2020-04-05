@@ -282,7 +282,7 @@ function z4h() {
         fi
 
         if (( Z4H_UPDATE == 1 )); then
-          _z4h_clone $Z4H/zsh4humans romkatv/zsh4humans "${Z4H_URL:t}" || return
+          _z4h_clone $Z4H romkatv/zsh4humans "${Z4H_URL:t}" || return
           print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
           Z4H_UPDATE=2 exec -- $_z4h_exe || return
         fi

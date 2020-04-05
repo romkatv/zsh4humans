@@ -118,7 +118,11 @@ function _z4h_clone() {
     local old=$dst.old.$$
     local new=$dst.new.$$
     {
-      >&2 git clone -b $branch --depth=1 -- https://github.com/$repo.git $new || return
+      local err
+      if ! err=$(git clone -b $branch --depth=1 -- https://github.com/$repo.git $new 2>&1); then
+        print -ru2 -- "$err"
+        return 1
+      fi
       [[ ! -e $dst ]] || zf_mv -- $dst $old || return
       zf_mv -- $new $dst
     } always {
@@ -134,9 +138,9 @@ function _z4h_clone() {
       local url=https://github.com/$repo/archive/$branch.tar.gz
       local err
       if (( $+commands[curl] )); then
-        err="$(curl -fsSLo $new/dump.tar.gz -- $url)"
+        err="$(curl -fsSLo $new/dump.tar.gz -- $url 2>&1)"
       elif (( $+commands[wget] )); then
-        err="$(wget -qO $new/dump.tar.gz -- $url)"
+        err="$(wget -qO $new/dump.tar.gz -- $url 2>&1)"
       else
         print -Pru2 -- "%F{3}z4h%f: please install %F{1}git%f, %F{1}curl%f or %F{1}wget%f"
         return 1

@@ -238,13 +238,16 @@ function z4h() {
       if [[ -d $Z4H/zsh4humans ]]; then
         typeset -gaU fpath
         fpath+=($Z4H/zsh4humans)
-        : ${Z4H_UPDATE=0}
+        typeset +x -gi Z4H_UPDATE
       else
-        Z4H_UPDATE=1
+        typeset +x -gi Z4H_UPDATE=1
       fi
     ;|
 
-    1-update)  : ${Z4H_UPDATE=1};|
+    1-update)
+      typeset +x -gi Z4H_UPDATE=1
+    ;|
+
     1-install|1-update)
       # GitHub projects to clone.
       local github_repos=(

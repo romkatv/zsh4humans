@@ -309,11 +309,6 @@ function z4h() {
             return 1
           fi
         fi
-
-        if [[ $1 == update ]]; then
-          print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-          exec -- $_z4h_exe || return
-        fi
       } always {
         if (( $? )); then
           print -Pru2 -- "%F{3}z4h%f: %F{1}failed to install or update dependencies%f"
@@ -463,6 +458,10 @@ function z4h() {
       if (( _z4h_initialized )); then
         print -Pru2 "%F{3}z4h%f: %F{1}init%f cannot be called more than once"
         return 1
+      fi
+      if (( Z4H_UPDATE == 1 )); then
+        print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
+        exec -- $_z4h_exe || return
       fi
     ;;
 

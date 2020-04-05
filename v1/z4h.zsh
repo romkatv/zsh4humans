@@ -52,6 +52,10 @@ fi
 
 emulate zsh
 
+zmodload zsh/zutil || return
+
+: ${ZDOTDIR:=~}
+
 if (( ! $+_z4h_exe )); then
   if [[ -x /proc/self/exe ]]; then
     _z4h_exe=/proc/self/exe
@@ -76,10 +80,6 @@ if (( _z4h_prelude_status == 2 )); then
 else
   unset _z4h_prelude_status
 fi
-
-zmodload zsh/zutil || return
-
-: ${ZDOTDIR:=~}
 
 function _z4h_clone() {
   [[ -d $Z4H/$1 && $Z4H_UPDATE == 0 ]] && return
@@ -110,6 +110,28 @@ function _z4h_clone() {
   fi
 }
 
+function _z4h_compile() {
+  [[ "$1".zwc -nt "$1" ]] && return
+  [[ -w "${1:h}"       ]] || return
+  zmodload zsh/system                   || return
+  zmodload -F zsh/files b:zf_mv b:zf_rm || return
+  local tmp="$1".tmp."${sysparams[pid]}".zwc
+  {
+    # This zf_rm is to work around bugs in NTFS and/or WSL. The following code fails there:
+    #
+    #   touch a b
+    #   chmod -w b
+    #   zf_rm -f a b
+    #
+    # The last command produces this error:
+    #
+    #   zf_mv: a: permission denied
+    zcompile -R -- "$tmp" "$1" && zf_rm -f -- "$1".zwc && zf_mv -f -- "$tmp" "$1".zwc
+  } always {
+    (( $? )) && zf_rm -f -- "$tmp"
+  }
+}
+
 function compinit() {}
 
 function compdef() {
@@ -132,25 +154,17 @@ function z4h-ssh-remote-teardown() {
 
 # Main zsh4humans function. Type `z4h help` for usage.
 function z4h() {
+  [[ "$ARGC-$1" != 2-source ]] || {
+    [[ -e "$2" ]] || return
+    _z4h_compile "$2" || true
+    source -- "$2"
+    return
+  }
+
   emulate -L zsh
   setopt typeset_silent pipe_fail extended_glob prompt_percent no_prompt_subst no_prompt_bang
 
   case $ARGC-$1 in
-    2-source)
-      [[ -r $2 ]] || return
-      if [[ ! $2.zwc -nt $2 && -w ${2:h} ]]; then
-        zmodload -F zsh/files b:zf_mv b:zf_rm || return
-        local tmp=$2.tmp.$$.zwc
-        {
-          zcompile -R -- $tmp $2 && zf_mv -f -- $tmp $2.zwc || return
-        } always {
-          (( $? )) && zf_rm -f -- $tmp
-        }
-      fi
-      source -- $2
-      return
-    ;;
-
     <2->-ssh)
       local -a files
       if ! zstyle -a :z4h:ssh:${@[-1]} files files; then
@@ -220,6 +234,7 @@ function z4h() {
       done
 
       autoload +X z4h-ssh-remote-setup z4h-ssh-remote-teardown
+      zmodload zsh/parameter || return
 
       local cmd='set -ue || exit'
       cmd+='; _z4h_tmpdir="$(mktemp -d ${TMPDIR:-/tmp}/z4h-ssh.XXXXXXXXXX)"'
@@ -438,7 +453,7 @@ function z4h() {
         source)
           print -Pr -- "usage: %F{2}z4h%f %Bsource%b %Ufile%u"
           print -Pr -- ""
-          print -Pr -- "Compile and source Zsh file if it exists."
+          print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
         ;;
         ssh)
           print -Pr -- "usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
@@ -943,15 +958,7 @@ function z4h() {
     autoload -Uz compinit
     local dump=$Z4H/.zcompdump-$ZSH_VERSION
     compinit -u -d $dump
-    if [[ -r $dump && ! $dump.zwc -nt $dump ]]; then
-      zmodload -F zsh/files b:zf_mv b:zf_rm || return
-      local tmp=$dump.tmp.$$.zwc
-      {
-        zcompile -R -- $tmp $dump && zf_mv -f -- $tmp $dump.zwc
-      } always {
-        (( $? )) && zf_rm -f -- $tmp
-      }
-    fi
+    [[ -r $dump ]] && _z4h_compile $dump
 
     # Replay compdef calls.
     local args
@@ -969,6 +976,8 @@ function z4h() {
   }
 
   precmd_functions=(_z4h-post-init $precmd_functions)
+
+  _z4h_compile $Z4H/z4h.zsh
 
   # Aliases.
   if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD

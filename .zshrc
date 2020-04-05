@@ -66,7 +66,7 @@ export GPG_TTY=$TTY
 # Extend PATH.
 path=(~/bin $path)
 
-# Use additional Git repositories pulled in with `z4h clone ...`.
+# Use additional Git repositories pulled in with `z4h clone`.
 z4h source $Z4H/ohmyzsh/ohmyzsh/lib/diagnostics.zsh                         # just an example
 z4h source $Z4H/ohmyzsh/ohmyzsh/plugins/emoji-clock/emoji-clock.plugin.zsh  # just an example
 fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)                            # just an example

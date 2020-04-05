@@ -33,11 +33,14 @@ zstyle :z4h: auto-update-days            28
 # Bind alt-arrows or ctrl-arrows to change current directory? The other key modifier will be bound
 # to cursor movement by words.
 zstyle :z4h: cd-key                      alt
-# `z4h ssh` copies these files (relative to $ZDOTDIR, wich defaults to $HOME) to the remote host.
-# Type `z4h ssh` to learn more about this feature.
-zstyle :z4h:ssh dotfiles                 .zshrc .p10k.zsh
 # Right-arrow key accepts one character (partial-accept) or the whole autosuggestion (accept)?
 zstyle :z4h:autosuggestions forward-char partial-accept
+
+# `z4h ssh` copies these files to the remote host. Type `z4h help ssh` to learn more.
+zstyle ':z4h:ssh:*' files                                                \
+  $ZDOTDIR/.zshrc             '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
+  $ZDOTDIR/.p10k.zsh          '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
+  $ZDOTDIR/.p10k-portable.zsh '$ZDOTDIR/' overwrite=1,remove=1,persist=0
 
 z4h install || return  # install or update core dependencies (fzf, zsh-autosuggestions, etc.)
 

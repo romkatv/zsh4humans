@@ -79,6 +79,8 @@ fi
 
 zmodload zsh/zutil || return
 
+: ${ZDOTDIR:=~}
+
 function _z4h_clone() {
   [[ -d $Z4H/$1 && $Z4H_UPDATE == 0 ]] && return
 
@@ -115,6 +117,19 @@ function compdef() {
   _z4h_compdef+=("${(pj:\0:)@}")
 }
 
+function z4h-ssh-remote-setup() {
+  local dir="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans.ssh
+  export Z4H="$dir"/cache
+  export ZDOTDIR="$dir"/dotfiles
+  export HISTFILE="$ZDOTDIR"/.zsh_history
+  export Z4H_SSH=1
+  export LC_ALL=C
+}
+
+function z4h-ssh-remote-teardown() {
+  find -- "$ZDOTDIR" -name '*.zwc' -exec rm -f -- '{}' ';'
+}
+
 # Main zsh4humans function. Type `z4h help` for usage.
 function z4h() {
   emulate -L zsh
@@ -137,59 +152,86 @@ function z4h() {
     ;;
 
     <2->-ssh)
-      # Copy these files and directories (relative to $ZDOTDIR, which defaults to
-      # $HOME) from local machine to remote. Silently skip files that don't exist.
-
-      local -a dotfiles
-      zstyle -a :z4h:ssh dotfiles dotfiles
-
-      if [[ $dotfiles[(Ie).zshrc] == 0 && -z $Z4H_URL ]]; then
-        print -Pru2 -- '%F{3}z4h%f: %F{2}ssh%f needs %U.zshrc%u in %Bdotfiles%b or non-empty %BZ4H_URL%b'
+      local -a files
+      if ! zstyle -a :z4h:ssh:${@[-1]} files files; then
+        files=(
+          $ZDOTDIR/.zshrc             '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
+          $ZDOTDIR/.p10k.zsh          '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
+          $ZDOTDIR/.p10k-portable.zsh '$ZDOTDIR/' overwrite=1,remove=1,persist=0
+        )
+      fi
+      if (( $#files % 3 )); then
+        print -Pru2 -- "%F{3}z4h%f: wrong number of elements in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}$#files%f"
         return 1
       fi
 
-      # Tar, compress and base64-encode the subset of $dotfiles that actually exist.
-      local dump
-      dump=$(cd -- ${ZDOTDIR:-~} && tar -czhT <(print -rl -- $^dotfiles(N)) | base64) || return
+      local -a write_files
+      local -a remove_files
+      local src flags dst
+      for src dst flags in "${files[@]}"; do
+        if [[ ${src:t} == *'"'* ]]; then
+          print -Pru2 -- "%F{3}z4h%f: bad path in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${src//\%/%%}%f"
+          return 1
+        fi
+        if [[ -n ${(@)${(s:,:)flags}:#(overwrite|remove|persist)=[01]} ]]; then
+          print -Pru2 -- "%F{3}z4h%f: bad flags in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${flags//\%/%%}%f"
+          return 1
+        fi
+        local -i overwrite=1 remove=1 persist=0
+        eval ${flags//,/; }
+        if [[ $dst == (|*'"'*) ]]; then
+          print -Pru2 -- "%F{3}z4h%f: bad path in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${dst//\%/%%}%f"
+          return 1
+        fi
+        [[ $dst == */ ]] && dst+=${src:t}
 
-      # Run this command on the remote host. Type `z4h help ssh` for help.
-      local cmd='
-        set -ue
+        local write=':'
 
-        # Ignore LANG and LC_* variables that may have been sent over. The remote machine
-        # may not have the requested locale installed. Let zshrc figure out which locale to use.
-        export LC_ALL=C
-
-        Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans.ssh
-        export ZDOTDIR="$Z4H"/dotfiles
-        export HISTFILE="$Z4H"/.zsh_history
-        export Z4H="$Z4H"/cache
-        export Z4H_SSH=1
-
-        rm -rf -- "$ZDOTDIR"
-        mkdir -p -- "$Z4H" "$ZDOTDIR"
-        touch -- "$HISTFILE"
-        chmod 700 "$Z4H" "$ZDOTDIR"
-        chmod 600 "$HISTFILE"
-
-        # Delete dotfiles when SSH connetion terminates. Keep Zsh plugins and command history.
-        trap '\''rm -rf -- "$ZDOTDIR"'\'' INT QUIT TERM EXIT ILL PIPE HUP
-
-        ( cd -- "$ZDOTDIR" && printf "%s" '${(q)dump//$'\n'}' | base64 --decode | tar -xz ) || exit
-
-        if [ ! -e "$ZDOTDIR"/.zshrc ]; then
-          if command -v curl >/dev/null 2>&1; then
-            curl -fsSLo "$ZDOTDIR"/.zshrc -- '${(q)Z4H_URL}'/.zshrc
-          elif command -v wget >/dev/null 2>&1; then
-            wget -O "$ZDOTDIR"/.zshrc -- '${(q)Z4H_URL}'/.zshrc
-          else
-            >&2 echo "z4h: please install `curl` or `wget` on the remote host"
-            exit 1
+        if [[ -e $src ]]; then
+          if [[ ! -f $src ]]; then
+            print -Pru2 -- "%F{3}z4h%f: not a file: %F{red}${src//\%/%%}%f"
+            return 1
           fi
+
+          local dump
+          dump="${$(cd -- ${src:h} && tar -czh -- ${src:t} | base64)//$'\n'}" || return
+
+          write+='; (cd -- "$_z4h_tmpdir" && echo "'$dump'" | base64 $_z4h_base64d | tar -xz) || exit'
+          if [[ -x $src ]]; then
+            write+='; chmod 700 "$_z4h_tmpdir/'${src:t}'"'
+          else
+            write+='; chmod 600 "$_z4h_tmpdir/'${src:t}'"'
+          fi
+          write+='; _z4h_dstdir="$(dirname -- "'$dst'")"'
+          write+='; if [ ! -d "$_z4h_dstdir" ]; then mkdir -p -- "$_z4h_dstdir"; chmod 700 "$_z4h_dstdir"; fi'
+          if (( overwrite )); then
+            write+='; mv -f -- "$_z4h_tmpdir/'${src:t}'" "'$dst'"'
+          else
+            write+='; mv -- "$_z4h_tmpdir/'${src:t}'" "'$dst'"'
+            write='if [ ! -e "'$dst'" ]; then '$write'; fi'
+          fi
+        elif (( remove )); then
+          write+='; rm -f -- "'$dst'"'
         fi
 
-        source "$ZDOTDIR"/.zshrc'
-      ssh -t "${@:2}" ${${cmd#$'\n'}// ##/ }
+        write='if [ -d "'$dst'" ]; then >&2 printf "z4h: file is a directory: %s" "'$dst'"; exit 1; fi; '$write
+        write_files+=($write)
+        (( persist )) || remove_files+=('"'$dst'"')
+      done
+
+      autoload +X z4h-ssh-remote-setup z4h-ssh-remote-teardown
+
+      local cmd='set -ue || exit'
+      cmd+='; _z4h_tmpdir="$(mktemp -d ${TMPDIR:-/tmp}/z4h-ssh.XXXXXXXXXX)"'
+      cmd+='; _z4h_ssh_setup() { '$functions[z4h-ssh-remote-setup]$'\n}'
+      cmd+='; _z4h_ssh_setup; unset -f _z4h_ssh_setup'
+      cmd+='; _z4h_ssh_teardown() { '$functions[z4h-ssh-remote-teardown]$'\n}'
+      cmd+='; trap '\''rm -f -- '${(j. .)remove_files}' || :; _z4h_ssh_teardown'\'' INT QUIT TERM EXIT ILL PIPE HUP'
+      cmd+='; if echo "Cg==" | base64 -d 2>/dev/null; then _z4h_base64d=-d; else _z4h_base64d=-D; fi'
+      cmd+='; '${(j.; .)write_files}
+      cmd+='; unset _z4h_tmpdir _z4h_base64d _z4h_dstdir'
+      cmd+='; ( set +ue; unset -f _z4h_ssh_teardown; source "$ZDOTDIR"/.zshrc )'
+      ssh -t "${@:2}" $cmd
       return
     ;;
 
@@ -408,27 +450,42 @@ function z4h() {
           print -Pr -- ""
           print -Pr -- "Here's what %F{2}z4h%f %Bssh%b does in more detail:"
           print -Pr -- ""
-          print -Pr -- "  1. Archives Zsh config files (%U.zshrc%u, %U.p10k.zsh%u, etc.; see,"
-          print -Pr -- "     %F{2}zstyle%f %B:z4h:ssh dotfiles%b in your %U.zshrc%u) on the local"
-          print -Pr -- "     host and sends them to the remote host. Local Zsh history does NOT"
-          print -Pr -- "     get sent over."
-          print -Pr -- "  2. Extracts these files to %U~/.cache/zsh4humans.ssh/dotfiles%u on the"
-          print -Pr -- "     remote host and points %BZDOTDIR%b to this directory to instruct Zsh"
-          print -Pr -- "     to read configuration files from it."
-          print -Pr -- "  3. Sets %BZ4H_SSH%b environment variable to %B1%b. You can use it"
-          print -Pr -- "     throughout %U.zshrc%u to perform various initialization steps"
-          print -Pr -- "     conditionally, depending on whether %U.zshrc%u is being sourced on the"
-          print -Pr -- "     local or remote host."
-          print -Pr -- "  4. Sources %U.zshrc%u, which immediately sources %Uz4h.zsh%u. The latter"
+          print -Pr -- "  1. Archives Zsh config files on the local host and sends them to the"
+          print -Pr -- "     remote host."
+          print -Pr -- "  2. Extracts Zsh config files on the remote host and sets %BZDOTDIR%b"
+          print -Pr -- "     to instruct Zsh to read them."
+          print -Pr -- "  3. Sources %U.zshrc%u, which immediately sources %Uz4h.zsh%u. The latter"
           print -Pr -- "     takes care of installing Zsh to %U~/.zsh-bin%u and replacing the"
-          print -Pr -- "     current process if necessary."
+          print -Pr -- "     current shell process if necessary."
+          print -Pr -- ""
+          print -Pr -- "The list of files copied to the remote host is defined with %F{2}zstyle%f."
+          print -Pr -- "Here's the default value:"
+          print -Pr -- ""
+          print -Pr -- "  %F{2}zstyle%f %F{3}':z4h:ssh:*'%f files                                                \\"
+          print -Pr -- "    \$ZDOTDIR/.zshrc             %F{3}'\$ZDOTDIR/'%f overwrite=1,remove=1,persist=0 \\"
+          print -Pr -- "    \$ZDOTDIR/.p10k.zsh          %F{3}'\$ZDOTDIR/'%f overwrite=1,remove=1,persist=0 \\"
+          print -Pr -- "    \$ZDOTDIR/.p10k-portable.zsh %F{3}'\$ZDOTDIR/'%f overwrite=1,remove=1,persist=0"
+          print -Pr -- ""
+          print -Pr -- "Each triplet defines a file on the local host, its desired location on the"
+          print -Pr -- "remote host and flags. If both local and the remote files exist, %Boverwrite=1%b"
+          print -Pr -- "causes the remote file to be overwritten. If local file doesn't exist but"
+          print -Pr -- "the remote file does, %Bremove=1%b causes the remove file to be deleted."
+          print -Pr -- "All remote files marked with %Bpersist=0%b get deleted when SSH connection"
+          print -Pr -- "terminates."
+          print -Pr -- ""
+          print -Pr -- "The last segment in the %F{2}zstyle%f context (the snippet above has %F{3}*%f in its"
+          print -Pr -- "place) is the last argument of %F{2}z4h%f %Bssh%b. It allows you to copy different"
+          print -Pr -- "files to different remote hosts."
+          print -Pr -- ""
+          print -Pr -- "When SSH connection is established, function %F{2}z4h-ssh-remote-setup%f is"
+          print -Pr -- "invoked to initialize environment. You can override it. By default it sets"
+          print -Pr -- "%BZ4H_SSH=1%b, which lets you perform conditional initialization in %U.zshrc%u."
+          print -Pr -- ""
+          print -Pr -- "Similarly, when SSH connection is terminated, %F{2}z4h-ssh-remote-teardown%f"
+          print -Pr -- "is called."
           print -Pr -- ""
           print -Pr -- "The first login to a remote host may take some time. After that it's as"
           print -Pr -- "fast as normal %F{2}ssh%f."
-          print -Pr -- ""
-          print -Pr -- "Command history persists on the remote host but Zsh config files"
-          print -Pr -- "(%U.zshrc%u, %U.p10k.zsh%u, etc.) get deleted when SSH connection"
-          print -Pr -- "terminates."
         ;;
         chsh)
           print -Pr -- "usage: %F{2}z4h%f %Bchsh%b"
@@ -519,12 +576,12 @@ function z4h() {
   () {
     emulate -L zsh -o extended_glob
     zmodload zsh/langinfo
-    [[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] && return
+    [[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] && return 0
     (( $+commands[locale] )) || return
     local loc=(${(@M)$(locale -a):#*.(utf|UTF)(-|)8})
     (( $#loc )) || return
     export LC_ALL=${loc[(r)(#i)C.UTF(-|)8]:-${loc[(r)(#i)en_US.UTF(-|)8]:-$loc[1]}}
-  }
+  } || : ${POWERLEVEL9K_CONFIG_FILE=${ZDOTDIR:-~}/.p10k-portable.zsh}
 
   # Enable command_not_found_handler if possible.
   if (( $+functions[command_not_found_handler] )); then
@@ -669,6 +726,7 @@ function z4h() {
     typeset -A ZSH_HIGHLIGHT_STYLES=(comment fg=96)  # different colors for comments and suggestions
   else
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold'  # the default is outside of 8 color range
+    : ${POWERLEVEL9K_CONFIG_FILE=${ZDOTDIR:-~}/.p10k-portable.zsh}
   fi
 
   ZSH_HIGHLIGHT_MAXLENGTH=1024                       # don't colorize long command lines (slow)
@@ -865,9 +923,12 @@ function z4h() {
   zstyle ':completion::complete:*'        cache-path      ${XDG_CACHE_HOME:-$HOME/.cache}/zcompcache-$ZSH_VERSION
   zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
-  # Initialize prompt. Type `p10k configure` or edit .p10k.zsh to customize it.
+  # Set POWERLEVEL9K_CONFIG_FILE to the default location if it's not set yet.
+  : ${POWERLEVEL9K_CONFIG_FILE:=${ZDOTDIR:-~}/.p10k.zsh}
+
+  # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
   z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
-  z4h source ${ZDOTDIR:-~}/.p10k.zsh
+  z4h source $POWERLEVEL9K_CONFIG_FILE
   z4h-set-term-title-precmd || return
 
   z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh

@@ -92,3 +92,21 @@ Add `_z4h_intro`. Copy from https://github.com/zsh4humans/core/blob/master/init.
 ---
 Add `_z4h_err`. Copy from https://github.com/zsh4humans/core/blob/master/init.zsh.
 ---
+Add this:
+
+```zsh
+zstyle :z4h: hidden-files [ignore|show|recurse]
+```
+
+If not `ignore`, should set `dotglob`, add `-A` to `ls`, make `alt-down` and `alt-f` show hidden
+leaves. `recurse` should make `alt-down` and `alt-f` recurse hidden directories.
+
+Will need to find another example of modifying aliases in `.zshrc` (currently it adds `-A` to `ls`).
+---
+Make `cd <alt-f>` consistent with `alt-down`.
+---
+Check if `alt-f` works on alpine (busybox).
+---
+Add options I like directly to `.zshrc`. They'll also serve as example. (Not sure if there are any
+that aren't already set in `z4h.zsh`.)
+---

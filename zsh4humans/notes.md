@@ -241,3 +241,57 @@ all and run `gitstatus/install`.
 This way `gitstatus/install` is called only when installing or updating, so it's ok if it runs
 `uname` (by the way, change `gitstatus` to use `uname -sm`). We also avoid downloading `gitstatusd`
 when it doesn't change.
+
+---
+
+Try harder when looking for zsh. Check `command zsh`, `$SHELL`, `/usr/local/bin/zsh`,
+`/usr/bin/zsh`, `/bin/zsh` and `~/.zsh-bin/bin/zsh`, in this order.
+
+---
+
+Add `-z4h-restart` (or `z4h restart`?) and use it instead of plain `exec $_z4h_exe`. This function
+should check whether `$_z4h_exe` is good before execing it.
+
+```zsh
+$_z4h_exe -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]'
+```
+
+Maybe also check that `zmodload zsh/zselect` and `autoload add-zsh-hook` work.
+
+If `$_z4h_exe` is not good, try to find a good one. If there aren't any, install zsh-bin. If
+everything fails, keep current prompt. Basically the same thing as `_z4h_prelude`.
+
+---
+
+Use some kind of counter to detect exec loop during initialization.
+
+---
+
+Install zsh-bin to `~/.local/zsh.app` and add a trampoline script to `~/.local/bin`:
+
+```sh
+#!/bin/sh
+
+p=":$PATH:"
+if [ -n ${p##*:$HOME/.local/zsh.app/bin:*} ]; then
+  export PATH="$HOME/.local/zsh.app/bin:$PATH"
+fi
+exec zsh "$@"
+```
+
+---
+
+Figure out how to allow customization of zsh-bin installation location. This should be defined with
+`zstyle`, so it won't be available when we actually need to install zsh-bin. Install it to `$Z4H`,
+`exec` into zsh, and then move zsh-bin to its intended location.
+
+Should it be allowed to put zsh-bin in `$Z4H`? One problem with this is that `chsh` becomes very
+dangerous. OK in ssh though? Probably better to disallow putting zsh-bin under `$XDG_CACHE_HOME`
+or `~/.cache`.
+
+---
+
+It would be nice to offer to install zsh-bin to `/opt` but unclear where the trampoline can be
+placed as it can clobber the existing zsh.
+
+---

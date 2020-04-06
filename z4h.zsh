@@ -576,7 +576,7 @@ function z4h() {
   fi
 
   # The same as up-line-or-beginning-search but for local history.
-  function z4h-up-line-or-beginning-search-local() {
+  function z4h-up-local-history() {
     emulate -L zsh
     local last=$LASTWIDGET
     zle .set-local-history 1
@@ -585,7 +585,7 @@ function z4h() {
   }
 
   # The same as down-line-or-beginning-search but for local history.
-  function z4h-down-line-or-beginning-search-local() {
+  function z4h-down-local-history() {
     emulate -L zsh
     local last=$LASTWIDGET
     zle .set-local-history 1
@@ -600,17 +600,17 @@ function z4h() {
 
   zmodload zsh/terminfo || return
   if (( $+terminfo[rmam] && $+terminfo[smam] )); then
-    function z4h-expand-or-complete-with-dots() {
+    function z4h-expand-or-complete() {
       # Show '...' while completing. No `emulate -L zsh` to pick up dotglob if it's set.
       print -rn -- ${terminfo[rmam]}${(%):-"%F{red}...%f"}${terminfo[smam]}
       zle fzf-tab-complete
     }
   else
-    function z4h-expand-or-complete-with-dots() { zle fzf-tab-complete }
+    function z4h-expand-or-complete() { zle fzf-tab-complete }
   fi
 
   # fzf-history-widget with duplicate removal, preview and syntax highlighting (requires `bat`).
-  function z4h-fzf-history-widget() {
+  function z4h-fzf-history() {
     emulate -L zsh -o pipefail
     local preview='printf "%s" {}'
     (( $+commands[bat] )) && preview+=' | bat -l bash --color always -pp'
@@ -660,20 +660,20 @@ function z4h() {
   function z4h-do-nothing() {}
 
   autoload -Uz up-line-or-beginning-search down-line-or-beginning-search run-help || return
-  (( $+aliases[run-help] )) && unalias run-help  # make alt-h binding more useful
+  (( $+aliases[run-help] )) && unalias run-help  # make run-help more useful
 
   zle -N up-line-or-beginning-search
   zle -N down-line-or-beginning-search
   zle -N z4h-expand
   zle -N z4h-beginning-of-buffer
   zle -N z4h-end-of-buffer
-  zle -N z4h-expand-or-complete-with-dots
-  zle -N z4h-up-line-or-beginning-search-local
-  zle -N z4h-down-line-or-beginning-search-local
+  zle -N z4h-expand-or-complete
+  zle -N z4h-up-local-history
+  zle -N z4h-down-local-history
   zle -N z4h-cd-back
   zle -N z4h-cd-forward
   zle -N z4h-cd-up
-  zle -N z4h-fzf-history-widget
+  zle -N z4h-fzf-history
   zle -N z4h-autosuggest-accept
   zle -N z4h-do-nothing
   zle -N z4h-run-help
@@ -687,9 +687,9 @@ function z4h() {
     : ${POWERLEVEL9K_CONFIG_FILE=${ZDOTDIR:-~}/.p10k-portable.zsh}
   fi
 
-  ZSH_HIGHLIGHT_MAXLENGTH=1024                       # don't colorize long command lines (slow)
-  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)         # main syntax highlighting plus matching brackets
-  ZSH_AUTOSUGGEST_MANUAL_REBIND=1                    # disable a very slow obscure feature
+  ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
+  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
+  ZSH_AUTOSUGGEST_MANUAL_REBIND=1             # disable a very slow obscure feature
 
   PROMPT_EOL_MARK='%K{red} %k'   # mark the missing \n at the end of a comand output with a red block
   READNULLCMD=less               # use `less` instead of the default `more`
@@ -710,10 +710,10 @@ function z4h() {
   fi
   : ${FZF_ALT_C_COMMAND:="command find -L . -mindepth 1 \( -path '*/\.*' "$fs" \) -prune -o -type d -print 2>/dev/null | cut -b3-"}
 
-  FZF_COMPLETION_TRIGGER=''                                # alt-j goes to fzf whenever possible
-  fzf_default_completion=z4h-expand-or-complete-with-dots  # alt-j falls back to tab
-  z4h source $Z4H/junegunn/fzf/shell/completion.zsh        # load fzf-completion
-  z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh      # load fzf-cd-widget
+  FZF_COMPLETION_TRIGGER=''                            # file completion without trigger
+  fzf_default_completion=z4h-expand-or-complete        # file completion falls back to regular
+  z4h source $Z4H/junegunn/fzf/shell/completion.zsh    # load fzf-completion
+  z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
 
   zstyle ':fzf-tab:*' prefix ''                    # remove '·'
   zstyle ':fzf-tab:*' continuous-trigger alt-enter # alt-enter to accept and trigger next completion
@@ -744,56 +744,56 @@ function z4h() {
   bindkey -s '^[[1~' '^[[H'  # home
   bindkey -s '^[[4~' '^[[F'  # end
 
-  bindkey '^[[D'    backward-char                           # left       move cursor one char backward
-  bindkey '^[[C'    forward-char                            # right      move cursor one char forward
-  bindkey '^[[A'    z4h-up-line-or-beginning-search-local   # up         prev command in local history
-  bindkey '^[[B'    z4h-down-line-or-beginning-search-local # down       next command in local history
-  bindkey '^[[H'    beginning-of-line                       # home       go to the beginning of line
-  bindkey '^[[F'    end-of-line                             # end        go to the end of line
-  bindkey '^?'      backward-delete-char                    # bs         delete one char backward
-  bindkey '^[[3~'   delete-char                             # delete     delete one char forward
-  bindkey '^H'      backward-kill-word                      # ctrl+bs    delete previous word
-  bindkey '^[^?'    backward-kill-word                      # alt+bs     delete previous word
-  bindkey '^[[3;5~' kill-word                               # ctrl+del   delete next word
-  bindkey '^[[3;3~' kill-word                               # alt+del    delete next word
-  bindkey '^K'      kill-line                               # ctrl+k     delete line after cursor
-  bindkey '^J'      backward-kill-line                      # ctrl+j     delete line before cursor
-  bindkey '^[n'     kill-buffer                             # alt+n      delete all lines
-  bindkey '^[N'     kill-buffer                             # alt+N      delete all lines
-  bindkey '^[m'     z4h-autosuggest-accept                  # alt+m      accept autosuggestion
-  bindkey '^[M'     z4h-autosuggest-accept                  # alt+M      accept autosuggestion
-  bindkey '^_'      undo                                    # ctrl+/     undo
-  bindkey '^[\'     redo                                    # alt+/      redo
-  bindkey '^[[1;5A' up-line-or-beginning-search             # ctrl+up    prev cmd in global history
-  bindkey '^[[1;5B' down-line-or-beginning-search           # ctrl+down  next cmd in global history
-  bindkey '^ '      z4h-expand                              # ctrl+space expand alias/glob/parameter
-  bindkey '\t'      z4h-expand-or-complete-with-dots        # tab        fzf-tab completion
-  bindkey '^[f'     fzf-completion                          # alt-f      fzf file completion
-  bindkey '^[F'     fzf-completion                          # alt-F      fzf file completion
-  bindkey '^R'      z4h-fzf-history-widget                  # ctrl+r     fzf history
-  bindkey '^[h'     z4h-run-help                            # alt+h      help for the cmd at cursor
-  bindkey '^[H'     z4h-run-help                            # alt+H      help for the cmd at cursor
-  bindkey '^[[1;5H' z4h-beginning-of-buffer                 # ctrl-home  go to the beginning of buffer
-  bindkey '^[[1;3H' z4h-beginning-of-buffer                 # alt-home   go to the beginning of buffer
-  bindkey '^[[1;5F' z4h-end-of-buffer                       # ctrl-end   go to the end of buffer
-  bindkey '^[[1;3F' z4h-end-of-buffer                       # alt-end    go to the end of buffer
-  bindkey '^[[5~'   z4h-do-nothing                          # pageup     do nothing
-  bindkey '^[[6~'   z4h-do-nothing                          # pageup     do nothing
+  bindkey '^[[D'    backward-char                  # left       move cursor one char backward
+  bindkey '^[[C'    forward-char                   # right      move cursor one char forward
+  bindkey '^[[A'    z4h-up-local-history           # up         prev command in local history
+  bindkey '^[[B'    z4h-down-local-history         # down       next command in local history
+  bindkey '^[[H'    beginning-of-line              # home       go to the beginning of line
+  bindkey '^[[F'    end-of-line                    # end        go to the end of line
+  bindkey '^?'      backward-delete-char           # bs         delete one char backward
+  bindkey '^[[3~'   delete-char                    # delete     delete one char forward
+  bindkey '^H'      backward-kill-word             # ctrl+bs    delete previous word
+  bindkey '^[^?'    backward-kill-word             # alt+bs     delete previous word
+  bindkey '^[[3;5~' kill-word                      # ctrl+del   delete next word
+  bindkey '^[[3;3~' kill-word                      # alt+del    delete next word
+  bindkey '^K'      kill-line                      # ctrl+k     delete line after cursor
+  bindkey '^J'      backward-kill-line             # ctrl+j     delete line before cursor
+  bindkey '^[n'     kill-buffer                    # alt+n      delete all lines
+  bindkey '^[N'     kill-buffer                    # alt+N      delete all lines
+  bindkey '^[m'     z4h-autosuggest-accept         # alt+m      accept autosuggestion
+  bindkey '^[M'     z4h-autosuggest-accept         # alt+M      accept autosuggestion
+  bindkey '^_'      undo                           # ctrl+/     undo
+  bindkey '^[\'     redo                           # alt+/      redo
+  bindkey '^[[1;5A' up-line-or-beginning-search    # ctrl+up    prev cmd in global history
+  bindkey '^[[1;5B' down-line-or-beginning-search  # ctrl+down  next cmd in global history
+  bindkey '^ '      z4h-expand                     # ctrl+space expand alias/glob/parameter
+  bindkey '\t'      z4h-expand-or-complete         # tab        fzf-tab completion
+  bindkey '^[f'     fzf-completion                 # alt-f      fzf file completion
+  bindkey '^[F'     fzf-completion                 # alt-F      fzf file completion
+  bindkey '^R'      z4h-fzf-history                # ctrl+r     fzf history
+  bindkey '^[h'     z4h-run-help                   # alt+h      help for the cmd at cursor
+  bindkey '^[H'     z4h-run-help                   # alt+H      help for the cmd at cursor
+  bindkey '^[[1;5H' z4h-beginning-of-buffer        # ctrl-home  go to the beginning of buffer
+  bindkey '^[[1;3H' z4h-beginning-of-buffer        # alt-home   go to the beginning of buffer
+  bindkey '^[[1;5F' z4h-end-of-buffer              # ctrl-end   go to the end of buffer
+  bindkey '^[[1;3F' z4h-end-of-buffer              # alt-end    go to the end of buffer
+  bindkey '^[[5~'   z4h-do-nothing                 # pageup     do nothing
+  bindkey '^[[6~'   z4h-do-nothing                 # pageup     do nothing
 
   if zstyle -t :z4h: cd-key ctrl; then
-    bindkey '^[[1;3D' backward-word                         # alt+left   go backward one word
-    bindkey '^[[1;3C' forward-word                          # alt+right  go forward one word
-    bindkey '^[[1;5D' z4h-cd-back                           # ctrl+left  cd into the prev directory
-    bindkey '^[[1;5C' z4h-cd-forward                        # ctrl+right cd into the next directory
-    bindkey '^[[1;5A' z4h-cd-up                             # ctrl+up    cd ..
-    bindkey '^[[1;5B' fzf-cd-widget                         # ctrl+down  fzf cd
+    bindkey '^[[1;3D' backward-word                # alt+left   go backward one word
+    bindkey '^[[1;3C' forward-word                 # alt+right  go forward one word
+    bindkey '^[[1;5D' z4h-cd-back                  # ctrl+left  cd into the prev directory
+    bindkey '^[[1;5C' z4h-cd-forward               # ctrl+right cd into the next directory
+    bindkey '^[[1;5A' z4h-cd-up                    # ctrl+up    cd ..
+    bindkey '^[[1;5B' fzf-cd-widget                # ctrl+down  fzf cd
   else
-    bindkey '^[[1;5D' backward-word                         # ctrl+left  go backward one word
-    bindkey '^[[1;5C' forward-word                          # ctrl+right go forward one word
-    bindkey '^[[1;3D' z4h-cd-back                           # alt+left   cd into the prev directory
-    bindkey '^[[1;3C' z4h-cd-forward                        # alt+right  cd into the next directory
-    bindkey '^[[1;3A' z4h-cd-up                             # alt+up     cd ..
-    bindkey '^[[1;3B' fzf-cd-widget                         # alt+down   fzf cd
+    bindkey '^[[1;5D' backward-word                # ctrl+left  go backward one word
+    bindkey '^[[1;5C' forward-word                 # ctrl+right go forward one word
+    bindkey '^[[1;3D' z4h-cd-back                  # alt+left   cd into the prev directory
+    bindkey '^[[1;3C' z4h-cd-forward               # alt+right  cd into the next directory
+    bindkey '^[[1;3A' z4h-cd-up                    # alt+up     cd ..
+    bindkey '^[[1;3B' fzf-cd-widget                # alt+down   fzf cd
   fi
 
   # Tell zsh-autosuggestions how to handle different widgets.
@@ -802,9 +802,9 @@ function z4h() {
     accept-line
     up-line-or-beginning-search
     down-line-or-beginning-search
-    up-line-or-beginning-search-local
-    down-line-or-beginning-search-local
-    z4h-fzf-history-widget
+    z4h-up-local-history
+    z4h-down-local-history
+    z4h-fzf-history
   )
   typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
     forward-word

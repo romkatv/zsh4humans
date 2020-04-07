@@ -276,20 +276,6 @@ Use some kind of counter to detect exec loop during initialization.
 
 ---
 
-Install zsh-bin to `~/.local/zsh` and add a trampoline script to `~/.local/bin`:
-
-```sh
-#!/bin/sh
-
-p=":$PATH:"
-if [ -n "${p##*:$HOME/.local/zsh/bin:*}" ]; then
-  export PATH="$HOME/.local/zsh/bin:$PATH"
-fi
-exec ~/.local/bin/zsh -fc 'exec -a ~/.local/bin/zsh -- ~/.local/zsh/bin/zsh "$@"'
-```
-
----
-
 Figure out how to allow customization of zsh-bin installation location. This should be defined with
 `zstyle`, so it won't be available when we actually need to install zsh-bin. Install it to `$Z4H`,
 `exec` into zsh, and then move zsh-bin to its intended location.
@@ -298,10 +284,12 @@ Should it be allowed to put zsh-bin in `$Z4H`? One problem with this is that `ch
 dangerous. OK in ssh though? Probably better to disallow putting zsh-bin under `$XDG_CACHE_HOME`
 or `~/.cache`.
 
----
+```zsh
+zstyle :z4h: zsh-installation-dir /usr/local ~/.local
+zstyle :z4h:ssh zsh-installation-dir /usr/local ~/.local
+```
 
-It would be nice to offer to install zsh-bin to `/opt/zsh` with the trampoline at
-`/usr/local/bin/zsh`.
+If there is more than one option, ask the user to choose. Mark options that would require `sudo`.
 
 ---
 

@@ -304,3 +304,5 @@ It would be nice to offer to install zsh-bin to `/opt` but unclear where the tra
 placed as it can clobber the existing zsh.
 
 ---
+
+Make `LS_COLORS` less obnoxious on NTFS.

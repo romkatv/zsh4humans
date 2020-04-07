@@ -183,8 +183,17 @@ Make `_z4h_clone` (or rather `-z4h-clone`) autoloadable.
 
 ---
 
-When `-z4h-clone` fails to `git pull`, try `git reset --hard HEAD` and `git clean -df` followed by
-another `pull`. If that also fails, try `git clone`.
+Replace `git pull` with `git fetch origin $ref` followed by `git reset --hard origin/$ref`. If the
+latter fails, try `git clean -df` and repeat `git reset`. If the whole thing fails, try `git clone`.
+
+---
+
+`-z4h-clone` should print "installing" or "updating" based on the presence of the target directory.
+It shouldn't produce additional output on success.
+
+---
+
+Restore "downloading z4h.zsh" message in `.zshrc`.
 
 ---
 

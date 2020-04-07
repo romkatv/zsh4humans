@@ -276,16 +276,16 @@ Use some kind of counter to detect exec loop during initialization.
 
 ---
 
-Install zsh-bin to `~/.local/zsh.app` and add a trampoline script to `~/.local/bin`:
+Install zsh-bin to `~/.local/zsh` and add a trampoline script to `~/.local/bin`:
 
 ```sh
 #!/bin/sh
 
 p=":$PATH:"
-if [ -n ${p##*:$HOME/.local/zsh.app/bin:*} ]; then
-  export PATH="$HOME/.local/zsh.app/bin:$PATH"
+if [ -n "${p##*:$HOME/.local/zsh/bin:*}" ]; then
+  export PATH="$HOME/.local/zsh/bin:$PATH"
 fi
-exec zsh "$@"
+exec ~/.local/bin/zsh -fc 'exec -a ~/.local/bin/zsh -- ~/.local/zsh/bin/zsh "$@"'
 ```
 
 ---
@@ -300,9 +300,18 @@ or `~/.cache`.
 
 ---
 
-It would be nice to offer to install zsh-bin to `/opt` but unclear where the trampoline can be
-placed as it can clobber the existing zsh.
+It would be nice to offer to install zsh-bin to `/opt/zsh` with the trampoline at
+`/usr/local/bin/zsh`.
 
 ---
 
 Make `LS_COLORS` less obnoxious on NTFS.
+
+---
+
+When `main.zsh` is being sourced, traverse the stack to find `.zshrc` and export `ZDOTDIR` pointing
+to its directory.
+
+---
+
+Remove all uses of `$TTY` before `z4h init`. Instead, check `[[ -t 0 && -t 1 ]]`.

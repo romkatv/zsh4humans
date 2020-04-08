@@ -64,7 +64,7 @@ the theme. Once you exit Zsh, the image is deleted.
 
 ```zsh
 docker run -e TERM -e COLORTERM -w /root -it --rm centos sh -uec '
-  curl -fsSLo ~/.zshrc https://raw.githubusercontent.com/romkatv/zsh4humans/.zshrc
+  curl -fsSLo ~/.zshrc https://raw.githubusercontent.com/romkatv/zsh4humans/master/.zshrc
   exec sh ~/.zshrc'
 ```
 

@@ -31,7 +31,7 @@ z4h_prelude() {
         return 1
       fi
       >&2 echo 'z4h: installing zsh to ~/.zsh-bin'
-      ( set -- -q; eval "$install" ) || return 1
+      ( set -- -q -d ~/.zsh-bin; eval "$install") || return 1
     fi
     export PATH="$HOME/.zsh-bin/bin:$PATH"
   fi

@@ -38,7 +38,7 @@ ZDOTDIR=~ exec zsh
 Don't have Zsh installed? Execute `~/.zshrc` with `sh` to install Zsh to `~/.zsh-bin`.
 
 ```zsh
-ZDOTDIR=~ exec ~/.zshrc
+ZDOTDIR=~ exec sh ~/.zshrc
 ```
 
 ## Features

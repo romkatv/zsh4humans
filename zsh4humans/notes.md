@@ -113,11 +113,6 @@ Add `:z4h:fzf git-clone-flags` and `:z4h:fzf git-pull-flags`.
 
 ---
 
-Add `:z4h:fzf git-ref`. Try to make it work when the user changes `git-ref` without having to store
-a separate database that records currently checked out refs.
-
----
-
 Add `-f` to `z4h clone` to force `Z4H_UPDATE=1` behavior. 
 
 ---
@@ -285,11 +280,15 @@ dangerous. OK in ssh though? Probably better to disallow putting zsh-bin under `
 or `~/.cache`.
 
 ```zsh
-zstyle :z4h: zsh-installation-dir /usr/local ~/.local
+zstyle :z4h:    zsh-installation-dir /usr/local ~/.local
 zstyle :z4h:ssh zsh-installation-dir /usr/local ~/.local
 ```
 
 If there is more than one option, ask the user to choose. Mark options that would require `sudo`.
+
+---
+
+Make `persist=1` option in `zstyle :z4h:ssh files` the default and remove support for `persist`.
 
 ---
 
@@ -303,3 +302,33 @@ to its directory.
 ---
 
 Remove all uses of `$TTY` before `z4h init`. Instead, check `[[ -t 0 && -t 1 ]]`.
+
+---
+
+Add this:
+
+```zsh
+zstyle :z4h:locale lang  'c' 'en_us' 'en_gb' 'en_*' '*'
+zstyle :z4h:locale force no  # if 'no', locale is changed only when encoding is not UTF-8
+```
+
+Set locale early in `z4h install`.
+
+---
+
+Add this:
+
+```zsh
+zstyle :z4h:fzf-tab             channel stable
+zstyle :z4h:syntax-highlighting channel dev
+zstyle :z4h:powerlevel10k       git-ref src
+
+zstyle :z4h:fzf-tab:channel     stable fca05e66d1c397cb5e72e8b185b1c3d1a0fc063d
+zstyle :z4h:fzf-tab:channel     dev    master
+```
+
+If `git-ref` is set, it wins. Otherwise commit is derived from `channel`.
+
+---
+
+Remove `~/.zshrc` from master branch.

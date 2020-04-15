@@ -332,3 +332,91 @@ If `git-ref` is set, it wins. Otherwise commit is derived from `channel`.
 ---
 
 Remove `~/.zshrc` from master branch.
+
+---
+
+Add this:
+
+```zsh
+z4h add-hook --after '*' --before 'foo*' --after 'foobar' preinit powerlevel10k _z4h-powerlevel10k-init arg1 arg2
+
+z4h run-hooks preinit arg3 arg4
+
+z4h preinit
+```
+
+- Ordering constraints are applied in the order they are specified.
+- `z4h preinit` runs `z4h run-hooks preinit`. It complains if executed for the second time.
+- The precmd hook runs `z4h postinit` if it hasn't run yet. This allows users to run it manually.
+- If `_z4h_powerlevel10k_init arg1 arg2` is not specified, it defaults to `powerlevel10k`.
+- It's OK to use `-a` and `-b` instead of `--after` and `--before`.
+
+`.zshrc` will look like this:
+
+```zsh
+. "$Z4H"/z4h.zsh || return
+
+z4h use zsh-syntax-highlighting
+z4h use powerlevel10k
+
+z4h install  # installs and/or updates everything
+z4h preinit  # enables instant prompt, sources most things, sets parameters, etc.
+z4h postinit # runs compinit and sources zsh-syntax-highlighting; called from precmd if not called called explicitly
+```
+
+`z4h use foo` calls `z4h-use-foo`, which in turn calls `z4h add-hook` a few times and nothing else.
+
+---
+
+Add this:
+
+```zsh
+if z4h use -t powerlevel10k; then  # is powerlevel10k used?
+  ...
+fi
+```
+
+---
+
+Add config presets:
+
+```zsh
+. "$Z4H"/z4h.zsh || return
+
+zstyle :z4h: config-version 1.0.0  # <==
+
+z4h use zsh-syntax-highlighting
+z4h use powerlevel10k
+...
+
+```
+
+`config-version` can be used by the core code to do things differently but its primary purpose is
+to set default values of various parameters, styles, options, bindings, etc.
+
+All `z4h use` directives should be in `.zshrc`. `z4h install` and `z4h preinit` should also be in
+`.zshrc`. Everything else should be in preset.
+
+---
+
+Make `z4h ssh` use the same directories (`ZDOTDIR`, `Z4H`, etc.) as local.
+
+Make setup and teardown configurable through `zstyle`.
+
+```zsh
+zstyle ':z4h:ssh:*' setup my-ssh-setup
+
+function my-ssh-setup() {
+  local ssh_args=("$@")
+  z4h ssh-send-env FOO $foo
+  z4h ssh-send-env BAR
+  z4h ssh-eval 'baz=qux'
+  z4h ssh-send-file -f /foo/bar '$FOO/baz'
+}
+```
+
+All these commands must be applied in the order they are listed. Remote code must be interpreted
+by zsh (hence `$FOO/baz` is OK without quotes).
+
+`ssh-send-file` should be able to send directories. The meaning of trailing slash in source and
+`destination` should be the same as in `rsync`.

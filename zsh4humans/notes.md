@@ -420,3 +420,18 @@ by zsh (hence `$FOO/baz` is OK without quotes).
 
 `ssh-send-file` should be able to send directories. The meaning of trailing slash in source and
 `destination` should be the same as in `rsync`.
+
+---
+
+Create `zle-experimental-save-restore-cursor` branch in `zsh`. Sync it to 5.8 and add `fix-sigwinch`
+code on top. Guard the new code with `ZLE_EXPERIMENTAL_SAVE_RESTORE_CURSOR`.
+
+Create a patch from this commit and store it in `zsh-bin`. Modify `build` to apply the patch.
+Set patchlevel to the commit hash from `zle-experimental-save-restore-cursor`.
+
+Add `ZLE_EXPERIMENTAL_SAVE_RESTORE_CURSOR=1` to zsh4humans.
+
+---
+
+Add an option to specify the minimum required zsh version. It should also allow specifying that you
+really want zsh from zsh-bin and not some other zsh 5.8.

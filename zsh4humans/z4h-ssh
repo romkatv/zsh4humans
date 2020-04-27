@@ -45,7 +45,7 @@ for src dst flags in "${files[@]}"; do
     local dump
     dump="${$(cd -- ${src:h} && tar -czh -- ${src:t} | base64)//$'\n'}" || return
 
-    write+='; (cd -- "$_z4h_tmpdir" && echo "'$dump'" | base64 $_z4h_base64d | tar -xz) || exit'
+    write+='; (cd -- "$_z4h_tmpdir" && echo "'$dump'" | base64 $_z4h_base64d | tar $_z4h_tar_opt -xz) || exit'
     if [[ -x $src ]]; then
       write+='; chmod 700 "$_z4h_tmpdir/'${src:t}'"'
     else
@@ -79,6 +79,7 @@ cmd+='; _z4h_ssh_setup; unset -f _z4h_ssh_setup'
 cmd+='; _z4h_ssh_teardown() { '$functions[z4h-ssh-remote-teardown]$'\n}'
 cmd+='; trap '\''rm -f -- '${(j. .)remove_files}' || :; _z4h_ssh_teardown'\'' INT QUIT TERM EXIT ILL PIPE HUP'
 cmd+='; if echo "Cg==" | base64 -d 2>/dev/null; then _z4h_base64d=-d; else _z4h_base64d=-D; fi'
+cmd+='; if tar --help 2>&1 | grep -qF -- --warning=; then _z4h_tar_opt=--warning=no-unknown-keyword; else _z4h_tar_opt=; fi'
 cmd+='; '${(j.; .)write_files}
 cmd+='; unset _z4h_tmpdir _z4h_base64d _z4h_dstdir'
 cmd+='; ( set +ue; unset -f _z4h_ssh_teardown; . "$ZDOTDIR"/.zshrc )'

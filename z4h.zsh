@@ -764,14 +764,13 @@ function z4h() {
   bindkey '^[[F'    end-of-line                    # end        go to the end of line
   bindkey '^?'      backward-delete-char           # bs         delete one char backward
   bindkey '^[[3~'   delete-char                    # delete     delete one char forward
-  bindkey '^H'      backward-kill-word             # ctrl+bs    delete previous word
   bindkey '^[^?'    backward-kill-word             # alt+bs     delete previous word
   bindkey '^[[3;5~' kill-word                      # ctrl+del   delete next word
   bindkey '^[[3;3~' kill-word                      # alt+del    delete next word
   bindkey '^K'      kill-line                      # ctrl+k     delete line after cursor
   bindkey '^J'      backward-kill-line             # ctrl+j     delete line before cursor
-  bindkey '^[n'     kill-buffer                    # alt+n      delete all lines
-  bindkey '^[N'     kill-buffer                    # alt+N      delete all lines
+  bindkey '^[k'     kill-buffer                    # alt+k      delete all lines
+  bindkey '^[K'     kill-buffer                    # alt+K      delete all lines
   bindkey '^[m'     z4h-autosuggest-accept         # alt+m      accept autosuggestion
   bindkey '^[M'     z4h-autosuggest-accept         # alt+M      accept autosuggestion
   bindkey '^_'      undo                           # ctrl+/     undo
@@ -780,8 +779,8 @@ function z4h() {
   bindkey '^[[1;5B' down-line-or-beginning-search  # ctrl+down  next cmd in global history
   bindkey '^ '      z4h-expand                     # ctrl+space expand alias/glob/parameter
   bindkey '\t'      z4h-expand-or-complete         # tab        fzf-tab completion
-  bindkey '^[f'     fzf-completion                 # alt-f      fzf file completion
-  bindkey '^[F'     fzf-completion                 # alt-F      fzf file completion
+  bindkey '^[i'     fzf-completion                 # alt-i      fzf file completion
+  bindkey '^[I'     fzf-completion                 # alt-I      fzf file completion
   bindkey '^R'      z4h-fzf-history                # ctrl+r     fzf history
   bindkey '^[h'     z4h-run-help                   # alt+h      help for the cmd at cursor
   bindkey '^[H'     z4h-run-help                   # alt+H      help for the cmd at cursor

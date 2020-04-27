@@ -87,6 +87,12 @@ if [[ $LC_TERMINAL == iTerm2 ]]; then
   z4h source ~/.iterm2_shell_integration.zsh
 fi
 
+# Define key bindings.
+bindkey '^H' backward-kill-word # ctrl-h and ctrl-backspace: delete previous word
+
+# Configure command completion: http://zsh.sourceforge.net/Doc/Release/Completion-System.html.
+zstyle ':completion:*' sort false # don't sort completion candidates
+
 # Autoload functions.
 autoload -Uz zmv
 

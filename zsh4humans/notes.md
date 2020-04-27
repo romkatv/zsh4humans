@@ -435,3 +435,19 @@ Add `ZLE_EXPERIMENTAL_SAVE_RESTORE_CURSOR=1` to zsh4humans.
 
 Add an option to specify the minimum required zsh version. It should also allow specifying that you
 really want zsh from zsh-bin and not some other zsh 5.8.
+
+---
+
+Add these straight to `.zshrc`?
+
+```zsh
+zstyle ':completion:*' sort false
+zstyle ':completion:*' list-dirs-first true
+```
+
+It would be nice to add `--group-directories-first` to `ls` for consistency but it's tricky because
+it's not POSIX.
+
+---
+
+Figure out if `_approximate` matcher works and whether it's worth it.

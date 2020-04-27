@@ -451,3 +451,10 @@ it's not POSIX.
 ---
 
 Figure out if `_approximate` matcher works and whether it's worth it.
+
+---
+
+Implement syntax highlighting of preview in `z4h-fzf-history` with `zsh-syntax-highlighting`. To do
+this, start a companion `zsh` (like in gitstatus), load `zsh-syntax-highlighting` there (make sure
+to disable widget wrapping as it's very slow) and communicate with it over pipes.
+

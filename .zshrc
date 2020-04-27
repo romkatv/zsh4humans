@@ -99,3 +99,6 @@ alias tree='tree -aC -I .git'
 
 # Add flags to existing aliases.
 alias ls="${aliases[ls]:-ls} -A"
+
+# Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
+setopt GLOB_DOTS  # glob matches files starting with dot; `ls *` becomes equivalent to `ls *(D)`

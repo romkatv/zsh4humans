@@ -768,9 +768,10 @@ function z4h() {
   bindkey '^[[3;5~' kill-word                      # ctrl+del   delete next word
   bindkey '^[[3;3~' kill-word                      # alt+del    delete next word
   bindkey '^K'      kill-line                      # ctrl+k     delete line after cursor
-  bindkey '^J'      backward-kill-line             # ctrl+j     delete line before cursor
-  bindkey '^[k'     kill-buffer                    # alt+k      delete all lines
-  bindkey '^[K'     kill-buffer                    # alt+K      delete all lines
+  bindkey '^[k'     backward-kill-line             # alt+k      delete line before cursor
+  bindkey '^[K'     backward-kill-line             # alt+K      delete line before cursor
+  bindkey '^[j'     kill-buffer                    # alt+j      delete all lines
+  bindkey '^[J'     kill-buffer                    # alt+J      delete all lines
   bindkey '^[m'     z4h-autosuggest-accept         # alt+m      accept autosuggestion
   bindkey '^[M'     z4h-autosuggest-accept         # alt+M      accept autosuggestion
   bindkey '^_'      undo                           # ctrl+/     undo

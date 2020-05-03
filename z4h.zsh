@@ -780,15 +780,15 @@ function z4h() {
   bindkey '^[[1;5B' down-line-or-beginning-search  # ctrl+down  next cmd in global history
   bindkey '^ '      z4h-expand                     # ctrl+space expand alias/glob/parameter
   bindkey '\t'      z4h-expand-or-complete         # tab        fzf-tab completion
-  bindkey '^[i'     fzf-completion                 # alt-i      fzf file completion
-  bindkey '^[I'     fzf-completion                 # alt-I      fzf file completion
+  bindkey '^[i'     fzf-completion                 # alt+i      fzf file completion
+  bindkey '^[I'     fzf-completion                 # alt+I      fzf file completion
   bindkey '^R'      z4h-fzf-history                # ctrl+r     fzf history
   bindkey '^[h'     z4h-run-help                   # alt+h      help for the cmd at cursor
   bindkey '^[H'     z4h-run-help                   # alt+H      help for the cmd at cursor
-  bindkey '^[[1;5H' z4h-beginning-of-buffer        # ctrl-home  go to the beginning of buffer
-  bindkey '^[[1;3H' z4h-beginning-of-buffer        # alt-home   go to the beginning of buffer
-  bindkey '^[[1;5F' z4h-end-of-buffer              # ctrl-end   go to the end of buffer
-  bindkey '^[[1;3F' z4h-end-of-buffer              # alt-end    go to the end of buffer
+  bindkey '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home  go to the beginning of buffer
+  bindkey '^[[1;3H' z4h-beginning-of-buffer        # alt+home   go to the beginning of buffer
+  bindkey '^[[1;5F' z4h-end-of-buffer              # ctrl+end   go to the end of buffer
+  bindkey '^[[1;3F' z4h-end-of-buffer              # alt+end    go to the end of buffer
   bindkey '^[[5~'   z4h-do-nothing                 # pageup     do nothing
   bindkey '^[[6~'   z4h-do-nothing                 # pageup     do nothing
 

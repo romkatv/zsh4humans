@@ -305,7 +305,7 @@ function z4h() {
         # Clone or update all repositories.
         local repo
         for repo in $github_repos; do
-          _z4h_clone $Z4H/$repo $repo master || return
+          _z4h_clone $Z4H/$repo zsh4humans/${repo:t} z4h-stable || return
         done
 
         # Download fzf binary.

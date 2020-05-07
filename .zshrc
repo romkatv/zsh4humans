@@ -66,6 +66,9 @@ fi
 # above. Everything else is best done below.
 z4h init || return
 
+# Enable emacs (-e) or vi (-v) keymap.
+bindkey -e
+
 # Export environment variables.
 export EDITOR=nano
 export GPG_TTY=$TTY
@@ -85,7 +88,7 @@ if [[ $LC_TERMINAL == iTerm2 ]]; then
 fi
 
 # Define key bindings.
-bindkey '^H' backward-kill-word # ctrl-h and ctrl-backspace: delete previous word
+bindkey -M emacs '^H' backward-kill-word # ctrl-h and ctrl-backspace: delete previous word
 
 # Configure command completion: http://zsh.sourceforge.net/Doc/Release/Completion-System.html.
 zstyle ':completion:*' sort false # don't sort completion candidates

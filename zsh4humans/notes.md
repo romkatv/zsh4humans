@@ -24,7 +24,10 @@ zh4 bindkey emacs,viins 'up','ctrl-p' z4h-up-local-history
 
 ---
 
-Set decent bindings for `viins` and `vicmd`.
+`vicmd` has `^P` bound to `up-history` by default. It should probably use bound to the same thing
+but with local history.
+
+`vicmd` has no bindings for global history. It should.
 
 ---
 

@@ -1,4 +1,4 @@
-# z4h_prelude check if the current shell is Zsh >= 5.4. If not, it replaces
+# z4h_prelude checks if the current shell is Zsh >= 5.4. If not, it replaces
 # the current process with Zsh >= 5.4. If there is no Zsh >= 5.4, z4h_prelude
 # installs the latest version to ~/.zsh-bin.
 z4h_prelude() {

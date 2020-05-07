@@ -4,7 +4,7 @@ export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 
 # URL of zsh4humans repository. Used during initial installation and
 # later when updating.
-: "${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v1}"
+: "${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v2}"
 
 # Cache directory. Gets recreated if deleted.
 : "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"

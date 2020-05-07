@@ -461,3 +461,16 @@ Implement syntax highlighting of preview in `z4h-fzf-history` with `zsh-syntax-h
 this, start a companion `zsh` (like in gitstatus), load `zsh-syntax-highlighting` there (make sure
 to disable widget wrapping as it's very slow) and communicate with it over pipes.
 
+---
+
+Replace this status message from `z4h reset`:
+
+```text
+z4h: cloning zsh4humans/powerlevel10k
+```
+
+With this:
+
+```text
+z4h: cloning romkatv/powerlevel10k
+```

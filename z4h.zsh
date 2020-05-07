@@ -713,8 +713,6 @@ function z4h() {
   HISTSIZE=1000000000                        # infinite command history
   SAVEHIST=1000000000                        # infinite command history
 
-  bindkey -e  # enable emacs keymap (sorry, vi users)
-
   if [[ ${commands[find]:A} == */busybox* ]]; then
     local fs=
   else
@@ -734,6 +732,8 @@ function z4h() {
 
   # Delete all existing keymaps and reset to the default state.
   bindkey -d
+  # Enable emacs keymap (sorry, vi users).
+  bindkey -e
 
   # If NumLock is off, translate keys to make them appear the same as with NumLock on.
   bindkey -s '^[OM' '^M'  # enter

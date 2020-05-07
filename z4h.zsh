@@ -980,11 +980,11 @@ function z4h() {
   zstyle ':completion:*'                  completer       _complete
   zstyle ':completion:*:*:-subscript-:*'  tag-order       indexes parameters
   zstyle ':completion:*'                  squeeze-slashes true
-  zstyle '*'                              single-ignored  show
+  zstyle ':completion:*'                  single-ignored  show
   zstyle ':completion:*:(rm|kill|diff):*' ignore-line     other
   zstyle ':completion:*:rm:*'             file-patterns   '*:all-files'
-  zstyle ':completion::complete:*'        use-cache       on
-  zstyle ':completion::complete:*'        cache-path      ${XDG_CACHE_HOME:-$HOME/.cache}/zcompcache-$ZSH_VERSION
+  zstyle ':completion:*'                  use-cache       true
+  zstyle ':completion:*'                  cache-path      $Z4H/.zcompcache-$ZSH_VERSION
   zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
   # Set POWERLEVEL9K_CONFIG_FILE to the default location if it's not set yet.
@@ -1003,9 +1003,20 @@ function z4h() {
     add-zsh-hook -d precmd _z4h-post-init
 
     # Initialize completions.
+    if zstyle -t ':completion::complete:' use-cache; then
+      local cache
+      zstyle -s ':completion::complete:' cache-path cache
+      : ${cache:=${ZDOTDIR:-~}/.zcompcache}
+      if [[ ! -e $cache ]] && zmodload -F zsh/files b:zf_mkdir; then
+        zf_mkdir -m 0700 -p -- $cache
+      fi
+    fi
+
+    local dump
+    zstyle -s ':z4h:compinit' dump-path dump
+    : ${dump:=$Z4H/.zcompdump-$ZSH_VERSION}
     unfunction compinit compdef
     autoload -Uz compinit
-    local dump=$Z4H/.zcompdump-$ZSH_VERSION
     compinit -u -d $dump
     [[ -r $dump ]] && _z4h_compile $dump
 

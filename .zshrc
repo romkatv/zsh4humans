@@ -61,13 +61,13 @@ if (( ! Z4H_SSH )); then
   z4h chsh
 fi
 
+# Enable emacs (-e) or vi (-v) keymap.
+bindkey -e
+
 # Initialize Zsh. After this point console I/O is unavailable. Everything
 # that requires user interaction or can perform network I/O must be done
 # above. Everything else is best done below.
 z4h init || return
-
-# Enable emacs (-e) or vi (-v) keymap.
-bindkey -e
 
 # Export environment variables.
 export EDITOR=nano

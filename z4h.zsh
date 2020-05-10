@@ -10,11 +10,11 @@ _z4h_bootstrap() {
   local dir="$Z4H/$proj"
   local tmp="$dir.tmp.$$"
   if [ "$mid" = "$Z4H_URL" -o -z "$ref" -o -z "$proj" ]; then
-    >&2 printf 'z4h: invalid Z4H_URL: %s\n' "$Z4H_URL"
+    >&2 printf '\033[33mz4h\033[0m: invalid \033[1mZ4H_URL\033[0m: \033[31m%s\033[0m\n' "$Z4H_URL"
     return 1
   fi
 
-  printf 'z4h: fetching %s\n' "$proj"
+  >&2 printf '\033[33mz4h\033[0m: fetching \033[1m%s\033[0m\n' "$proj"
   command mkdir -p -- "$tmp" "$Z4H"/bin "$Z4H"/fn "$Z4H"/cache || return
   echo -n > $Z4H/cache/.last-update-ts || return
 
@@ -29,13 +29,13 @@ _z4h_bootstrap() {
     elif command -v wget >/dev/null 2>&1; then
       err="$(command wget -O snapshot.tar.gz -- "$url" 2>&1)"
     else
-      >&2 echo "z4h: please install curl or wget"
+      >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
       exit 1
     fi
 
     if [ $? != 0 ]; then
       >&2 printf "%s\n" "$err"
-      >&2 echo "z4h: failed to download $url"
+      >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"
       exit 1
     fi
 

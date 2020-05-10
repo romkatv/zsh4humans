@@ -260,17 +260,17 @@ function z4h() {
       GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus
 
       {
-        if [[ ! -e $Z4H/.last-update-ts ]]; then
+        if [[ ! -e $Z4H/cache/.last-update-ts ]]; then
           zmodload -F zsh/files b:zf_mkdir || return
           zf_mkdir -p -- $Z4H || return
-          print -n >$Z4H/.last-update-ts || return
+          print -n >$Z4H/cache/.last-update-ts || return
         elif zstyle -t :z4h: auto-update ask; then
           local days
           if zstyle -s :z4h: auto-update-days days && [[ $dayz == <-> ]]; then
             # Check if update is required.
             zmodload zsh/stat zsh/datetime || return
             local -a last_update_ts
-            if zstat -A last_update_ts +mtime -- $Z4H/.last-update-ts 2>/dev/null &&
+            if zstat -A last_update_ts +mtime -- $Z4H/cache/.last-update-ts 2>/dev/null &&
               (( EPOCHSECONDS - last_update_ts[1] >= 86400 * days )); then
               local REPLY
               {
@@ -283,7 +283,7 @@ function z4h() {
                 return
               fi
               print -Pru2 -- "%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"
-              print -n >$Z4H/.last-update-ts || return
+              print -n >$Z4H/cache/.last-update-ts || return
             fi
           fi
         fi
@@ -984,7 +984,7 @@ function z4h() {
   zstyle ':completion:*:(rm|kill|diff):*' ignore-line     other
   zstyle ':completion:*:rm:*'             file-patterns   '*:all-files'
   zstyle ':completion:*'                  use-cache       true
-  zstyle ':completion:*'                  cache-path      $Z4H/.zcompcache-$ZSH_VERSION
+  zstyle ':completion:*'                  cache-path      $Z4H/cache/.zcompcache-$ZSH_VERSION
   zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
   # Set POWERLEVEL9K_CONFIG_FILE to the default location if it's not set yet.
@@ -1014,7 +1014,7 @@ function z4h() {
 
     local dump
     zstyle -s ':z4h:compinit' dump-path dump
-    : ${dump:=$Z4H/.zcompdump-$ZSH_VERSION}
+    : ${dump:=$Z4H/cache/.zcompdump-$ZSH_VERSION}
     unfunction compinit compdef
     autoload -Uz compinit
     compinit -u -d $dump

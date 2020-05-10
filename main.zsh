@@ -21,21 +21,49 @@ _z4h_prelude() {
   if ! command -v zsh >/dev/null 2>&1 || ! zsh -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]'; then
     if [ ! -d ~/.zsh-bin ]; then
       # There is no suitable Zsh. Install the latest version to ~/.zsh-bin.
-      local install zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
+      local install="$Z4H"/install-zsh.$$
+      local zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
+      [ ! -e "$install" ] || command rm -rf -- "$install" || return 1
       if command -v curl >/dev/null 2>&1; then
-        install="$(curl -fsSL -- "$zsh_url")" || return 1
+        err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
       elif command -v wget >/dev/null 2>&1; then
-        install="$(wget -O- -- "$zsh_url")"   || return 1
+        err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
       else
-        >&2 echo 'z4h: please install `curl` or `wget`'
+        if [ -t 2 ]; then
+          >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
+        else
+          >&2 printf 'z4h: please install curl or wget\n'
+        fi
         return 1
       fi
-      >&2 echo 'z4h: installing zsh to ~/.zsh-bin'
-      ( set -- -q -d ~/.zsh-bin; eval "$install") || return 1
+      if [ $? != 0 ]; then
+        >&2 printf "%s\n" "$err"
+        if [ -t 2 ]; then
+          >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
+        else
+          >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
+        fi
+        command rm -f -- "$install"
+        return 1
+      fi
+      if [ -t 2 ]; then
+        >&2 printf '\033[33mz4h\033[0m: installing \033[32mzsh\033[0m to \033[4m~/.zsh-bin\033[0m\n'
+      else
+        >&2 printf 'z4h: installing zsh to ~/.zsh-bin\n'
+      fi
+      ( set -- -q -d ~/.zsh-bin; . "$install" )
+      local ret=$?
+      command rm -f -- "$install"
+      [ "$ret" = 0 ] || return "$ret"
     fi
     export PATH="$HOME/.zsh-bin/bin:$PATH"
   fi
   # The current interpreter is not Zsh >= 5.4. Execute Zsh >= 5.4.
+  if [ -t 2 ]; then
+    >&2 printf '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
+  else
+    >&2 printf 'z4h: starting zsh\n'
+  fi
   exec zsh -i || return 1
 }
 
@@ -221,7 +249,7 @@ function z4h() {
       zmodload -F zsh/files b:zf_rm || return
       zf_rm -rf -- $Z4H
       print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-      exec -- $_z4h_exe
+      exec -- $_z4h_exe -i
       return
     ;;
 
@@ -255,7 +283,9 @@ function z4h() {
         zf_rm -rf -- $old $new || return
       }
 
-      return 0
+      print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
+      exec -- $_z4h_exe -i
+      return
     ;;
 
     1-install)

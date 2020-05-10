@@ -92,8 +92,8 @@ zmodload zsh/zutil || return
     print -Pru2 -- "%F{3}z4h%f: invalid %BZ4H%b: %F{1}${Z4H//\%/%%}%f"
     return 1
   fi
-  if [[ $1 != $Z4H/z4h.zsh ]]; then
-    print -Pru2 -- "%F{3}z4h%f: confusing %Uz4h.zsh%u location: %F{1}${1//\%/%%}%f"
+  if [[ $1 != $Z4H/romkatv/zsh4humans/main.zsh ]]; then
+    print -Pru2 -- "%F{3}z4h%f: confusing %Umain.zsh%u location: %F{1}${1//\%/%%}%f"
     return 1
   fi
   if [[ $Z4H_URL != https://raw.githubusercontent.com/*/zsh4humans/v[^/]##* ]]; then

@@ -247,7 +247,7 @@ function z4h() {
           print -Pru2 -- ''
           print -Pru2 -- 'Type `%F{2}z4h%f %Bupdate%b` to retry.'
         fi
-        command zf_rm -rf -- $tmp || return
+        zf_rm -rf -- $tmp || return
       }
 
       return 0

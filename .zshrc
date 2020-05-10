@@ -15,7 +15,7 @@ umask o-w
 # Fetch z4h.zsh if it doesn't yet exist and source it.
 if [ ! -e "$Z4H"/z4h.zsh ]; then
   mkdir -p -- "$Z4H" || return
-  >&2 echo "z4h: downloading z4h.zsh"
+  >&2 echo "zshrc: downloading z4h.zsh"
   if command -v curl >/dev/null 2>&1; then
     curl -fsSLo "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
   else

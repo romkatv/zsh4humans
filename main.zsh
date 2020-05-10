@@ -1,7 +1,7 @@
-# z4h_prelude checks if the current shell is Zsh >= 5.4. If not, it replaces
-# the current process with Zsh >= 5.4. If there is no Zsh >= 5.4, z4h_prelude
+# _z4h_prelude checks if the current shell is Zsh >= 5.4. If not, it replaces
+# the current process with Zsh >= 5.4. If there is no Zsh >= 5.4, _z4h_prelude
 # installs the latest version to ~/.zsh-bin.
-z4h_prelude() {
+_z4h_prelude() {
   local v="${ZSH_VERSION-}"
   local v1="${v%%.*}"
   local v2="${v#*.}"
@@ -39,10 +39,13 @@ z4h_prelude() {
   exec zsh -i || return 1
 }
 
-z4h_prelude
+_z4h_prelude
 _z4h_prelude_status=$?
-unset -f z4h_prelude
-[ $_z4h_prelude_status = 1 ] && return 1
+unset -f _z4h_prelude
+if [ $_z4h_prelude_status = 1 ]; then
+  unset _z4h_prelude_status
+  return 1
+fi
 
 if (( ${+functions[z4h]} )); then
   print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
@@ -107,64 +110,44 @@ typeset -gaU cdpath fpath mailpath path
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 
 function _z4h_clone() {
-  [[ -d $1 && $Z4H_UPDATE == 0 ]] && return
+  [[ -d $Z4H/$1 ]] && return
 
-  local dst=$1
+  local dst=$Z4H/$1
   local repo=$2
   local branch=$3
-  if [[ -d $dst/.git && $+commands[git] == 1 ]]; then
-    print -Pru2 -- "%F{3}z4h%f: updating %B${repo//\%/%%}%b"
-    >&2 git -C $dst pull || return
-  elif (( $+commands[git] )); then
-    print -Pru2 -- "%F{3}z4h%f: cloning %B${repo//\%/%%}%b"
-    zmodload -F zsh/files b:zf_rm b:zf_mv || return
-    local old=$dst.old.$$
-    local new=$dst.new.$$
-    {
-      local err
-      if ! err=$(git clone -b $branch --depth=1 -- https://github.com/$repo.git $new 2>&1); then
-        print -ru2 -- "$err"
-        return 1
-      fi
-      [[ ! -e $dst ]] || zf_mv -- $dst $old || return
-      zf_mv -- $new $dst
-    } always {
-      rm -rf -- $old $new
-    }
-  else
-    print -Pru2 -- "%F{3}z4h%f: downloading %B${repo//\%/%%}%b"
-    zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
-    local old=$dst.old.$$
-    local new=$dst.new.$$
-    {
-      zf_mkdir -p -- ${dst:h} $new
-      local url=https://github.com/$repo/archive/$branch.tar.gz
-      local err
-      if (( $+commands[curl] )); then
-        err="$(curl -fsSLo $new/dump.tar.gz -- $url 2>&1)"
-      elif (( $+commands[wget] )); then
-        err="$(wget -qO $new/dump.tar.gz -- $url 2>&1)"
-      else
-        print -Pru2 -- "%F{3}z4h%f: please install %F{1}git%f, %F{1}curl%f or %F{1}wget%f"
-        return 1
-      fi
-      if (( $? )); then
-        print -ru2 -- $err
-        print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
-        return 1
-      fi
-      ( cd -- $new && tar -xzf dump.tar.gz ) || return
-      local dirs=($new/${repo:t}-*(N/))
-      if (( $#dirs != 1 )); then
-        print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
-        return 1
-      fi
-      [[ ! -e $dst ]] || zf_mv -- $dst $old || return
-      zf_mv -- $dirs[1] $dst
-    } always {
-      zf_rm -rf -- $old $new
-    }
-  fi
+
+  print -Pru2 -- "%F{3}z4h%f: fetching %B${1//\%/%%}%b"
+  zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
+  local old=$dst.old.$$
+  local new=$dst.new.$$
+  {
+    zf_mkdir -p -- $new
+    local url=https://github.com/$repo/archive/$branch.tar.gz
+    local err
+    if (( $+commands[curl] )); then
+      err="$(curl -fsSLo $new/snapshot.tar.gz -- $url 2>&1)"
+    elif (( $+commands[wget] )); then
+      err="$(wget -qO $new/snapshot.tar.gz -- $url 2>&1)"
+    else
+      print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
+      return 1
+    fi
+    if (( $? )); then
+      print -ru2 -- $err
+      print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+      return 1
+    fi
+    ( cd -- $new && tar -xzf snapshot.tar.gz ) || return
+    local dirs=($new/${repo:t}-*(N/))
+    if (( $#dirs != 1 )); then
+      print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
+      return 1
+    fi
+    [[ ! -e $dst ]] || zf_mv -- $dst $old || return
+    zf_mv -- $dirs[1] $dst
+  } always {
+    zf_rm -rf -- $old $new
+  }
 }
 
 function _z4h_compile() {
@@ -242,37 +225,46 @@ function z4h() {
       return
     ;;
 
-    1-install)
-      if [[ -d $Z4H/zsh4humans ]]; then
-        path=($Z4H/bin $path)
-        fpath+=($Z4H/zsh4humans)
-        typeset +x -gi Z4H_UPDATE
-      else
-        typeset +x -gi Z4H_UPDATE=1
-      fi
-    ;|
-
     1-update)
-      typeset +x -gi Z4H_UPDATE=1
-    ;|
+      local old=$Z4H.old.$$
+      local new=$Z4H.new.$$
+      zmodload -F zsh/files b:zf_rm  || return
+      command zf_rm -rf -- $old $new || return
+      {
+        Z4H=$new $_z4h_exe -ic 'exit 73' </dev/null >/dev/null
+        (( $? == 73 )) || return
+        if [[ ! -d $new ]]; then
+          print -Pru2 -- "%F{3}z4h%f: %B\$Z4H%b %F{1}does not propagate%f through %U.zshrc%u"
+          return 1
+        fi
+        zmodload -F zsh/files b:zf_mv || return
+        zf_mv -f -- $Z4H $old         || return
+        zf_mv -f -- $new $Z4H         || return
+        zf_rm -rf -- $old             || true
+      } always {
+        if (( $? )); then
+          print -Pru2 -- '%F{3}z4h%f: update %F{1}failed%f'
+          print -Pru2 -- ''
+          print -Pru2 -- 'Type `%F{2}z4h%f %Bupdate%b` to retry.'
+        fi
+        command zf_rm -rf -- $tmp || return
+      }
 
-    1-install|1-update)
-      # GitHub projects to clone.
-      local github_repos=(
-        zsh-users/zsh-syntax-highlighting  # https://github.com/zsh-users/zsh-syntax-highlighting
-        zsh-users/zsh-autosuggestions      # https://github.com/zsh-users/zsh-autosuggestions
-        zsh-users/zsh-completions          # https://github.com/zsh-users/zsh-completions
-        romkatv/powerlevel10k              # https://github.com/romkatv/powerlevel10k
-        Aloxaf/fzf-tab                     # https://github.com/Aloxaf/fzf-tab
-        junegunn/fzf                       # https://github.com/junegunn/fzf
-      )
+      return 0
+    ;;
+
+    1-install)
+      path=($Z4H/bin $path)
+      fpath+=($Z4H/romkatv/zsh4humans/fn $Z4H/fn)
+
+      GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus
 
       {
         if [[ ! -e $Z4H/.last-update-ts ]]; then
           zmodload -F zsh/files b:zf_mkdir || return
           zf_mkdir -p -- $Z4H || return
           print -n >$Z4H/.last-update-ts || return
-        elif (( ! Z4H_UPDATE )) && zstyle -t :z4h: auto-update ask; then
+        elif zstyle -t :z4h: auto-update ask; then
           local days
           if zstyle -s :z4h: auto-update-days days && [[ $dayz == <-> ]]; then
             # Check if update is required.
@@ -282,41 +274,54 @@ function z4h() {
               (( EPOCHSECONDS - last_update_ts[1] >= 86400 * days )); then
               local REPLY
               {
-                read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && Z4H_UPDATE=1
+                read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && REPLY=y
               } always {
                 [[ -w $TTY ]] && print >>$TTY || print -u2
               }
-              (( Z4H_UPDATE )) || print -Pru2 -- "%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"
+              if [[ $REPLY == y ]]; then
+                z4h update
+                return
+              fi
+              print -Pru2 -- "%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"
               print -n >$Z4H/.last-update-ts || return
             fi
           fi
         fi
 
-        if (( Z4H_UPDATE == 1 )); then
-          _z4h_clone $Z4H romkatv/zsh4humans "${Z4H_URL:t}" || return
-          print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-          Z4H_UPDATE=2 exec -- $_z4h_exe || return
-        fi
-
-        if (( Z4H_UPDATE == 2 )); then
-          typeset +x -gi Z4H_UPDATE=1
-        fi
+        # GitHub projects to clone.
+        local github_repos=(
+          zsh-users/zsh-syntax-highlighting  # https://github.com/zsh-users/zsh-syntax-highlighting
+          zsh-users/zsh-autosuggestions      # https://github.com/zsh-users/zsh-autosuggestions
+          zsh-users/zsh-completions          # https://github.com/zsh-users/zsh-completions
+          romkatv/powerlevel10k              # https://github.com/romkatv/powerlevel10k
+          Aloxaf/fzf-tab                     # https://github.com/Aloxaf/fzf-tab
+          junegunn/fzf                       # https://github.com/junegunn/fzf
+        )
 
         # Clone or update all repositories.
         local repo
         for repo in $github_repos; do
-          _z4h_clone $Z4H/$repo zsh4humans/${repo:t} z4h-stable || return
+          [[ -d $Z4H/$repo ]] && continue
+          _z4h_clone $repo zsh4humans/${repo:t} z4h-stable || return
+          case $repo in
+            junegunn/fzf)
+              print -Pru2 -- "%F{3}z4h%f: fetching %F{2}fzf%f binary"
+              local BASH_SOURCE=($Z4H/junegunn/fzf/install) err
+              if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
+                print -ru2 -- $err
+                return 1
+              fi
+              zmodload -F zsh/files b:zf_mv || return
+              zf_mv -f -- $Z4H/junegunn/fzf/bin/fzf $Z4H/bin/ || return
+            ;;
+            romkatv/powerlevel10k)
+              print -Pru2 -- "%F{3}z4h%f: fetching %F{2}gitstatus%f binary"
+              $Z4H/romkatv/powerlevel10k/gitstatus/install -f || return
+            ;;
+          esac
         done
 
-        # Download fzf binary.
-        if [[ ! -e $Z4H/junegunn/fzf/bin/fzf || $Z4H_UPDATE == 1 ]]; then
-          print -Pru2 -- "%F{3}z4h%f: fetching %F{2}fzf%f binary"
-          local BASH_SOURCE=($Z4H/junegunn/fzf/install) err
-          if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
-            print -ru2 -- $err
-            return 1
-          fi
-        fi
+        fpath+=($Z4H/zsh-users/zsh-completions/src)
       } always {
         if (( $? )); then
           print -Pru2 -- "%F{3}z4h%f: %F{1}failed to install or update dependencies%f"
@@ -326,17 +331,16 @@ function z4h() {
         fi
       }
 
-      fpath+=($Z4H/zsh-users/zsh-completions/src)
-      path+=($Z4H/junegunn/fzf/bin)
+      typeset -gri _z4h_installed=1
       return 0
     ;;
 
     2-clone)
-      if [[ -z $2 || $2 == *:* ]]; then
+      if [[ -z $2 || $2 != *?/?* || $2 == *:* ]]; then
         print -Pru2 -- "%F{3}z4h%f: %Bclone%b argument must be %Uuser/repo%u: %F{1}${2//\%/%%}%f"
         return 1
       fi
-      if [[ -z ${Z4H_UPDATE:#2} ]]; then
+      if (( ! $+_z4h_installed )); then
         print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
         return 1
       fi
@@ -344,17 +348,17 @@ function z4h() {
         print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
         return 1
       fi
-      _z4h_clone $Z4H/$2 $2 master
+      _z4h_clone $2 $2 master
       return
     ;;
 
     1-chsh)
-      if [[ -z ${Z4H_UPDATE:#2} ]]; then
-        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
+      if (( ! $+_z4h_installed )); then
+        print -Pru2 -- "%F{3}z4h%f: %F{1}chsh%f cannot be called before %Binstall%b"
         return 1
       fi
       if (( $+_z4h_initialized )); then
-        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
+        print -Pru2 -- "%F{3}z4h%f: %F{1}chsh%f cannot be called after %Binit%b"
         return 1
       fi
       # Check whether the current shell is the login shell. If not, offer to change login shell.
@@ -461,17 +465,13 @@ function z4h() {
     ;;
 
     1-init)
-      if [[ -z ${Z4H_UPDATE:#2} ]]; then
+      if (( ! $+_z4h_installed )); then
         print -Pru2 -- "%F{3}z4h%f: %F{1}init%f cannot be called before %Binstall%b"
         return 1
       fi
       if (( _z4h_initialized )); then
         print -Pru2 "%F{3}z4h%f: %F{1}init%f cannot be called more than once"
         return 1
-      fi
-      if (( Z4H_UPDATE == 1 )); then
-        print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-        exec -- $_z4h_exe || return
       fi
     ;;
 

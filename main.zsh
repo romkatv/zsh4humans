@@ -305,7 +305,7 @@ function z4h() {
           _z4h_clone $repo zsh4humans/${repo:t} z4h-stable || return
           case $repo in
             junegunn/fzf)
-              print -Pru2 -- "%F{3}z4h%f: fetching %F{2}fzf%f binary"
+              print -Pru2 -- "%F{3}z4h%f: fetching %Bfzf%b binary"
               local BASH_SOURCE=($Z4H/junegunn/fzf/install) err
               if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
                 print -ru2 -- $err
@@ -315,7 +315,7 @@ function z4h() {
               zf_mv -f -- $Z4H/junegunn/fzf/bin/fzf $Z4H/bin/ || return
             ;;
             romkatv/powerlevel10k)
-              print -Pru2 -- "%F{3}z4h%f: fetching %F{2}gitstatus%f binary"
+              print -Pru2 -- "%F{3}z4h%f: fetching %Bgitstatus%b binary"
               $Z4H/romkatv/powerlevel10k/gitstatus/install -f || return
             ;;
           esac

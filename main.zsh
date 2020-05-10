@@ -229,7 +229,7 @@ function z4h() {
       local old=$Z4H.old.$$
       local new=$Z4H.new.$$
       zmodload -F zsh/files b:zf_rm  || return
-      command zf_rm -rf -- $old $new || return
+      zf_rm -rf -- $old $new         || return
       {
         Z4H=$new $_z4h_exe -ic 'exit 73' </dev/null >/dev/null
         (( $? == 73 )) || return

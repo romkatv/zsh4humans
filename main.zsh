@@ -228,16 +228,19 @@ function z4h() {
     1-update)
       local old=$Z4H.old.$$
       local new=$Z4H.new.$$
-      zmodload -F zsh/files b:zf_rm  || return
-      zf_rm -rf -- $old $new         || return
+      zmodload -F zsh/files b:zf_mkdir b:zf_mv b:zf_rm || return
+      zf_rm -rf -- $old $new                           || return
+      zf_mkdir -p -- $new                              || return
+      
       {
+        Z4H=$new _z4h_clone romkatv/zsh4humans romkatv/zsh4humans ${Z4H_URL:t} || return
+        zf_mv -f -- $new/romkatv/zsh4humans/z4h.zsh $new/                      || return
         Z4H=$new $_z4h_exe -ic 'exit 73' </dev/null >/dev/null
         (( $? == 73 )) || return
-        if [[ ! -d $new ]]; then
+        if [[ ! -d $new/bin ]]; then
           print -Pru2 -- "%F{3}z4h%f: %B\$Z4H%b %F{1}does not propagate%f through %U.zshrc%u"
           return 1
         fi
-        zmodload -F zsh/files b:zf_mv || return
         zf_mv -f -- $Z4H $old         || return
         zf_mv -f -- $new $Z4H         || return
         zf_rm -rf -- $old             || true

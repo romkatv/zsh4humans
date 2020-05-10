@@ -24,7 +24,7 @@ _z4h_bootstrap() {
     >&2 printf 'z4h: fetching %s\n' "$proj"
   fi
   command mkdir -p -- "$tmp" "$Z4H"/bin "$Z4H"/fn "$Z4H"/cache || return
-  echo -n > $Z4H/cache/.last-update-ts || return
+  echo -n >$Z4H/cache/.last-update-ts || return
 
   (
     cd "${ZSH_VERSION:+-q}" -- "$tmp" || exit

@@ -235,6 +235,8 @@ function z4h() {
       {
         Z4H=$new _z4h_clone romkatv/zsh4humans romkatv/zsh4humans ${Z4H_URL:t} || return
         zf_mv -f -- $new/romkatv/zsh4humans/z4h.zsh $new/                      || return
+        zf_mkdir -p -- $new/bin $new/fn $new/cache                             || return
+        print -n  >$Z4H/cache/.last-update-ts                                  || return
         Z4H=$new $_z4h_exe -ic 'exit 73' </dev/null >/dev/null
         (( $? == 73 )) || return
         if [[ ! -d $new/bin ]]; then

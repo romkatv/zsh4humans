@@ -256,26 +256,35 @@ function z4h() {
     1-update)
       local old=$Z4H.old.$$
       local new=$Z4H.new.$$
-      zmodload -F zsh/files b:zf_mkdir b:zf_mv b:zf_rm || return
-      zf_rm -rf -- $old $new                           || return
-      zf_mkdir -p -- $new                              || return
       
       {
+        zmodload -F zsh/files b:zf_mkdir b:zf_mv b:zf_rm || return 1
+        zf_rm -rf -- $old $new                           || return 1
+        zf_mkdir -p -- $new                              || return 1
+
         Z4H=$new _z4h_clone romkatv/zsh4humans romkatv/zsh4humans ${Z4H_URL:t} || return
-        zf_mv -f -- $new/romkatv/zsh4humans/z4h.zsh $new/                      || return
-        zf_mkdir -p -- $new/bin $new/fn $new/cache                             || return
-        print -n  >$Z4H/cache/.last-update-ts                                  || return
-        Z4H=$new $_z4h_exe -ic 'exit 73' </dev/null >/dev/null
-        (( $? == 73 )) || return
-        if [[ ! -d $new/bin ]]; then
-          print -Pru2 -- "%F{3}z4h%f: %B\$Z4H%b %F{1}does not propagate%f through %U.zshrc%u"
-          return 1
+        $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new                       || return 1
+        Z4H=$new </dev/null >/dev/null $_z4h_exe -ic '
+          "builtin" "emulate" "zsh" "-o" "no_aliases"
+          [[ $Z4H == '${(q)new}' ]] || exit 0
+          print -n >$Z4H/cache/z4h-update-succeeded'                           || return 1
+        if [[ ! -e $new/cache/z4h-update-succeeded ]]; then
+          print -Pru2 -- '%F{3}z4h%f: %B$Z4H%b %F{1}does not propagate%f through %U.zshrc%u'
+          print -Pru2 -- ''
+          print -Pru2 -- 'Change %U'${${(D)ZDOTDIR}//\%/%%}'/.zshrc%u to keep %BZ4H%b intact if already set.'
+          print -Pru2 -- ''
+          print -Pru2 -- 'For example:'
+          print -Pru2 -- ''
+          print -Pru2 -- '  %F{2}:%f %F{3}"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"%f'
+          print -Pru2 -- ''
+          print -Pru2 -- 'Note: The leading colon (%F{2}:%f) is necessary.'
+          return 2
         fi
-        zf_mv -f -- $Z4H $old         || return
-        zf_mv -f -- $new $Z4H         || return
-        zf_rm -rf -- $old             || true
+        zf_mv -f -- $Z4H $old  || return 1
+        zf_mv -f -- $new $Z4H  || return 1
+        zf_rm -rf -- $old      || true
       } always {
-        if (( $? )); then
+        if [[ $? != [02] ]]; then
           print -Pru2 -- '%F{3}z4h%f: update %F{1}failed%f'
           print -Pru2 -- ''
           print -Pru2 -- 'Type `%F{2}z4h%f %Bupdate%b` to retry.'
@@ -283,6 +292,7 @@ function z4h() {
         zf_rm -rf -- $old $new || return
       }
 
+      print -Pru2 -- "%F{3}z4h%f: %Bupdate%b successful"
       print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
       exec -- $_z4h_exe -i
       return

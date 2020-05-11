@@ -19,7 +19,7 @@ if [ ! -e "$Z4H"/z4h.zsh ]; then
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL -- "$Z4H_URL"/z4h.zsh >"$Z4H"/z4h.zsh.$$ || return
   else
-    wget       -- "$Z4H_URL"/z4h.zsh >"$Z4H"/z4h.zsh.$$ || return
+    wget -O-   -- "$Z4H_URL"/z4h.zsh >"$Z4H"/z4h.zsh.$$ || return
   fi
   mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return
 fi

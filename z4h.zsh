@@ -1,5 +1,5 @@
 if [ -n "$ZSH_VERSION" ]; then
-  if [[ -o "interactive" -a "${+functions[z4h]}" = "0" ]]; then
+  if [[ "${+functions[z4h]}" = "0" ]]; then
     emulate zsh
     setopt auto_cd    no_bg_nice    no_flow_control  hist_find_no_dups
     setopt c_bases    hist_verify   auto_param_slash hist_ignore_space
@@ -13,8 +13,7 @@ if [ -n "$ZSH_VERSION" ]; then
 
     WORDCHARS=
     ZLE_REMOVE_SUFFIX_CHARS=
-    zle_highlight=('paste:none')
-    : ${HISTFILE:=${ZDOTDIR:-~}/.zsh_history}
+    HISTFILE:=${ZDOTDIR:-~}/.zsh_history
     HISTSIZE=1000000000
     SAVEHIST=1000000000
 

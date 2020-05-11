@@ -27,7 +27,7 @@ _z4h_exec_zsh_i() {
 
   # There is no suitable Zsh. Need to install.
   if [ -t 2 ]; then
-    >&2 printf '\033[33mz4h\033[0m: cannot find \033[31mZsh >= 5.4\033[0m\n'
+    >&2 printf '\033[33mz4h\033[0m: cannot find \033[32mZsh >= 5.4\033[0m\n'
     >&2 printf '\033[33mz4h\033[0m: fetching \033[32mZsh 5.8\033[0m installer\n'
   else
     >&2 printf 'z4h: cannot find Zsh >= 5.4\n'
@@ -63,6 +63,7 @@ _z4h_exec_zsh_i() {
   local zshdir="$Z4H"/cache/zshdir.$$
   while true; do
     [ ! -e "$zshdir" ] || command rm -rf -- "$zshdir" || return 1
+    >&2 echo
     if command sh -- "$install" -s 3 3>"$zshdir"; then
       local dir=
       IFS= read -r dir <"$zshdir"                          || return 1

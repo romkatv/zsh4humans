@@ -41,11 +41,12 @@ if [ -z "$new" ]; then
   exit 1
 fi
 
-command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache || exit
-echo -n >"$new"/cache/.last-update-ts                 || exit
+command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache      || exit
+command mv -f -- "$new"/romkatv/zsh4humans/z4h.zsh "$new/" || exit
+echo -n >"$new"/cache/.last-update-ts                      || exit
 
 if [ -n "$old" -a -d "$old"/stickycache ]; then
-  command cp -r -- "$old"/stickycache "$new"/stickycache || exit
+  command cp -r -- "$old"/stickycache "$new"/stickycache   || exit
 else
-  command mkdir -p -- "$new"/stickycache                 || exit
+  command mkdir -p -- "$new"/stickycache                   || exit
 fi

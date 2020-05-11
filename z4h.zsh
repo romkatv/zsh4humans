@@ -194,7 +194,6 @@ _z4h_bootstrap() {
 
     command tar -xzf snapshot.tar.gz       || exit
     ./*-*/sc/setup -n ./*-*                || exit
-    command mv -f -- ./*-*/z4h.zsh "$Z4H/" || exit
     command rm -rf -- "$Z4H/$proj"         || exit
     command mv -f -- ./*-* "$dir"          || exit
   )

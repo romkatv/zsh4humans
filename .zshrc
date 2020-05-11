@@ -17,9 +17,9 @@ if [ ! -e "$Z4H"/z4h.zsh ]; then
   mkdir -p -- "$Z4H" || return
   >&2 echo "zshrc: downloading z4h.zsh"
   if command -v curl >/dev/null 2>&1; then
-    curl -fsSLo "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
+    curl -fsSL -- "$Z4H_URL"/z4h.zsh >"$Z4H"/z4h.zsh.$$ || return
   else
-    wget -O     "$Z4H"/z4h.zsh.$$ -- "$Z4H_URL"/z4h.zsh || return
+    wget       -- "$Z4H_URL"/z4h.zsh >"$Z4H"/z4h.zsh.$$ || return
   fi
   mv -- "$Z4H"/z4h.zsh.$$ "$Z4H"/z4h.zsh || return
 fi

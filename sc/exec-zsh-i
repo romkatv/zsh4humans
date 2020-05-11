@@ -37,28 +37,34 @@ _z4h_exec_zsh_i() {
   local install="$Z4H"/cache/install-zsh.$$
   local zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
   [ ! -e "$install" ] || command rm -rf -- "$install" || return 1
-  if command -v curl >/dev/null 2>&1; then
-    err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
-  elif command -v wget >/dev/null 2>&1; then
-    err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
-  else
-    if [ -t 2 ]; then
-      >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
+
+  (
+    cd ${ZSH_VERSION:+-q} -- "$Z4H"/cache || exit 1
+    install="${install##*/}"
+    local err
+    if command -v curl >/dev/null 2>&1; then
+      err="$(command curl -fsSLo "${install" -- "$zsh_url" 2>&1)"
+    elif command -v wget >/dev/null 2>&1; then
+      err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
     else
-      >&2 printf 'z4h: please install curl or wget\n'
+      if [ -t 2 ]; then
+        >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
+      else
+        >&2 printf 'z4h: please install curl or wget\n'
+      fi
+      return 2
     fi
-    return 2
-  fi
-  if [ $? != 0 ]; then
-    >&2 printf "%s\n" "$err"
-    if [ -t 2 ]; then
-      >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
-    else
-      >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
+    if [ $? != 0 ]; then
+      >&2 printf "%s\n" "$err"
+      if [ -t 2 ]; then
+        >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
+      else
+        >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
+      fi
+      command rm -f -- "$install"
+      return 2
     fi
-    command rm -f -- "$install"
-    return 2
-  fi
+  )
 
   local zshdir="$Z4H"/cache/zshdir.$$
   while true; do
@@ -83,7 +89,7 @@ _z4h_exec_zsh_i() {
     if [ -t 2 ]; then
       >&2 printf '\033[33mz4h\033[0m: \033[32mZsh 5.8\033[0m installation \033[31mfailed\033[0m\n'
     else
-      >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
+      >&2 printf 'z4h: Zsh 5.8 installation failed\n'
     fi
     >&2 echo
     while true; do

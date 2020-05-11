@@ -65,24 +65,27 @@ function _z4h_clone() {
   zmodload -F zsh/files b:zf_mkdir b:zf_rm b:zf_mv || return
   local old=$dst.old.$$
   local new=$dst.new.$$
+  local url=https://github.com/$repo/archive/$branch.tar.gz
+  zf_mkdir -p -- $new || return
   {
-    zf_mkdir -p -- $new
-    local url=https://github.com/$repo/archive/$branch.tar.gz
-    local err
-    if (( $+commands[curl] )); then
-      err="$(curl -fsSLo $new/snapshot.tar.gz -- $url 2>&1)"
-    elif (( $+commands[wget] )); then
-      err="$(wget -qO $new/snapshot.tar.gz -- $url 2>&1)"
-    else
-      print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
-      return 1
-    fi
-    if (( $? )); then
-      print -ru2 -- $err
-      print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
-      return 1
-    fi
-    ( cd -- $new && tar -xzf snapshot.tar.gz ) || return
+    (
+      local err
+      cd -q -- $new || exit
+      if (( $+commands[curl] )); then
+        err="$(curl -fsSLo snapshot.tar.gz -- $url 2>&1)"
+      elif (( $+commands[wget] )); then
+        err="$(wget -O snapshot.tar.gz -- $url 2>&1)"
+      else
+        print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
+        exit 1
+      fi
+      if (( $? )); then
+        print -ru2 -- $err
+        print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+        exit 1
+      fi
+      tar -xzf snapshot.tar.gz || exit
+    ) || return
     local dirs=($new/${repo:t}-*(N/))
     if (( $#dirs != 1 )); then
       print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"

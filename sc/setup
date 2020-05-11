@@ -1,0 +1,51 @@
+#!/bin/sh
+
+old=
+new=
+
+while getopts ':o:n:h' opt "$@"; do
+  case "$opt" in
+    h)
+      command cat <<\END
+Usage: setup [-o old] -n new
+END
+      exit
+    ;;
+    o)
+      if [ -n "$old" ]; then
+        >&2 echo "[z4h/setup] error: duplicate option: -$opt"
+        exit 1
+      fi
+      old="$OPTARG"
+    ;;
+    n)
+      if [ -n "$new" ]; then
+        >&2 echo "[z4h/setup] error: duplicate option: -$opt"
+        exit 1
+      fi
+      new="$OPTARG"
+    ;;
+    \?) >&2 echo "[z4h/setup] error: invalid option: -$OPTARG"           ; exit 1;;
+    :)  >&2 echo "[z4h/setup] error: missing required argument: -$OPTARG"; exit 1;;
+    *)  >&2 echo "[z4h/setup] internal error: unhandled option: -$opt"   ; exit 1;;
+  esac
+done
+
+if [ "$OPTIND" -le $# ]; then
+  >&2 echo "[z4h/setup] error: unexpected positional argument"
+  exit 1
+fi
+
+if [ -z "$new" ]; then
+  >&2 echo "[z4h/setup] error: missing required option: -n"
+  exit 1
+fi
+
+command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache || exit
+echo -n >"$new"/cache/.last-update-ts                 || exit
+
+if [ -n "$old" -a -d "$old"/stickycache ]; then
+  command cp -r -- "$old"/stickycache "$new"/stickycache || exit
+else
+  command mkdir -p -- "$new"/stickycache                 || exit
+fi

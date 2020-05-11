@@ -199,16 +199,26 @@ _z4h_bootstrap() {
 
   local ret=$?
   command rm -rf -- "$tmp"
-
   return "$ret"
 }
 
 if ! [ -r "$Z4H"/romkatv/zsh4humans/main.zsh ]; then
-  _z4h_bootstrap && { unset -f _z4h_bootstrap; return 0; }
-  [ "$?" = 2 ]   && { unset -f _z4h_bootstrap; return 2; }
+  _z4h_bootstrap
+  case $? in
+    0)
+      unset -f _z4h_bootstrap
+      . "$Z4H"/romkatv/zsh4humans/main.zsh && return 0
+      [ "$?" = 2 ]                         && return 2
+    ;;
+    2)
+      unset -f _z4h_bootstrap
+      return 2
+    ;;
+    *)
+      unset -f _z4h_bootstrap
+    ;;
+  esac
 fi
-
-unset -f _z4h_bootstrap
 
 if [ -t 2 ]; then
   >&2 printf '\033[33mz4h\033[0m: bootstap \033[31mfailed\033[0m\n'

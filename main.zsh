@@ -1086,23 +1086,23 @@ function z4h() {
 
   # Enable decent options. See http://zsh.sourceforge.net/Doc/Release/Options.html.
   emulate zsh                    # restore default options just in case something messed them up
-  setopt ALWAYS_TO_END           # full completions move cursor to the end
-  setopt AUTO_CD                 # `dirname` is equivalent to `cd dirname`
-  setopt AUTO_PARAM_SLASH        # if completed parameter is a directory, add a trailing slash
-  setopt AUTO_PUSHD              # `cd` pushes directories to the directory stack
-  setopt COMPLETE_IN_WORD        # complete from the cursor rather than from the end of the word
-  setopt EXTENDED_GLOB           # more powerful globbing
-  setopt EXTENDED_HISTORY        # write timestamps to history
-  setopt HIST_EXPIRE_DUPS_FIRST  # if history needs to be trimmed, evict dups first
-  setopt HIST_FIND_NO_DUPS       # don't show dups when searching history
-  setopt HIST_IGNORE_DUPS        # don't add consecutive dups to history
-  setopt HIST_IGNORE_SPACE       # don't add commands starting with space to history
-  setopt HIST_VERIFY             # if a command triggers history expansion, show it instead of running
-  setopt INTERACTIVE_COMMENTS    # allow comments in command line
-  setopt MULTIOS                 # allow multiple redirections for the same fd
-  setopt NO_BG_NICE              # don't nice background jobs
-  setopt NO_FLOW_CONTROL         # disable start/stop characters in shell editor
-  setopt PATH_DIRS               # perform path search even on command names with slashes
-  setopt SHARE_HISTORY           # write and import history on every command
-  setopt C_BASES                 # print hex/oct numbers as 0xFF/077 instead of 16#FF/8#77
+  setopt always_to_end           # full completions move cursor to the end
+  setopt auto_cd                 # `dirname` is equivalent to `cd dirname`
+  setopt auto_param_slash        # if completed parameter is a directory, add a trailing slash
+  setopt auto_pushd              # `cd` pushes directories to the directory stack
+  setopt complete_in_word        # complete from the cursor rather than from the end of the word
+  setopt extended_glob           # more powerful globbing
+  setopt extended_history        # write timestamps to history
+  setopt hist_expire_dups_first  # if history needs to be trimmed, evict dups first
+  setopt hist_find_no_dups       # don't show dups when searching history
+  setopt hist_ignore_dups        # don't add consecutive dups to history
+  setopt hist_ignore_space       # don't add commands starting with space to history
+  setopt hist_verify             # if a command triggers history expansion, show it instead of running
+  setopt interactive_comments    # allow comments in command line
+  setopt multios                 # allow multiple redirections for the same fd
+  setopt no_bg_nice              # don't nice background jobs
+  setopt no_flow_control         # disable start/stop characters in shell editor
+  setopt path_dirs               # perform path search even on command names with slashes
+  setopt share_history           # write and import history on every command
+  setopt c_bases                 # print hex/oct numbers as 0xFF/077 instead of 16#FF/8#77
 }

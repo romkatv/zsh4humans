@@ -1,5 +1,6 @@
 #!/bin/sh
 
+self="$(dirname -- "$0")"
 old=
 new=
 
@@ -42,10 +43,13 @@ if [ -z "$new" ]; then
 fi
 
 command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache      || exit
-command mv -f -- "$new"/romkatv/zsh4humans/z4h.zsh "$new/" || exit
-echo -n >"$new"/cache/.last-update-ts                      || exit
+command mv -f -- "$self"/../z4h.zsh "$new/"                || exit
+if [ ! -e "$new"/cache/.last-update-ts ]; then
+  echo -n >"$new"/cache/.last-update-ts                    || exit
+fi
 
 if [ -n "$old" -a -d "$old"/stickycache ]; then
+  command rm -rf -- "$new"/stickycache                     || exit
   command cp -r -- "$old"/stickycache "$new"/stickycache   || exit
 else
   command mkdir -p -- "$new"/stickycache                   || exit

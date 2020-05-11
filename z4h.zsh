@@ -191,10 +191,10 @@ _z4h_bootstrap() {
       exit 1
     fi
 
-    command tar -xzf snapshot.tar.gz       || exit
-    ./*-*/sc/setup -n ./*-*                || exit
-    command rm -rf -- "$Z4H/$proj"         || exit
-    command mv -f -- ./*-* "$dir"          || exit
+    command tar -xzf snapshot.tar.gz  || exit
+    ./*-*/sc/setup -n "$Z4H"          || exit
+    command rm -rf -- "$dir"          || exit
+    command mv -f -- ./*-* "$dir"     || exit
   )
 
   local ret=$?

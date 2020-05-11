@@ -1,126 +1,5 @@
-# _z4h_prelude checks if the current shell is Zsh >= 5.4. If not, it replaces
-# the current process with Zsh >= 5.4. If there is no Zsh >= 5.4, _z4h_prelude
-# installs Zsh 5.8.
-#
-# Exit codes:
-#
-#   - 0  success
-#   - 2  error that doesn't require additional diagnostics
-#   - 3  the current interpreter is non-interactive Zsh >= 5.4
-#   - *  error that requires additional generic diagnostics
-_z4h_prelude() {
-  if [ -n "${ZSH_VERSION-}" ] && eval '[[ "$ZSH_VERSION" == (5.<4->*|<6->.*) ]]'; then
-    if [[ -o interactive ]]; then
-      # The current interpreter is interactive Zsh >= 5.4. Proceed with initialization.
-      return 0
-    fi
-    # The current interpreter is non-interactive Zsh >= 5.4. Need to execute interactive.
-    # Will continue below. It's more convenient because we know we are in Zsh.
-    return 3
-  fi
-
-  _z4h_try_exec() {
-    command -v "$1" >/dev/null 2>&1 || return 0
-    command "$1" -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]' </dev/null >/dev/null 2>/dev/null ||
-      return 0
-    if [ -t 2 ]; then
-      >&2 printf '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
-    else
-      >&2 printf 'z4h: starting zsh\n'
-    fi
-    exec "$1" -i || return 1
-  }
-
-  _z4h_try_exec zsh                || return 1
-  _z4h_try_exec /usr/local/bin/zsh || return 1
-  _z4h_try_exec ~/.local/bin/zsh   || return 1
-  _z4h_try_exec ~/.zsh-bin/bin/zsh || return 1
-
-  if [ -r "$Z4H"/stickycache/zshdir ]; then
-    local dir
-    IFS= read -r dir <"$Z4H"/stickycache/zshdir || return 1
-    _z4h_try_exec "$dir"/bin/zsh                || return 1
-  fi
-
-  # There is no suitable Zsh. Need to install.
-  if [ -t 2 ]; then
-    >&2 printf '\033[33mz4h\033[0m: cannot find \033[31mZsh >= 5.4\033[0m\n'
-    >&2 printf '\033[33mz4h\033[0m: fetching \033[32mZsh 5.8\033[0m installer\n'
-  else
-    >&2 printf 'z4h: cannot find Zsh >= 5.4\n'
-    >&2 printf 'z4h: fetching Zsh 5.8 installer\n'
-  fi
-
-  local install="$Z4H"/cache/install-zsh.$$
-  local zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
-  [ ! -e "$install" ] || command rm -rf -- "$install" || return 1
-  if command -v curl >/dev/null 2>&1; then
-    err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
-  elif command -v wget >/dev/null 2>&1; then
-    err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
-  else
-    if [ -t 2 ]; then
-      >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
-    else
-      >&2 printf 'z4h: please install curl or wget\n'
-    fi
-    return 2
-  fi
-  if [ $? != 0 ]; then
-    >&2 printf "%s\n" "$err"
-    if [ -t 2 ]; then
-      >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
-    else
-      >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
-    fi
-    command rm -f -- "$install"
-    return 2
-  fi
-
-  local zshdir="$Z4H"/cache/zshdir.$$
-  while true; do
-    [ ! -e "$zshdir" ] || command rm -rf -- "$zshdir" || return 1
-    if command sh -- "$install" -s 3 3>"$zshdir"; then
-      local dir=
-      IFS= read -r dir <"$zshdir"                          || return 1
-      command rm -f -- "$Z4H"/stickycache/zshdir           || return 1
-      command mv -f -- "$zshdir" "$Z4H"/stickycache/zshdir || return 1
-      if ! _z4h_try_exec "$dir"/bin/zsh; then
-        if [ -t 2 ]; then
-          >&2 printf '\033[33mz4h\033[0m: \033[31minternal error\033[0m\n'
-        else
-          >&2 printf 'z4h: internal error\n'
-        fi
-        return 1
-      fi
-    fi
-
-    >&2 echo
-    if [ -t 2 ]; then
-      >&2 printf '\033[33mz4h\033[0m: \033[32mZsh 5.8\033[0m installation \033[31mfailed\033[0m\n'
-    else
-      >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
-    fi
-    >&2 echo
-    while true; do
-      >&2 printf 'Try again? [y/N] '
-      local yn=
-      IFS= read -r yn || yn=n
-      case "$yn" in
-        y|Y|yes|YES|Yes) break;;
-        n|N|no|NO|No)    return 1;;
-      esac
-    done
-  done
-}
-
-_z4h_prelude
-_z4h_prelude_status=$?
-unset -f _z4h_prelude _z4h_try_exec
-
-if [ "$_z4h_prelude_status" != 3 ]; then
-  unset _z4h_prelude_status
-  return "$_z4h_prelude_status"
+if [ -z "${ZSH_VERSION-}" ] || ! eval '[[ "$ZSH_VERSION" == (5.<4->*|<6->.*) ]]'; then
+  . "$Z4H"/sc/exec-zsh-i || return
 fi
 
 if (( ${+functions[z4h]} )); then
@@ -150,13 +29,8 @@ if (( ! $+_z4h_exe )); then
   typeset -gr _z4h_exe=${_z4h_exe:A}
 fi
 
-if (( _z4h_prelude_status == 2 )); then
-  exec -- $_z4h_exe -i || return 1
-else
-  unset _z4h_prelude_status
-fi
-
-zmodload zsh/zutil zsh/parameter || return 1
+[[ -o interactive ]] || exec -- $_z4h_exe -i || return 1
+zmodload zsh/zutil zsh/parameter             || return 1
 
 () {
   emulate -L zsh -o extended_glob -o prompt_percent -o no_prompt_subst -o no_prompt_bang

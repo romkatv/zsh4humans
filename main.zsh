@@ -1,84 +1,132 @@
 # _z4h_prelude checks if the current shell is Zsh >= 5.4. If not, it replaces
 # the current process with Zsh >= 5.4. If there is no Zsh >= 5.4, _z4h_prelude
-# installs the latest version to ~/.zsh-bin.
+# installs Zsh 5.8.
+#
+# Exit codes:
+#
+#   - 0  success
+#   - 2  error that doesn't require additional diagnostics
+#   - 3  the current interpreter is non-interactive Zsh >= 5.4
+#   - *  error that requires additional generic diagnostics
 _z4h_prelude() {
-  local v="${ZSH_VERSION-}"
-  local v1="${v%%.*}"
-  local v2="${v#*.}"
-  v2="${v2%%.*}"
-  if [ -n "$v1" -a -n "$v2" ]; then
-    if [ "$v1" -eq 5 -a "$v2" -ge 4 -o "$v1" -gt 5 ]; then
-      if [[ -o interactive ]]; then
-        # The current interpreter is interactive Zsh >= 5.4. Proceed with initialization.
-        set +ue
-        return 0
-      fi
-      # The current interpreter is non-interactive Zsh >= 5.4. Need to execute interactive.
-      # Will continue below. It's more convenient because we know we are in Zsh.
-      return 2
+  if [ -n "${ZSH_VERSION-}" ] && eval '[[ "$ZSH_VERSION" == (5.<4->*|<6->.*) ]]'; then
+    if [[ -o interactive ]]; then
+      # The current interpreter is interactive Zsh >= 5.4. Proceed with initialization.
+      return 0
     fi
+    # The current interpreter is non-interactive Zsh >= 5.4. Need to execute interactive.
+    # Will continue below. It's more convenient because we know we are in Zsh.
+    return 3
   fi
-  if ! command -v zsh >/dev/null 2>&1 || ! zsh -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]'; then
-    if [ ! -d ~/.zsh-bin ]; then
-      # There is no suitable Zsh. Install the latest version to ~/.zsh-bin.
-      local install="$Z4H"/install-zsh.$$
-      local zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
-      [ ! -e "$install" ] || command rm -rf -- "$install" || return 1
-      if command -v curl >/dev/null 2>&1; then
-        err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
-      elif command -v wget >/dev/null 2>&1; then
-        err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
-      else
-        if [ -t 2 ]; then
-          >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
-        else
-          >&2 printf 'z4h: please install curl or wget\n'
-        fi
-        return 1
-      fi
-      if [ $? != 0 ]; then
-        >&2 printf "%s\n" "$err"
-        if [ -t 2 ]; then
-          >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
-        else
-          >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
-        fi
-        command rm -f -- "$install"
-        return 1
-      fi
-      if [ -t 2 ]; then
-        >&2 printf '\033[33mz4h\033[0m: installing \033[32mzsh\033[0m to \033[4m~/.zsh-bin\033[0m\n'
-      else
-        >&2 printf 'z4h: installing zsh to ~/.zsh-bin\n'
-      fi
-      ( set -- -q -d ~/.zsh-bin; . "$install" )
-      local ret=$?
-      command rm -f -- "$install"
-      [ "$ret" = 0 ] || return "$ret"
+
+  _z4h_try_exec() {
+    command -v "$1" >/dev/null 2>&1 || return 0
+    command "$1" -fc '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]' </dev/null >/dev/null 2>/dev/null ||
+      return 0
+    if [ -t 2 ]; then
+      >&2 printf '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
+    else
+      >&2 printf 'z4h: starting zsh\n'
     fi
-    export PATH="$HOME/.zsh-bin/bin:$PATH"
+    exec "$1" -i || return 1
+  }
+
+  _z4h_try_exec zsh                || return 1
+  _z4h_try_exec /usr/local/bin/zsh || return 1
+  _z4h_try_exec ~/.local/bin/zsh   || return 1
+  _z4h_try_exec ~/.zsh-bin/bin/zsh || return 1
+
+  if [ -r "$Z4H"/stickycache/zshdir ]; then
+    local dir
+    IFS= read -r dir <"$Z4H"/stickycache/zshdir || return 1
+    _z4h_try_exec "$dir"/bin/zsh                || return 1
   fi
-  # The current interpreter is not Zsh >= 5.4. Execute Zsh >= 5.4.
+
+  # There is no suitable Zsh. Need to install.
   if [ -t 2 ]; then
-    >&2 printf '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
+    >&2 printf '\033[33mz4h\033[0m: cannot find \033[31mZsh >= 5.4\033[0m\n'
+    >&2 printf '\033[33mz4h\033[0m: fetching \033[32mZsh 5.8\033[0m installer\n'
   else
-    >&2 printf 'z4h: starting zsh\n'
+    >&2 printf 'z4h: cannot find Zsh >= 5.4\n'
+    >&2 printf 'z4h: fetching Zsh 5.8 installer\n'
   fi
-  exec zsh -i || return 1
+
+  local install="$Z4H"/cache/install-zsh.$$
+  local zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
+  [ ! -e "$install" ] || command rm -rf -- "$install" || return 1
+  if command -v curl >/dev/null 2>&1; then
+    err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
+  elif command -v wget >/dev/null 2>&1; then
+    err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
+  else
+    if [ -t 2 ]; then
+      >&2 printf '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
+    else
+      >&2 printf 'z4h: please install curl or wget\n'
+    fi
+    return 2
+  fi
+  if [ $? != 0 ]; then
+    >&2 printf "%s\n" "$err"
+    if [ -t 2 ]; then
+      >&2 printf '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
+    else
+      >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
+    fi
+    command rm -f -- "$install"
+    return 2
+  fi
+
+  local zshdir="$Z4H"/cache/zshdir.$$
+  while true; do
+    [ ! -e "$zshdir" ] || command rm -rf -- "$zshdir" || return 1
+    if command sh -- "$install" -s 3 3>"$zshdir"; then
+      local dir=
+      IFS= read -r dir <"$zshdir"                          || return 1
+      command rm -f -- "$Z4H"/stickycache/zshdir           || return 1
+      command mv -f -- "$zshdir" "$Z4H"/stickycache/zshdir || return 1
+      if ! _z4h_try_exec "$dir"/bin/zsh; then
+        if [ -t 2 ]; then
+          >&2 printf '\033[33mz4h\033[0m: \033[31minternal error\033[0m\n'
+        else
+          >&2 printf 'z4h: internal error\n'
+        fi
+        return 1
+      fi
+    fi
+
+    >&2 echo
+    if [ -t 2 ]; then
+      >&2 printf '\033[33mz4h\033[0m: \033[32mZsh 5.8\033[0m installation \033[31mfailed\033[0m\n'
+    else
+      >&2 printf 'z4h: failed to download %s\n' "$zsh_url"
+    fi
+    >&2 echo
+    while true; do
+      >&2 printf 'Try again? [y/N] '
+      local yn=
+      IFS= read -r yn || yn=n
+      case "$yn" in
+        y|Y|yes|YES|Yes) break;;
+        n|N|no|NO|No)    return 1;;
+      esac
+    done
+  done
 }
 
 _z4h_prelude
 _z4h_prelude_status=$?
-unset -f _z4h_prelude
-if [ $_z4h_prelude_status = 1 ]; then
+unset -f _z4h_prelude _z4h_try_exec
+
+if [ "$_z4h_prelude_status" != 3 ]; then
   unset _z4h_prelude_status
-  return 1
+  return "$_z4h_prelude_status"
 fi
 
 if (( ${+functions[z4h]} )); then
   print -ru2 -- ${(%):-"%F{3}z4h%f: please use %F{2}%Uexec%u zsh%f instead of %F{2}source%f %U~/.zshrc%u"}
   unset _z4h_prelude_status
-  return 1
+  return 2
 fi
 
 emulate zsh
@@ -95,7 +143,7 @@ if (( ! $+_z4h_exe )); then
     elif [[ -x $_z4h_exe ]]; then
       _z4h_exe=${_z4h_exe:a}
     else
-      print -Pru2 -- "%F{3}z4h%f: %F{1}unable to find path to zsh%f"
+      print -Pru2 -- "%F{3}z4h%f: unable to find path to %F{1}zsh%f"
       return 1
     fi
   fi
@@ -103,33 +151,25 @@ if (( ! $+_z4h_exe )); then
 fi
 
 if (( _z4h_prelude_status == 2 )); then
-  exec -- $_z4h_exe -i || return
+  exec -- $_z4h_exe -i || return 1
 else
   unset _z4h_prelude_status
 fi
 
-zmodload zsh/zutil || return
+zmodload zsh/zutil zsh/parameter || return 1
 
 () {
   emulate -L zsh -o extended_glob -o prompt_percent -o no_prompt_subst -o no_prompt_bang
-  if [[ -n $ZDOTDIR && $ZDOTDIR != /* ]]; then
-    print -Pru2 -- "%F{3}z4h%f: invalid %BZDOTDIR%b: %F{1}${ZDOTDIR//\%/%%}%f"
-    return 1
-  fi
-  if [[ $Z4H != /* ]]; then
-    print -Pru2 -- "%F{3}z4h%f: invalid %BZ4H%b: %F{1}${Z4H//\%/%%}%f"
+  local zshrc=${funcsourcetrace[-1]%:<->}
+  if [[ $zshrc != */.zshrc ]]; then
+    print -Pru2 -- "%F{3}z4h%f: confusing config origin: %F{1}${zshrc//\%/%%}%f"
     return 1
   fi
   if [[ $1 != $Z4H/romkatv/zsh4humans/main.zsh ]]; then
     print -Pru2 -- "%F{3}z4h%f: confusing %Umain.zsh%u location: %F{1}${1//\%/%%}%f"
     return 1
   fi
-  if [[ $Z4H_URL != https://raw.githubusercontent.com/*/zsh4humans/v[^/]##* ]]; then
-    print -Pru2 -- "%F{3}z4h%f: invalid %BZ4H_URL%b: %F{1}${Z4H_URL//\%/%%}%f"
-    return 1
-  fi
-
-  : ${ZDOTDIR:=~}
+  ZDOTDIR=${zshrc:h}
   typeset -gr _z4h_param_pat=$'ZDOTDIR=$ZDOTDIR\0Z4H=$Z4H\0Z4H_URL=$Z4H_URL'
   typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
 } ${${(%):-%x}:a} || return 1
@@ -280,9 +320,10 @@ function z4h() {
           print -Pru2 -- 'Note: The leading colon (%F{2}:%f) is necessary.'
           return 2
         fi
-        zf_mv -f -- $Z4H $old  || return 1
-        zf_mv -f -- $new $Z4H  || return 1
-        zf_rm -rf -- $old      || true
+        zf_rm -- $new/cache/z4h-update-succeeded || return 1
+        zf_mv -f -- $Z4H $old                    || return 1
+        zf_mv -f -- $new $Z4H                    || return 1
+        zf_rm -rf -- $old                        || true
       } always {
         if [[ $? != [02] ]]; then
           print -Pru2 -- '%F{3}z4h%f: update %F{1}failed%f'
@@ -294,8 +335,8 @@ function z4h() {
 
       print -Pru2 -- "%F{3}z4h%f: %Bupdate%b successful"
       print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-      exec -- $_z4h_exe -i
-      return
+      exec -- $_z4h_exe -i || return
+      return 0
     ;;
 
     1-install)

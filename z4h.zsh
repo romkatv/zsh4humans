@@ -163,7 +163,7 @@ _z4h_bootstrap() {
   command mkdir -p -- "$tmp" || return 1
 
   (
-    cd "${ZSH_VERSION:+-q}" -- "$tmp" || exit
+    cd ${ZSH_VERSION:+-q} -- "$tmp" || exit
 
     local url="https://github.com/$proj/archive/$ref.tar.gz"
     local err

@@ -13,7 +13,7 @@ if [ -n "$ZSH_VERSION" ]; then
 
     WORDCHARS=
     ZLE_REMOVE_SUFFIX_CHARS=
-    HISTFILE:=${ZDOTDIR:-~}/.zsh_history
+    HISTFILE=${ZDOTDIR:-~}/.zsh_history
     HISTSIZE=1000000000
     SAVEHIST=1000000000
 

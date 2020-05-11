@@ -675,9 +675,9 @@ function z4h() {
   ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab completion
   zle_highlight=('paste:none')   # disable highlighting of text pasted into the command line
 
-  HISTFILE:=${ZDOTDIR:-~}/.zsh_history  # save command history in this file
-  HISTSIZE=1000000000                   # infinite command history
-  SAVEHIST=1000000000                   # infinite command history
+  HISTFILE=${ZDOTDIR:-~}/.zsh_history  # save command history in this file
+  HISTSIZE=1000000000                  # infinite command history
+  SAVEHIST=1000000000                  # infinite command history
 
   if [[ ${commands[find]:A} == */busybox* ]]; then
     local fs=

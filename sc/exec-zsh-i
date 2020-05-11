@@ -43,7 +43,7 @@ _z4h_exec_zsh_i() {
     install="${install##*/}"
     local err
     if command -v curl >/dev/null 2>&1; then
-      err="$(command curl -fsSLo "${install" -- "$zsh_url" 2>&1)"
+      err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
     elif command -v wget >/dev/null 2>&1; then
       err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
     else

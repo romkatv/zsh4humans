@@ -70,14 +70,14 @@ function _z4h_clone() {
   {
     (
       local err
-      cd -q -- $new || exit
+      builtin cd -q -- $new || exit
       if (( $+commands[curl] )); then
         err="$(curl -fsSLo snapshot.tar.gz -- $url 2>&1)"
       elif (( $+commands[wget] )); then
         err="$(wget -O snapshot.tar.gz -- $url 2>&1)"
       else
         print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
-        exit 1
+        exit 2
       fi
       if (( $? )); then
         print -ru2 -- $err

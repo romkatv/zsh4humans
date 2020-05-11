@@ -39,7 +39,11 @@ _z4h_exec_zsh_i() {
   [ ! -e "$install" ] || command rm -rf -- "$install" || return 1
 
   (
-    cd ${ZSH_VERSION:+-q} -- "$Z4H"/cache || exit 1
+    if [ -n "${ZSH_VERSION:-}" ]; then
+      builtin cd -q -- "$Z4H"/cache || exit 1
+    else
+      cd -- "$Z4H"/cache            || exit 1
+    fi
     install="${install##*/}"
     local err
     if command -v curl >/dev/null 2>&1; then

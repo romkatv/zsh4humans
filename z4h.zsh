@@ -1,11 +1,11 @@
-if [ -n "$ZSH_VERSION" ]; then
-  if [[ "${+functions[z4h]}" = "0" ]]; then
-    emulate zsh
-    setopt auto_cd    no_bg_nice    no_flow_control  hist_find_no_dups
-    setopt c_bases    hist_verify   auto_param_slash hist_ignore_space
-    setopt multios    always_to_end complete_in_word interactive_comments
-    setopt path_dirs  extended_glob extended_history hist_expire_dups_first
-    setopt auto_pushd share_history hist_ignore_dups 
+if '[' '-n' "$ZSH_VERSION" ']'; then
+  if '[' "${+functions[z4h]}" '=' "0" ']'; then
+    'emulate' 'zsh'
+    'setopt' 'auto_cd'    'no_bg_nice'    'no_flow_control'  'hist_find_no_dups'
+    'setopt' 'c_bases'    'hist_verify'   'auto_param_slash' 'hist_ignore_space'
+    'setopt' 'multios'    'always_to_end' 'complete_in_word' 'interactive_comments'
+    'setopt' 'path_dirs'  'extended_glob' 'extended_history' 'hist_expire_dups_first'
+    'setopt' 'auto_pushd' 'share_history' 'hist_ignore_dups'
 
     PS1='%B%F{2}%n@%m%f %F{4}%~%f
 %F{%(?.2.1)}%#%f%b '
@@ -13,58 +13,58 @@ if [ -n "$ZSH_VERSION" ]; then
 
     WORDCHARS=
     ZLE_REMOVE_SUFFIX_CHARS=
-    HISTFILE=${ZDOTDIR:-~}/.zsh_history
-    HISTSIZE=1000000000
-    SAVEHIST=1000000000
+    HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+    HISTSIZE='1000000000'
+    SAVEHIST='1000000000'
 
-    bindkey -d
-    bindkey -e
+    'bindkey' '-d'
+    'bindkey' '-e'
 
-    bindkey -s '^[OM' '^M'
-    bindkey -s '^[Ok' '+'
-    bindkey -s '^[Om' '-'
-    bindkey -s '^[Oj' '*'
-    bindkey -s '^[Oo' '/'
-    bindkey -s '^[OX' '='
-    bindkey -s '^[OH' '^[[H'
-    bindkey -s '^[OF' '^[[F'
-    bindkey -s '^[OA' '^[[A'
-    bindkey -s '^[OB' '^[[B'
-    bindkey -s '^[OD' '^[[D'
-    bindkey -s '^[OC' '^[[C'
-    bindkey -s '^[[1~' '^[[H'
-    bindkey -s '^[[4~' '^[[F'
+    'bindkey' '-s' '^[OM' '^M'
+    'bindkey' '-s' '^[Ok' '+'
+    'bindkey' '-s' '^[Om' '-'
+    'bindkey' '-s' '^[Oj' '*'
+    'bindkey' '-s' '^[Oo' '/'
+    'bindkey' '-s' '^[OX' '='
+    'bindkey' '-s' '^[OH' '^[[H'
+    'bindkey' '-s' '^[OF' '^[[F'
+    'bindkey' '-s' '^[OA' '^[[A'
+    'bindkey' '-s' '^[OB' '^[[B'
+    'bindkey' '-s' '^[OD' '^[[D'
+    'bindkey' '-s' '^[OC' '^[[C'
+    'bindkey' '-s' '^[[1~' '^[[H'
+    'bindkey' '-s' '^[[4~' '^[[F'
 
-    bindkey -M emacs '^[[H'    beginning-of-line
-    bindkey -M viins '^[[H'    vi-beginning-of-line
-    bindkey -M vicmd '^[[H'    vi-beginning-of-line
-    bindkey -M emacs '^[[F'    end-of-line
-    bindkey -M viins '^[[F'    vi-end-of-line
-    bindkey -M vicmd '^[[F'    vi-end-of-line
-    bindkey -M viins '^?'      backward-delete-char
-    bindkey -M emacs '^[[3;5~' kill-word
-    bindkey -M emacs '^[[3;3~' kill-word
-    bindkey -M emacs '^[k'     backward-kill-line
-    bindkey -M emacs '^[K'     backward-kill-line
-    bindkey -M emacs '^[j'     kill-buffer
-    bindkey -M emacs '^[J'     kill-buffer
-    bindkey -M viins '^_'      undo
-    bindkey -M emacs '^[\'     redo
-    bindkey -M viins '^[\'     redo
-    bindkey -M emacs '^[[1;3D' backward-word
-    bindkey -M emacs '^[[1;5D' backward-word
-    bindkey -M viins '^[[1;3D' vi-backward-word
-    bindkey -M viins '^[[1;5D' vi-backward-word
-    bindkey -M emacs '^[[1;3C' forward-word
-    bindkey -M emacs '^[[1;5C' forward-word
-    bindkey -M viins '^[[1;3C' vi-forward-word
-    bindkey -M viins '^[[1;5C' vi-forward-word
+    'bindkey' '-M' 'emacs' '^[[H'    'beginning-of-line'
+    'bindkey' '-M' 'viins' '^[[H'    'vi-beginning-of-line'
+    'bindkey' '-M' 'vicmd' '^[[H'    'vi-beginning-of-line'
+    'bindkey' '-M' 'emacs' '^[[F'    'end-of-line'
+    'bindkey' '-M' 'viins' '^[[F'    'vi-end-of-line'
+    'bindkey' '-M' 'vicmd' '^[[F'    'vi-end-of-line'
+    'bindkey' '-M' 'viins' '^?'      'backward-delete-char'
+    'bindkey' '-M' 'emacs' '^[[3;5~' 'kill-word'
+    'bindkey' '-M' 'emacs' '^[[3;3~' 'kill-word'
+    'bindkey' '-M' 'emacs' '^[k'     'backward-kill-line'
+    'bindkey' '-M' 'emacs' '^[K'     'backward-kill-line'
+    'bindkey' '-M' 'emacs' '^[j'     'kill-buffer'
+    'bindkey' '-M' 'emacs' '^[J'     'kill-buffer'
+    'bindkey' '-M' 'viins' '^_'      'undo'
+    'bindkey' '-M' 'emacs' '^[\'     'redo'
+    'bindkey' '-M' 'viins' '^[\'     'redo'
+    'bindkey' '-M' 'emacs' '^[[1;3D' 'backward-word'
+    'bindkey' '-M' 'emacs' '^[[1;5D' 'backward-word'
+    'bindkey' '-M' 'viins' '^[[1;3D' 'vi-backward-word'
+    'bindkey' '-M' 'viins' '^[[1;5D' 'vi-backward-word'
+    'bindkey' '-M' 'emacs' '^[[1;3C' 'forward-word'
+    'bindkey' '-M' 'emacs' '^[[1;5C' 'forward-word'
+    'bindkey' '-M' 'viins' '^[[1;3C' 'vi-forward-word'
+    'bindkey' '-M' 'viins' '^[[1;5C' 'vi-forward-word'
   fi
 fi
 
-if [ -r "$Z4H"/romkatv/zsh4humans/main.zsh ]; then
-  . "$Z4H"/romkatv/zsh4humans/main.zsh && return 0
-  [ "$?" = 2 ]                         && return 2
+if '[' '-r' "$Z4H"/romkatv/zsh4humans/main.zsh ']'; then
+  '.' "$Z4H"/romkatv/zsh4humans/main.zsh && 'return' '0'
+  '[' "$?" '=' '2' ']'                   && 'return' '2'
 fi
 
 _z4h_bootstrap() {
@@ -163,7 +163,11 @@ _z4h_bootstrap() {
   command mkdir -p -- "$tmp" || return 1
 
   (
-    cd ${ZSH_VERSION:+-q} -- "$tmp" || exit
+    if [ -n "${ZSH_VERSION:-}" ]; then
+      builtin cd -q -- "$tmp" || exit 1
+    else
+      cd -- "$tmp"            || exit 1
+    fi
 
     local url="https://github.com/$proj/archive/$ref.tar.gz"
     local err
@@ -178,7 +182,7 @@ _z4h_bootstrap() {
       else
         >&2 printf 'z4h: please install curl or wget\n'
       fi
-      exit 1
+      exit 2
     fi
 
     if [ $? != 0 ]; then
@@ -188,13 +192,13 @@ _z4h_bootstrap() {
       else
         >&2 printf 'z4h: failed to download %s\n' "$url"
       fi
-      exit 1
+      exit 2
     fi
 
-    command tar -xzf snapshot.tar.gz  || exit
-    ./*-*/sc/setup -n "$Z4H"          || exit
-    command rm -rf -- "$dir"          || exit
-    command mv -f -- ./*-* "$dir"     || exit
+    command tar -xzf snapshot.tar.gz  || exit 1
+    ./*-*/sc/setup -n "$Z4H"          || exit 1
+    command rm -rf -- "$dir"          || exit 1
+    command mv -f -- ./*-* "$dir"     || exit 1
   )
 
   local ret=$?

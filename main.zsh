@@ -399,7 +399,7 @@ function z4h() {
       # Check whether the current shell is the login shell. If not, offer to change login shell.
       (( UID && EUID )) || return 0
       [[ -n $SHELL && $SHELL != $_z4h_exe && $_z4h_exe == /* && ${SHELL:A} != ${_z4h_exe:A} &&
-        -x ${_z4h_exe:A} && ! -e $Z4H/.no-chsh && $+commands[chsh] == 1 &&
+        -x ${_z4h_exe:A} && ! -e $Z4H/stickycache/.no-chsh && $+commands[chsh] == 1 &&
         -r /etc/shells && -w $TTY ]] || return 0
       [[ $+commands[sudo] == 1 ||
         "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
@@ -421,8 +421,8 @@ function z4h() {
             >>$TTY print -l -- '' ''
           }
           if [[ $REPLY != y ]]; then
-            print -rn >$Z4H/.no-chsh || return
-            >>$TTY print -Pr -- "Won't ask again until %U\$Z4H/.no-chsh%u is deleted."
+            print -rn >$Z4H/stickycache/.no-chsh || return
+            >>$TTY print -Pr -- "Won't ask again unless %U\$Z4H/stickycache/.no-chsh%u is deleted."
             return 1
           fi
           query="Try again?"

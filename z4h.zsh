@@ -186,7 +186,7 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
     >&2 'printf' '\033[33mz4h\033[0m: fetching \033[1m%ss\033[0m\n' "romkatv/zsh4humans"
 
     dir="$Z4H"/romkatv/zsh4humans
-    url="https://github.com/$proj/archive/v$v.tar.gz"
+    url="https://github.com/romkatv/zsh4humans/archive/v$v.tar.gz"
 
     'command' 'mkdir' '-p' '--' "$Z4H"/romkatv || 'exit'
     if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then

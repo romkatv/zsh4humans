@@ -84,7 +84,7 @@ function z4h() {
     return 1
   }
 
-  [[ "$ARGC-$1" != 1-source ]] || {
+  [[ "$ARGC-$1" != 1-init ]] || {
     (( ${+_z4h_install_succeeded} )) || {
       print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called before %Binstall%b"}
       return 1
@@ -164,7 +164,6 @@ function z4h() {
             print -ru2 -- $err
             return 1
           fi
-          zf_mv -f -- $Z4H/junegunn/fzf/bin/fzf $Z4H/bin/ || return
         fi
 
         path=($Z4H/junegunn/fzf/bin $path)

@@ -1,8 +1,10 @@
 emulate -L zsh
 local last=$LASTWIDGET
-zle .set-local-history 1
+zle .set-local-history $1
+shift
 {
   () { local -h LASTWIDGET=$last; "$@" } "$@"
 } always {
   zle .set-local-history 0
 }
+(( ! $+functions[_zsh_highlight] )) || _zsh_highlight

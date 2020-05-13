@@ -78,10 +78,16 @@ elif (( $+commands[brew] )); then
 fi
 
 function z4h-up-local-history() {
-  -z4h-with-local-history up-line-or-beginning-search "$@"
+  -z4h-with-local-history 1 up-line-or-beginning-search "$@"
 }
 function z4h-down-local-history() {
-  -z4h-with-local-history down-line-or-beginning-search "$@"
+  -z4h-with-local-history 1 down-line-or-beginning-search "$@"
+}
+function z4h-up-global-history() {
+  -z4h-with-local-history 0 up-line-or-beginning-search "$@"
+}
+function z4h-down-global-history() {
+  -z4h-with-local-history 0 down-line-or-beginning-search "$@"
 }
 
 function z4h-beginning-of-buffer() { CURSOR=0 }
@@ -116,6 +122,8 @@ zle -N z4h-end-of-buffer
 zle -N z4h-expand-or-complete
 zle -N z4h-up-local-history
 zle -N z4h-down-local-history
+zle -N z4h-up-global-history
+zle -N z4h-down-global-history
 zle -N z4h-cd-back
 zle -N z4h-cd-forward
 zle -N z4h-cd-up
@@ -204,11 +212,11 @@ bindkey   -M emacs '^[[B'    z4h-down-local-history         # down
 bindkey   -M viins '^[[B'    z4h-down-local-history         # down
 bindkey   -M vicmd 'j'       z4h-down-local-history         # j
 # Move cursor one line up or fetch the previous command from GLOBAL history.
-bindkey   -M emacs '^[[1;5A' up-line-or-beginning-search    # ctrl+up
-bindkey   -M viins '^[[1;5A' up-line-or-beginning-search    # ctrl+up
+bindkey   -M emacs '^[[1;5A' z4h-up-global-history          # ctrl+up
+bindkey   -M viins '^[[1;5A' z4h-up-global-history          # ctrl+up
 # Move cursor one line down or fetch the next command from GLOBAL history.
-bindkey   -M emacs '^[[1;5B' down-line-or-beginning-search  # ctrl+down
-bindkey   -M viins '^[[1;5B' down-line-or-beginning-search  # ctrl+down
+bindkey   -M emacs '^[[1;5B' z4h-down-global-history        # ctrl+down
+bindkey   -M viins '^[[1;5B' z4h-down-global-history        # ctrl+down
 # Move cursor to the beginning of line.
 bindkey   -M emacs '^[[H'    beginning-of-line              # home
 bindkey   -M viins '^[[H'    vi-beginning-of-line           # home
@@ -343,6 +351,8 @@ typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
   down-line-or-beginning-search
   z4h-up-local-history
   z4h-down-local-history
+  z4h-up-global-history
+  z4h-down-global-history
   z4h-fzf-history
 )
 typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(

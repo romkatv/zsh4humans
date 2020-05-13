@@ -81,7 +81,6 @@ if '[' '-n' "$Z4H" '-a' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/romkatv/zsh4humans/ma
     'setopt' 'aliases'
     'return'
   fi
-  '[' '-n' "$ZSH_VERSION" ']' && 'setopt' 'aliases'
   'unset' '_z4h_bootstrap'
 else
   _z4h_bootstrap='1'
@@ -227,8 +226,10 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
     ret="$?"
     'command' 'rm' '-rf' '--' "$tmpdir" || 'exit'
     'exit' "$ret"
-  ) && return
+  ) && '.' "$Z4H"/romkatv/zsh4humans/main.zsh && 'setopt' 'aliases' && 'return'
 fi
+
+'[' '-n' "$ZSH_VERSION" ']' && 'setopt' 'aliases'
 
 >&2 'printf' '\n'
 >&2 'printf' '\033[33mz4h\033[0m: \033[31mcommand failed\033[0m: \033[32m.\033[0m \033[4;33m"$Z4H"\033[0m\033[4m/z4h.zsh\033[0m\n'

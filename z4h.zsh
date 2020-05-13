@@ -10,7 +10,7 @@ if '[' '-n' "$ZSH_VERSION" ']'; then
     'return' '1'
   fi
 
-  'typeset' '-gr' '_z4h_source_called=1'
+  'typeset' '-gri' _z4h_source_called='1'
 
   'emulate' 'zsh'
   'setopt' 'auto_cd'    'no_bg_nice'    'no_flow_control'  'hist_find_no_dups'
@@ -21,15 +21,15 @@ if '[' '-n' "$ZSH_VERSION" ']'; then
   'setopt' 'prompt_cr'  'prompt_sp'     'prompt_percent'   'no_prompt_subst'
   'setopt' 'no_bg_nice' 'no_aliases'
 
-  'typeset' '-g' 'PS1="%B%F{2}%n@%m%f %F{4}%~%f
-%F{%(?.2.1)}%#%f%b "'
-  'typeset' '-g' 'RPS1="%B%F{3}z4h recovery mode%f%b"'
+  PS1="%B%F{2}%n@%m%f %F{4}%~%f
+%F{%(?.2.1)}%#%f%b "
+  RPS1="%B%F{3}z4h recovery mode%f%b"
 
-  'typeset' '-g' 'WORDCHARS='
-  'typeset' '-g' 'ZLE_REMOVE_SUFFIX_CHARS='
-  'typeset' '-g' 'HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"'
-  'typeset' '-g' 'HISTSIZE=1000000000'
-  'typeset' '-g' 'SAVEHIST=1000000000'
+  WORDCHARS=''
+  ZLE_REMOVE_SUFFIX_CHARS=''
+  HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+  HISTSIZE='1000000000'
+  SAVEHIST='1000000000'
 
   'bindkey' '-d'
   'bindkey' '-e'
@@ -224,7 +224,7 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
       'command' 'mv' '-f' '--' './'*'-'* "$dir" || 'exit'
     )
 
-    'local' ret="$?"
+    ret="$?"
     'command' 'rm' '-rf' '--' "$tmpdir" || 'exit'
     'exit' "$ret"
   ) && return

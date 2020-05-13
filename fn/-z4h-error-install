@@ -1,6 +1,7 @@
 local home=~
 local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
 local z4h=${${${(q)Z4H}/#${(q)home}/'~'}//\%/%%}
+print -Pru2 -- ''
 print -Pru2 -- '%F{3}z4h%f: install %F{1}failed%f'
 print -Pru2 -- ''
 print -Pru2 -- 'See error messages above to identify the culprit.'

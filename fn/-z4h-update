@@ -35,6 +35,7 @@ local new=$Z4H.new.$$
   zf_rm -rf -- $old                        || true
 } always {
   if (( $? )); then
+    print -Pru2 -- ''
     print -Pru2 -- '%F{3}z4h%f: update %F{1}failed%f'
     print -Pru2 -- ''
     print -Pru2 -- 'See error messages above to identify the culprit.'

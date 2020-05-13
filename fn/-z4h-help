@@ -1,0 +1,70 @@
+case $ARGC-$1 in
+  2-help)
+    case $2 in
+      install)
+        print -Pr -- "usage: %F{2}z4h%f %Binstall%b"
+        print -Pr -- ""
+        print -Pr -- "Install all missing dependencies (fzf, zsh-autosuggestions, etc.)."
+      ;;
+      update)
+        print -Pr -- "usage: %F{2}z4h%f %Bupdate%b"
+        print -Pr -- ""
+        print -Pr -- "Update all dependencies (fzf, zsh-autosuggestions, etc.)."
+      ;;
+      init)
+        print -Pr -- "usage: %F{2}z4h%f %Binit%b"
+        print -Pr -- ""
+        print -Pr -- "Initialize Zsh. Should be called just once from %U.zshrc%u."
+      ;;
+      reset)
+        print -Pr -- "usage: %F{2}z4h%f %Breset%b"
+        print -Pr -- ""
+        print -Pr -- "Reinstall all dependencies (fzf, zsh-autosuggestions, etc.)."
+      ;;
+      clone)
+        print -Pr -- "usage: %F{2}z4h%f %Bclone%b %Uusername/repository%u"
+        print -Pr -- ""
+        print -Pr -- "Clone a repository from GitHub. Can be called from %U.zshrc%u between"
+        print -Pr -- "%Binstall%b and %Binit%b."
+      ;;
+      source)
+        print -Pr -- "usage: %F{2}z4h%f %Bsource%b %Ufile%u"
+        print -Pr -- ""
+        print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
+      ;;
+      ssh)
+        -z4h-help-ssh
+        return
+      ;;
+      chsh)
+        print -Pr -- "usage: %F{2}z4h%f %Bchsh%b"
+        print -Pr -- ""
+        print -Pr -- "Check whether current user's login shell is %F{2}zsh%f. If not, offer to"
+        print -Pr -- "change login shell."
+      ;;
+      help)
+        print -Pr -- "usage: %F{2}z4h%f %Bhelp%b [%Ucommand%u]"
+        print -Pr -- ""
+        print -Pr -- "Print help for the command."
+      ;;
+      *)
+        print -Pru2 -- "%F{3}z4h%f: unknown command: %F{1}${2//\%/%%}%f"
+        return 1
+      ;;
+    esac
+    return 0
+  ;;
+  *)
+    [[ $ARGC-$1 == 1-help ]] && local fd=1 ret=0 || local fd=2 ret=1
+    print -Pru$fd -- "usage: %F{2}z4h%f %Binstall%b"
+    print -Pru$fd -- "           %Bupdate%b"
+    print -Pru$fd -- "           %Binit%b"
+    print -Pru$fd -- "           %Breset%b"
+    print -Pru$fd -- "           %Bclone%b %Uusername/repository%u"
+    print -Pru$fd -- "           %Bsource%b %Ufile%u"
+    print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
+    print -Pru$fd -- "           %Bchsh%b"
+    print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"
+    return ret
+  ;;
+esac

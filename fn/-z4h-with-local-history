@@ -1,0 +1,8 @@
+emulate -L zsh
+local last=$LASTWIDGET
+zle .set-local-history 1
+{
+  () { local -h LASTWIDGET=$last; "$@" } "$@"
+} always {
+  zle .set-local-history 0
+}

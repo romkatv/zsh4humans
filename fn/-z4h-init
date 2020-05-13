@@ -1,0 +1,480 @@
+# Display $1 in terminal title.
+function z4h-set-term-title() {
+  emulate -L zsh
+  if [[ -t 1 ]]; then
+    print -rn -- $'\e]0;'${(V)1}$'\a'
+  elif [[ -w $TTY ]]; then
+    print -rn -- $'\e]0;'${(V)1}$'\a' >$TTY
+  fi
+}
+
+# When a command is running, display it in the terminal title.
+function z4h-set-term-title-preexec() {
+  if (( P9K_SSH )); then
+    z4h-set-term-title ${(V%):-"%n@%m: "}$1
+  else
+    z4h-set-term-title $1
+  fi
+}
+
+# When no command is running, display the current directory in the terminal title.
+function z4h-set-term-title-precmd() {
+  if (( P9K_SSH )); then
+    z4h-set-term-title ${(V%):-"%n@%m: %~"}
+  else
+    z4h-set-term-title ${(V%):-"%~"}
+  fi
+}
+
+autoload -Uz add-zsh-hook                       || return
+add-zsh-hook preexec z4h-set-term-title-preexec || return
+add-zsh-hook precmd z4h-set-term-title-precmd   || return
+
+local p10k_cfg=
+# If the current locale isn't UTF-8, change it to an UTF-8 one.
+# Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
+() {
+  emulate -L zsh -o extended_glob
+  [[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] && return 0
+  (( $+commands[locale] )) || return
+  local loc=(${(@M)$(locale -a):#*.(utf|UTF)(-|)8})
+  (( $#loc )) || return
+  export LC_ALL=${loc[(r)(#i)C.UTF(-|)8]:-${loc[(r)(#i)en_US.UTF(-|)8]:-$loc[1]}}
+} && [[ $TERM != (dumb|linux) ]] || p10k_cfg+=-ascii
+(( terminfo[colors] >= 256 )) || p10k_cfg+=-8color
+: ${POWERLEVEL9K_CONFIG_FILE:=$ZDOTDIR/.p10k${p10k_cfg}.zsh}
+
+# Enable command_not_found_handler if possible.
+if (( $+functions[command_not_found_handler] )); then
+  # already installed
+elif [[ -e /etc/zsh_command_not_found ]]; then
+  source /etc/zsh_command_not_found
+elif [[ -e /usr/share/doc/pkgfile/command-not-found.zsh ]]; then
+  source /usr/share/doc/pkgfile/command-not-found.zsh
+elif [[ -x /usr/libexec/pk-command-not-found && -S /var/run/dbus/system_bus_socket ]]; then
+  command_not_found_handler() { /usr/libexec/pk-command-not-found "$@" }
+elif [[ -x /data/data/com.termux/files/usr/libexec/termux/command-not-found ]]; then
+  command_not_found_handler() { /data/data/com.termux/files/usr/libexec/termux/command-not-found "$@" }
+elif [[ -x /run/current-system/sw/bin/command-not-found ]]; then
+  command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
+elif (( $+commands[brew] )); then
+  () {
+    emulate -L zsh -o extended_glob
+    [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
+    local repo
+    repo="$(brew --repository 2>/dev/null)" || return
+    [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
+    function command_not_found_handler() {
+      emulate -L zsh
+      local msg
+      if msg="$(brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
+        print -ru2 -- $msg
+      else
+        print -ru2 -- "zsh: command not found: $1"
+      fi
+      return 127
+    }
+  }
+fi
+
+function z4h-up-local-history() {
+  -z4h-with-local-history up-line-or-beginning-search "$@"
+}
+function z4h-down-local-history() {
+  -z4h-with-local-history down-line-or-beginning-search "$@"
+}
+
+function z4h-beginning-of-buffer() { CURSOR=0 }
+function z4h-end-of-buffer() { CURSOR=$(($#BUFFER  + 1)) }
+function z4h-expand() { zle _expand_alias || zle .expand-word || true }
+function z4h-run-help() { zle run-help || true }
+
+if (( $+terminfo[rmam] && $+terminfo[smam] )); then
+  function z4h-expand-or-complete() {
+    # Show '...' while completing. No `emulate -L zsh` to pick up dotglob if it's set.
+    print -rn -- ${terminfo[rmam]}${(%):-"%F{red}...%f"}${terminfo[smam]}
+    zle fzf-tab-complete
+  }
+else
+  function z4h-expand-or-complete() { zle fzf-tab-complete }
+fi
+
+function z4h-cd-back() { z4h-cd-rotate +1 }
+function z4h-cd-forward() { z4h-cd-rotate -0 }
+function z4h-cd-up() { cd .. && z4h-redraw-prompt }
+
+function z4h-do-nothing() {}
+
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search run-help || return
+(( $+aliases[run-help] )) && unalias run-help  # make run-help more useful
+
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+zle -N z4h-expand
+zle -N z4h-beginning-of-buffer
+zle -N z4h-end-of-buffer
+zle -N z4h-expand-or-complete
+zle -N z4h-up-local-history
+zle -N z4h-down-local-history
+zle -N z4h-cd-back
+zle -N z4h-cd-forward
+zle -N z4h-cd-up
+zle -N z4h-fzf-history
+zle -N z4h-autosuggest-accept
+zle -N z4h-do-nothing
+zle -N z4h-run-help
+
+if (( terminfo[colors] >= 256 )); then
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'         # the default is hard to see
+  typeset -A ZSH_HIGHLIGHT_STYLES=(comment fg=96)  # different colors for comments and suggestions
+else
+  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold'  # the default is outside of 8 color range
+  : ${POWERLEVEL9K_CONFIG_FILE=${ZDOTDIR:-~}/.p10k-portable.zsh}
+fi
+
+ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
+ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
+ZSH_AUTOSUGGEST_MANUAL_REBIND=1             # disable a very slow obscure feature
+
+PROMPT_EOL_MARK='%K{red} %k'   # mark the missing \n at the end of a comand output with a red block
+READNULLCMD=less               # use `less` instead of the default `more`
+WORDCHARS=''                   # only alphanums make up words in word-based zle widgets
+ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab completion
+zle_highlight=('paste:none')   # disable highlighting of text pasted into the command line
+
+HISTFILE=${ZDOTDIR:-~}/.zsh_history  # save command history in this file
+HISTSIZE=1000000000                  # infinite command history
+SAVEHIST=1000000000                  # infinite command history
+
+if [[ ${commands[find]:A} == */busybox* ]]; then
+  local fs=
+else
+  local fs="-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc"
+fi
+: ${FZF_ALT_C_COMMAND:="command find -L . -mindepth 1 \( -path '*/\.*' "$fs" \) -prune -o -type d -print 2>/dev/null | cut -b3-"}
+
+FZF_COMPLETION_TRIGGER=''                            # file completion without trigger
+fzf_default_completion=z4h-expand-or-complete        # file completion falls back to regular
+z4h source $Z4H/junegunn/fzf/shell/completion.zsh    # load fzf-completion
+z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
+
+zstyle ':fzf-tab:*' prefix ''                    # remove '·'
+zstyle ':fzf-tab:*' continuous-trigger alt-enter # alt-enter to accept and trigger next completion
+bindkey '\t' expand-or-complete                  # fzf-tab reads it during initialization
+z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh       # load fzf-tab-complete
+
+# Delete all existing keymaps and reset to the default state.
+bindkey -d
+
+# If NumLock is off, translate keys to make them appear the same as with NumLock on.
+bindkey -s '^[OM' '^M'  # enter
+bindkey -s '^[Ok' '+'
+bindkey -s '^[Om' '-'
+bindkey -s '^[Oj' '*'
+bindkey -s '^[Oo' '/'
+bindkey -s '^[OX' '='
+
+# If someone switches our terminal to application mode (smkx), translate keys to make
+# them appear the same as in raw mode (rmkx).
+bindkey -s '^[OH' '^[[H'  # home
+bindkey -s '^[OF' '^[[F'  # end
+bindkey -s '^[OA' '^[[A'  # up
+bindkey -s '^[OB' '^[[B'  # down
+bindkey -s '^[OD' '^[[D'  # left
+bindkey -s '^[OC' '^[[C'  # right
+
+# TTY sends different key codes. Translate them to regular.
+bindkey -s '^[[1~' '^[[H'  # home
+bindkey -s '^[[4~' '^[[F'  # end
+
+# Move cursor one char backward.
+bindkey   -M emacs '^[[D'    backward-char                  # left
+bindkey   -M viins '^[[D'    vi-backward-char               # left
+# Move cursor one char forward.
+bindkey   -M emacs '^[[C'    forward-char                   # right
+bindkey   -M viins '^[[C'    vi-forward-char                # right
+# Move cursor one line up or fetch the previous command from LOCAL history.
+bindkey   -M emacs '^P'      z4h-up-local-history           # ctrl+p
+bindkey   -M emacs '^[[A'    z4h-up-local-history           # up
+bindkey   -M viins '^[[A'    z4h-up-local-history           # up
+bindkey   -M vicmd 'k'       z4h-up-local-history           # k
+# Move cursor one line down or fetch the next command from LOCAL history.
+bindkey   -M emacs '^N'      z4h-down-local-history         # ctrl-n
+bindkey   -M emacs '^[[B'    z4h-down-local-history         # down
+bindkey   -M viins '^[[B'    z4h-down-local-history         # down
+bindkey   -M vicmd 'j'       z4h-down-local-history         # j
+# Move cursor one line up or fetch the previous command from GLOBAL history.
+bindkey   -M emacs '^[[1;5A' up-line-or-beginning-search    # ctrl+up
+bindkey   -M viins '^[[1;5A' up-line-or-beginning-search    # ctrl+up
+# Move cursor one line down or fetch the next command from GLOBAL history.
+bindkey   -M emacs '^[[1;5B' down-line-or-beginning-search  # ctrl+down
+bindkey   -M viins '^[[1;5B' down-line-or-beginning-search  # ctrl+down
+# Move cursor to the beginning of line.
+bindkey   -M emacs '^[[H'    beginning-of-line              # home
+bindkey   -M viins '^[[H'    vi-beginning-of-line           # home
+bindkey   -M vicmd '^[[H'    vi-beginning-of-line           # home
+# Move cursor to the end of line.
+bindkey   -M emacs '^[[F'    end-of-line                    # end
+bindkey   -M viins '^[[F'    vi-end-of-line                 # end
+bindkey   -M vicmd '^[[F'    vi-end-of-line                 # end
+# Move cursor to the beginning of buffer.
+bindkey   -M emacs '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
+bindkey   -M emacs '^[[1;3H' z4h-beginning-of-buffer        # alt+home
+bindkey   -M viins '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
+bindkey   -M viins '^[[1;3H' z4h-beginning-of-buffer        # alt+home
+bindkey   -M vicmd '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
+bindkey   -M vicmd '^[[1;3H' z4h-beginning-of-buffer        # alt+home
+# Move cursor to the end of buffer.
+bindkey   -M emacs '^[[1;5F' z4h-end-of-buffer              # ctrl+end
+bindkey   -M emacs '^[[1;3F' z4h-end-of-buffer              # alt+end
+bindkey   -M viins '^[[1;5F' z4h-end-of-buffer              # ctrl+end
+bindkey   -M viins '^[[1;3F' z4h-end-of-buffer              # alt+end
+bindkey   -M vicmd '^[[1;5F' z4h-end-of-buffer              # ctrl+end
+bindkey   -M vicmd '^[[1;3F' z4h-end-of-buffer              # alt+end
+# Delete previous char.
+bindkey   -M viins '^?'      backward-delete-char           # bs
+# Delete next word.
+bindkey   -M emacs '^[[3;5~' kill-word                      # ctrl+del
+bindkey   -M emacs '^[[3;3~' kill-word                      # alt+del
+# Delete line before cursor.
+bindkey   -M emacs '^[k'     backward-kill-line             # alt+k
+bindkey   -M emacs '^[K'     backward-kill-line             # alt+K
+# Delete all lines.
+bindkey   -M emacs '^[j'     kill-buffer                    # alt+j
+bindkey   -M emacs '^[J'     kill-buffer                    # alt+J
+# Accept autosuggestion.
+bindkey   -M emacs '^[m'     z4h-autosuggest-accept         # alt+m
+bindkey   -M emacs '^[M'     z4h-autosuggest-accept         # alt+M
+bindkey   -M viins '^[m'     z4h-autosuggest-accept         # alt+m
+bindkey   -M viins '^[M'     z4h-autosuggest-accept         # alt+M
+bindkey   -M vicmd '^[m'     z4h-autosuggest-accept         # alt+m
+bindkey   -M vicmd '^[M'     z4h-autosuggest-accept         # alt+M
+# Undo.
+bindkey   -M viins '^_'      undo                           # ctrl+/
+# Redo.
+bindkey   -M emacs '^[\'     redo                           # alt+/
+bindkey   -M viins '^[\'     redo                           # alt+/
+# Expand alias/glob/parameter.
+bindkey   -M emacs '^ '      z4h-expand                     # ctrl+space
+bindkey   -M viins '^ '      z4h-expand                     # ctrl+space
+# Generic command completion.
+bindkey   -M emacs '\t'      z4h-expand-or-complete         # tab
+bindkey   -M viins '\t'      z4h-expand-or-complete         # tab
+bindkey   -M vicmd '\t'      z4h-expand-or-complete         # tab
+# Deep file completion.
+bindkey   -M emacs '^[i'     fzf-completion                 # alt+i
+bindkey   -M emacs '^[I'     fzf-completion                 # alt+I
+bindkey   -M viins '^[i'     fzf-completion                 # alt+i
+bindkey   -M viins '^[I'     fzf-completion                 # alt+I
+bindkey   -M vicmd '^[i'     fzf-completion                 # alt+i
+bindkey   -M vicmd '^[I'     fzf-completion                 # alt+I
+# Command history.
+bindkey   -M emacs '^R'      z4h-fzf-history                # ctrl+r
+bindkey   -M viins '^R'      z4h-fzf-history                # ctrl+r
+bindkey   -M vicmd '^R'      z4h-fzf-history                # ctrl+r
+# Show help for the command at cursor.
+bindkey   -M emacs '^[h'     z4h-run-help                   # alt+h
+bindkey   -M emacs '^[H'     z4h-run-help                   # alt+H
+bindkey   -M viins '^[h'     z4h-run-help                   # alt+h
+bindkey   -M viins '^[H'     z4h-run-help                   # alt+H
+bindkey   -M vicmd '^[h'     z4h-run-help                   # alt+h
+bindkey   -M vicmd '^[H'     z4h-run-help                   # alt+H
+# Do nothing (better than printing '~').
+bindkey   -M emacs '^[[5~'   z4h-do-nothing                 # pageup
+bindkey   -M emacs '^[[6~'   z4h-do-nothing                 # pagedown
+
+if zstyle -t :z4h: cd-key ctrl; then
+  # Move cursor one word backward.
+  bindkey -M emacs '^[[1;3D' backward-word                  # alt+left
+  bindkey -M viins '^[[1;3D' vi-backward-word               # alt+left
+  # Move cursor one word forward.
+  bindkey -M emacs '^[[1;3C' forward-word                   # alt+right
+  bindkey -M viins '^[[1;3C' vi-forward-word                # alt+right
+  # cd into the previous directory.
+  bindkey -M emacs '^[[1;5D' z4h-cd-back                    # ctrl+left
+  bindkey -M viins '^[[1;5D' z4h-cd-back                    # ctrl+left
+  bindkey -M vicmd '^[[1;5D' z4h-cd-back                    # ctrl+left
+  # cd into the next directory.
+  bindkey -M emacs '^[[1;5C' z4h-cd-forward                 # ctrl+right
+  bindkey -M viins '^[[1;5C' z4h-cd-forward                 # ctrl+right
+  bindkey -M vicmd '^[[1;5C' z4h-cd-forward                 # ctrl+right
+  # cd into the parent directory.
+  bindkey -M emacs '^[[1;5A' z4h-cd-up                      # ctrl+up
+  bindkey -M viins '^[[1;5A' z4h-cd-up                      # ctrl+up
+  bindkey -M vicmd '^[[1;5A' z4h-cd-up                      # ctrl+up
+  # cd into a subdirectory (interactive).
+  bindkey -M emacs '^[[1;5B' fzf-cd-widget                  # ctrl+down
+  bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
+  bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
+else
+  # Move cursor one word backward.
+  bindkey -M emacs '^[[1;5D' backward-word                  # alt+left
+  bindkey -M viins '^[[1;5D' vi-backward-word               # alt+left
+  # Move cursor one word forward.
+  bindkey -M emacs '^[[1;5C' forward-word                   # alt+right
+  bindkey -M viins '^[[1;5C' vi-forward-word                # alt+right
+  # cd into the previous directory.
+  bindkey -M emacs '^[[1;3D' z4h-cd-back                    # ctrl+left
+  bindkey -M viins '^[[1;3D' z4h-cd-back                    # ctrl+left
+  bindkey -M vicmd '^[[1;3D' z4h-cd-back                    # ctrl+left
+  # cd into the next directory.
+  bindkey -M emacs '^[[1;3C' z4h-cd-forward                 # ctrl+right
+  bindkey -M viins '^[[1;3C' z4h-cd-forward                 # ctrl+right
+  bindkey -M vicmd '^[[1;3C' z4h-cd-forward                 # ctrl+right
+  # cd into the parent directory.
+  bindkey -M emacs '^[[1;3A' z4h-cd-up                      # ctrl+up
+  bindkey -M viins '^[[1;3A' z4h-cd-up                      # ctrl+up
+  bindkey -M vicmd '^[[1;3A' z4h-cd-up                      # ctrl+up
+  # cd into a subdirectory (interactive).
+  bindkey -M emacs '^[[1;3B' fzf-cd-widget                  # ctrl+down
+  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # ctrl+down
+  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # ctrl+down
+fi
+
+# Instruct {up,down}-line-or-beginning-search to keep cursor where it is.
+zstyle ':zle:up-line-or-beginning-search'   leave-cursor no
+zstyle ':zle:down-line-or-beginning-search' leave-cursor no
+
+# Tell zsh-autosuggestions how to handle different widgets.
+typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
+typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
+  accept-line
+  up-line-or-beginning-search
+  down-line-or-beginning-search
+  z4h-up-local-history
+  z4h-down-local-history
+  z4h-fzf-history
+)
+typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
+  forward-word
+  emacs-forward-word
+  vi-forward-word
+  vi-forward-word-end
+  vi-forward-blank-word
+  vi-forward-blank-word-end
+  vi-find-next-char
+  vi-find-next-char-skip
+)
+typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(
+  orig-\*
+  beep
+  run-help
+  set-local-history
+  which-command
+  yank
+  yank-pop
+  zle-\*
+  redisplay
+  fzf-tab-complete
+  z4h-autosuggest-accept
+  autosuggest-accept
+)
+typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
+  z4h-end-of-buffer
+)
+
+if zstyle -t :z4h:autosuggestions forward-char accept; then
+  ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
+else
+  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
+fi
+
+if zstyle -t :z4h:autosuggestions end-of-line accept; then
+  ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
+else
+  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
+fi
+
+# Use lesspipe if available. It allows you to use less on binary files (zip archives, etc.).
+if (( $#commands[(i)lesspipe(|.sh)] )); then
+  export LESSOPEN="| /usr/bin/env $commands[(i)lesspipe(|.sh)] %s 2>&-"
+fi
+
+# This affects every invocation of `less`.
+#
+#   -i   case-insensitive search unless search string contains uppercase letters
+#   -R   color
+#   -F   exit if there is less than one page of content
+#   -X   keep content on screen after exit
+#   -M   show more info at the bottom prompt line
+#   -x4  tabs are 4 instead of 8
+export LESS=-iRFXMx4
+
+export PAGER=less
+
+# LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
+export LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:'
+LS_COLORS+='cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:'
+LS_COLORS+='st=37;44:ex=01;32:'
+export LSCOLORS='ExGxFxdaCxDaDahbadacec'
+
+# Configure completions.
+zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'
+zstyle ':completion:*'                  completer       _complete
+zstyle ':completion:*:*:-subscript-:*'  tag-order       indexes parameters
+zstyle ':completion:*'                  squeeze-slashes true
+zstyle ':completion:*'                  single-ignored  show
+zstyle ':completion:*:(rm|kill|diff):*' ignore-line     other
+zstyle ':completion:*:rm:*'             file-patterns   '*:all-files'
+zstyle ':completion:*'                  use-cache       true
+zstyle ':completion:*'                  cache-path      $Z4H/cache/.zcompcache-$ZSH_VERSION
+zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
+
+# Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
+z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
+z4h source $POWERLEVEL9K_CONFIG_FILE
+z4h-set-term-title-precmd || return
+
+z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+
+function -z4h-post-init() {
+  emulate -L zsh
+
+  add-zsh-hook -d precmd -- -z4h-post-init
+
+  # Initialize completions.
+  if zstyle -t ':completion::complete:' use-cache; then
+    local cache
+    zstyle -s ':completion::complete:' cache-path cache
+    : ${cache:=${ZDOTDIR:-~}/.zcompcache}
+    if [[ ! -e $cache ]]; then
+      zf_mkdir -m 0700 -p -- $cache
+    fi
+  fi
+
+  local dump
+  zstyle -s ':z4h:compinit' dump-path dump
+  : ${dump:=$Z4H/cache/.zcompdump-$ZSH_VERSION}
+  unfunction compinit compdef
+  autoload -Uz compinit
+  compinit -u -d $dump
+  [[ ! -r $dump ]] || [[ $dump.zwc -nt $dump ]] || -z4h-compile $dump
+
+  # Replay compdef calls.
+  local args
+  for args in $_z4h_compdef; do
+    compdef "${(@0)args}"
+  done
+  unset _z4h_compdef
+
+  # Make it possible to use completion specifications and functions written for bash.
+  autoload -Uz bashcompinit
+  bashcompinit
+
+  # zsh-syntax-highlighting must be loaded after all widgets have been defined.
+  z4h source $Z4H/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
+}
+
+precmd_functions=(-z4h-post-init $precmd_functions)
+
+[[ -e $Z4H/z4h.zsh.zwc ]] || -z4h-compile-all
+
+# Aliases.
+if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD
+  # Don't define aliases for commands that point to busybox.
+  [[ ${${:-diff}:c:A:t} == busybox* ]] || alias diff='diff --color=auto'
+  [[ ${${:-ls}:c:A:t}   == busybox* ]] || alias ls='ls --color=auto'
+else
+  [[ ${${:-ls}:c:A:t}   == busybox* ]] || alias ls='ls -G'
+fi
+[[ ${${:-grep}:c:A:t}   == busybox* ]] || alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'

@@ -1,0 +1,7 @@
+emulate -L zsh
+local f
+for f in chpwd $chpwd_functions precmd $precmd_functions; do
+  (( $+functions[$f] )) && $f &>/dev/null
+done
+zle .reset-prompt
+zle -R

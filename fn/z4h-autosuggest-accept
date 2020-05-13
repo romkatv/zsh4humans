@@ -1,0 +1,4 @@
+emulate -L zsh
+local cursor=$CURSOR
+zle autosuggest-accept
+CURSOR=$cursor

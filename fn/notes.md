@@ -177,7 +177,7 @@ Name all private functions like this: `-z4h-foo-bar`.
 
 ---
 
-Make `_z4h_clone` (or rather `-z4h-clone`) autoloadable.
+Make `-z4h-clone` (or rather `-z4h-clone`) autoloadable.
 
 ---
 

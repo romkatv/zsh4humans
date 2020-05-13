@@ -1,0 +1,16 @@
+emulate -L zsh 
+print -Pru2 -- "%F{3}z4h%f: core parameters have unexpectedly changed"
+local -a old=(${(0)_z4h_param_sig})
+local -a new=(${(0)${(e)_z4h_param_pat}})
+local diff_old=(${new:|old})
+local diff_new=(${old:|new})
+print -Pru2 -- ""
+print -Pru2 -- "%F{2}Expected:%f"
+print -Pru2 -- ""
+print -lru2 -- "  "$^diff_old
+print -Pru2 -- ""
+print -Pru2 -- "%F{1}Found:%f"
+print -Pru2 -- ""
+print -lru2 -- "  "$^diff_new
+print -Pru2 -- ""
+print -Pru2 -- "Restore the parameters or restart Zsh with %F{2}%Uexec%u zsh%f."

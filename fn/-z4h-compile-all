@@ -1,0 +1,8 @@
+local files=(
+  $Z4H/romkatv/zsh4humans/main.zsh
+  $Z4H/romkatv/zsh4humans/sc/exec-zsh-i
+  $Z4H/romkatv/zsh4humans/fn/z4h-*
+  $Z4H/romkatv/zsh4humans/fn/-z4h-*
+  $Z4H/z4h.zsh)  # this file must be last because its presence gates the call
+local file
+for file in $files; do -z4h-compile $file; done

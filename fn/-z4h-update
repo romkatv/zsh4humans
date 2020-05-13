@@ -12,6 +12,7 @@ local new=$Z4H.new.$$
   Z4H=$new -z4h-clone romkatv/zsh4humans romkatv/zsh4humans ${Z4H_URL:t} || return
   $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new                       || return 1
   print -n >$new/cache/z4h-updating                                      || return 1
+  local path=(${(@)path:#$Z4H/junegunn/fzf/bin})
   Z4H=$new </dev/null >/dev/null $_z4h_exe -ic '
     (( $? )) && "exit" "1"
     "builtin" "emulate" "zsh" "-o" "no_aliases"
@@ -30,6 +31,7 @@ local new=$Z4H.new.$$
     return 2
   fi
   zf_rm -- $new/cache/z4h-update-succeeded || return 1
+  zf_rm -- $new/cache/z4h-updating         || return 1
   zf_mv -f -- $Z4H $old                    || return 1
   zf_mv -f -- $new $Z4H                    || return 1
   zf_rm -rf -- $old                        || true

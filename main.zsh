@@ -156,10 +156,11 @@ function z4h() {
 
         if (( ! ${have[(I)*/romkatv/powerlevel10k]} )); then
           print -Pru2 -- "%F{3}z4h%f: fetching %Bgitstatus%b binary"
-          $Z4H/romkatv/powerlevel10k/gitstatus/install -f || return
+          GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR \
+            $Z4H/romkatv/powerlevel10k/gitstatus/install -f || return
         fi
 
-        if [ ! -e $Z4H/junegunn/fzf/bin/fzf ]; then
+        if [[ ! -e $Z4H/junegunn/fzf/bin/fzf ]]; then
           print -Pru2 -- "%F{3}z4h%f: fetching %Bfzf%b binary"
           local BASH_SOURCE=($Z4H/junegunn/fzf/install) err
           if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then

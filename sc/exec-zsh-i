@@ -70,7 +70,7 @@ _z4h_exec_zsh_i() {
   while 'true'; do
     
     >&2 'echo'
-    if 'command' 'sh' '--' "$install" '-s' '3' '3'>"$zshdir"; then
+    if 'command' 'sh' '--' "$install" '-s' '3' 3>"$zshdir"; then
       'local' dir=''
       IFS='' 'read' '-r' 'dir' <"$zshdir"                          || 'return'
       'command' 'rm' '-f' '--' "$Z4H"/stickycache/zshdir           || 'return'

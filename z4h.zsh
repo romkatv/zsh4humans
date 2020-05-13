@@ -205,7 +205,7 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
 
       if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
         err="$('command' 'curl' '-fsSLo' 'snapshot.tar.gz' '--' "$url" 2>&1)"
-      elif 'command' '-v' 'wget' '>/dev/null' 2>&1; then
+      elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
         err="$('command' 'wget' '-O' 'snapshot.tar.gz' '--' "$url" 2>&1)"
       else
         >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
@@ -263,7 +263,7 @@ if '[' '-n' "$Z4H" '-a' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/z4h.zsh ']'; then
   >&2 'printf' 'If nothing helps and you are about to give up:\n'
   >&2 'printf' '\n'
   >&2 'printf' '  \033[35m# nuke the entire site from orbit\033[0m\n'
-  >&2 'printf' '  \033[4;32msudo\033[0m \033[32mrm\033[0m -rf -- \033[4;33m%s\033[0m\n' "$Z4H"
+  >&2 'printf' '  \033[4;32msudo\033[0m \033[32mrm\033[0m -rf -- \033[4;33m"%s"\033[0m\n' "$Z4H"
 fi
 if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
@@ -276,5 +276,7 @@ elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' '  \033[32msh\033[0m -c \033[33m"\033[0m$(\033[32mwget\033[0m -O- \033[4mhttps://raw.githubusercontent.com/romkatv/zsh4humans/v2/install\033[0m)\033[33m"\033[0m\n'
 fi
+
+>&2 'printf' '\n'
 
 'return' '1'

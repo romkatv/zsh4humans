@@ -76,7 +76,7 @@ if '[' '-n' "$ZSH_VERSION" ']'; then
 fi
 
 if '[' '-n' "$Z4H" '-a' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/romkatv/zsh4humans/main.zsh ']' &&
-   '[' '-a' "$Z4H_URL" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v2' ']'; then
+   '[' "$Z4H_URL" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v2' ']'; then
   if '.' "$Z4H"/romkatv/zsh4humans/main.zsh; then
     'setopt' 'aliases'
     'return'
@@ -180,29 +180,6 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
       >&2 'printf' '  Z4H_URL=\033[33m"%s"\033[0m\n' "$Z4H_URL"
       >&2 'printf' '\n'
       >&2 'printf' 'Delete \033[4m%s\033[0m to switch to \033[1mv%s\033[0m.\n' "$Z4H" "$v"
-      'exit' '1'
-    fi
-
-    
-    "tmp=$dir.tmp.$$"
-    if '[' "$mid" '=' "$Z4H_URL" '-o' '-z' "$ref" '-o' '-z' "$proj" ]; then
-      if '[' '-t' '2' ']'; then
-        >&2 'printf' '\033[33mz4h\033[0m: invalid \033[1mZ4H_URL\033[0m: \033[31m%s\033[0m\n' "$Z4H_URL"
-        >&2 'printf' '\n'
-        >&2 'printf' 'It comes from \033[4m%s\033[0m. Correct value example:\n' "${ZDOTDIR:-~}"/.zshrc
-        >&2 'printf' '\n'
-        >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v2}"\033[0m\n'
-        >&2 'printf' '\n'
-        >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
-      else
-        >&2 'printf' 'z4h: invalid Z4H_URL: %s\n' "$Z4H_URL"
-        >&2 'printf' '\n'
-        >&2 'printf' 'It comes from %s. Correct value example:\n' "${ZDOTDIR:-~}"/.zshrc
-        >&2 'printf' '\n'
-        >&2 'printf' '  : "${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v2}"\n'
-        >&2 'printf' '\n'
-        >&2 'printf' 'Note: The leading colon (:) is necessary.\n'
-      fi
       'exit' '1'
     fi
 

@@ -98,8 +98,10 @@ function z4h() {
     if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
       source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
     fi
-    eval "$_z4h_opt"
-    -z4h-init
+    () {
+      eval "$_z4h_opt"
+      -z4h-init
+    }
     return
   }
 

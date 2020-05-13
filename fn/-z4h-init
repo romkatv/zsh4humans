@@ -430,7 +430,7 @@ z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 function -z4h-post-init() {
   emulate -L zsh
 
-  add-zsh-hook -d precmd -- -z4h-post-init
+  add-zsh-hook -d -- precmd -z4h-post-init
 
   # Initialize completions.
   if zstyle -t ':completion::complete:' use-cache; then

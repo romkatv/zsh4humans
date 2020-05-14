@@ -1,49 +1,50 @@
-if (( ! $+_z4h_install_succeeded )); then
-  print -Pru2 -- "%F{3}z4h%f: %F{1}chsh%f cannot be called before %Binstall%b"
-  return 1
-fi
+# Check whether the current shell is the login shell. If not, offer to change login shell.
+
 if (( $+_z4h_init_called )); then
   print -Pru2 -- "%F{3}z4h%f: %F{1}chsh%f cannot be called after %Binit%b"
   return 1
 fi
-# Check whether the current shell is the login shell. If not, offer to change login shell.
-(( UID && EUID )) || return 0
+
 [[ -n $SHELL && $SHELL != $_z4h_exe && $_z4h_exe == /* && ${SHELL:A} != ${_z4h_exe:A} &&
-  -x ${_z4h_exe:A} && ! -e $Z4H/stickycache/.no-chsh && $+commands[chsh] == 1 &&
-  -r /etc/shells && -w $TTY ]] || return 0
-[[ $+commands[sudo] == 1 ||
+   -x ${_z4h_exe:A} && ! -e $Z4H/stickycache/no-chsh && $+commands[chsh] == 1 &&
+   -r /etc/shells && -t 0 && -t 1 && -t 2 ]] || return 0
+[[ $+commands[sudo] == 1 || -w /etc/shells ||
   "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
 
->>$TTY print -Pr -- "%F{3}z4h%f: the current shell isn't your login shell"
->>$TTY print -Pr -- ""
->>$TTY print -Pr -- "  Current shell         %F{2}${_z4h_exe//\%/%%}%f"
->>$TTY print -Pr -- "  Login shell (%B\$SHELL%b)  %F{2}${SHELL//\%/%%}%f"
+print -Pr -- "%F{3}z4h%f: the current shell isn't your login shell"
+print -Pr -- ""
+print -Pr -- "  Current shell         %F{2}${_z4h_exe//\%/%%}%f"
+print -Pr -- "  Login shell (%B\$SHELL%b)  %F{2}${SHELL//\%/%%}%f"
 
-trap '' INT
 (
-  local query="Change login shell to %F{2}${_z4h_exe//\%/%%}%f?"
-  while true; do
-    {
-      local REPLY=n
-      >>$TTY print
-      read -q ${(%):-"?$query [y/N]: "} && REPLY=y
-    } always {
-      >>$TTY print -l -- '' ''
-    }
-    if [[ $REPLY != y ]]; then
-      print -rn >$Z4H/stickycache/.no-chsh || return
-      >>$TTY print -Pr -- "Won't ask again unless %U\$Z4H/stickycache/.no-chsh%u is deleted."
-      return 1
-    fi
-    query="Try again?"
-    if [[ "$(</etc/shells)" != *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]]; then
-      >>$TTY print -Pr -- "Adding %F{2}${_z4h_exe//\%/%%}%f to %U/etc/shells%u."
-      sudo tee -a /etc/shells >/dev/null <<<$_z4h_exe || continue
-      >$TTY print
-    fi
-    >>$TTY print -Pr -- "Changing login shell to %F{2}${_z4h_exe//\%/%%}%f."
-    chsh -s $_z4h_exe || continue
-    >>$TTY print -Pr -- "Changed login shell to %F{2}${_z4h_exe//\%/%%}%f."
-    return 0
-  done
+  trap '' INT
+  (
+    local query="Change login shell to %F{2}${_z4h_exe//\%/%%}%f?"
+    while true; do
+      {
+        local REPLY=n
+        print
+        read -q ${(%):-"?$query [y/N]: "} && REPLY=y
+      } always {
+        print -l -- '' ''
+      }
+      if [[ $REPLY != y ]]; then
+        print -rn >$Z4H/stickycache/no-chsh || return
+        print -Pr -- "Won't ask again unless %U\$Z4H/stickycache/no-chsh%u is deleted."
+        return 1
+      fi
+      query="Try again?"
+      if [[ "$(</etc/shells)" != *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]]; then
+        print -Pr -- "Adding %F{2}${_z4h_exe//\%/%%}%f to %U/etc/shells%u."
+        local precmd=(command)
+        [[ -w /etc/shells ]] || precmd+=(sudo)
+        $precmd tee -a /etc/shells >/dev/null <<<$_z4h_exe || continue
+        print
+      fi
+      print -Pr -- "Changing login shell to %F{2}${_z4h_exe//\%/%%}%f."
+      chsh -s $_z4h_exe || continue
+      print -Pr -- "Changed login shell to %F{2}${_z4h_exe//\%/%%}%f."
+      return 0
+    done
+  )
 ) && export SHELL=$_z4h_exe

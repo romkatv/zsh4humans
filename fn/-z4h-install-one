@@ -1,0 +1,81 @@
+local url postinstall
+
+if [[ $1 == romkatv/zsh4humans ]]; then
+  url=https://github.com/romkatv/zsh4humans/archive/${Z4H_URL:t}.tar.gz
+  print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
+else
+  local channel
+  zstyle -s :z4h:$1 channel channel || channel=stable
+
+  case $channel in
+    stable)  url=https://github.com/zsh4humans/${1:t}/archive/z4h-stable.tar.gz;;
+    testing) url=https://github.com/zsh4humans/${1:t}/archive/z4h-testing.tar.gz;;
+    dev)     url=https://github.com/$1/archive/master.tar.gz;;
+    *)
+      print -Pru2 -- '%F{3}z4h%f: invalid zstyle'
+      print -Pru2 -- ''
+      print -Pru2 -- "  %F{2}zstyle%f :z4h:${(q)1//\%/%%} channel %F{1}${(q)channel//\%/%%}%f"
+      print -Pru2 -- ''
+      print -Pru2 -- 'Supported values: %Bstable%b, %Btesting%b and %Bdev%b.'
+      return 1
+    ;;
+  esac
+
+  if ! zstyle -s :z4h:$1 postinstall postinstall; then
+    postinstall=z4h-postinstall-${1:t}
+    (( $+functions[postinstall] )) || postinstall=
+  fi
+
+  if [[ -e $Z4H/cache/z4h-updating ]]; then
+    print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
+  else
+    print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
+  fi
+fi
+
+local dst=$Z4H/$1
+local old new
+
+{
+
+  if (( $+commands[mktemp] )); then
+    old="$(command mktemp -d $dst.old.XXXXXXXXXX)" || return
+    new="$(command mktemp -d $dst.new.XXXXXXXXXX)" || return
+  else
+    old=$dst.old.$$
+    new=$dst.new.$$
+    zf_mkdir -p -- $old $new || return
+  fi
+
+  {
+    (
+      local err
+      builtin cd -q -- $new || exit
+      if (( $+commands[curl] )); then
+        err="$(command curl -fsSLo snapshot.tar.gz -- $url 2>&1)"
+      elif (( $+commands[wget] )); then
+        err="$(command wget -O snapshot.tar.gz -- $url 2>&1)"
+      else
+        print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
+        exit 1
+      fi
+      if (( $? )); then
+        print -ru2 -- $err
+        print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+        exit 1
+      fi
+      command tar -xzf snapshot.tar.gz || exit
+      local dirs=(./${1:t}-*(N/))
+      if (( $#dirs != 1 )); then
+        print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
+        return 1
+      fi
+      builtin cd -q -- $dirs || exit
+      eval $postinstall || exit
+    ) || return
+
+    [[ ! -e $dst ]] || zf_mv -- $dst $old/ || return
+    zf_mv -- $new/${1:t}-*(N/) $dst
+} always {
+  zf_rm -rf -- $old $new
+}

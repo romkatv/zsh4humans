@@ -85,7 +85,7 @@ Install `bat`.
 
 Add options to `z4h chsh`. Perhaps `-v` so that it prints what your login and current shells are
 and what it's going to do about it. Also add `-r` or something to prevent the creation of
-`.no-chsh`. Maybe `-f` to ignore `.no-chsh` and to call `chsh` even if it seems unnecessary.
+`no-chsh`. Maybe `-f` to ignore `no-chsh` and to call `chsh` even if it seems unnecessary.
 Should return `0` if login shell is current shell or if it successfully changes it. Should return
 `1` if user says "no" and `2` on errors.
 

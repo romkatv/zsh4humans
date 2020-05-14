@@ -9,14 +9,14 @@ local new=$Z4H.new.$$
   local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
   local z4h=${${${(q)Z4H}/#${(q)home}/'~'}//\%/%%}
 
-  Z4H=$new -z4h-clone romkatv/zsh4humans romkatv/zsh4humans ${Z4H_URL:t} || return
-  $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new                       || return 1
-  print -n >$new/cache/z4h-updating                                      || return 1
+  Z4H=$new -z4h-install-one romkatv/zsh4humans      || return
+  $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new  || return 1
+  print -n >$new/cache/z4h-updating                 || return 1
   Z4H=$new </dev/null >/dev/null $_z4h_exe -ic '
     (( $? )) && "exit" "1"
     "builtin" "emulate" "zsh" "-o" "no_aliases"
     [[ $Z4H == '${(q)new}' ]] || exit 0
-    print -n >$Z4H/cache/z4h-update-succeeded'                           || return 1
+    print -n >$Z4H/cache/z4h-update-succeeded'      || return 1
   if [[ ! -e $new/cache/z4h-update-succeeded ]]; then
     print -Pru2 -- '%F{3}z4h%f: %B$Z4H%b %F{1}does not propagate%f through %U.zshrc%u'
     print -Pru2 -- ''
@@ -48,10 +48,6 @@ local new=$Z4H.new.$$
     print -Pru2 -- 'Retry update:'
     print -Pru2 -- ''
     print -Pru2 -- '  %F{2}z4h%f %Bupdate%b'
-    print -Pru2 -- ''
-    print -Pru2 -- 'If errors persist and you are desperate:'
-    print -Pru2 -- ''
-    print -Pru2 -- '  %F{2}z4h%f %Breset%b'
     print -Pru2 -- ''
     print -Pru2 -- 'If nothing helps and you are about to give up:'
     print -Pru2 -- ''

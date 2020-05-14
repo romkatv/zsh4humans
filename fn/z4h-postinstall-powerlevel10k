@@ -1,0 +1,5 @@
+emulate -L zsh
+
+print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bgitstatus%b binary"}
+GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR ./gitstatus/install -f || return
+zf_mkdir -p -- $Z4H/cache/powerlevel10k/p10k-root

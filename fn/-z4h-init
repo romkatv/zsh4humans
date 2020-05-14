@@ -1,36 +1,26 @@
-# Display $1 in terminal title.
-function z4h-set-term-title() {
-  emulate -L zsh
-  if [[ -t 1 ]]; then
-    print -rn -- $'\e]0;'${(V)1}$'\a'
-  elif [[ -w $TTY ]]; then
-    print -rn -- $'\e]0;'${(V)1}$'\a' >$TTY
-  fi
-}
-
 # When a command is running, display it in the terminal title.
-function z4h-set-term-title-preexec() {
+function -z4h-set-term-title-preexec() {
   emulate -L zsh
   if (( P9K_SSH )); then
-    z4h-set-term-title ${(%):-"%n@%m: "}$1
+    -z4h-set-term-title ${(%):-"%n@%m: "}$1
   else
-    z4h-set-term-title $1
+    -z4h-set-term-title $1
   fi
 }
 
 # When no command is running, display the current directory in the terminal title.
-function z4h-set-term-title-precmd() {
+function -z4h-set-term-title-precmd() {
   emulate -L zsh
   if (( P9K_SSH )); then
-    z4h-set-term-title ${(%):-"%n@%m: %~"}
+    -z4h-set-term-title ${(%):-"%n@%m: %~"}
   else
-    z4h-set-term-title ${(%):-"%~"}
+    -z4h-set-term-title ${(%):-"%~"}
   fi
 }
 
-autoload -Uz add-zsh-hook                       || return
-add-zsh-hook preexec z4h-set-term-title-preexec || return
-add-zsh-hook precmd z4h-set-term-title-precmd   || return
+autoload -Uz add-zsh-hook                           || return
+add-zsh-hook -- preexec -z4h-set-term-title-preexec || return
+add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 
 local p10k_cfg=
 # If the current locale isn't UTF-8, change it to an UTF-8 one.
@@ -109,7 +99,7 @@ fi
 
 function z4h-cd-back() { z4h-cd-rotate +1 }
 function z4h-cd-forward() { z4h-cd-rotate -0 }
-function z4h-cd-up() { cd .. && z4h-redraw-prompt }
+function z4h-cd-up() { cd .. && -z4h-redraw-prompt }
 
 function z4h-do-nothing() {}
 
@@ -341,10 +331,6 @@ else
   bindkey -M viins '^[[1;3B' fzf-cd-widget                  # ctrl+down
 fi
 
-# Instruct {up,down}-line-or-beginning-search to keep cursor where it is.
-zstyle ':zle:up-line-or-beginning-search'   leave-cursor no
-zstyle ':zle:down-line-or-beginning-search' leave-cursor no
-
 # Tell zsh-autosuggestions how to handle different widgets.
 typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
 typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
@@ -438,7 +424,7 @@ zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
   z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
 }
 z4h source $POWERLEVEL9K_CONFIG_FILE
-z4h-set-term-title-precmd || return
+-z4h-set-term-title-precmd || return
 
 z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
 

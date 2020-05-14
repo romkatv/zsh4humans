@@ -1,0 +1,8 @@
+# Display $1 in terminal title.
+
+emulate -L zsh
+if [[ -t 1 ]]; then
+  print -rn -- $'\e]0;'${(V)1}$'\a'
+elif [[ -w $TTY ]]; then
+  print -rn -- $'\e]0;'${(V)1}$'\a' >$TTY
+fi

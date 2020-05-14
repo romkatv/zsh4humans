@@ -1,0 +1,38 @@
+{
+  if (( ! $+_z4h_no_autoupdate )) && zstyle -t :z4h: auto-update ask; then
+    typeset -gri _z4h_no_autoupdate=1
+    local days
+    if zstyle -s :z4h: auto-update-days days && [[ $days == <-> ]]; then
+      # Check if update is required.
+      local -a last_update_ts
+      if zstat -A last_update_ts +mtime -- $Z4H/cache/.last-update-ts 2>/dev/null &&
+        (( EPOCHSECONDS - last_update_ts[1] >= 86400 * days )) &&
+        [[ ! -e $Z4H/cache/z4h-updating ]]; then
+        local REPLY
+        {
+          read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && REPLY=y
+        } always {
+          [[ -w $TTY ]] && print >>$TTY || print -u2
+        }
+        if [[ $REPLY == y ]]; then
+          z4h update
+          return
+        fi
+        print -Pru2 -- "%F{3}z4h%f: won't ask again for %B$days%b day(s)"
+        print -Pru2 -- ""
+        print -Pru2 -- "To update manually, type:"
+        print -Pru2 -- ""
+        print -Pru2 -- "  %F{2}z4h%f %Bupdate%b"
+        print -n >$Z4H/cache/.last-update-ts || return
+      fi
+    fi
+  fi
+
+  # Clone or update all repositories.
+  local repo have=($Z4H/$^_z4h_install_queue(N))
+  for repo in ${${_z4h_install_queue:|have}#$Z4H}; do
+    -z4h-install-one $repo || return
+  done
+} always {
+  unset _z4h_install_queue
+}

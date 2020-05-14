@@ -1,6 +1,4 @@
-#!/bin/sh
-#
-# This file gets sourced. The hashbang is for syntax highlighting.
+# This file gets sourced. It never returns succeeds.
 
 _z4h_try_exec_zsh_i() {
   'command' '-v' "$1" >'/dev/null' 2>&1 || 'return' '0'
@@ -28,7 +26,7 @@ _z4h_exec_zsh_i() {
 
   'local' 'install'
   if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
-    install="$(mktemp "$Z4H"/cache/install-zsh.XXXXXXXXXX)"
+    install="$('command' 'mktemp' "$Z4H"/cache/install-zsh.XXXXXXXXXX)"
   else
     install="$Z4H"/cache/install-zsh.tmp."$$"
     '[' '!' '-e' "$install" ']' || 'command' 'rm' '-rf' '--' "$install" || 'return'
@@ -62,7 +60,7 @@ _z4h_exec_zsh_i() {
 
   'local' 'zshdir'
   if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
-    zshdir="$(mktemp "$Z4H"/cache/zshdir.XXXXXXXXXX)"
+    zshdir="$('command' 'mktemp' "$Z4H"/cache/zshdir.XXXXXXXXXX)"
   else
     zshdir="$Z4H"/cache/zshdir.tmp."$$"
     '[' '!' '-e' "$zshdir" ']' || 'command' 'rm' '-rf' '--' "$zshdir" || 'return'

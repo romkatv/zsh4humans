@@ -56,7 +56,9 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
 typeset -gaU cdpath fpath mailpath path
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 path=($Z4H/bin $Z4H/junegunn/fzf/bin $path)
-fpath+=($Z4H/romkatv/zsh4humans/fn $Z4H/fn)
+fpath+=($Z4H/romkatv/zsh4humans/fn $Z4H/fn $Z4H/zsh-users/zsh-completions/src)
+
+: ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 
 autoload -Uz -- $Z4H/romkatv/zsh4humans/fn/[^_]*(:t) || return
 
@@ -85,15 +87,22 @@ function z4h() {
   }
 
   [[ "$ARGC-$1" != 1-init ]] || {
-    (( ${+_z4h_install_succeeded} )) || {
-      print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called before %Binstall%b"}
-      return 1
-    }
     (( ! ${+_z4h_init_called} )) || {
       print -ru2 ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
       return 1
     }
     typeset -gri _z4h_init_called=1
+    _z4h_install_queue+=(
+      romkatv/powerlevel10k
+      junegunn/fzf
+      Aloxaf/fzf-tab
+      zsh-users/zsh-completions
+      zsh-users/zsh-autosuggestions
+      zsh-users/zsh-syntax-highlighting)
+    if ! -z4h-install-many; then
+      -z4h-error-command init
+      return 1
+    fi
     # Enable Powerlevel10k instant prompt.
     () {
       local user=${(%):-%n}
@@ -104,7 +113,9 @@ function z4h() {
     }
     () {
       eval "$_z4h_opt"
-      -z4h-init
+      -z4h-init && return
+      -z4h-error-command init
+      return 1
     }
     return
   }
@@ -112,101 +123,35 @@ function z4h() {
   eval "$_z4h_opt"
 
   case $ARGC-$1 in
-    1-install)
-      : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
-
-      {
-        if [[ ! -e $Z4H/cache/.last-update-ts ]]; then
-          zf_mkdir -p -- $Z4H || return
-          print -n >$Z4H/cache/.last-update-ts || return
-        elif zstyle -t :z4h: auto-update ask; then
-          local days
-          if zstyle -s :z4h: auto-update-days days && [[ $dayz == <-> ]]; then
-            # Check if update is required.
-            local -a last_update_ts
-            if zstat -A last_update_ts +mtime -- $Z4H/cache/.last-update-ts 2>/dev/null &&
-              (( EPOCHSECONDS - last_update_ts[1] >= 86400 * days )); then
-              local REPLY
-              {
-                read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && REPLY=y
-              } always {
-                [[ -w $TTY ]] && print >>$TTY || print -u2
-              }
-              if [[ $REPLY == y ]]; then
-                z4h update
-                return
-              fi
-              print -Pru2 -- "%F{3}z4h%f: type %F{2}z4h%f %Bupdate%b to update"
-              print -n >$Z4H/cache/.last-update-ts || return
-            fi
-          fi
-        fi
-
-        # GitHub projects to clone.
-        local github_repos=(
-          zsh-users/zsh-syntax-highlighting  # https://github.com/zsh-users/zsh-syntax-highlighting
-          zsh-users/zsh-autosuggestions      # https://github.com/zsh-users/zsh-autosuggestions
-          zsh-users/zsh-completions          # https://github.com/zsh-users/zsh-completions
-          romkatv/powerlevel10k              # https://github.com/romkatv/powerlevel10k
-          Aloxaf/fzf-tab                     # https://github.com/Aloxaf/fzf-tab
-          junegunn/fzf                       # https://github.com/junegunn/fzf
-        )
-
-        # Clone or update all repositories.
-        local repo have=($Z4H/$^github_repos(N))
-        for repo in ${github_repos:|have}; do
-          -z4h-clone ${repo#$Z4H} zsh4humans/${repo:t} z4h-stable || return
-        done
-
-        if (( ! ${have[(I)*/romkatv/powerlevel10k]} )); then
-          print -Pru2 -- "%F{3}z4h%f: fetching %Bgitstatus%b binary"
-          GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR \
-            $Z4H/romkatv/powerlevel10k/gitstatus/install -f || return
-          zf_mkdir -p -- $Z4H/cache/powerlevel10k/p10k-root
-        fi
-
-        if [[ ! -e $Z4H/junegunn/fzf/bin/fzf ]]; then
-          print -Pru2 -- "%F{3}z4h%f: fetching %Bfzf%b binary"
-          local BASH_SOURCE=($Z4H/junegunn/fzf/install) err
-          if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
-            print -ru2 -- $err
-            return 1
-          fi
-          if [[ -h $Z4H/junegunn/fzf/bin/fzf ]]; then
-            command cp -- $Z4H/junegunn/fzf/bin/fzf $Z4H/junegunn/fzf/bin/fzf.tmp || return
-            zf_mv -f -- $Z4H/junegunn/fzf/bin/fzf.tmp $Z4H/junegunn/fzf/bin/fzf || return
-          fi
-        fi
-
-        path=($Z4H/junegunn/fzf/bin $path)
-        fpath+=($Z4H/zsh-users/zsh-completions/src)
-        typeset -gri _z4h_install_succeeded=1
-      } always {
-        (( $? )) && -z4h-error-install
-      }
-    ;;
-
-    2-clone)
-      if [[ -z $2 || $2 != *?/?* || $2 == *:* ]]; then
-        print -Pru2 -- "%F{3}z4h%f: %Bclone%b argument must be %Uuser/repo%u: %F{1}${2//\%/%%}%f"
+    <->-install)
+      local -i flush OPTIND
+      local opt OPTARG
+      shift
+      while getopts ':f' opt "$@"; do
+        case $opt in
+          f)  flush=1;;
+          +f) flush=0;;
+          *) -z4h-error-bad-opt '%Binstall%b'; return 1;;
+        esac
+      done
+      shift $((OPTIND-1))
+      local invalid=("${@:#([^/]##/)##[^/]##}")
+      if (( $#invalid )); then
+        print -Pru2 -- '%F{3}z4h%f: %Binstall%b: invalid project name(s)'
+        print -Pru2 -- ''
+        print -Prlu2 -- '  %F{1}'${(q)^invalid//\%/%%}'%f'
         return 1
       fi
-      if (( ! $+_z4h_install_succeeded )); then
-        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called before %Binstall%b"
-        return 1
-      fi
-      if (( $+_z4h_init_called )); then
-        print -Pru2 -- "%F{3}z4h%f: %F{1}clone%f cannot be called after %Binit%b"
-        return 1
-      fi
-      [[ ! -d $Z4H/$2 ]] || -z4h-clone $2 $2 master
-      return
+      _z4h_install_queue+=("${@:$OPTIND}")
+      (( flush && $#_z4h_install_queue )) || return 0
+      -z4h-install-many && return
+      -z4h-error-command install
+      return 1
     ;;
 
     1-chsh)   -z4h-chsh;;
-    <2->-ssh) -z4h-ssh "${@:2}";;
+    # <2->-ssh) -z4h-ssh "${@:2}";;
     1-update) -z4h-update;;
-    1-reset)  -z4h-reset;;
     *)        -z4h-help "$@";;
   esac
 }

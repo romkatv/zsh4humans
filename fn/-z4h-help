@@ -16,26 +16,15 @@ case $ARGC-$1 in
         print -Pr -- ""
         print -Pr -- "Initialize Zsh. Should be called just once from %U.zshrc%u."
       ;;
-      reset)
-        print -Pr -- "usage: %F{2}z4h%f %Breset%b"
-        print -Pr -- ""
-        print -Pr -- "Reinstall all dependencies (fzf, zsh-autosuggestions, etc.)."
-      ;;
-      clone)
-        print -Pr -- "usage: %F{2}z4h%f %Bclone%b %Uusername/repository%u"
-        print -Pr -- ""
-        print -Pr -- "Clone a repository from GitHub. Can be called from %U.zshrc%u between"
-        print -Pr -- "%Binstall%b and %Binit%b."
-      ;;
       source)
         print -Pr -- "usage: %F{2}z4h%f %Bsource%b %Ufile%u"
         print -Pr -- ""
         print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
       ;;
-      ssh)
-        -z4h-help-ssh
-        return
-      ;;
+      # ssh)
+      #   -z4h-help-ssh
+      #   return
+      # ;;
       chsh)
         print -Pr -- "usage: %F{2}z4h%f %Bchsh%b"
         print -Pr -- ""
@@ -59,10 +48,8 @@ case $ARGC-$1 in
     print -Pru$fd -- "usage: %F{2}z4h%f %Binstall%b"
     print -Pru$fd -- "           %Bupdate%b"
     print -Pru$fd -- "           %Binit%b"
-    print -Pru$fd -- "           %Breset%b"
-    print -Pru$fd -- "           %Bclone%b %Uusername/repository%u"
     print -Pru$fd -- "           %Bsource%b %Ufile%u"
-    print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
+    # print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
     print -Pru$fd -- "           %Bchsh%b"
     print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"
     return ret

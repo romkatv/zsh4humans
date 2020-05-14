@@ -2,7 +2,7 @@
 
 Configuration for [Z shell](https://en.wikipedia.org/wiki/Z_shell) that aims to work really well out
 of the box. It combines the best Zsh plugins into a coherent whole that feels like a finished
-product rather than a DYI starter kit.
+product rather than a DIY starter kit.
 
 If you want a great shell that just works, this project is for you.
 

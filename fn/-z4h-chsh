@@ -13,7 +13,7 @@ if (( ! $+commands[chsh] )); then
   [[ $+commands[sudo] == 1 || -w /etc ]] || return 0
   (( $+commands[sed] )) || return 0
 fi
-if [[ ! -w /etc/shells ]]; then
+if [[ $+commands[sudo] == 0 && ! -w /etc/shells ]] && ; then
   [[ "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
 fi
 
@@ -42,7 +42,7 @@ print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
 (
   trap '' INT
   (
-    local query="Change login shell to %F{2}${_z4h_exe//\%/%%}%f?"
+    local query="Change login shell of %F{3}${user//\%/%%}%f to %F{2}${_z4h_exe//\%/%%}%f?"
     while true; do
       {
         local REPLY=n
@@ -80,7 +80,7 @@ print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
         $precmd tee -- /etc/passwd.bak.$$ >/dev/null <<<${(F)p} || continue
         $precmd mv -f -- /etc/passwd.bak.$$ /etc/passwd || continue
       fi
-      print -Pr -- "Changed login shell to %F{2}${_z4h_exe//\%/%%}%f."
+      print -Pr -- "Changed login shell of %F{3}${user//\%/%%}%f to %F{2}${_z4h_exe//\%/%%}%f."
       return 0
     done
   )

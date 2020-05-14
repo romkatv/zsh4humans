@@ -431,7 +431,10 @@ zstyle ':completion:*'                  cache-path      $Z4H/cache/.zcompcache-$
 zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
 # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
-z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
+() {
+  local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
+  z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
+}
 z4h source $POWERLEVEL9K_CONFIG_FILE
 z4h-set-term-title-precmd || return
 

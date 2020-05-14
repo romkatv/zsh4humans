@@ -95,9 +95,13 @@ function z4h() {
     }
     typeset -gri _z4h_init_called=1
     # Enable Powerlevel10k instant prompt.
-    if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-      source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-    fi
+    () {
+      local user=${(%):-%n}
+      local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
+      [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
+      [[ -e $XDG_CACHE_HOME/p10k-root ]] || zf_mkdir -p -- $XDG_CACHE_HOME/p10k-root 2>/dev/null
+      source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
+    }
     () {
       eval "$_z4h_opt"
       -z4h-init
@@ -109,7 +113,7 @@ function z4h() {
 
   case $ARGC-$1 in
     1-install)
-      GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus
+      : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 
       {
         if [[ ! -e $Z4H/cache/.last-update-ts ]]; then
@@ -158,6 +162,7 @@ function z4h() {
           print -Pru2 -- "%F{3}z4h%f: fetching %Bgitstatus%b binary"
           GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR \
             $Z4H/romkatv/powerlevel10k/gitstatus/install -f || return
+          zf_mkdir -p -- $Z4H/cache/powerlevel10k/p10k-root
         fi
 
         if [[ ! -e $Z4H/junegunn/fzf/bin/fzf ]]; then
@@ -166,6 +171,10 @@ function z4h() {
           if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
             print -ru2 -- $err
             return 1
+          fi
+          if [[ -h $Z4H/junegunn/fzf/bin/fzf ]]; then
+            command cp -- $Z4H/junegunn/fzf/bin/fzf $Z4H/junegunn/fzf/bin/fzf.tmp || return
+            zf_mv -f -- $Z4H/junegunn/fzf/bin/fzf.tmp $Z4H/junegunn/fzf/bin/fzf || return
           fi
         fi
 

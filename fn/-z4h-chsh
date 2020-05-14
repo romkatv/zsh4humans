@@ -5,16 +5,39 @@ if (( $+_z4h_init_called )); then
   return 1
 fi
 
-[[ -n $SHELL && $SHELL != $_z4h_exe && $_z4h_exe == /* && ${SHELL:A} != ${_z4h_exe:A} &&
-   -x ${_z4h_exe:A} && ! -e $Z4H/stickycache/no-chsh && $+commands[chsh] == 1 &&
-   -r /etc/shells && -t 0 && -t 1 && -t 2 ]] || return 0
-[[ $+commands[sudo] == 1 || -w /etc/shells ||
-  "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
+[[ -n $SHELL && $SHELL == $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] && return 0
 
-print -Pr -- "%F{3}z4h%f: the current shell isn't your login shell"
+local user=${(%):-%n}
+[[ -n $user && -r /etc/passwd && -r /etc/shells && -t 0 && -t 1 && -t 2 ]] || return 0
+if (( ! $+commands[chsh] )); then
+  [[ $+commands[sudo] == 1 || -w /etc ]] || return 0
+  (( $+commands[sed] )) || return 0
+fi
+if [[ ! -w /etc/shells ]]; then
+  [[ "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
+fi
+
+local passwd
+passwd="$(</etc/passwd)" || return 1
+[[ $passwd == *((#s)|$'\n')$user:[^$'\n']#:($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] && return 0
+
+local -a match mbegin mend
+[[ $passwd == (#b)*((#s)|$'\n')$user:[^$'\n']#:([^:]##)((#e)|$'\n')* ]] || return 0
+local login_shell=$match[2]
+[[ -n $login_shell && -x $login_shell && ${login_shell:A} != ${_z4h_exe:A} ]] || return 0
+
+local -a shells
+shells=(${(f)"$(</etc/shells)"}) || return 1
+local my_shell=$shells[(re)$_z4h_exe]
+if [[ -z $my_shell ]]; then
+  local real_shells=(${shells:A})
+  my_shell=$shells[$real_shells[(ie)${_z4h_exe:A}]]
+fi
+
+print -Pr -- "%F{3}z4h%f: your login shell isn't the same as this shell"
 print -Pr -- ""
-print -Pr -- "  Current shell         %F{2}${_z4h_exe//\%/%%}%f"
-print -Pr -- "  Login shell (%B\$SHELL%b)  %F{2}${SHELL//\%/%%}%f"
+print -Pr -- "  login shell: %F{2}${login_shell//\%/%%}%f"
+print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
 
 (
   trap '' INT
@@ -34,15 +57,29 @@ print -Pr -- "  Login shell (%B\$SHELL%b)  %F{2}${SHELL//\%/%%}%f"
         return 1
       fi
       query="Try again?"
-      if [[ "$(</etc/shells)" != *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]]; then
+      if [[ -z $my_shell ]]; then
         print -Pr -- "Adding %F{2}${_z4h_exe//\%/%%}%f to %U/etc/shells%u."
         local precmd=(command)
         [[ -w /etc/shells ]] || precmd+=(sudo)
         $precmd tee -a /etc/shells >/dev/null <<<$_z4h_exe || continue
-        print
+        my_shell=$_z4h_exe
+        (( $#precmd == 1 )) || print
       fi
       print -Pr -- "Changing login shell to %F{2}${_z4h_exe//\%/%%}%f."
-      chsh -s $_z4h_exe || continue
+      if (( $+commands[chsh] )); then
+        command chsh -s $_z4h_exe || continue
+      else
+        local MATCH MBEGIN MEND
+        local p=("${(@)${(@f)passwd}/#%(#m)$user:*/${MATCH%:*}:$my_shell}")
+        if [[ ${(F)p} == $passwd ]]; then
+          print -Pru2 -- '%F{3}z4h%f: %F{1}internal error%f'
+          return 1
+        fi
+        local precmd=(command)
+        [[ -w /etc ]] || precmd+=(sudo)
+        $precmd tee -- /etc/passwd.bak.$$ >/dev/null <<<${(F)p} || continue
+        $precmd mv -f -- /etc/passwd.bak.$$ /etc/passwd || continue
+      fi
       print -Pr -- "Changed login shell to %F{2}${_z4h_exe//\%/%%}%f."
       return 0
     done

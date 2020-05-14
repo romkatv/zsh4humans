@@ -142,7 +142,7 @@ function z4h() {
         print -Prlu2 -- '  %F{1}'${(q)^invalid//\%/%%}'%f'
         return 1
       fi
-      _z4h_install_queue+=("${@:$OPTIND}")
+      _z4h_install_queue+=("$@")
       (( flush && $#_z4h_install_queue )) || return 0
       -z4h-install-many && return
       -z4h-error-command install

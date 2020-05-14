@@ -1,0 +1,126 @@
+#!/bin/sh
+
+if '[' '-n' "${ZSH_VERSION-}" ']'; then
+  'emulate' 'sh' '-o' 'err_exit' '-o' 'no_unset'
+else
+  'set' '-ue'
+fi
+
+platform="$('command' 'uname' '-sm')"
+platform="$('printf' '%s' "$platform" | 'command' 'tr' '[A-Z]' '[a-z]')"
+
+case "$platform" in
+  'darwin x86_64');;
+  'freebsd amd64');;
+  'linux aarch64');;
+  'linux armv6l');;
+  'linux armv7l');;
+  'linux i686');;
+  'linux x86_64');;
+  *)
+    >&2 'printf' '\033[33mz4h\033[0m: sorry, unsupported platform: \033[31m%s\033[0m\n' "$platform"
+    'exit' '1'
+  ;;
+esac
+
+if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
+  fetch='command curl -fsSLo'
+elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
+  fetch='command wget -O'
+else
+  >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
+  'exit' '1'
+fi
+
+>&2 'printf' '\033[33mz4h\033[0m: platform \033[32m%s\033[0m is supported\n' "$platform"
+
+rcs=''
+
+for f in ~/'.zshenv' ~/'.zprofile' ~/'.zshrc' ~/'.zlogin' ~/'.zlogout'; do
+  if '[' '-e' "$f" ']'; then
+    rcs="$rcs ${f##*/}"
+  fi
+done
+
+backup_dir=''
+
+if '[' '-n' "$rcs" ']'; then
+  backup_dir='zsh-backup'
+  if 'command' '-v' 'date' >'/dev/null' 2>&1; then
+    backup_dir="$backup_dir/$('command' 'date' '+%Y-%m-%d-%H-%M-%S')"
+  fi
+  if [ '-e' "$HOME/$backup_dir" ]; then
+    i='1'
+    while '[' '-e' "$HOME/$backup_dir.$i" ]; do
+      i="$((i+1))"
+    done
+    backup_dir="$backup_dir.$i"
+  fi
+  >&2 'printf' '\033[33mz4h\033[0m: \033[32mz4h\033[0m startup files already exist\n'
+  >&2 'printf' '\n'
+  for f in $rcs; do
+    >&2 'printf' '    \033[4m~/%s\033[0m\n' "${f##*/}"
+  done
+  >&2 'printf' '\n'
+  >&2 'printf' '  \033[1m(1)\033[0m  Move them to \033[4m~/%s\033[0m\n' "$backup_dir"
+  >&2 'printf' '  \033[1m(2)\033[0m  Delete them.\n'
+  >&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
+  >&2 'printf' '\n'
+  while 'true'; do
+    >&2 'printf' '\033[1mChoice [12q]:\033[0m '
+    IFS='' 'read' '-r' 'choice'
+    case "$choice" in
+      '1')
+        backup_dir="$HOME/$backup_dir"
+        'break'
+      ;;
+      '2')
+        backup_dir=''
+        'break'
+      ;;
+      'q')
+        'exit' '1'
+      ;;
+      *)
+        >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
+      ;;
+    esac
+  done
+fi
+
+url='https://raw.githubusercontent.com/romkatv/zsh4humans/v2/.zshrc'
+
+>&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
+
+if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
+  zshrc="$('command' 'mktemp' "$HOME"/.zshrc.XXXXXXXXXX)"
+else
+  zshrc="$HOME"/.zshrc.tmp."$$"
+fi
+
+(
+  if ! err="$($fetch "$zshrc" '--' "$url" 2>&1)"; then
+    >&2 'printf' "%s\n" "$err"
+    >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"
+    'exit' '1'
+  fi
+
+  if '[' '-n' "$backup_dir" ']'; then
+    'command' 'mkdir' '-p' '--' "$backup_dir"
+    for f in $rcs; do
+      'command' 'cp' '--' "$f" "$backup_dir"/
+    done
+  fi
+
+  if '[' '-n' "$rcs" ']'; then
+    'command' 'rm' '-f' '--' $rcs
+  fi
+
+  'command' 'mv' '--' "$zshrc" ~/'.zshrc'
+
+  >&2 'printf' '\033[33mz4h\033[0m: bootstrapping \033[32mzsh\033[0m environment\n'
+  '.' ~/'.zshrc'
+) && 'exit'
+
+'command' 'rm' '-f' '--' "$zshrc" 2>'/dev/null'
+'exit' '1'

@@ -36,7 +36,7 @@ zstyle ':z4h:*'               channel          stable
 # The other key modifier will be bound to cursor movement by words.
 zstyle ':z4h:'                cd-key           alt
 # Right-arrow key accepts one character ('partial-accept') from
-# the autosuggestion of the whole thing ('accept')?
+# command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     partial-accept
 
 if (( UID && UID == EUID )) && [[ -z $SSH_CONNECTION ]]; then
@@ -52,7 +52,7 @@ fi
 # This is just an example. If you don't plan to use Oh My Zsh, delete this.
 z4h install ohmyzsh/ohmyzsh || return
 
-# Install or update core dependencies (fzf, zsh-autosuggestions, etc.) and
+# Install or update core components (fzf, zsh-autosuggestions, etc.) and
 # initialize Zsh. After this point console I/O is unavailable. Everything
 # that requires user interaction or can perform network I/O must be done
 # above. Everything else is best done below.
@@ -87,7 +87,7 @@ bindkey -M emacs '^H' backward-kill-word # ctrl-h and ctrl-backspace: delete pre
 # Configure command completion: http://zsh.sourceforge.net/Doc/Release/Completion-System.html.
 zstyle ':completion:*' sort false # don't sort completion candidates
 
-# Whether cursor should go to the end when up/down/ctrl-up/ctrl-down fetch command from history.
+# Should cursor go to the end when up/down/ctrl-up/ctrl-down fetch commands from history?
 zstyle ':zle:(up|down)-line-or-beginning-search' leave-cursor no
 
 # Autoload functions.

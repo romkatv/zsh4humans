@@ -1,6 +1,10 @@
 emulate -L zsh
 
-print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}
+if [[ -e $Z4H/cache/z4h-updating ]]; then
+  print -ru2 -- ${(%):-"%F{3}z4h%f: updating %Bfzf%b binary"}
+else
+  print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}
+fi
 local BASH_SOURCE=(./install) err
 if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
   print -ru2 -- $err

@@ -1,6 +1,6 @@
 case $opt in
   \?) print -Pru2 "%F{3}z4h%f: $1: invalid option: %F{1}-${OPTARG//\%/%%}%f";;
-  :)  print -Pru2 "%F{3}z4h%f: $1: missing required argument: %F{1}-${OPTARG//\%/%%}%f";:
+  :)  print -Pru2 "%F{3}z4h%f: $1: missing required argument: %F{1}-${OPTARG//\%/%%}%f";;
   +?) print -Pru2 "%F{3}z4h%f: $1: unhandled option: %F{1}+${opt//\%/%%}%f";;
   *)  print -Pru2 "%F{3}z4h%f: $1: unhandled option: %F{1}-${opt//\%/%%}%f";;
 esac

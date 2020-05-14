@@ -415,7 +415,7 @@ zstyle ':completion:*'                  single-ignored  show
 zstyle ':completion:*:(rm|kill|diff):*' ignore-line     other
 zstyle ':completion:*:rm:*'             file-patterns   '*:all-files'
 zstyle ':completion:*'                  use-cache       true
-zstyle ':completion:*'                  cache-path      $Z4H/cache/.zcompcache-$ZSH_VERSION
+zstyle ':completion:*'                  cache-path      $Z4H/cache/zcompcache-$ZSH_VERSION
 zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
 # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
@@ -445,7 +445,7 @@ function -z4h-post-init() {
 
   local dump
   zstyle -s ':z4h:compinit' dump-path dump
-  : ${dump:=$Z4H/cache/.zcompdump-$ZSH_VERSION}
+  : ${dump:=$Z4H/cache/zcompdump-$ZSH_VERSION}
   unfunction compinit compdef
   autoload -Uz compinit
   compinit -u -d $dump

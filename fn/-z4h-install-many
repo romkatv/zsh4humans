@@ -5,9 +5,9 @@
     if zstyle -s :z4h: auto-update-days days && [[ $days == <-> ]]; then
       # Check if update is required.
       local -a last_update_ts
-      if zstat -A last_update_ts +mtime -- $Z4H/cache/.last-update-ts 2>/dev/null &&
+      if zstat -A last_update_ts +mtime -- $Z4H/cache/last-update-ts 2>/dev/null &&
         (( EPOCHSECONDS - last_update_ts[1] >= 86400 * days )) &&
-        [[ ! -e $Z4H/cache/z4h-updating ]]; then
+        [[ ! -e $Z4H/tmp/updating ]]; then
         local REPLY
         {
           read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && REPLY=y
@@ -23,7 +23,7 @@
         print -Pru2 -- "To update manually, type:"
         print -Pru2 -- ""
         print -Pru2 -- "  %F{2}z4h%f %Bupdate%b"
-        print -n >$Z4H/cache/.last-update-ts || return
+        print -n >$Z4H/cache/last-update-ts || return
       fi
     fi
   fi

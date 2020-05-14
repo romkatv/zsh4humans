@@ -26,9 +26,9 @@ _z4h_exec_zsh_i() {
 
   'local' 'install'
   if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
-    install="$('command' 'mktemp' "$Z4H"/cache/install-zsh.XXXXXXXXXX)"
+    install="$('command' 'mktemp' "$Z4H"/tmp/install-zsh.XXXXXXXXXX)"
   else
-    install="$Z4H"/cache/install-zsh.tmp."$$"
+    install="$Z4H"/tmp/install-zsh.tmp."$$"
     '[' '!' '-e' "$install" ']' || 'command' 'rm' '-rf' '--' "$install" || 'return'
   fi
 
@@ -36,9 +36,9 @@ _z4h_exec_zsh_i() {
 
   (
     if '[' '-n' "${ZSH_VERSION:-}" ]; then
-      'builtin' 'cd' '-q' '--' "$Z4H"/cache || 'exit' '1'
+      'builtin' 'cd' '-q' '--' "$Z4H"/tmp || 'exit' '1'
     else
-      'cd' '--' "$Z4H"/cache                || 'exit' '1'
+      'cd' '--' "$Z4H"/tmp                || 'exit' '1'
     fi
     install="${install##*/}"
     'local' 'err'
@@ -60,9 +60,9 @@ _z4h_exec_zsh_i() {
 
   'local' 'zshdir'
   if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
-    zshdir="$('command' 'mktemp' "$Z4H"/cache/zshdir.XXXXXXXXXX)"
+    zshdir="$('command' 'mktemp' "$Z4H"/tmp/zshdir.XXXXXXXXXX)"
   else
-    zshdir="$Z4H"/cache/zshdir.tmp."$$"
+    zshdir="$Z4H"/tmp/zshdir.tmp."$$"
     '[' '!' '-e' "$zshdir" ']' || 'command' 'rm' '-rf' '--' "$zshdir" || 'return'
   fi
   while 'true'; do

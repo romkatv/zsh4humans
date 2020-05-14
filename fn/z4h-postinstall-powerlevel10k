@@ -1,6 +1,6 @@
 emulate -L zsh
 
-if [[ -e $Z4H/cache/z4h-updating ]]; then
+if [[ -e $Z4H/tmp/updating ]]; then
   print -ru2 -- ${(%):-"%F{3}z4h%f: updating %Bgitstatus%b binary"}
 else
   print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bgitstatus%b binary"}

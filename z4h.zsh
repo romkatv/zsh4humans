@@ -234,7 +234,7 @@ fi
 >&2 'printf' '\n'
 >&2 'printf' '\033[33mz4h\033[0m: \033[31mcommand failed\033[0m: \033[32m.\033[0m \033[4;33m"$Z4H"\033[0m\033[4m/z4h.zsh\033[0m\n'
 
-'[' '-e' "$Z4H"/cache/z4h-updating ']' && 'return' '1'
+'[' '-e' "$Z4H"/tmp/updating ']' && 'return' '1'
 
 >&2 'printf' '\033[33mz4h\033[0m: enabling \033[1mrecovery mode\033[0m\n'
 >&2 'printf' '\n'

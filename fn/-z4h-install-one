@@ -37,7 +37,7 @@ else
     (( $+functions[$postinstall] )) || postinstall=
   fi
 
-  if [[ -e $Z4H/cache/z4h-updating ]]; then
+  if [[ -e $Z4H/tmp/updating ]]; then
     print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
   else
     print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"

@@ -42,8 +42,6 @@ local success
     return
   fi
 
-  print -lr 
-
   if (( $+commands[mktemp] )); then
     success="$(command mktemp -- $Z4H/tmp/install-many.XXXXXXXXXX)" || return
   else

@@ -93,11 +93,11 @@ function z4h() {
     }
     typeset -gri _z4h_init_called=1
     _z4h_install_queue+=(
-      zsh-users/zsh-completions
+      Aloxaf/fzf-tab
       zsh-users/zsh-autosuggestions
+      zsh-users/zsh-completions
       zsh-users/zsh-syntax-highlighting
       junegunn/fzf
-      Aloxaf/fzf-tab
       romkatv/powerlevel10k)
     if ! -z4h-install-many; then
       -z4h-error-command init

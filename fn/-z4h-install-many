@@ -30,7 +30,7 @@ local success
     fi
   fi
 
-  # Clone or update all repositories.
+  _z4h_install_queue=(${(u)_z4h_install_queue})
   local repo have=($Z4H/$^_z4h_install_queue(N))
   have=(${have#$Z4H/})
   _z4h_install_queue=(${_z4h_install_queue:|have})
@@ -51,12 +51,21 @@ local success
   fi
 
   function '-z4h-install-many-parallel'() {
-    local fd fds=()
-    for repo in ${_z4h_install_queue:|have}; do
+    local fd head=() tail=()
+    local p10k=romkatv/powerlevel10k omz=ohmyzsh/ohmyzsh
+    local queue=(${(M)_z4h_install_queue:#$p10k})
+    queue=(${_z4h_install_queue:#$omz} ${(M)_z4h_install_queue:#$omz})
+    for repo in $queue; do
+      if (( $#head + $#tail == 4 )); then
+        fd=$head[1]
+        <&$fd >&2 || return
+        exec {fd}<&- || return
+        shift 1 head
+      fi
       exec {fd}< <( (-z4h-install-one $repo 2>&1 ) || zf_rm -f -- $success ) || return
-      fds+=$fd
+      [[ $repo == $p10k ]] && tail+=$fd || head+=$fd
     done
-    for fd in $fds; do
+    for fd in $head $tail; do
       <&$fd || return
       exec {fd}<&- || return
     done

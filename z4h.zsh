@@ -1,6 +1,6 @@
 'export' TERM="${TERM:-xterm-256color}"
 
-if '[' '-n' "$ZSH_VERSION" ']'; then
+if '[' '-n' "${ZSH_VERSION-}" ']'; then
   if '[' '-n' "${_z4h_source_called+x}" ']'; then
     if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4m~/.zshrc\033[0m\n'
@@ -77,8 +77,8 @@ if '[' '-n' "$ZSH_VERSION" ']'; then
   'bindkey' '-M' 'viins' '^[[1;5C' 'vi-forward-word'
 fi
 
-if '[' '-n' "$Z4H" '-a' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/romkatv/zsh4humans/main.zsh ']' &&
-   '[' "$Z4H_URL" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v2' ']'; then
+if '[' '-n' "${Z4H-}" '-a' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v2' ']' &&
+   '[' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/romkatv/zsh4humans/main.zsh ']'; then
   if '.' "$Z4H"/romkatv/zsh4humans/main.zsh; then
     'setopt' 'aliases'
     'return'
@@ -88,10 +88,10 @@ else
   _z4h_bootstrap='1'
 fi
 
-if '[' '-n' "$_z4h_bootstrap" ']'; then
+if '[' '-n' "${_z4h_bootstrap-}" ']'; then
   'unset' '_z4h_bootstrap'
   (
-    if '[' '-z' "${Z4H:-}" ]; then
+    if '[' '-z' "${Z4H-}" ]; then
       >&2 'printf' '\033[33mz4h\033[0m: missing required parameter: \033[31mZ4H\033[0m\n'
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
@@ -137,7 +137,7 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
       'exit' '1'
     fi
 
-    if '[' '-z' "${Z4H_URL:-}" ']'; then
+    if '[' '-z' "${Z4H_URL-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: missing required parameter: \033[31mZ4H_URL\033[0m\n'
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
@@ -199,7 +199,7 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
     fi
 
     (
-      if '[' '-n' "${ZSH_VERSION:-}" ']'; then
+      if '[' '-n' "${ZSH_VERSION-}" ']'; then
         'builtin' 'cd' '-q' '--' "$tmpdir" || 'exit'
       else
         'cd' '--' "$tmpdir"                || 'exit'
@@ -232,7 +232,7 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
   ) && '.' "$Z4H"/romkatv/zsh4humans/main.zsh && 'setopt' 'aliases' && 'return'
 fi
 
-'[' '-n' "$ZSH_VERSION" ']' && 'setopt' 'aliases'
+'[' '-n' "${ZSH_VERSION-}" ']' && 'setopt' 'aliases'
 
 >&2 'printf' '\n'
 >&2 'printf' '\033[33mz4h\033[0m: \033[31mcommand failed\033[0m: \033[32m.\033[0m \033[4;33m"$Z4H"\033[0m\033[4m/z4h.zsh\033[0m\n'
@@ -256,7 +256,7 @@ if 'command' '-v' 'zsh' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' '  \033[4;32mexec\033[0m \033[32mzsh\033[0m\n'
 fi
-if '[' '-n' "$ZSH_VERSION" ']' && 'command' '-v' 'z4h' >'/dev/null' 2>&1; then
+if '[' '-n' "${ZSH_VERSION-}" ']' && 'command' '-v' 'z4h' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'If errors persist and you are desperate:\n'
   >&2 'printf' '\n'

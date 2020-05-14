@@ -35,7 +35,7 @@ _z4h_exec_zsh_i() {
   'local' zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
 
   (
-    if '[' '-n' "${ZSH_VERSION:-}" ]; then
+    if '[' '-n' "${ZSH_VERSION-}" ]; then
       'builtin' 'cd' '-q' '--' "$Z4H"/tmp || 'exit' '1'
     else
       'cd' '--' "$Z4H"/tmp                || 'exit' '1'

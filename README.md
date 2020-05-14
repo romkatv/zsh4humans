@@ -1,8 +1,8 @@
 # Zsh for Humans
 
-Configuration for [Z shell](https://en.wikipedia.org/wiki/Z_shell) that works really well out of
-the box. It combines the best Zsh plugins into a coherent whole that feels like a finished product
-rather than a DYI starter kit.
+Configuration for [Z shell](https://en.wikipedia.org/wiki/Z_shell) that aims to work really well out
+of the box. It combines the best Zsh plugins into a coherent whole that feels like a finished
+product than a DYI starter kit.
 
 If you want a great shell that just works, this project is for you.
 
@@ -63,17 +63,17 @@ Try Zsh for Humans in Docker. You can safely make any changes to the file system
 the theme. Once you exit Zsh, the image is deleted.
 
 ```zsh
-docker run -e TERM -e COLORTERM -w /root -it --rm centos sh -uec '
-  curl -fsSLo ~/.zshrc https://raw.githubusercontent.com/romkatv/zsh4humans/master/.zshrc
-  exec sh ~/.zshrc'
+docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
+  wget https://raw.githubusercontent.com/romkatv/zsh4humans/v2/.zshrc
+  source ~/.zshrc'
 ```
 
 Try directory navigation with *Alt-Arrows*, completion with *Tab* and command history with *Ctrl-R*.
 
 *Tip*: Install [powerlevel10k font](
   https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)
-before running the Docker command to get access to all prompt styles. Run `p10k configure` while in
-Docker to try a different prompt style.
+on your local machine before running the Docker command to get access to all prompt styles. Run
+`p10k configure` while in Docker to try a different prompt style.
 
 ## Usage
 

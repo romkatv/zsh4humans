@@ -11,8 +11,8 @@ _z4h_try_exec_zsh_i() {
 _z4h_exec_zsh_i() {
   '_z4h_try_exec_zsh_i' 'zsh'                || 'return'
   '_z4h_try_exec_zsh_i' '/usr/local/bin/zsh' || 'return'
-  '_z4h_try_exec_zsh_i' ~'/.local/bin/zsh'   || 'return'
-  '_z4h_try_exec_zsh_i' ~'/.zsh-bin/bin/zsh' || 'return'
+  '_z4h_try_exec_zsh_i' ~/'.local/bin/zsh'   || 'return'
+  '_z4h_try_exec_zsh_i' ~/'.zsh-bin/bin/zsh' || 'return'
 
   if '[' '-r' "$Z4H"/stickycache/zshdir ]; then
     'local' 'dir'

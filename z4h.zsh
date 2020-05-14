@@ -55,6 +55,8 @@ if '[' '-n' "$ZSH_VERSION" ']'; then
   'bindkey' '-M' 'emacs' '^[[F'    'end-of-line'
   'bindkey' '-M' 'viins' '^[[F'    'vi-end-of-line'
   'bindkey' '-M' 'vicmd' '^[[F'    'vi-end-of-line'
+  'bindkey' '-M' 'emacs' '^[[3~'   'delete-char'
+  'bindkey' '-M' 'viins' '^[[3~'   'delete-char'
   'bindkey' '-M' 'viins' '^?'      'backward-delete-char'
   'bindkey' '-M' 'emacs' '^[[3;5~' 'kill-word'
   'bindkey' '-M' 'emacs' '^[[3;3~' 'kill-word'
@@ -192,7 +194,8 @@ if '[' '-n' "$_z4h_bootstrap" ']'; then
       tmpdir="$('command' 'mktemp' '-d' "$dir".XXXXXXXXXX)"
     else
       tmpdir="$dir".tmp."$$"
-      'command' 'mkdir' '--' "$tmpdir" || 'exit'
+      'command' 'rm' '-rf' '--' "$tmpdir" || 'exit'
+      'command' 'mkdir' '--' "$tmpdir"    || 'exit'
     fi
 
     (

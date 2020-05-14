@@ -1,3 +1,5 @@
+local success
+
 {
   if (( ! $+_z4h_no_autoupdate )) && zstyle -t :z4h: auto-update ask; then
     typeset -gri _z4h_no_autoupdate=1
@@ -31,9 +33,40 @@
   # Clone or update all repositories.
   local repo have=($Z4H/$^_z4h_install_queue(N))
   have=(${have#$Z4H/})
-  for repo in ${_z4h_install_queue:|have}; do
-    -z4h-install-one $repo || return
-  done
+  _z4h_install_queue=(${_z4h_install_queue:|have})
+
+  if (( $#_z4h_install_queue <= 1 )) || [[ -o interactive && $ZSH_SUBSHELL != 0 ]]; then
+    for repo in ${_z4h_install_queue:|have}; do
+      -z4h-install-one $repo || return
+    done
+    return
+  fi
+
+  if (( $+commands[mktemp] )); then
+    success="$(command mktemp -- $Z4H/tmp/install-many.XXXXXXXXXX)" || return
+  else
+    success=$Z4H/tmp/install-many.$$
+    zf_rm -rf -- $success   || return
+    print -n >$success      || return
+  fi
+
+  function '-z4h-install-many-parallel'() {
+    local fd fds=()
+    for repo in ${_z4h_install_queue:|have}; do
+      exec {fd}< <( (-z4h-install-one $repo 2>&1 ) || zf_rm -f -- $success ) || return
+      fds+=$fd
+    done
+    for fd in $fds; do
+      <&$fd || return
+      exec {fd}<&- || return
+    done
+  }
+
+  -z4h-run-process-tree -z4h-install-many-parallel || return
+  [[ -e $success ]] || return
+
 } always {
   unset _z4h_install_queue
+  unset "functions[-z4h-install-many-parallel]"
+  [[ -z $success ]] || zf_rm -f -- $success
 }

@@ -231,7 +231,10 @@ bindkey   -M viins '^[[1;5F' z4h-end-of-buffer              # ctrl+end
 bindkey   -M viins '^[[1;3F' z4h-end-of-buffer              # alt+end
 bindkey   -M vicmd '^[[1;5F' z4h-end-of-buffer              # ctrl+end
 bindkey   -M vicmd '^[[1;3F' z4h-end-of-buffer              # alt+end
-# Delete previous char.
+# Delete the character under the cursor.
+bindkey   -M emacs '^[[3~'   delete-char                    # delete
+bindkey   -M viins '^[[3~'   delete-char                    # delete
+# Delete the character behind the cursor.
 bindkey   -M viins '^?'      backward-delete-char           # bs
 # Delete next word.
 bindkey   -M emacs '^[[3;5~' kill-word                      # ctrl+del

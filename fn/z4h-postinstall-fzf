@@ -6,7 +6,7 @@ else
   print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}
 fi
 local BASH_SOURCE=(./install) err
-if ! err=$(emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
+if ! err=$(local opt && emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
   print -ru2 -- $err
   return 1
 fi

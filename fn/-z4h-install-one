@@ -57,6 +57,7 @@ local old new
   else
     old=$dst.old.$$
     new=$dst.new.$$
+    zf_rm -rf -- $old $new   || return
     zf_mkdir -p -- $old $new || return
   fi
 

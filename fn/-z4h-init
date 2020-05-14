@@ -429,7 +429,7 @@ zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 z4h source $POWERLEVEL9K_CONFIG_FILE
 -z4h-set-term-title-precmd || return
 
-z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 function -z4h-post-init() {
   emulate -L zsh
@@ -466,7 +466,7 @@ function -z4h-post-init() {
   bashcompinit
 
   # zsh-syntax-highlighting must be loaded after all widgets have been defined.
-  z4h source $Z4H/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh
+  z4h source $Z4H/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 }
 
 precmd_functions=(-z4h-post-init $precmd_functions)

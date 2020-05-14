@@ -1,4 +1,9 @@
 local files=(
+  $Z4H/Aloxaf/fzf-tab/{fzf-tab.zsh,lib/zsh-ls-colors/ls-colors.zsh}
+  $Z4H/junegunn/fzf/shell/*.zsh
+  $Z4H/romkatv/powerlevel10k/{*.zsh-theme,internal/*.zsh,gitstatus/*.zsh,gitstatus/install}
+  $Z4H/zsh-users/zsh-autosuggestions/{zsh-autosuggestions.zsh,src/**/*.zsh}
+  $Z4H/zsh-users/zsh-syntax-highlighting/{zsh-syntax-highlighting.zsh,highlighters/*/*.zsh}
   $Z4H/romkatv/zsh4humans/main.zsh
   $Z4H/romkatv/zsh4humans/sc/exec-zsh-i
   $Z4H/romkatv/zsh4humans/fn/z4h-*

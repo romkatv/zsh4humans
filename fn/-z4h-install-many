@@ -42,6 +42,8 @@ local success
     return
   fi
 
+  print -lr 
+
   if (( $+commands[mktemp] )); then
     success="$(command mktemp -- $Z4H/tmp/install-many.XXXXXXXXXX)" || return
   else
@@ -53,8 +55,8 @@ local success
   function '-z4h-install-many-parallel'() {
     local fd head=() tail=()
     local p10k=romkatv/powerlevel10k omz=ohmyzsh/ohmyzsh
-    local queue=(${(M)_z4h_install_queue:#$p10k})
-    queue=(${_z4h_install_queue:#$omz} ${(M)_z4h_install_queue:#$omz})
+    local queue=(${(M)_z4h_install_queue:#$p10k} ${_z4h_install_queue:#$p10k})
+    queue=(${queue:#$omz} ${(M)queue:#$omz})
     for repo in $queue; do
       if (( $#head + $#tail == 4 )); then
         fd=$head[1]

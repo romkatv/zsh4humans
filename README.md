@@ -32,8 +32,8 @@ docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
   sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v2/install)"'
 ```
 
-Use <kb>Tab</kb> to complete commands, <kb>Ctrl-R</kb> to search history
-<kb>Alt-{Left,Right,Up,Down}</kb> to change current directory.
+Use <kbd>Tab</kbd> to complete commands, <kbd>Ctrl-R</kbd> to search history
+<kbd>Alt-{Left,Right,Up,Down}</kbd> to change current directory.
 
 *Tip*: Install [powerlevel10k font](
   https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)

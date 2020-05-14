@@ -1,12 +1,10 @@
-# Export XDG environment variables. Other environment variables are
-# exported later (see below).
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+# Export XDG environment variables. Other environment variables are exported later.
+export XDG_CACHE_HOME=~/.cache
 
-# URL of zsh4humans repository. Used during initial installation and
-# later when updating.
-: "${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v2}"
+# URL of zsh4humans repository. Used during initial installation and updates.
+Z4H_URL=https://raw.githubusercontent.com/romkatv/zsh4humans/v2
 
-# Cache directory. Gets recreated if deleted.
+# Cache directory. Gets recreated if deleted. If already set, must not be changed.
 : "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"
 
 # Do not create world-writable files by default.

@@ -68,7 +68,7 @@ local success
       [[ $repo == $p10k ]] && tail+=$fd || head+=$fd
     done
     for fd in $head $tail; do
-      <&$fd || return
+      <&$fd >&2 || return
       exec {fd}<&- || return
     done
   }

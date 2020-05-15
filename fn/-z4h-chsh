@@ -1,11 +1,6 @@
 # Check whether the current shell is the login shell. If not, offer to change login shell.
 
-if (( $+_z4h_init_called )); then
-  print -Pru2 -- "%F{3}z4h%f: %F{1}chsh%f cannot be called after %Binit%b"
-  return 1
-fi
-
-[[ -n $SHELL && $SHELL == $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] && return 0
+[[ $SHELL == $_z4h_exe || ${SHELL:A} == ${_z4h_exe:A} || -e $Z4H/stickycache/no-chsh ]] && return 0
 
 local user=${(%):-%n}
 [[ -n $user && -r /etc/passwd && -r /etc/shells && -t 0 && -t 1 && -t 2 ]] || return 0
@@ -18,7 +13,7 @@ if [[ $+commands[sudo] == 0 && ! -w /etc/shells ]] && ; then
 fi
 
 local passwd
-passwd="$(</etc/passwd)" || return 1
+passwd="$(</etc/passwd)" || return
 [[ $passwd == *((#s)|$'\n')$user:[^$'\n']#:($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] && return 0
 
 local -a match mbegin mend
@@ -27,22 +22,23 @@ local login_shell=$match[2]
 [[ -n $login_shell && -x $login_shell && ${login_shell:A} != ${_z4h_exe:A} ]] || return 0
 
 local -a shells
-shells=(${(f)"$(</etc/shells)"}) || return 1
+shells=(${(f)"$(</etc/shells)"}) || return
 local my_shell=$shells[(re)$_z4h_exe]
 if [[ -z $my_shell ]]; then
   local real_shells=(${shells:A})
   my_shell=$shells[$real_shells[(ie)${_z4h_exe:A}]]
 fi
 
-print -Pr -- "%F{3}z4h%f: your login shell isn't the same as this shell"
+print -Pr -- "%F{3}z4h%f: login shell isn't the same as this shell"
 print -Pr -- ""
-print -Pr -- "  login shell: %F{2}${login_shell//\%/%%}%f"
-print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
+print -Pr -- "  user         %B${user//\%/%%}%b"
+print -Pr -- "  login shell  %F{2}${login_shell//\%/%%}%f"
+print -Pr -- "  this shell   %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
 
 (
   trap '' INT
   (
-    local query="Change login shell of %F{3}${user//\%/%%}%f to %F{2}${_z4h_exe//\%/%%}%f?"
+    local query="Change login shell of %F{3}${user//\%/%%}%f to %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f?"
     while true; do
       {
         local REPLY=n
@@ -53,7 +49,10 @@ print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
       }
       if [[ $REPLY != y ]]; then
         print -rn >$Z4H/stickycache/no-chsh || return
+        local home=~
+        local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
         print -Pr -- "Won't ask again unless %U\$Z4H/stickycache/no-chsh%u is deleted."
+        print -Pr -- "Consider removing %F{2}z4h%f %Bchsh%b call from %U$zdotdir/.zshrc%u."
         return 1
       fi
       query="Try again?"
@@ -65,9 +64,9 @@ print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
         my_shell=$_z4h_exe
         (( $#precmd == 1 )) || print
       fi
-      print -Pr -- "Changing login shell to %F{2}${_z4h_exe//\%/%%}%f."
+      print -Pr -- "Changing login shell to %F{2}${my_shell//\%/%%}%f."
       if (( $+commands[chsh] )); then
-        command chsh -s $_z4h_exe || continue
+        command chsh -s $my_shell || continue
       else
         local MATCH MBEGIN MEND
         local p=("${(@)${(@f)passwd}/#%(#m)$user:*/${MATCH%:*}:$my_shell}")
@@ -80,8 +79,8 @@ print -Pr -- "  this shell:  %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
         $precmd tee -- /etc/passwd.bak.$$ >/dev/null <<<${(F)p} || continue
         $precmd mv -f -- /etc/passwd.bak.$$ /etc/passwd || continue
       fi
-      print -Pr -- "Changed login shell of %F{3}${user//\%/%%}%f to %F{2}${_z4h_exe//\%/%%}%f."
+      print -Pr -- "Changed login shell of %F{3}${user//\%/%%}%f to %F{2}${my_shell//\%/%%}%f."
       return 0
     done
   )
-) && export SHELL=$_z4h_exe
+) && export SHELL=${my_shell:-$_z4h_exe}

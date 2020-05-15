@@ -47,7 +47,7 @@ docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
 If you've used Zsh, Bash or Fish, Zsh for Humans should feel familiar. For the most part everything
 works as you would expect.
 
-### Key Bindings
+### Key bindings
 
 These are the key bindings that you get with the default `~/.zshrc`. You can
 [change them](#customizing-key-bindings).
@@ -55,7 +55,7 @@ These are the key bindings that you get with the default `~/.zshrc`. You can
 If you aren't sure what `emacs`, `viins` and `vicmd` mean, you are likely using `emacs` keymap.
 You can ignore the other two columns.
 
-#### Cursor Movement
+#### Cursor movement
 
 | Zle Widget | Description | emacs | viins | vicmd |
 | - | - | - | - | - |
@@ -67,10 +67,10 @@ You can ignore the other two columns.
 | `vi-backward-word` | move cursor one word backward (vi style) | | <kbd>Ctrl-Left</kbd> | <kbd>b</kbd> |
 | `forward-word` | move cursor one word forward | <kbd>Ctrl-Right</kbd> <kbd>Alt-F</kbd> | | <kbd>w</kbd> |
 | `vi-forward-word` | move cursor one word forward (vi style) | | <kbd>Ctrl-Right</kbd> | |
-| `z4h-up-local-history` | move cursor one line **up**; if already on the top line, fetch from the **current shell's** history the **previous** command whose prefix is the same as the content to the left of cursor | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> | <kbd>Up</kbd> | <kbd>k</kbd> |
-| `z4h-down-local-history` | move cursor one line down; if already on the bottom line, fetch from **current shell's** history the **next** command whose prefix is the same as the content to the left of cursor | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> | <kbd>Down</kbd> | <kbd>j</kbd> |
-| `z4h-up-global-history` | move cursor one line **up**; if already on the top line, fetch from the history of **all shells** the **previous** command whose prefix is the same as the content to the left of cursor | <kbd>Ctrl-Up</kbd> | <kbd>Ctrl-Up</kbd> | |
-| `z4h-down-global-history` | move cursor one line **down**; if already on the bottom line, fetch from the history of **all shells** the **next** command whose prefix is the same as the content to the left of cursor | <kbd>Ctrl-Down</kbd> | <kbd>Ctrl-Down</kbd> | |
+| `z4h-up-local-history` | move cursor up or fetch [previous local history event](#searching-command-history) | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> | <kbd>Up</kbd> | <kbd>k</kbd> |
+| `z4h-down-local-history` | move cursor down or fetch [next local history event](#searching-command-history) | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> | <kbd>Down</kbd> | <kbd>j</kbd> |
+| `z4h-up-global-history` | move cursor up or fetch [previous global history event](#searching-command-history) | <kbd>Ctrl-Up</kbd> | <kbd>Ctrl-Up</kbd> | |
+| `z4h-down-global-history` | move cursor down or fetch [next global history event](#searching-command-history) | <kbd>Ctrl-Down</kbd> | <kbd>Ctrl-Down</kbd> | |
 | `beginning-of-line` | move cursor to the beginning of line | <kbd>Home</kbd> <kbd>Ctrl-A</kbd> | | |
 | `vi-beginning-of-line` | move cursor to the beginning of line (vi style) | | <kbd>Home</kbd> | <kbd>Home</kbd> |
 | `end-of-line` | move cursor to the end of line | <kbd>End</kbd> <kbd>Ctrl-E</kbd> | | |
@@ -97,7 +97,7 @@ You can ignore the other two columns.
 | `undo` | undo the last edit | <kbd>Ctrl-/</kbd> | <kbd>Ctrl-/</kbd> | |
 | `redo` | redo the last undone edit | <kbd>Alt-/</kbd> | <kbd>Alt-/</kbd> | <kbd>u</kbd> |
 
-#### Accepting Autosuggestions
+#### Accepting autosuggestions
 
 All key bindings that move cursor can accept *command autosuggestions*. For example, moving the
 cursor one word to the right will accept that word from the autosuggestion.
@@ -115,7 +115,7 @@ There is one special binding that is specific to autosuggestions.
 Autosuggestions in Zsh For Humans are provided by [zsh-autosuggestions](
   https://github.com/zsh-users/zsh-autosuggestions). See its homepage for more information.
 
-#### Completing Commands
+#### Completing commands
 
 | Zle Widget | Description | emacs | viins | vicmd |
 | - | - | - | - | - |
@@ -143,17 +143,37 @@ The UI for interacting with the completion system is provided by
 is a bridge that connects the powerful Zsh completions system (*completion functions*) with fzf
 fuzzy searcher.
 
-#### Searching Command History
+#### Searching command history
+
+<kbd>Up</kbd> and <kbd>Down</kbd> fetch commands from history when the cursor is already at the top
+or bottom line respectively. Otherwise they just move the cursor. When they do fetch history, they
+filter it by the prefix bound by the command line start and the cursor. For example, if you press
+<kbd>Up</kbd> when the first line of the command buffer contains `echo hello world` and the cursor
+is positioned before `world`, it'll fetch the last executed command that starts with `echo
+hello`.
+
+All active shells running under the same user have access to each other's command history in real
+time. History events from the current shell together with all history events that happened before
+the current shell started are collectively called *local history*. *Global history* contains all
+events.
+
+<kbd>Up</kbd> and <kbd>Down</kbd> use local history. Everything else uses global history. Thus,
+when you press <kbd>Up</kbd> with empty command line buffer, it fetches the last command executed
+in the current shell. Conversely, <kbd>Ctrl-Up</kbd> fetches the last command executed in *any*
+shell. The only difference between <kbd>Up</kbd>/<kbd>Down</kbd> and
+<kbd>Ctrl-Up</kbd>/<kbd>Ctrl-Down</kbd> is the use of local vs global history.
+
+<kbd>Ctrl-R</kbd> searches over global history. There is no equivalent binding for local history.
 
 | Zle Widget | Description | emacs | viins | vicmd |
 | - | - | - | - | - |
-| `z4h-up-local-history` | move cursor one line **up**; if already on the top line, fetch from the **current shell's** history the **previous** command whose prefix is the same as the content to the left of cursor | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> | <kbd>Up</kbd> | <kbd>k</kbd> |
-| `z4h-down-local-history` | move cursor one line down; if already on the bottom line, fetch from **current shell's** history the **next** command whose prefix is the same as the content to the left of cursor | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> | <kbd>Down</kbd> | <kbd>j</kbd> |
-| `z4h-up-global-history` | move cursor one line **up**; if already on the top line, fetch from the history of **all shells** the **previous** command whose prefix is the same as the content to the left of cursor | <kbd>Ctrl-Up</kbd> | <kbd>Ctrl-Up</kbd> | |
-| `z4h-down-global-history` | move cursor one line **down**; if already on the bottom line, fetch from the history of **all shells** the **next** command whose prefix is the same as the content to the left of cursor | <kbd>Ctrl-Down</kbd> | <kbd>Ctrl-Down</kbd> | |
+| `z4h-up-local-history` | move cursor up or fetch previous local history event | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> | <kbd>Up</kbd> | <kbd>k</kbd> |
+| `z4h-down-local-history` | move cursor down or fetch next local history event | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> | <kbd>Down</kbd> | <kbd>j</kbd> |
+| `z4h-up-global-history` | move cursor up or fetch previous global history event | <kbd>Ctrl-Up</kbd> | <kbd>Ctrl-Up</kbd> | |
+| `z4h-down-global-history` | move cursor down or fetch next global history event | <kbd>Ctrl-Down</kbd> | <kbd>Ctrl-Down</kbd> | |
 | `z4h-fzf-history` | [fuzzy search](#fuzzy-search) history from all shells | <kbd>Ctrl-R</kbd> | <kbd>Ctrl-R</kbd> | <kbd>Ctrl-R</kbd> |
 
-#### Changing Current Directory
+#### Changing current directory
 
 These bindings allows you to quickly change current directory without losing command line buffer.
 Going to the previous/next directory works similarly to the *Back* and *Forward* buttons in a Web
@@ -250,7 +270,8 @@ See [Powerlevel10k](https://github.com/romkatv/powerlevel10k) homepage for more 
 
 ### Customizing key bindings
 
-There are several common key binding customizations that many users apply.
+There are several common key binding customizations that many users apply. They can be achieved
+with one-line changes in `~/.zshrc`.
 
 | Customization | How |
 | - | - |

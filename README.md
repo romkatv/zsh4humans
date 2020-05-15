@@ -128,7 +128,7 @@ consistent with `emacs` keymap from Zsh For Humans but not quite the same. There
 additional bindings to accept selection.
 
 | Description | Key Binding |
-| - | - | - | - |
+| - | - |
 | accept selection | <kbd>Enter</kbd> |
 | mark selection (for accepting multiple entries) | <kbd>Ctrl-Space</kbd> |
 | accept selection and trigger another completion right away; great for completing file paths | <kbd>Tab</kbd> |

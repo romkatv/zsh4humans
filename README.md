@@ -14,10 +14,10 @@ If you want a great shell that just works, this project is for you.
 
 ## Installation
 
-*Optional*: Install [MesloLGS NF](
-  https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)
-terminal font.
-
+1. *Optional*: Install [MesloLGS NF](
+   https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)
+   terminal font.
+2. Execute this command.
 ```shell
 if command -v curl >/dev/null 2>&1; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v2/install)"
@@ -26,11 +26,11 @@ else
 fi
 ```
 
-This command backs up the existing Zsh startup files, downloads
-[.zshrc](https://github.com/romkatv/zsh4humans/blob/v2/.zshrc), installs everything necessary
-for Zsh For Humans and starts it. It asks for confirmation before every action so that you are
-always in control. The command requires `curl` or `wget`. It does not require `git`, `zsh`, `sudo`
-or anything else.
+The installer backs up the existing Zsh startup files, downloads [.zshrc](
+  https://github.com/romkatv/zsh4humans/blob/v2/.zshrc), installs everything necessary for Zsh For
+Humans and opens a new shell. It asks for confirmation on every step so that you are always in
+control. Installation requires `curl` or `wget`. It does not require `git`, `zsh`, `sudo` or
+anything else.
 
 ## Try it in Docker
 

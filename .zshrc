@@ -84,11 +84,13 @@ fi
 # Define key bindings.
 bindkey -M emacs '^H' backward-kill-word # Ctrl-H and Ctrl-Backspace: Delete previous word.
 
-# Sort completion candidates when pressing TAB?
-zstyle ':completion:*' sort false
-
-# Should cursor go to the end when up/down/ctrl-up/ctrl-down fetch commands from history?
-zstyle ':zle:(up|down)-line-or-beginning-search' leave-cursor no
+# Sort completion candidates when pressing Tab?
+zstyle ':completion:*'                           sort               false
+# Should cursor go to the end when Up/Down/Ctrl-Up/Ctrl-Down fetches a command from history?
+zstyle ':zle:(up|down)-line-or-beginning-search' leave-cursor       no
+# When presented with the list of choices upon hitting Tab, accept selection and
+# trigger another completion with this key binding. Great for completing file paths.
+zstyle ':fzf-tab:*'                              continuous-trigger tab
 
 # Autoload functions.
 autoload -Uz zmv

@@ -157,34 +157,36 @@ fzf_default_completion=z4h-expand-or-complete        # file completion falls bac
 z4h source $Z4H/junegunn/fzf/shell/completion.zsh    # load fzf-completion
 z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
 
-zstyle ':fzf-tab:*' prefix ''                    # remove '·'
-zstyle ':fzf-tab:*' continuous-trigger alt-enter # alt-enter to accept and trigger next completion
-bindkey '\t' expand-or-complete                  # fzf-tab reads it during initialization
-z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh       # load fzf-tab-complete
+zstyle ':fzf-tab:*' prefix ''               # remove '·'
+bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
+z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh  # load fzf-tab-complete
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
 
-# If NumLock is off, translate keys to make them appear the same as with NumLock on.
-bindkey -s '^[OM' '^M'  # enter
-bindkey -s '^[Ok' '+'
-bindkey -s '^[Om' '-'
-bindkey -s '^[Oj' '*'
-bindkey -s '^[Oo' '/'
-bindkey -s '^[OX' '='
+local keymap
+for keymap in emacs viins vicmd; do
+  # If NumLock is off, translate keys to make them appear the same as with NumLock on.
+  bindkey -M $keymap -s '^[OM' '^M'  # enter
+  bindkey -M $keymap -s '^[Ok' '+'
+  bindkey -M $keymap -s '^[Om' '-'
+  bindkey -M $keymap -s '^[Oj' '*'
+  bindkey -M $keymap -s '^[Oo' '/'
+  bindkey -M $keymap -s '^[OX' '='
 
-# If someone switches our terminal to application mode (smkx), translate keys to make
-# them appear the same as in raw mode (rmkx).
-bindkey -s '^[OH' '^[[H'  # home
-bindkey -s '^[OF' '^[[F'  # end
-bindkey -s '^[OA' '^[[A'  # up
-bindkey -s '^[OB' '^[[B'  # down
-bindkey -s '^[OD' '^[[D'  # left
-bindkey -s '^[OC' '^[[C'  # right
+  # If someone switches our terminal to application mode (smkx), translate keys to make
+  # them appear the same as in raw mode (rmkx).
+  bindkey -M $keymap -s '^[OH' '^[[H'  # home
+  bindkey -M $keymap -s '^[OF' '^[[F'  # end
+  bindkey -M $keymap -s '^[OA' '^[[A'  # up
+  bindkey -M $keymap -s '^[OB' '^[[B'  # down
+  bindkey -M $keymap -s '^[OD' '^[[D'  # left
+  bindkey -M $keymap -s '^[OC' '^[[C'  # right
 
-# TTY sends different key codes. Translate them to regular.
-bindkey -s '^[[1~' '^[[H'  # home
-bindkey -s '^[[4~' '^[[F'  # end
+  # TTY sends different key codes. Translate them to regular.
+  bindkey -M $keymap -s '^[[1~' '^[[H'  # home
+  bindkey -M $keymap -s '^[[4~' '^[[F'  # end
+done
 
 # Move cursor one char backward.
 bindkey   -M emacs '^[[D'    backward-char                  # left
@@ -284,6 +286,10 @@ bindkey   -M vicmd '^[H'     z4h-run-help                   # alt+H
 # Do nothing (better than printing '~').
 bindkey   -M emacs '^[[5~'   z4h-do-nothing                 # pageup
 bindkey   -M emacs '^[[6~'   z4h-do-nothing                 # pagedown
+bindkey   -M viins '^[[5~'   z4h-do-nothing                 # pageup
+bindkey   -M viins '^[[6~'   z4h-do-nothing                 # pagedown
+bindkey   -M vicmd '^[[5~'   z4h-do-nothing                 # pageup
+bindkey   -M vicmd '^[[6~'   z4h-do-nothing                 # pagedown
 
 if zstyle -t :z4h: cd-key ctrl; then
   # Move cursor one word backward.
@@ -310,27 +316,27 @@ if zstyle -t :z4h: cd-key ctrl; then
   bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
 else
   # Move cursor one word backward.
-  bindkey -M emacs '^[[1;5D' backward-word                  # alt+left
-  bindkey -M viins '^[[1;5D' vi-backward-word               # alt+left
+  bindkey -M emacs '^[[1;5D' backward-word                  # ctrl+left
+  bindkey -M viins '^[[1;5D' vi-backward-word               # ctrl+left
   # Move cursor one word forward.
-  bindkey -M emacs '^[[1;5C' forward-word                   # alt+right
-  bindkey -M viins '^[[1;5C' vi-forward-word                # alt+right
+  bindkey -M emacs '^[[1;5C' forward-word                   # ctrl+right
+  bindkey -M viins '^[[1;5C' vi-forward-word                # ctrl+right
   # cd into the previous directory.
-  bindkey -M emacs '^[[1;3D' z4h-cd-back                    # ctrl+left
-  bindkey -M viins '^[[1;3D' z4h-cd-back                    # ctrl+left
-  bindkey -M vicmd '^[[1;3D' z4h-cd-back                    # ctrl+left
+  bindkey -M emacs '^[[1;3D' z4h-cd-back                    # alt+left
+  bindkey -M viins '^[[1;3D' z4h-cd-back                    # alt+left
+  bindkey -M vicmd '^[[1;3D' z4h-cd-back                    # alt+left
   # cd into the next directory.
-  bindkey -M emacs '^[[1;3C' z4h-cd-forward                 # ctrl+right
-  bindkey -M viins '^[[1;3C' z4h-cd-forward                 # ctrl+right
-  bindkey -M vicmd '^[[1;3C' z4h-cd-forward                 # ctrl+right
+  bindkey -M emacs '^[[1;3C' z4h-cd-forward                 # alt+right
+  bindkey -M viins '^[[1;3C' z4h-cd-forward                 # alt+right
+  bindkey -M vicmd '^[[1;3C' z4h-cd-forward                 # alt+right
   # cd into the parent directory.
-  bindkey -M emacs '^[[1;3A' z4h-cd-up                      # ctrl+up
-  bindkey -M viins '^[[1;3A' z4h-cd-up                      # ctrl+up
-  bindkey -M vicmd '^[[1;3A' z4h-cd-up                      # ctrl+up
+  bindkey -M emacs '^[[1;3A' z4h-cd-up                      # alt+up
+  bindkey -M viins '^[[1;3A' z4h-cd-up                      # alt+up
+  bindkey -M vicmd '^[[1;3A' z4h-cd-up                      # alt+up
   # cd into a subdirectory (interactive).
-  bindkey -M emacs '^[[1;3B' fzf-cd-widget                  # ctrl+down
-  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # ctrl+down
-  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # ctrl+down
+  bindkey -M emacs '^[[1;3B' fzf-cd-widget                  # alt+down
+  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
+  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
 fi
 
 # Tell zsh-autosuggestions how to handle different widgets.

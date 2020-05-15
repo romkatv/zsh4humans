@@ -1,3 +1,5 @@
+# Documentation: https://github.com/romkatv/zsh4humans/blob/v2/README.md.
+
 # Export XDG environment variables. Other environment variables are exported later.
 export XDG_CACHE_HOME="$HOME/.cache"
 

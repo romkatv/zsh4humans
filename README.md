@@ -165,12 +165,12 @@ fuzzy searcher.
 
 #### Searching command history
 
-<kbd>Up</kbd> and <kbd>Down</kbd> fetch commands from history when the cursor is already at the top
-or bottom line respectively. Otherwise they just move the cursor. When they do fetch history, they
-filter it by the prefix bound by the command line start and the cursor. For example, if you press
-<kbd>Up</kbd> when the first line of the command buffer contains `echo hello world` and the cursor
-is positioned before `world`, it'll fetch the last executed command that starts with `echo
-hello`.
+<kbd>Up</kbd> and <kbd>Down</kbd> keys fetch commands from history when the cursor is already at the
+top or the bottom line respectively. Otherwise they just move the cursor. When they do fetch
+history, they filter it by the prefix bound by the command line start and the cursor. For example,
+if you press <kbd>Up</kbd> when the first line of the command buffer contains `echo hello world` and
+the cursor is positioned before `world`, it'll fetch the last executed command that starts with
+`echo hello`.
 
 All active shells running under the same user have access to each other's command history in real
 time. History events from the current shell together with all history events that happened before
@@ -258,8 +258,8 @@ See [fzf](https://github.com/junegunn/fzf) homepage for more information.
 
 ### SSH
 
-When you SSH to a remote host, you can bring your Zsh For Humans environment along. Simply replace
-`ssh` with `z4h ssh`.
+You can bring your Zsh For Humans environment along when connecting over SSH to a remote host.
+Simply use `z4h ssh` instead of `ssh`.
 
 ```zsh
 z4h ssh root@google.com
@@ -282,7 +282,7 @@ This prevents clashes with regular Zsh configs if they exist.
 The first login to a remote host may take some time. After that it's as fast as normal `ssh`.
 
 For `z4h ssh` to work, you must follow the best practice of [checking for presence of external
-external commands and files](#using-external-commands-or-files) before using them in `~/.zshrc`.
+commands and files](#using-external-commands-or-files) before using them in `~/.zshrc`.
 
 ## Customization
 

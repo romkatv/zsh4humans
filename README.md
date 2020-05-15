@@ -22,6 +22,8 @@ else
 fi
 ```
 
+Requires `curl` or `wget`. Does not require `git`, `zsh`, `sudo` or anything else.
+
 ## Try it in Docker
 
 Try Zsh for Humans in Docker. You can safely make any changes to the file system while trying out

@@ -65,7 +65,7 @@ autoload -Uz -- $Z4H/romkatv/zsh4humans/fn/[^_]*(:t) || return
 function compinit() {}
 
 function compdef() {
-  emulate -L zsh
+  eval "$_z4h_opt"
   _z4h_compdef+=("${(pj:\0:)@}")
 }
 

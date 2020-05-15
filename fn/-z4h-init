@@ -1,6 +1,6 @@
 # When a command is running, display it in the terminal title.
 function -z4h-set-term-title-preexec() {
-  emulate -L zsh
+  eval "$_z4h_opt"
   if (( P9K_SSH )); then
     -z4h-set-term-title ${(%):-"%n@%m: "}$1
   else
@@ -10,7 +10,7 @@ function -z4h-set-term-title-preexec() {
 
 # When no command is running, display the current directory in the terminal title.
 function -z4h-set-term-title-precmd() {
-  emulate -L zsh
+  eval "$_z4h_opt"
   if (( P9K_SSH )); then
     -z4h-set-term-title ${(%):-"%n@%m: %~"}
   else
@@ -26,7 +26,6 @@ local p10k_cfg=
 # If the current locale isn't UTF-8, change it to an UTF-8 one.
 # Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
 () {
-  emulate -L zsh -o extended_glob
   [[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] && return 0
   (( $+commands[locale] )) || return
   local loc=(${(@M)$(locale -a):#*.(utf|UTF)(-|)8})
@@ -51,13 +50,13 @@ elif [[ -x /run/current-system/sw/bin/command-not-found ]]; then
   command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
 elif (( $+commands[brew] )); then
   () {
-    emulate -L zsh -o extended_glob
+    eval "$_z4h_opt"
     [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
     local repo
     repo="$(brew --repository 2>/dev/null)" || return
     [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
     function command_not_found_handler() {
-      emulate -L zsh
+      eval "$_z4h_opt"
       local msg
       if msg="$(brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
         print -ru2 -- $msg
@@ -399,7 +398,7 @@ fi
 #   -X   keep content on screen after exit
 #   -M   show more info at the bottom prompt line
 #   -x4  tabs are 4 instead of 8
-export LESS=-iRFXMx4
+export LESS='-iRFXMx4'
 
 export PAGER=less
 
@@ -432,7 +431,7 @@ z4h source $POWERLEVEL9K_CONFIG_FILE
 z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 function -z4h-post-init() {
-  emulate -L zsh
+  eval "$_z4h_opt"
 
   add-zsh-hook -d -- precmd -z4h-post-init
 

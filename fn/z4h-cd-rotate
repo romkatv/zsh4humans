@@ -1,4 +1,4 @@
-emulate -L zsh
+eval "$_z4h_opt"
 while (( $#dirstack )) && ! pushd -q $1 &>/dev/null; do
   popd -q $1
 done

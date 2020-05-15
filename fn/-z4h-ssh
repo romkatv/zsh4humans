@@ -1,6 +1,3 @@
-emulate -L zsh
-setopt typeset_silent pipe_fail extended_glob prompt_percent no_prompt_subst no_prompt_bang
-
 local -a files
 if ! zstyle -a :z4h:ssh:${@[-1]} files files; then
   files=(

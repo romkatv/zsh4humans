@@ -82,10 +82,10 @@ if [[ $LC_TERMINAL == iTerm2 ]]; then
 fi
 
 # Define key bindings.
-bindkey -M emacs '^H' backward-kill-word # ctrl-h and ctrl-backspace: delete previous word
+bindkey -M emacs '^H' backward-kill-word # Ctrl-H and Ctrl-Backspace: Delete previous word.
 
-# Configure command completion: http://zsh.sourceforge.net/Doc/Release/Completion-System.html.
-zstyle ':completion:*' sort false # don't sort completion candidates
+# Sort completion candidates when pressing TAB?
+zstyle ':completion:*' sort false
 
 # Should cursor go to the end when up/down/ctrl-up/ctrl-down fetch commands from history?
 zstyle ':zle:(up|down)-line-or-beginning-search' leave-cursor no

@@ -1,6 +1,3 @@
-emulate -L zsh
-setopt prompt_percent no_prompt_subst no_prompt_bang
-
 print -Pr -- "$(<<\END
 usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u
 

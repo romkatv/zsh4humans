@@ -1,4 +1,4 @@
-emulate -L zsh
+eval "$_z4h_opt"
 local f
 for f in chpwd $chpwd_functions precmd $precmd_functions; do
   (( $+functions[$f] )) && $f &>/dev/null

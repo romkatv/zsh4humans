@@ -1,4 +1,4 @@
-emulate -L zsh
+eval "$_z4h_opt"
 local cursor=$CURSOR
 zle autosuggest-accept
 CURSOR=$cursor

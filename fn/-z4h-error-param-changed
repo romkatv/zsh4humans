@@ -1,4 +1,3 @@
-emulate -L zsh 
 print -Pru2 -- "%F{3}z4h%f: core parameters have unexpectedly changed"
 local -a old=(${(0)_z4h_param_sig})
 local -a new=(${(0)${(e)_z4h_param_pat}})

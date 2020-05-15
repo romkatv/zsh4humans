@@ -1,6 +1,7 @@
 # Display $1 in terminal title.
 
-emulate -L zsh
+eval "$_z4h_opt"
+
 if [[ -t 1 ]]; then
   print -rn -- $'\e]0;'${(V)1}$'\a'
 elif [[ -w $TTY ]]; then

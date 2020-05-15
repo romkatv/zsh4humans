@@ -42,7 +42,7 @@ if [ -z "$new" ]; then
   exit 1
 fi
 
-# TODO: check if platform is supported.
+
 
 command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache "$new"/tmp || exit
 command mv -f -- "$self"/../z4h.zsh "$new/"                      || exit

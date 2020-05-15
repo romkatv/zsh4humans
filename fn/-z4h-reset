@@ -1,4 +1,0 @@
-print -Pru2 -- "%F{3}z4h%f: deleting %B\$Z4H%b (%U${Z4H//\%/%%}%u)."
-zf_rm -rf -- $Z4H
-print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-exec -- $_z4h_exe -i

@@ -1,4 +1,5 @@
-emulate -L zsh
+eval "$_z4h_opt"
+
 local last=$LASTWIDGET
 zle .set-local-history $1
 shift

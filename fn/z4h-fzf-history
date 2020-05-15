@@ -1,5 +1,5 @@
 # fzf-history-widget with duplicate removal, preview and syntax highlighting (requires `bat`).
-emulate -L zsh -o pipefail
+eval "$_z4h_opt"
 local preview='printf "%s" {}'
 (( $+commands[bat] )) && preview+=' | bat -l bash --color always -pp'
 local tmp=${TMPDIR:-/tmp}/zsh-hist.$sysparams[pid]

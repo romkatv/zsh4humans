@@ -2,14 +2,14 @@ case $ARGC-$1 in
   2-help)
     case $2 in
       install)
-        print -Pr -- "usage: %F{2}z4h%f %Binstall%b"
+        print -Pr -- "usage: %F{2}z4h%f %Binstall%b [-f] [%Uuser/project%u]..."
         print -Pr -- ""
-        print -Pr -- "Install all missing dependencies (fzf, zsh-autosuggestions, etc.)."
+        print -Pr -- "Clone or update GitHub project(s)."
       ;;
       update)
         print -Pr -- "usage: %F{2}z4h%f %Bupdate%b"
         print -Pr -- ""
-        print -Pr -- "Update all dependencies (fzf, zsh-autosuggestions, etc.)."
+        print -Pr -- "Update %Bzsh4humans%b and all dependencies (%Bfzf%b, %Bzsh-autosuggestions%b, etc.)."
       ;;
       init)
         print -Pr -- "usage: %F{2}z4h%f %Binit%b"
@@ -21,10 +21,10 @@ case $ARGC-$1 in
         print -Pr -- ""
         print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
       ;;
-      # ssh)
-      #   -z4h-help-ssh
-      #   return
-      # ;;
+      ssh)
+        -z4h-help-ssh
+        return
+      ;;
       chsh)
         print -Pr -- "usage: %F{2}z4h%f %Bchsh%b"
         print -Pr -- ""
@@ -45,11 +45,11 @@ case $ARGC-$1 in
   ;;
   *)
     [[ $ARGC-$1 == 1-help ]] && local fd=1 ret=0 || local fd=2 ret=1
-    print -Pru$fd -- "usage: %F{2}z4h%f %Binstall%b"
+    print -Pru$fd -- "usage: %F{2}z4h%f %Binstall%b [-f] [%Uuser/project%u]..."
     print -Pru$fd -- "           %Bupdate%b"
     print -Pru$fd -- "           %Binit%b"
     print -Pru$fd -- "           %Bsource%b %Ufile%u"
-    # print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
+    print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
     print -Pru$fd -- "           %Bchsh%b"
     print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"
     return ret

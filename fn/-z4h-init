@@ -128,7 +128,6 @@ if (( terminfo[colors] >= 256 )); then
   typeset -A ZSH_HIGHLIGHT_STYLES=(comment fg=96)  # different colors for comments and suggestions
 else
   ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold'  # the default is outside of 8 color range
-  : ${POWERLEVEL9K_CONFIG_FILE=${ZDOTDIR:-~}/.p10k-portable.zsh}
 fi
 
 ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)

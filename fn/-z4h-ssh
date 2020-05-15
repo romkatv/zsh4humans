@@ -1,83 +1,34 @@
-local -a files
-if ! zstyle -a :z4h:ssh:${@[-1]} files files; then
-  files=(
-    $ZDOTDIR/.zshrc             '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
-    $ZDOTDIR/.p10k.zsh          '$ZDOTDIR/' overwrite=1,remove=1,persist=0 \
-    $ZDOTDIR/.p10k-portable.zsh '$ZDOTDIR/' overwrite=1,remove=1,persist=0
-  )
-fi
-if (( $#files % 3 )); then
-  print -Pru2 -- "%F{3}z4h%f: wrong number of elements in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}$#files%f"
-  return 1
-fi
+local cfg_set=(.zshenv .zprofile .zshrc .zlogin .zlogout)
+local cfg_add=(.p10k{,-ascii}{,-8color}.zsh)
 
-local -a write_files
-local -a remove_files
-local src flags dst
-for src dst flags in "${files[@]}"; do
-  if [[ ${src:t} == *'"'* ]]; then
-    print -Pru2 -- "%F{3}z4h%f: bad path in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${src//\%/%%}%f"
-    return 1
+local dump
+dump="$(
+  builtin cd -q -- $ZDOTDIR || exit
+  local files=($^cfg_set(N^/) $^cfg_add(N^/))
+  if (( ! $files[(I).zshrc] )); then
+    print -Pru2 -- '%F{3}z4h%f: file not found: %F{1}'${ZDOTDIR//\%/%%}'/.zshrc%f'
+    exit 1
   fi
-  if [[ -n ${(@)${(s:,:)flags}:#(overwrite|remove|persist)=[01]} ]]; then
-    print -Pru2 -- "%F{3}z4h%f: bad flags in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${flags//\%/%%}%f"
-    return 1
+  tar -czh -- $files | base64 | tr -d '\n')" || return
+
+ssh -t "$@" '"set" "-ue" || "exit"
+"export" ZDOTDIR="${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"
+"export" Z4H="$ZDOTDIR"/.z4h
+"export" LC_ALL="C"
+"command" "mkdir" "-p" "--" "$ZDOTDIR"
+(
+  if "[" "-n" "${ZSH_VERSION-}" "]"; then
+    "emulate" "sh" "-o" "err_return" "-o" "no_unset"
+    "builtin" "cd" "-q" "--" "$ZDOTDIR"
+  else
+    "cd" "--" "$ZDOTDIR"
   fi
-  local -i overwrite=1 remove=1 persist=0
-  eval ${flags//,/; }
-  if [[ $dst == (|*'"'*) ]]; then
-    print -Pru2 -- "%F{3}z4h%f: bad path in %F{2}zstyle%f %U:z4h:ssh%u %Ufiles%u: %F{red}${dst//\%/%%}%f"
-    return 1
-  fi
-  [[ $dst == */ ]] && dst+=${src:t}
-
-  local write=':'
-
-  if [[ -e $src ]]; then
-    if [[ ! -f $src ]]; then
-      print -Pru2 -- "%F{3}z4h%f: not a file: %F{red}${src//\%/%%}%f"
-      return 1
-    fi
-
-    local dump
-    dump="${$(cd -- ${src:h} && tar -czh -- ${src:t} | base64)//$'\n'}" || return
-
-    write+='; (cd -- "$_z4h_tmpdir" && echo "'$dump'" | base64 $_z4h_base64d | tar $_z4h_tar_opt -xz) || exit'
-    if [[ -x $src ]]; then
-      write+='; chmod 700 "$_z4h_tmpdir/'${src:t}'"'
-    else
-      write+='; chmod 600 "$_z4h_tmpdir/'${src:t}'"'
-    fi
-    write+='; _z4h_dstdir="$(dirname -- "'$dst'")"'
-    write+='; if [ ! -d "$_z4h_dstdir" ]; then mkdir -p -- "$_z4h_dstdir"; chmod 700 "$_z4h_dstdir"; fi'
-    if (( overwrite )); then
-      write+='; mv -f -- "$_z4h_tmpdir/'${src:t}'" "'$dst'"'
-    else
-      write+='; mv -- "$_z4h_tmpdir/'${src:t}'" "'$dst'"'
-      write='if [ ! -e "'$dst'" ]; then '$write'; fi'
-    fi
-  elif (( remove )); then
-    write+='; rm -f -- "'$dst'"'
-  fi
-
-  write='if [ -d "'$dst'" ]; then >&2 printf "z4h: file is a directory: %s" "'$dst'"; exit 1; fi; '$write
-  write_files+=($write)
-  (( persist )) || remove_files+=('"'$dst'"')
-done
-
-autoload +X z4h-ssh-remote-setup z4h-ssh-remote-teardown
-zmodload zsh/parameter || return
-
-local cmd='set -ue || exit'
-cmd+='; umask o-w'
-cmd+='; _z4h_tmpdir="$(mktemp -d ${TMPDIR:-/tmp}/z4h-ssh.XXXXXXXXXX)"'
-cmd+='; _z4h_ssh_setup() { '$functions[z4h-ssh-remote-setup]$'\n}'
-cmd+='; _z4h_ssh_setup; unset -f _z4h_ssh_setup'
-cmd+='; _z4h_ssh_teardown() { '$functions[z4h-ssh-remote-teardown]$'\n}'
-cmd+='; trap '\''rm -f -- '${(j. .)remove_files}' || :; _z4h_ssh_teardown'\'' INT QUIT TERM EXIT ILL PIPE HUP'
-cmd+='; if echo "Cg==" | base64 -d 2>/dev/null; then _z4h_base64d=-d; else _z4h_base64d=-D; fi'
-cmd+='; if tar --help 2>&1 | grep -qF -- --warning=; then _z4h_tar_opt=--warning=no-unknown-keyword; else _z4h_tar_opt=; fi'
-cmd+='; '${(j.; .)write_files}
-cmd+='; unset _z4h_tmpdir _z4h_base64d _z4h_dstdir'
-cmd+='; ( set +ue; unset -f _z4h_ssh_teardown; . "$ZDOTDIR"/.zshrc )'
-ssh -t "$@" $cmd
+  _z4h_d="-D"
+  _z4h_w=""
+  "echo" "Cg==" | "command" "base64" "-d" >"/dev/null" 2>&1 && _z4h_d="-d"
+  "command" "rm" "-rf" "--" '${(j: :)cfg_set}'
+  "command" "tar" "--help" 2>&1 | "command" "grep" "-qF" "--" "--warning=" 2>/dev/null && _z4h_w="--warning=no-unknown-keyword"
+  "echo" "'$dump'" | "command" "base64" $_z4h_d | "command" "tar" $_z4h_w "-xz"
+)
+"set" "+ue"
+. "$ZDOTDIR"/.zshrc'

@@ -150,7 +150,7 @@ function z4h() {
     ;;
 
     1-chsh)   -z4h-chsh;;
-    # <2->-ssh) -z4h-ssh "${@:2}";;
+    <2->-ssh) -z4h-ssh "${@:2}";;
     1-update) -z4h-update;;
     *)        -z4h-help "$@";;
   esac

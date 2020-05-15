@@ -268,7 +268,7 @@ z4h ssh root@google.com
 This command connect to the remote host over SSH and starts Zsh with your local configs. The remote
 host must have login shell compatible with the Bourne shell (`sh`, `bash`, `zsh`, `ash`, `dash`,
 etc.), `curl` or `wget`, and internet connection. Nothing else is required. In particular, the
-remote host doesn't need to have Zsh or `sudo`.
+remote host doesn't need to have `zsh`, `git` or `sudo`.
 
 Here's what `z4h ssh` does:
 

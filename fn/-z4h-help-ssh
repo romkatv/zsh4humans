@@ -18,6 +18,8 @@ Here's what %F{2}z4h%f %Bssh%b does in more detail:
 %F{3}"${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"%f. This prevents clashes
 with regular Zsh configs if they exist.
 
+%BZ4H_SSH%b on the remote host is set to %B1%b.
+
 The first login to a remote host may take some time. After that it's as
 fast as normal %F{2}ssh%f.
 END

@@ -279,6 +279,9 @@ Here's what `z4h ssh` does:
 `ZDOTDIR` and `Z4H` on the remote host both point to `"${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"`.
 This prevents clashes with regular Zsh configs if they exist.
 
+Whenever you are in a remote shell opened via `z4h ssh`, `Z4H_SSH` environment variable is set to
+`1`.
+
 The first login to a remote host may take some time. After that it's as fast as normal `ssh`.
 
 For `z4h ssh` to work, you must follow the best practice of [checking for presence of external

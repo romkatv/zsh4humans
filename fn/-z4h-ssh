@@ -17,6 +17,7 @@ dump="$(
 ssh -t "$@" '"set" "-ue" || "exit"
 "export" ZDOTDIR="${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"
 "export" Z4H="$ZDOTDIR"/.z4h
+"export" Z4H_SSH="1"
 "export" LC_ALL="C"
 (
   IFS="" "read" "-r" "_z4h_v" <"$Z4H"/romkatv/zsh4humans/version &&

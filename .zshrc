@@ -63,6 +63,10 @@ z4h init || return
 # Enable emacs (-e) or vi (-v) keymap.
 bindkey -e
 
+# If you plan on using the Vi keymap, you should lower this value if pressing
+# Escape followed by a motion (like 'h') triggers an unintended binding
+KEYTIMEOUT=40  # hundredths of a second
+
 # Export environment variables.
 export EDITOR=nano
 export GPG_TTY=$TTY

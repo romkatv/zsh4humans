@@ -236,6 +236,34 @@ that start with `core` and end with either `go`, `rb`, or `py`.
 
 See [fzf](https://github.com/junegunn/fzf) homepage for more information.
 
+### SSH
+
+When you SSH to a remote host, you can bring your Zsh For Humans environment along. Simply replace
+`ssh` with `z4h ssh`.
+
+```zsh
+z4h ssh root@google.com
+```
+
+This command connect to the remote host over SSH and starts Zsh with your local configs. The remote
+host must have login shell compatible with the Bourne shell (`sh`, `bash`, `zsh`, `ash`, `dash`,
+etc.), `curl` or `wget`, and internet connection. Nothing else is required. In particular, the
+remote host doesn't need to have Zsh or `sudo`.
+
+Here's what `z4h ssh` does:
+
+1. Archives Zsh config files on the local host and sends them to the remote host.
+2. Extracts Zsh config files on the remote host.
+3. Sources `.zshrc`, which starts the usual Zsh For Humans bootstrap process.
+
+`ZDOTDIR` and `Z4H` on the remote host both point to `"${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"`.
+This prevents clashes with regular Zsh configs if they exist.
+
+The first login to a remote host may take some time. After that it's as fast as normal `ssh`.
+
+For `z4h ssh` to work, you must follow the best practice of [checking for presence of external
+external commands and files](#using-external-commands-or-files) before using them in `~/.zshrc`.
+
 ## Customization
 
 You can (and should) edit `~/.zshrc` to customize your shell. It's a very good idea to read through
@@ -347,7 +375,7 @@ exists before attempting to source it and will `zcompile` it for faster loading.
 z4h source ~/.iterm2_shell_integration.zsh
 ```
 
-### Additional zsh startup files
+### Additional Zsh startup files
 
 When you start Zsh, it automatically sources `~/.zshrc` -- your personal config that builds on
 Zsh For Humans. Zsh supports several additional startup files with complex rules governing when each
@@ -362,6 +390,44 @@ update channels. From the most stable to the most fresh: `stable` (default), `te
 
 There is no update mechanism for `~/.zshrc` itself.
 
-## Replicating shell on another machine
+## Configuration files
 
-*TODO*
+Zsh For Humans uses the following configuration files:
+
+- `~/.zshrc`. Main Zsh configuration file. Zsh For Humans gets bootstrapped from it. See
+  [Replicating shell on another machine](#replicating shell on another machine).
+- `~/.p10k*.zsh`. [Powerlevel10k](https://github.com/romkatv/powerlevel10k) (prompt) configuration
+  files. There can be more than one such file (hence `*`) to account for terminals with limited
+  capabilities. Most users will ever only see `~/.p10k.zsh`. Powerlevel10k configuration wizard
+  starts automatically upon Zsh startup if there is no suitable configuration file. You can also run
+  it manually with `p10k configure`. Either way it will write new configuration to `~/.p10k*.zsh`.
+
+It's a very good idea to backup `~/.zshrc` and/or store it in a Git repository. If you expend
+non-trivial amount of effort customizing prompt, give the same treatment to `~/.p10k*.zsh`.
+
+Zsh For Humans stores transient state in the directory designated by `$Z4H`. Do not manually modify
+or delete files from this directory. It's OK, however, to delete *the whole* directory. It'll be
+recreated. You don't have to back it up and you shouldn't share it between different machines or
+different users on the same machine.
+
+## Replicating Zsh For Humans on another machine or restoring it from a backup
+
+If you have `~/.zshrc` from your Zsh For Humans setup, you can recreate the environment on another
+machine or restore it on the original machine.
+
+1. *Optional*: Install [MesloLGS NF](
+   https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)
+   terminal font.
+2. Remove or backup the existing Zsh config files: `~/.zshenv`, `~/.zshrc`, `~/.zprofile`,
+   `~/.zlogin` and `~/.zlogout`.
+3. Place `~/.zshrc` from your Zsh For Humans setup in the home directory.
+4. If you have `~/.p10k*.zsh` files, place them in the home directory.
+4. Run the following command:
+```zsh
+ZDOTDIR="$HOME" exec sh -c '. ~/.zshrc'
+```
+
+This requires requires `curl` or `wget`. It does not require `git`, `zsh`, `sudo` or anything else.
+
+*Note*: If you have Zsh For Humans installed on local host and want to have the same environment
+when you SSH to remote host, use `z4h ssh` command instead of the regular `ssh`. See [SSH](#SSH).

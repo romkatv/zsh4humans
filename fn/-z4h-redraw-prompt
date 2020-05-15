@@ -1,7 +1,6 @@
-eval "$_z4h_opt"
 local f
-for f in chpwd $chpwd_functions precmd $precmd_functions; do
-  (( $+functions[$f] )) && $f &>/dev/null
+for f in chpwd "${chpwd_functions[@]}" precmd "${precmd_functions[@]}"; do
+  [[ "${+functions[$f]}" == 0 ]] || "$f" &>/dev/null || true
 done
 zle .reset-prompt
 zle -R

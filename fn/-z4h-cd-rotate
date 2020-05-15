@@ -1,7 +1,7 @@
-eval "$_z4h_opt"
-while (( $#dirstack )) && ! pushd -q $1 &>/dev/null; do
-  popd -q $1
-done
-if (( $#dirstack )); then
-  -z4h-redraw-prompt
-fi
+() {
+  eval "$_z4h_opt"
+  while (( $#dirstack )) && ! pushd -q $1 &>/dev/null; do
+    popd -q $1
+  done
+  (( $#dirstack ))
+} && -z4h-redraw-prompt

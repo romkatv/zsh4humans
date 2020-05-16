@@ -17,16 +17,16 @@ If you want a great shell that just works, this project is for you.
     * 3.1.3. [Accepting autosuggestions](#accepting-autosuggestions)
     * 3.1.4. [Completing commands](#completing-commands)
     * 3.1.5. [Searching command history](#searching-command-history)
-    * 3.1.6. [Changing current directory](changing-current-directory)
+    * 3.1.6. [Changing current directory](#changing-current-directory)
     * 3.1.7. [Miscellaneous](#miscellaneous)
   * 3.2. [Fuzzy search](#fuzzy-search)
   * 3.3. [SSH](#SSH)
 * 4. [Customization](#customization)
   * 4.1. [Customizing prompt](#customizing-prompt)
   * 4.2. [Customizing key bindings](#customizing-key-bindings)
-  * 4.3. [Customizing appearance](customizing-appearance)
-  * 4.4. [Using external commands or files](using-external-commands-or-files)
-  * 4.5. [Additional Zsh startup files](additional-zsh-startup-files)
+  * 4.3. [Customizing appearance](#customizing-appearance)
+  * 4.4. [Using external commands or files](#using-external-commands-or-files)
+  * 4.5. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 5. [Updating](#updating)
 * 6. [Configuration files](#configuration-files)
 * 7. [Replicating Zsh For Humans on another machine or restoring it from a backup](#replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup)
@@ -362,7 +362,7 @@ everywhere.
 
 When using external commands or files in `~/.zshrc`, prefer conditional evaluation. If your
 `~/.zshrc` uses only things that exist, it'll be easier to [replicate shell on another machine](
-  #replicating-shell-on-another-machine).
+  #replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup).
 
 Here are a few examples to demonstrate this:
 
@@ -408,7 +408,8 @@ There is no update mechanism for `~/.zshrc` itself.
 Zsh For Humans uses the following configuration files:
 
 - `~/.zshrc`. Main Zsh configuration file. Zsh For Humans gets bootstrapped from it. See
-  [Replicating shell on another machine](#replicating shell on another machine).
+  [Replicating Zsh For Humans on another machine or restoring it from a backup](
+    #replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup).
 - `~/.p10k*.zsh`. [Powerlevel10k](https://github.com/romkatv/powerlevel10k) (prompt) configuration
   files. There can be more than one such file (hence `*`) to account for terminals with limited
   capabilities. Most users will ever only see `~/.p10k.zsh`. Powerlevel10k configuration wizard

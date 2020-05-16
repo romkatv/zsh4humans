@@ -72,50 +72,40 @@ works as you would expect.
 These are the key bindings that you get with the default `~/.zshrc`. You can
 [change them](#customizing-key-bindings).
 
-If you aren't sure what `emacs`, `viins` and `vicmd` mean, you are likely using `emacs` keymap.
-You can ignore the other two columns.
+The default bindings currently work well only in `emacs` mode. If you would like to use `vi` mode,
+you'll likely need to define additional bindings.
 
 #### Cursor movement
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `backward-char` | move cursor one char backward | <kbd>Left</kbd> <kbd>Ctrl-B</kbd> | | |
-| `vi-backward-char` | move cursor one char backward (vi style) | | <kbd>Left</kbd> | <kbd>h</kbd> <kbd>Backspace</kbd> <kbd>Ctrl-Backspace</kbd> <kbd>Ctrl-H</kbd> |
-| `forward-char` | move cursor one char forward | <kbd>Right</kbd> <kbd>Ctrl-F</kbd> | | |
-| `vi-forward-char` | move cursor one char forward (vi style) | | <kbd>Right</kbd> | <kbd>Space</kbd> <kbd>l</kbd> |
-| `backward-word` | move cursor one word backward | <kbd>Ctrl-Left</kbd> <kbd>Alt-B</kbd> | | |
-| `vi-backward-word` | move cursor one word backward (vi style) | | <kbd>Ctrl-Left</kbd> | <kbd>b</kbd> |
-| `forward-word` | move cursor one word forward | <kbd>Ctrl-Right</kbd> <kbd>Alt-F</kbd> | | <kbd>w</kbd> |
-| `vi-forward-word` | move cursor one word forward (vi style) | | <kbd>Ctrl-Right</kbd> | |
-| `z4h-up-local-history` | move cursor up or fetch [previous local history event](#searching-command-history) | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> | <kbd>Up</kbd> | <kbd>k</kbd> |
-| `z4h-down-local-history` | move cursor down or fetch [next local history event](#searching-command-history) | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> | <kbd>Down</kbd> | <kbd>j</kbd> |
-| `z4h-up-global-history` | move cursor up or fetch [previous global history event](#searching-command-history) | <kbd>Ctrl-Up</kbd> | <kbd>Ctrl-Up</kbd> | |
-| `z4h-down-global-history` | move cursor down or fetch [next global history event](#searching-command-history) | <kbd>Ctrl-Down</kbd> | <kbd>Ctrl-Down</kbd> | |
-| `beginning-of-line` | move cursor to the beginning of line | <kbd>Home</kbd> <kbd>Ctrl-A</kbd> | | |
-| `vi-beginning-of-line` | move cursor to the beginning of line (vi style) | | <kbd>Home</kbd> | <kbd>Home</kbd> |
-| `end-of-line` | move cursor to the end of line | <kbd>End</kbd> <kbd>Ctrl-E</kbd> | | |
-| `vi-end-of-line` | move cursor to the end of line (vi style) | | <kbd>End</kbd> | <kbd>End</kbd> <kbd>$</kbd> |
-| `z4h-beginning-of-buffer` | move cursor to the beginning of buffer | <kbd>Ctrl-Home</kbd> <kbd>Alt-Home</kbd> | <kbd>Ctrl-Home</kbd> <kbd>Alt-Home</kbd> | <kbd>Ctrl-Home</kbd> <kbd>Alt-Home</kbd> |
-| `z4h-end-of-buffer` | move cursor to the end of buffer | <kbd>Ctrl-End</kbd> <kbd>Alt-End</kbd> | <kbd>Ctrl-End</kbd> <kbd>Alt-End</kbd> | <kbd>Ctrl-End</kbd> <kbd>Alt-End</kbd> |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `backward-char` | move cursor one char backward | <kbd>Left</kbd> <kbd>Ctrl-B</kbd> |
+| `forward-char` | move cursor one char forward | <kbd>Right</kbd> <kbd>Ctrl-F</kbd> |
+| `backward-word` | move cursor one word backward | <kbd>Ctrl-Left</kbd> <kbd>Alt-B</kbd> |
+| `forward-word` | move cursor one word forward | <kbd>Ctrl-Right</kbd> <kbd>Alt-F</kbd> |
+| `z4h-up-local-history` | move cursor up or fetch [previous local history event](#searching-command-history) | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> |
+| `z4h-down-local-history` | move cursor down or fetch [next local history event](#searching-command-history) | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> |
+| `z4h-up-global-history` | move cursor up or fetch [previous global history event](#searching-command-history) | <kbd>Ctrl-Up</kbd> |
+| `z4h-down-global-history` | move cursor down or fetch [next global history event](#searching-command-history) | <kbd>Ctrl-Down</kbd> |
+| `beginning-of-line` | move cursor to the beginning of line | <kbd>Home</kbd> <kbd>Ctrl-A</kbd> |
+| `end-of-line` | move cursor to the end of line | <kbd>End</kbd> <kbd>Ctrl-E</kbd> |
+| `z4h-beginning-of-buffer` | move cursor to the beginning of buffer | <kbd>Ctrl-Home</kbd> <kbd>Alt-Home</kbd> |
+| `z4h-end-of-buffer` | move cursor to the end of buffer | <kbd>Ctrl-End</kbd> <kbd>Alt-End</kbd> |
 
 #### Editing
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `delete-char` | delete the character under the cursor | <kbd>Delete</kbd> | <kbd>Delete</kbd> | <kbd>Delete</kbd> |
-| `vi-delete-char` | delete the character under the cursor (vi style) | | | <kbd>x</kbd> |
-| `backward-delete-char` | delete the character behind the cursor | <kbd>Backspace</kbd> | <kbd>Backspace</kbd> | |
-| `vi-backward-delete-char` | delete the character behind the cursor (vi style) | | <kbd>Ctrl-Backspace</kbd> <kbd>Ctrl-H</kbd> | <kbd>X</kbd> |
-| `backward-kill-word` | delete the previous word | <kbd>Ctrl-Backspace</kbd> <kbd>Alt-Backspace</kbd> <kbd>Ctrl-W</kbd> <kbd>Ctrl-H</kbd> | | |
-| `vi-backward-kill-word` | delete the previous word (vi style) | | <kbd>Ctrl-W</kbd> | | |
-| `kill-word` | delete the next word | <kbd>Ctrl-Delete</kbd> <kbd>Alt-Delete</kbd> <kbd>Alt-D</kbd> | | |
-| `backward-kill-line` | delete from the beginning of the line to the cursor | <kbd>Alt-K</kbd> | | |
-| `kill-line` | delete from the cursor to the end of the line | <kbd>Ctrl-K</kbd> | | |
-| `kill-whole-line` | delete the whole current line | <kbd>Ctrl-U</kbd> | | |
-| `vi-kill-line` | delete the whole current line (vi style) | | <kbd>Ctrl-U</kbd> | |
-| `kill-buffer` | delete all lines | <kbd>Alt-J</kbd> | | |
-| `undo` | undo the last edit | <kbd>Ctrl-/</kbd> | <kbd>Ctrl-/</kbd> | |
-| `redo` | redo the last undone edit | <kbd>Alt-/</kbd> | | <kbd>u</kbd> |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `delete-char` | delete the character under the cursor | <kbd>Delete</kbd> |
+| `backward-delete-char` | delete the character behind the cursor | <kbd>Backspace</kbd> |
+| `backward-kill-word` | delete the previous word | <kbd>Ctrl-Backspace</kbd> <kbd>Alt-Backspace</kbd> <kbd>Ctrl-W</kbd> <kbd>Ctrl-H</kbd> |
+| `kill-word` | delete the next word | <kbd>Ctrl-Delete</kbd> <kbd>Alt-Delete</kbd> <kbd>Alt-D</kbd> |
+| `backward-kill-line` | delete from the beginning of the line to the cursor | <kbd>Alt-K</kbd> |
+| `kill-line` | delete from the cursor to the end of the line | <kbd>Ctrl-K</kbd> |
+| `kill-whole-line` | delete the whole current line | <kbd>Ctrl-U</kbd> |
+| `kill-buffer` | delete all lines | <kbd>Alt-J</kbd> |
+| `undo` | undo the last edit | <kbd>Ctrl-/</kbd> |
+| `redo` | redo the last undone edit | <kbd>Alt-/</kbd> |
 
 #### Accepting autosuggestions
 
@@ -128,20 +118,20 @@ autosuggestion instead.
 
 There is one special binding that is specific to autosuggestions.
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `z4h-autosuggest-accept` | accept the whole autosuggestion without moving the cursor | <kbd>Alt-M</kbd> | | |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `z4h-autosuggest-accept` | accept the whole autosuggestion without moving the cursor | <kbd>Alt-M</kbd> |
 
 Autosuggestions in Zsh For Humans are provided by [zsh-autosuggestions](
   https://github.com/zsh-users/zsh-autosuggestions). See its homepage for more information.
 
 #### Completing commands
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `z4h-expand` | expand an alias, glob or parameter | <kbd>Ctrl-Space</kbd> | <kbd>Ctrl-Space</kbd> | |
-| `z4h-expand-or-complete` | complete interactively with [fuzzy search](#fuzzy-search) | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> |
-| `fzf-completion` | complete files recursively; great for completing file paths | <kbd>Alt-I</kbd> | | |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `z4h-expand` | expand an alias, glob or parameter | <kbd>Ctrl-Space</kbd> |
+| `z4h-expand-or-complete` | complete interactively with [fuzzy search](#fuzzy-search) | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> |
+| `fzf-completion` | complete files recursively; great for completing file paths | <kbd>Alt-I</kbd> |
 
 When completing with <kbd>Tab</kbd>, you can move the cursor with arrow keys. Editing is mostly
 consistent with `emacs` keymap from Zsh For Humans but not quite the same. There are several
@@ -185,13 +175,13 @@ shell. The only difference between <kbd>Up</kbd>/<kbd>Down</kbd> and
 
 <kbd>Ctrl-R</kbd> searches over global history. There is no equivalent binding for local history.
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `z4h-up-local-history` | move cursor up or fetch previous local history event | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> | <kbd>Up</kbd> | <kbd>k</kbd> |
-| `z4h-down-local-history` | move cursor down or fetch next local history event | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> | <kbd>Down</kbd> | <kbd>j</kbd> |
-| `z4h-up-global-history` | move cursor up or fetch previous global history event | <kbd>Ctrl-Up</kbd> | <kbd>Ctrl-Up</kbd> | |
-| `z4h-down-global-history` | move cursor down or fetch next global history event | <kbd>Ctrl-Down</kbd> | <kbd>Ctrl-Down</kbd> | |
-| `z4h-fzf-history` | [fuzzy search](#fuzzy-search) history from all shells | <kbd>Ctrl-R</kbd> | <kbd>Ctrl-R</kbd> | <kbd>Ctrl-R</kbd> |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `z4h-up-local-history` | move cursor up or fetch previous local history event | <kbd>Up</kbd> <kbd>Ctrl-P</kbd> |
+| `z4h-down-local-history` | move cursor down or fetch next local history event | <kbd>Down</kbd> <kbd>Ctrl-N</kbd> |
+| `z4h-up-global-history` | move cursor up or fetch previous global history event | <kbd>Ctrl-Up</kbd> |
+| `z4h-down-global-history` | move cursor down or fetch next global history event | <kbd>Ctrl-Down</kbd> |
+| `z4h-fzf-history` | [fuzzy search](#fuzzy-search) history from all shells | <kbd>Ctrl-R</kbd> |
 
 #### Changing current directory
 
@@ -199,12 +189,12 @@ These bindings allows you to quickly change current directory without losing com
 Going to the previous/next directory works similarly to the *Back* and *Forward* buttons in a Web
 browser.
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `z4h-cd-back` | `cd` into the previous directory | <kbd>Alt-Left</kbd> | <kbd>Alt-Left</kbd> | <kbd>Alt-Left</kbd> |
-| `z4h-cd-forward` | `cd` into the next directory | <kbd>Alt-Right</kbd> | <kbd>Alt-Right</kbd> | <kbd>Alt-Right</kbd> |
-| `z4h-cd-up` | `cd` into the parent directory | <kbd>Alt-Up</kbd> | <kbd>Alt-Up</kbd> | <kbd>Alt-Up</kbd> |
-| `z4h-cd-down` | `cd` into a subdirectory; uses [fuzzy search](#fuzzy-search) | <kbd>Alt-Down</kbd> | <kbd>Alt-Down</kbd> | <kbd>Alt-Down</kbd> |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `z4h-cd-back` | `cd` into the previous directory | <kbd>Alt-Left</kbd> |
+| `z4h-cd-forward` | `cd` into the next directory | <kbd>Alt-Right</kbd> |
+| `z4h-cd-up` | `cd` into the parent directory | <kbd>Alt-Up</kbd> |
+| `z4h-cd-down` | `cd` into a subdirectory; uses [fuzzy search](#fuzzy-search) | <kbd>Alt-Down</kbd> |
 
 Another way to change current directory is to type `cd ~/` and hit <kbd>Alt+I</kbd>. It works with
 any directory prefix. <kbd>Alt+I</kbd> completes files with [fuzzy search](#fuzzy-search) but it's
@@ -221,11 +211,11 @@ completion function, too, so that `md fo<TAB>` will complete to `md foo/` but no
 
 #### Miscellaneous
 
-| Zle Widget | Description | emacs | viins | vicmd |
-| - | - | - | - | - |
-| `clear-screen` | clear screen and place prompt at the top | <kbd>Ctrl-L</kbd> | <kbd>Ctrl-L</kbd> | <kbd>Ctrl-L</kbd> |
-| `z4h-run-help` | show help for the command at cursor | <kbd>Alt-H</kbd> | | |
-| `z4h-do-nothing` | do nothing; useful for blocking keys that would otherwise print garbage | <kbd>PageUp</kbd> <kbd>PageDown</kbd> | <kbd>PageUp</kbd> <kbd>PageDown</kbd> | <kbd>PageUp</kbd> <kbd>PageDown</kbd> |
+| Zle Widget | Description | Bindings |
+| - | - | - |
+| `clear-screen` | clear screen and place prompt at the top | <kbd>Ctrl-L</kbd> |
+| `z4h-run-help` | show help for the command at cursor | <kbd>Alt-H</kbd> |
+| `z4h-do-nothing` | do nothing; useful for blocking keys that would otherwise print garbage | <kbd>PageUp</kbd> <kbd>PageDown</kbd> |
 
 ### Fuzzy search
 

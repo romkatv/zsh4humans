@@ -474,3 +474,12 @@ With this:
 ```text
 z4h: cloning romkatv/powerlevel10k
 ```
+
+---
+
+Revamp vi bindings. See https://github.com/zsh-vi-more/vi-motions and
+https://github.com/softmoth/zsh-vim-mode.
+
+Cursor shape changes should go to p10k?
+
+---

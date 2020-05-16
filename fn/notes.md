@@ -483,3 +483,15 @@ https://github.com/softmoth/zsh-vim-mode.
 Cursor shape changes should go to p10k?
 
 ---
+
+When looking for zsh, check `/etc/shells`.
+
+If there are several zsh versions installed, pick the one from `PATH`. If it's too old, pick
+the latest latest from the rest.
+
+---
+
+When zsh-bin installs zsh, it should ask whether to add it to /etc/shells. By default it should
+do this only when the installation directory is world-readable.
+
+---

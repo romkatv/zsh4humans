@@ -362,7 +362,7 @@ everywhere.
 
 When using external commands or files in `~/.zshrc`, prefer conditional evaluation. If your
 `~/.zshrc` uses only things that exist, it'll be easier to [replicate shell on another machine](
-  #replicating-shell-on-another-machine).
+  #replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup).
 
 Here are a few examples to demonstrate this:
 
@@ -408,7 +408,8 @@ There is no update mechanism for `~/.zshrc` itself.
 Zsh For Humans uses the following configuration files:
 
 - `~/.zshrc`. Main Zsh configuration file. Zsh For Humans gets bootstrapped from it. See
-  [Replicating shell on another machine](#replicating shell on another machine).
+  [Replicating Zsh For Humans on another machine or restoring it from a backup](
+    #replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup).
 - `~/.p10k*.zsh`. [Powerlevel10k](https://github.com/romkatv/powerlevel10k) (prompt) configuration
   files. There can be more than one such file (hence `*`) to account for terminals with limited
   capabilities. Most users will ever only see `~/.p10k.zsh`. Powerlevel10k configuration wizard

@@ -115,7 +115,7 @@ You can ignore the other two columns.
 | `vi-kill-line` | delete the whole current line (vi style) | | <kbd>Ctrl-U</kbd> | |
 | `kill-buffer` | delete all lines | <kbd>Alt-J</kbd> | | |
 | `undo` | undo the last edit | <kbd>Ctrl-/</kbd> | <kbd>Ctrl-/</kbd> | |
-| `redo` | redo the last undone edit | <kbd>Alt-/</kbd> | <kbd>Alt-/</kbd> | <kbd>u</kbd> |
+| `redo` | redo the last undone edit | <kbd>Alt-/</kbd> | | <kbd>u</kbd> |
 
 #### Accepting autosuggestions
 
@@ -130,7 +130,7 @@ There is one special binding that is specific to autosuggestions.
 
 | Zle Widget | Description | emacs | viins | vicmd |
 | - | - | - | - | - |
-| `z4h-autosuggest-accept` | accept the whole autosuggestion without moving the cursor | <kbd>Alt-M</kbd> | <kbd>Alt-M</kbd> | <kbd>Alt-M</kbd> |
+| `z4h-autosuggest-accept` | accept the whole autosuggestion without moving the cursor | <kbd>Alt-M</kbd> | | |
 
 Autosuggestions in Zsh For Humans are provided by [zsh-autosuggestions](
   https://github.com/zsh-users/zsh-autosuggestions). See its homepage for more information.
@@ -141,7 +141,7 @@ Autosuggestions in Zsh For Humans are provided by [zsh-autosuggestions](
 | - | - | - | - | - |
 | `z4h-expand` | expand an alias, glob or parameter | <kbd>Ctrl-Space</kbd> | <kbd>Ctrl-Space</kbd> | |
 | `z4h-expand-or-complete` | complete interactively with [fuzzy search](#fuzzy-search) | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> | <kbd>Tab</kbd> <kbd>Ctrl-I</kbd> |
-| `fzf-completion` | complete files recursively; great for completing file paths | <kbd>Alt-I</kbd> | <kbd>Alt-I</kbd> | <kbd>Alt-I</kbd> |
+| `fzf-completion` | complete files recursively; great for completing file paths | <kbd>Alt-I</kbd> | | |
 
 When completing with <kbd>Tab</kbd>, you can move the cursor with arrow keys. Editing is mostly
 consistent with `emacs` keymap from Zsh For Humans but not quite the same. There are several
@@ -224,7 +224,7 @@ completion function, too, so that `md fo<TAB>` will complete to `md foo/` but no
 | Zle Widget | Description | emacs | viins | vicmd |
 | - | - | - | - | - |
 | `clear-screen` | clear screen and place prompt at the top | <kbd>Ctrl-L</kbd> | <kbd>Ctrl-L</kbd> | <kbd>Ctrl-L</kbd> |
-| `z4h-run-help` | show help for the command at cursor | <kbd>Alt-H</kbd> | <kbd>Alt-H</kbd> | <kbd>Alt-H</kbd> |
+| `z4h-run-help` | show help for the command at cursor | <kbd>Alt-H</kbd> | | |
 | `z4h-do-nothing` | do nothing; useful for blocking keys that would otherwise print garbage | <kbd>PageUp</kbd> <kbd>PageDown</kbd> | <kbd>PageUp</kbd> <kbd>PageDown</kbd> | <kbd>PageUp</kbd> <kbd>PageDown</kbd> |
 
 ### Fuzzy search

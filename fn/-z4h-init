@@ -185,6 +185,10 @@ for keymap in emacs viins vicmd; do
   # TTY sends different key codes. Translate them to regular.
   bindkey -M $keymap -s '^[[1~' '^[[H'  # home
   bindkey -M $keymap -s '^[[4~' '^[[F'  # end
+
+  # Urxvt sends different key codes.
+  bindkey -M $keymap -s '^[[7~' '^[[H'  # home
+  bindkey -M $keymap -s '^[[8~' '^[[F'  # end
 done
 
 # Move cursor one char backward.

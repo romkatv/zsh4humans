@@ -27,9 +27,15 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
 
   WORDCHARS=''
   ZLE_REMOVE_SUFFIX_CHARS=''
-  HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
   HISTSIZE='1000000000'
   SAVEHIST='1000000000'
+
+  if '[' '-n' "$HISTFILE" ']'; then
+    'typeset' '-gri' _z4h_custom_histfile='1'
+  else
+    'typeset' '-gri' _z4h_custom_histfile='0'
+    HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+  fi
 
   'bindkey' '-d'
   'bindkey' '-e'

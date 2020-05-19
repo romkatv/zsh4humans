@@ -104,6 +104,7 @@ you'll likely need to define additional bindings.
 | `kill-line` | delete from the cursor to the end of the line | <kbd>Ctrl-K</kbd> |
 | `kill-whole-line` | delete the whole current line | <kbd>Ctrl-U</kbd> |
 | `kill-buffer` | delete all lines | <kbd>Alt-J</kbd> |
+| `z4h-stash-buffer` | push command to history and delete all lines | <kbd>Alt-O</kbd> |
 | `undo` | undo the last edit | <kbd>Ctrl-/</kbd> |
 | `redo` | redo the last undone edit | <kbd>Alt-/</kbd> |
 

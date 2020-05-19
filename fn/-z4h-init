@@ -110,6 +110,7 @@ zle -N down-line-or-beginning-search
 zle -N z4h-expand
 zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
+zle -N z4h-stash-buffer
 zle -N z4h-expand-or-complete
 zle -N z4h-up-local-history
 zle -N z4h-down-local-history
@@ -249,6 +250,9 @@ bindkey   -M emacs '^[K'     backward-kill-line             # alt+K
 # Delete all lines.
 bindkey   -M emacs '^[j'     kill-buffer                    # alt+j
 bindkey   -M emacs '^[J'     kill-buffer                    # alt+J
+# Push buffer to ephemeral history (won't be saved to HISTFILE) and delete all lines.
+bindkey   -M emacs '^[o'     z4h-stash-buffer               # alt+o
+bindkey   -M emacs '^[O'     z4h-stash-buffer               # alt+O
 # Accept autosuggestion.
 bindkey   -M emacs '^[m'     z4h-autosuggest-accept         # alt+m
 bindkey   -M emacs '^[M'     z4h-autosuggest-accept         # alt+M

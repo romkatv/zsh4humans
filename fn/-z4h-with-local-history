@@ -1,11 +1,11 @@
 eval "$_z4h_opt"
 
 local last=$LASTWIDGET
-zle .set-local-history $1
+zle .set-local-history -n $1
 shift
 {
   () { local -h LASTWIDGET=$last; "$@" } "$@"
 } always {
-  zle .set-local-history 0
+  zle .set-local-history -n 0
 }
 (( ! $+functions[_zsh_highlight] )) || _zsh_highlight

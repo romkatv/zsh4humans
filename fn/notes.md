@@ -426,6 +426,21 @@ by zsh (hence `$FOO/baz` is OK without quotes).
 
 ---
 
+`z4h ssh` should be able to send history and then to retrieve it. For retrieving there needs to
+be `teardown` hook similar to `setup`.
+
+---
+
+`z4h ssh` should perform setup and interactive connection with these SSH options:
+
+```
+-o 'ControlMaster auto' -o 'ControlPath ~/.ssh/control-master-%r@%h:%p' -o 'ControlPersist 10'
+```
+
+These can be overridden via zstyle.
+
+---
+
 Create `zle-experimental-save-restore-cursor` branch in `zsh`. Sync it to 5.8 and add `fix-sigwinch`
 code on top. Guard the new code with `ZLE_EXPERIMENTAL_SAVE_RESTORE_CURSOR`.
 
@@ -495,3 +510,10 @@ When zsh-bin installs zsh, it should ask whether to add it to /etc/shells. By de
 do this only when the installation directory is world-readable.
 
 ---
+
+If `ZDOTDIR` is set and doesn't point to `$HOME` when `install` starts, ask whether to install to
+`$HOME` or `$ZDOTDIR`. Backups should go under the same directory.
+
+---
+
+Create `~/.zshenv` with just `setopt no_global_rcs` in it.

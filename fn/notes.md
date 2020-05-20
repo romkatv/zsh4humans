@@ -517,3 +517,41 @@ If `ZDOTDIR` is set and doesn't point to `$HOME` when `install` starts, ask whet
 ---
 
 Create `~/.zshenv` with just `setopt no_global_rcs` in it.
+
+---
+
+Add `z4h use [-f] [module]...` where `module` is one of the built-in things:
+`zsh-users/zsh-autosuggestions`, `bindkey`, `term-title`, etc.
+
+On `-f` it should essentially run `-z4h-init` (or rather `-z4h-use-rigi`, see below) with a bunch
+of conditions sprinkled it:
+
+```zsh
+if (( ${@[(Ie)zsh-users/zsh-autosuggestions]} )); then
+  ...
+fi
+```
+
+Add this:
+
+```zsh
+zstyle ':z4h:' preset rigi
+```
+
+Could support multiple values for preset "addons". Presets can be used by the core code to do things
+differently but its primary purpose is to set default values of various parameters, styles, options,
+bindings, etc.
+
+`z4h init` will simply call the preset function -- `-z4h-init-rigi`. The latter will do this:
+
+```zsh
+local -a mods=()
+zstyle -T :z4h:zsh-users/zsh-autosuggestion install && mods+=zsh-autosuggestion
+...
+z4h install -f -- $mods
+
+local -a mods=()
+zstyle -T :z4h:zsh-users/zsh-autosuggestion use && mods+=zsh-autosuggestion
+...
+z4h use -f -- $mods
+```

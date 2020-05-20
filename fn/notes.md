@@ -520,17 +520,24 @@ Create `~/.zshenv` with just `setopt no_global_rcs` in it.
 
 ---
 
-Add `z4h use [-f] [module]...` where `module` is one of the built-in things:
+Add `z4h use [-d] [-f] [module]...` where `module` is one of the built-in things:
 `zsh-users/zsh-autosuggestions`, `bindkey`, `term-title`, etc.
 
-On `-f` it should essentially run `-z4h-init` (or rather `-z4h-use-rigi`, see below) with a bunch
-of conditions sprinkled it:
+Without `-d` modules are added to `_z4h_use_queue`. With `-d` they are added to
+`_z4h_install_queue_d[-1]`. The latter is an array with nul separated lists as its elements.
+
+On `-f` it should install a `precmd` hook called `-z4h-precmd-$#_z4h_install_queue_d` that calls
+`${(0)_z4h_install_queue_d[${0#-z4h-precmd-}]}`, and call `-z4h-use-rigi $_z4h_use_queue`.
+
+`-z4h-use-rigi` should be the same as the current `-z4h-init` with a bunch of conditions added in:
 
 ```zsh
 if (( ${@[(Ie)zsh-users/zsh-autosuggestions]} )); then
   ...
 fi
 ```
+
+It should issue warnings (but not fail) for arguments it doesn't recognize.
 
 Add this:
 
@@ -551,7 +558,16 @@ zstyle -T :z4h:zsh-users/zsh-autosuggestion install && mods+=zsh-autosuggestion
 z4h install -f -- $mods
 
 local -a mods=()
+zstyle -T :z4h:compinit use && mods+=compinit
+...
+z4h use -d -- $mods
+
+local -a mods=()
 zstyle -T :z4h:zsh-users/zsh-autosuggestion use && mods+=zsh-autosuggestion
 ...
 z4h use -f -- $mods
 ```
+
+---
+
+Use `fc` to write history in `z4h-stash-buffer`. Might need `fc -p`.

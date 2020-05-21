@@ -43,7 +43,7 @@ local new=$Z4H.new.$$
     print -Pru2 -- ''
     print -Pru2 -- 'Edit Zsh configuration:'
     print -Pru2 -- ''
-    print -Pru2 -- '  %F{2}${(q)${VISUAL:-${EDITOR:-vi}}%f %U'$zdotdir'/.zshrc%u'
+    print -Pru2 -- '  %F{2}${(q)${VISUAL:-${EDITOR:-vi}}}%f %U'$zdotdir'/.zshrc%u'
     print -Pru2 -- ''
     print -Pru2 -- 'Retry update:'
     print -Pru2 -- ''

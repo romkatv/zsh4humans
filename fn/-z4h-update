@@ -36,34 +36,7 @@ local new=$Z4H.new.$$
   zf_rm -rf -- $old                   || true
 } always {
   if (( $? )); then
-    print -Pru2 -- ''
-    print -Pru2 -- '%F{3}z4h%f: update %F{1}failed%f'
-    print -Pru2 -- ''
-    print -Pru2 -- 'See error messages above to identify the culprit.'
-    print -Pru2 -- ''
-    print -Pru2 -- 'Edit Zsh configuration:'
-    print -Pru2 -- ''
-    print -Pru2 -- '  %F{2}${(q)${VISUAL:-${EDITOR:-vi}}}%f %U'$zdotdir'/.zshrc%u'
-    print -Pru2 -- ''
-    print -Pru2 -- 'Retry update:'
-    print -Pru2 -- ''
-    print -Pru2 -- '  %F{2}z4h%f %Bupdate%b'
-    print -Pru2 -- ''
-    print -Pru2 -- 'If nothing helps and you are about to give up:'
-    print -Pru2 -- ''
-    print -Pru2 -- '  %F{5}# nuke the entire site from orbit'
-    print -Pru2 -- '  %F{2}%Usudo%u rm%f -rf -- %U'$z4h'%u'
-    if (( $+commands[curl] )); then
-      print -Pru2 -- ''
-      print -Pru2 -- 'Give up and start over:'
-      print -Pru2 -- ''
-      print -Pru2 -- '  %F{2}sh%f -c %F{3}"%f$(%F{2}curl%f -fsSL %Uhttps://raw.githubusercontent.com/romkatv/zsh4humans/v2/install%u)%F{3}"%f'
-    elif (( $+commands[wget] )); then
-      print -Pru2 -- ''
-      print -Pru2 -- 'Give up and start over:'
-      print -Pru2 -- ''
-      print -Pru2 -- '  %F{2}sh%f -c %F{3}"%f$(%F{2}wget%f -O- %Uhttps://raw.githubusercontent.com/romkatv/zsh4humans/v2/install%u)%F{3}"%f'
-    fi
+    -z4h-error-command update
   fi
   zf_rm -rf -- $old $new || return
 }

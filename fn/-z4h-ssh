@@ -14,7 +14,7 @@ dump="$(
   fi
   tar -czh -- $files | base64 | tr -d '\n')" || return
 
-ssh -t "$@" '"set" "-ue" || "exit"
+"command" "ssh" "-t" "$@" '"set" "-ue" || "exit"
 "export" ZDOTDIR="${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"
 "export" Z4H="$ZDOTDIR"/.z4h
 "export" Z4H_SSH="1"

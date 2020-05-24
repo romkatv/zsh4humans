@@ -159,7 +159,8 @@ fzf_default_completion=z4h-expand-or-complete        # file completion falls bac
 z4h source $Z4H/junegunn/fzf/shell/completion.zsh    # load fzf-completion
 z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
 
-zstyle ':fzf-tab:*' prefix ''               # remove '·'
+zstyle ':fzf-tab:*' prefix       ''         # remove '·'
+zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
 bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
 z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh  # load fzf-tab-complete
 

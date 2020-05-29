@@ -409,7 +409,7 @@ There is no update mechanism for `~/.zshrc` itself.
 
 To uninstall Zsh For Humans, remove `~/.zshrc` or replace it with a different version. If you had
 this file prior to the installation of Zsh For Humans and have replied in the affirmative when asked
-by the installer whether you wait `~/.zshrc` backed up, you can find it in `~/zsh-backup`.
+by the installer whether you want `~/.zshrc` backed up, you can find it in `~/zsh-backup`.
 
 ## Configuration files
 

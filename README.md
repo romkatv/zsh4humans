@@ -28,8 +28,9 @@ If you want a great shell that just works, this project is for you.
   * 4.4. [Using external commands or files](#using-external-commands-or-files)
   * 4.5. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 5. [Updating](#updating)
-* 6. [Configuration files](#configuration-files)
-* 7. [Replicating Zsh For Humans on another machine or restoring it from a backup](#replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup)
+* 6. [Uninstalling](#uninstalling)
+* 7. [Configuration files](#configuration-files)
+* 8. [Replicating Zsh For Humans on another machine or restoring it from a backup](#replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup)
 
 
 ## Installation
@@ -104,6 +105,7 @@ you'll likely need to define additional bindings.
 | `kill-line` | delete from the cursor to the end of the line | <kbd>Ctrl-K</kbd> |
 | `kill-whole-line` | delete the whole current line | <kbd>Ctrl-U</kbd> |
 | `kill-buffer` | delete all lines | <kbd>Alt-J</kbd> |
+| `z4h-stash-buffer` | push command to history and delete all lines | <kbd>Alt-O</kbd> |
 | `undo` | undo the last edit | <kbd>Ctrl-/</kbd> |
 | `redo` | redo the last undone edit | <kbd>Alt-/</kbd> |
 
@@ -402,6 +404,12 @@ or disable auto-update prompt altogether. You can manually update with `z4h upda
 update channels. From the most stable to the most fresh: `stable` (default), `testing` and `dev`.
 
 There is no update mechanism for `~/.zshrc` itself.
+
+## Uninstalling
+
+To uninstall Zsh For Humans, remove `~/.zshrc` or replace it with a different version. If you had
+this file prior to the installation of Zsh For Humans and have replied in the affirmative when asked
+by the installer whether you wait `~/.zshrc` backed up, you can find it in `~/zsh-backup`.
 
 ## Configuration files
 

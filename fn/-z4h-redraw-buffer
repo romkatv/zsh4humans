@@ -1,0 +1,5 @@
+_zsh_autosuggest_highlight_reset
+_zsh_highlight
+-z4h-autosuggest-fetch
+_zsh_autosuggest_highlight_apply
+zle -R

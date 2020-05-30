@@ -1,4 +1,11 @@
-eval "$_z4h_opt"
-local cursor=$CURSOR
-zle autosuggest-accept
-CURSOR=$cursor
+local -i cursor=CURSOR
+{
+  if [[ "$KEYMAP" == "vicmd" && -n "$BUFFER" ]]; then
+    CURSOR=$(($#BUFFER - 1))
+  else
+    CURSOR=$#BUFFER
+  fi
+  zle autosuggest-accept
+} always {
+  CURSOR=cursor
+}

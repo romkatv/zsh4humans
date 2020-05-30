@@ -1,0 +1,8 @@
+if [[ "$CONTEXT" == "start" ]]; then
+  typeset -g _z4h_autosuggest_buffer="$BUFFER"
+  if (( ${+_z4h_autosuggestion} )); then
+    typeset -g _z4h_autosuggestion="$POSTDISPLAY"
+  fi
+else
+  unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion
+fi

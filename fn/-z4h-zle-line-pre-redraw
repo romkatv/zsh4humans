@@ -1,0 +1,20 @@
+local -i ret
+
+if (( ${+widgets[-z4h-orig-zle-line-pre-redraw]} )); then
+  zle -z4h-orig-zle-line-pre-redraw "$@" || ret=$?
+fi
+
+if (( PENDING || KEYS_QUEUED_COUNT )); then
+  if (( ! ${+_z4h_redraw_fd} )); then
+    typeset -gi _z4h_redraw_fd
+    if sysopen -o cloexec -ru _z4h_redraw_fd /dev/null; then
+      zle -F $_z4h_redraw_fd -z4h-redraw-buffer
+    else
+      unset _z4h_redraw_fd
+    fi
+  fi
+else
+  -z4h-redraw-buffer
+fi
+
+return ret

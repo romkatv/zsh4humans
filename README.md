@@ -32,7 +32,6 @@ If you want a great shell that just works, this project is for you.
 * 7. [Configuration files](#configuration-files)
 * 8. [Replicating Zsh For Humans on another machine or restoring it from a backup](#replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup)
 
-
 ## Installation
 
 1. *Optional*: Install [MesloLGS NF](

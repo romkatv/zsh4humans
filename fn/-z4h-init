@@ -84,7 +84,6 @@ function z4h-down-global-history() {
 function z4h-beginning-of-buffer() { CURSOR=0 }
 function z4h-end-of-buffer() { CURSOR=$#BUFFER }
 function z4h-expand() { zle _expand_alias || zle .expand-word || true }
-function z4h-run-help() { zle run-help || true }
 
 if (( $+terminfo[rmam] && $+terminfo[smam] )); then
   function z4h-expand-or-complete() {
@@ -122,7 +121,6 @@ zle -N z4h-cd-up
 zle -N z4h-fzf-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
-zle -N z4h-run-help
 
 if (( terminfo[colors] >= 256 )); then
   typeset -g  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244' # the default is hard to see
@@ -287,12 +285,12 @@ bindkey   -M emacs '^R'      z4h-fzf-history                # ctrl+r
 bindkey   -M viins '^R'      z4h-fzf-history                # ctrl+r
 bindkey   -M vicmd '^R'      z4h-fzf-history                # ctrl+r
 # Show help for the command at cursor.
-bindkey   -M emacs '^[h'     z4h-run-help                   # alt+h
-bindkey   -M emacs '^[H'     z4h-run-help                   # alt+H
-# bindkey -M viins '^[h'     z4h-run-help                   # alt+h
-# bindkey -M viins '^[H'     z4h-run-help                   # alt+H
-# bindkey -M vicmd '^[h'     z4h-run-help                   # alt+h
-# bindkey -M vicmd '^[H'     z4h-run-help                   # alt+H
+bindkey   -M emacs '^[h'     run-help                       # alt+h
+bindkey   -M emacs '^[H'     run-help                       # alt+H
+# bindkey -M viins '^[h'     run-help                       # alt+h
+# bindkey -M viins '^[H'     run-help                       # alt+H
+# bindkey -M vicmd '^[h'     run-help                       # alt+h
+# bindkey -M vicmd '^[H'     run-help                       # alt+H
 # Do nothing (better than printing '~').
 bindkey   -M emacs '^[[5~'   z4h-do-nothing                 # pageup
 bindkey   -M emacs '^[[6~'   z4h-do-nothing                 # pagedown

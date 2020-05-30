@@ -216,7 +216,7 @@ completion function, too, so that `md fo<TAB>` will complete to `md foo/` but no
 | Zle Widget | Description | Bindings |
 | - | - | - |
 | `clear-screen` | clear screen and place prompt at the top | <kbd>Ctrl-L</kbd> |
-| `z4h-run-help` | show help for the command at cursor | <kbd>Alt-H</kbd> |
+| `run-help` | show help for the command at cursor | <kbd>Alt-H</kbd> |
 | `z4h-do-nothing` | do nothing; useful for blocking keys that would otherwise print garbage | <kbd>PageUp</kbd> <kbd>PageDown</kbd> |
 
 ### Fuzzy search

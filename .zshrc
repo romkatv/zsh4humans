@@ -39,7 +39,7 @@ zstyle ':z4h:*'               channel          stable
 zstyle ':z4h:'                cd-key           alt
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
-zstyle ':z4h:autosuggestions' forward-char     partial-accept
+zstyle ':z4h:autosuggestions' forward-char     accept
 
 if (( UID && UID == EUID && ! Z4H_SSH )); then
   # When logged in as a regular user and not via `z4h ssh`, check that
@@ -59,9 +59,6 @@ z4h install ohmyzsh/ohmyzsh || return
 # that requires user interaction or can perform network I/O must be done
 # above. Everything else is best done below.
 z4h init || return
-
-# Enable emacs (-e) or vi (-v) keymap.
-bindkey -e
 
 # Export environment variables.
 export EDITOR=nano

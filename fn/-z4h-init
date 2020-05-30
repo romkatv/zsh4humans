@@ -166,6 +166,7 @@ fi
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
+bindkey -e
 
 local keymap
 for keymap in emacs viins vicmd; do

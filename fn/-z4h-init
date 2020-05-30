@@ -425,6 +425,9 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     vi-find-next-char-skip
   )
   typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
+    end-of-line
+    vi-end-of-line
+    vi-add-eol
     z4h-end-of-buffer
   )
 
@@ -432,12 +435,6 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
   else
     ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
-  fi
-
-  if zstyle -T :z4h:autosuggestions end-of-line accept; then
-    ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
-  else
-    ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
   fi
 
   z4h source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh

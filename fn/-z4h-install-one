@@ -1,57 +1,65 @@
 local url postinstall
 
-if [[ $1 == zsh4humans ]]; then
-  url=https://github.com/romkatv/zsh4humans/archive/${Z4H_URL:t}.tar.gz
+if [[ $1 == */* ]]; then
+  url=https://github.com/$1/archive/master.tar.gz
+  zstyle -s :z4h:$1 postinstall postinstall || postinstall=
+else
+  local -a channel
+  zstyle -a :z4h:$1 channel channel || channel=(stable)
+  [[ $1 == zsh4humans ]] && url=https://github.com/romkatv/zsh4humans/archive/${Z4H_URL:t}.tar.gz
+  case $+url-$#channel-$channel[1] in
+    ?-1-stable)  : ${url:=https://github.com/zsh4humans/$1/archive/z4h-stable.tar.gz};;
+    ?-1-testing) : ${url:=https://github.com/zsh4humans/$1/archive/z4h-testing.tar.gz};;
+    ?-1-dev)
+      case $1 in
+        fzf)                     ${url:=https://github.com/junegunn/$1/archive/master.tar.gz};;
+        fzf-tab)                 ${url:=https://github.com/Aloxaf/$1/archive/master.tar.gz};;
+        powerlevel10k)           ${url:=https://github.com/romkatv/$1/archive/master.tar.gz};;
+        zsh-completions)         ${url:=https://github.com/zsh-users/$1/archive/master.tar.gz};;
+        zsh-autosuggestions)     ${url:=https://github.com/zsh-users/$1/archive/master.tar.gz};;
+        zsh-syntax-highlighting) ${url:=https://github.com/zsh-users/$1/archive/master.tar.gz};;
+        zsh4humans) ;;
+        *)
+          print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
+          return 1
+        ;;
+      esac
+    ;;
+    0-1-none)
+      zf_mkdir -p -- $Z4H/$1 || return
+      return
+    ;;
+    ?-2-command)
+      if [[ -e $Z4H/tmp/updating ]]; then
+        print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
+      else
+        print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
+      fi
+      local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$Z4H/$1
+      eval $channel[2] || return
+      return
+    ;;
+    *)
+      print -Pru2 -- '%F{3}z4h%f: invalid zstyle'
+      print -Pru2 -- ''
+      print -Pru2 -- "  %F{2}zstyle%f :z4h:${(q)1//\%/%%} channel %F{1}${(j: :)${(@q)channel//\%/%%}}%f"
+      print -Pru2 -- ''
+      print -Pru2 -- 'Supported values: %Bstable%b, %Btesting%b and %Bdev%b.'
+      return 1
+    ;;
+  esac
+  (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
+fi
+
+if [[ $1 == zsh4humans || -e $Z4H/tmp/updating ]]; then
   print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
 else
-  if [[ $1 == */* ]]; then
-    url=https://github.com/$1/archive/master.tar.gz
-    local cmd
-    if zstyle -a :z4h:$1 postinstall cmd && (( $#cmd )); then
-      postinstall="${(j: :)${(@q)cmd}} ${(q)1}"
-    fi
-  else
-    local channel
-    zstyle -s :z4h:$1 channel channel || channel=stable
-    case $channel in
-      stable)  url=https://github.com/zsh4humans/$1/archive/z4h-stable.tar.gz;;
-      testing) url=https://github.com/zsh4humans/$1/archive/z4h-testing.tar.gz;;
-      dev)
-        case $1 in
-          fzf)                     url=https://github.com/junegunn/$1/archive/master.tar.gz;;
-          fzf-tab)                 url=https://github.com/Aloxaf/$1/archive/master.tar.gz;;
-          powerlevel10k)           url=https://github.com/romkatv/$1/archive/master.tar.gz;;
-          zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-          zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-          zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-          *)
-            print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
-            return 1
-          ;;
-        esac
-      ;;
-      *)
-        print -Pru2 -- '%F{3}z4h%f: invalid zstyle'
-        print -Pru2 -- ''
-        print -Pru2 -- "  %F{2}zstyle%f :z4h:${(q)1//\%/%%} channel %F{1}${(q)channel//\%/%%}%f"
-        print -Pru2 -- ''
-        print -Pru2 -- 'Supported values: %Bstable%b, %Btesting%b and %Bdev%b.'
-        return 1
-      ;;
-    esac
-    (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
-  fi
-
-  if [[ -e $Z4H/tmp/updating ]]; then
-    print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
-  else
-    print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
-  fi
+  print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
 fi
 
 local dst=$Z4H/$1
 
-[[ -d ${dst:h} ]] || command mkdir -p -- ${dst:h} || return
+[[ -d ${dst:h} ]] || zf_mkdir -p -- ${dst:h} || return
 
 local old new
 
@@ -89,6 +97,7 @@ local old new
       return 1
     fi
     builtin cd -q -- $dirs || exit
+    local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=${(%):-%/}
     eval $postinstall || exit
   ) || return
 

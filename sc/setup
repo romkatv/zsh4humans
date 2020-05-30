@@ -45,7 +45,7 @@ fi
 
 
 command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache "$new"/tmp || exit
-command mv -f -- "$self"/../z4h.zsh "$new/"                      || exit
+command cp -f -- "$self"/../z4h.zsh "$new/"                      || exit
 if [ ! -e "$new"/cache/last-update-ts ]; then
   echo -n >"$new"/cache/last-update-ts                           || exit
 fi

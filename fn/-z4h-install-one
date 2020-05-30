@@ -71,7 +71,6 @@ local old new
         print -Pru2 -- "%F{3}z4h%f: custom command failed to install: %F{1}${new//\%/%%}/${1//\%/%%}%f"
         exit 1
       fi
-      builtin cd -q -- $new/$1 || exit
     else
       builtin cd -q -- $new || exit
       local err
@@ -94,14 +93,17 @@ local old new
         print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
         return 1
       fi
-      builtin cd -q -- $dirs || exit
+      if [[ $dirs[1] != ./${1:t} ]]; then
+        zf_mv -- $dirs[1] ./${1:t} || exit
+      fi
     fi
     local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=${(%):-%/}
-    eval $postinstall || exit
+    builtin cd -q -- $new/${1:t} || exit
+    eval $postinstall            || exit
   ) || return
 
   [[ ! -e $dst ]] || zf_mv -- $dst $old/ || return
-  zf_mv -- $new/${1:t}-*(N/) $dst
+  zf_mv -- $new/${1:t} $dst
 } always {
   [[ -z $old && -z $new ]] || zf_rm -rf -- $old $new
 }

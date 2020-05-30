@@ -110,7 +110,7 @@ function z4h() {
     () {
       eval "$_z4h_opt"
       -z4h-init && return
-      -z4h-error-command init
+      [[ -e $Z4H/.updating ]] || -z4h-error-command init
       return 1
     }
     return

@@ -7,7 +7,7 @@ else
 fi
 
 (
-  unset -m 'GITSTATUS_*'
+  unset -m 'GITSTATUS_*~GITSTATUS_CACHE_DIR'
   export GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR
   ./gitstatus/install -f
 ) || return

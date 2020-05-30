@@ -19,7 +19,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   'setopt' 'path_dirs'  'extended_glob' 'extended_history' 'hist_expire_dups_first'
   'setopt' 'auto_pushd' 'share_history' 'hist_ignore_dups' 'no_prompt_bang' 
   'setopt' 'prompt_cr'  'prompt_sp'     'prompt_percent'   'no_prompt_subst'
-  'setopt' 'no_bg_nice' 'no_aliases'    'typeset_silent'
+  'setopt' 'no_bg_nice' 'no_aliases'    'typeset_silent'   'no_rcs'
 
   PS1="%B%F{2}%n@%m%f %F{4}%~%f
 %F{%(?.2.1)}%#%f%b "

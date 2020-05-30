@@ -2,21 +2,21 @@ local old=$Z4H.old.$$
 local new=$Z4H.new.$$
 
 {
-  zf_rm -rf -- $old $new || return 1
-  zf_mkdir -p -- $new    || return 1
+  zf_rm -rf -- $old $new || return
+  zf_mkdir -p -- $new    || return
 
   local home=~
   local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
   local z4h=${${${(q)Z4H}/#${(q)home}/'~'}//\%/%%}
 
   Z4H=$new -z4h-install-one romkatv/zsh4humans      || return
-  $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new  || return 1
-  print -n >$new/tmp/updating                 || return 1
-  Z4H=$new </dev/null >/dev/null $_z4h_exe -ic '
+  $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new  || return
+  print -n >$new/tmp/updating                       || return
+  Z4H=$new Z4H_UPDATING=1 </dev/null >/dev/null $_z4h_exe -ic '
     (( $? )) && "exit" "1"
     "builtin" "emulate" "zsh" "-o" "no_aliases"
     [[ $Z4H == '${(q)new}' ]] || exit 0
-    print -n >$Z4H/tmp/update-successful'      || return 1
+    print -n >$Z4H/tmp/update-successful'           || return
   if [[ ! -e $new/tmp/update-successful ]]; then
     print -Pru2 -- '%F{3}z4h%f: %B$Z4H%b %F{1}does not propagate%f through %U.zshrc%u'
     print -Pru2 -- ''
@@ -27,13 +27,13 @@ local new=$Z4H.new.$$
     print -Pru2 -- '  %F{2}:%f %F{3}"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"%f'
     print -Pru2 -- ''
     print -Pru2 -- 'Note: The leading colon (%F{2}:%f) is necessary.'
-    return 2
+    return 1
   fi
-  zf_rm -- $new/tmp/update-successful || return 1
-  zf_rm -- $new/tmp/updating          || return 1
-  zf_mv -f -- $Z4H $old               || return 1
-  zf_mv -f -- $new $Z4H               || return 1
-  zf_rm -rf -- $old                   || true
+  zf_rm -- $new/tmp/update-successful || return
+  zf_rm -- $new/tmp/updating          || return
+  zf_mv -f -- $Z4H $old               || return
+  zf_mv -f -- $new $Z4H               || return
+  zf_rm -rf -- $old                   || return
 } always {
   if (( $? )); then
     -z4h-error-command update

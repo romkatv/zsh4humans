@@ -193,7 +193,6 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
     >&2 'printf' '\033[33mz4h\033[0m: installing \033[1m%s\033[0m\n' "zsh4humans"
 
     dir="$Z4H"/zsh4humans
-    url="https://github.com/romkatv/zsh4humans/archive/v$v.tar.gz"
 
     if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
       tmpdir="$('command' 'mktemp' '-d' "$dir".XXXXXXXXXX)"
@@ -204,29 +203,54 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
     fi
 
     (
+      if '[' '-n' "${Z4H_BOOTSTRAP_COMMAND-}" ']'; then
+        Z4H_PACKAGE_NAME='zsh4humans'
+        Z4H_PACKAGE_DIR="$tmpdir"/zsh4humans-"$v"
+        'eval' "$Z4H_BOOTSTRAP_COMMAND" || 'exit'
+      fi
+
       if '[' '-n' "${ZSH_VERSION-}" ']'; then
         'builtin' 'cd' '-q' '--' "$tmpdir" || 'exit'
       else
         'cd' '--' "$tmpdir"                || 'exit'
       fi
 
-      if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
-        err="$('command' 'curl' '-fsSLo' 'snapshot.tar.gz' '--' "$url" 2>&1)"
-      elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
-        err="$('command' 'wget' '-O' 'snapshot.tar.gz' '--' "$url" 2>&1)"
+      if '[' '-z' "${Z4H_BOOTSTRAP_COMMAND-}" ']'; then
+        url="https://github.com/romkatv/zsh4humans/archive/v$v.tar.gz"
+
+        if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
+          err="$('command' 'curl' '-fsSLo' 'snapshot.tar.gz' '--' "$url" 2>&1)"
+        elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
+          err="$('command' 'wget' '-O' 'snapshot.tar.gz' '--' "$url" 2>&1)"
+        else
+          >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
+          'exit' '1'
+        fi
+
+        if '[' "$?" '!=' '0' ']'; then
+          >&2 'printf' "%s\n" "$err"
+          >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"
+          'exit' '1'
+        fi
+
+        'command' 'tar' '-xzf' 'snapshot.tar.gz' || 'exit'
+      fi
+
+      if '[' '-e' "$Z4H"/.updating ']'; then
+        if '[' '-z' "${Z4H_UPDATING-}" ']'; then
+          >&2 'printf' '\033[33mz4h\033[0m: \033[1mZ4H_UPDATING\033[0m does not propagate through \033[4m.zshrc\033[0m\n'
+          >&2 'printf' '\n'
+          if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
+            >&2 'printf' 'Change \033[4m~/.zshrc\033[0m to keep \033[1mZ4H_UPDATING\033[0m intact.\n'
+          else
+            >&2 'printf' 'Change \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m to keep \033[1mZ4H_UPDATING\033[0m intact.\n'
+          fi
+          'exit' '1'
+        fi
+        ./zsh4humans-"$v"/sc/setup '-n' "$Z4H" '-o' "$Z4H_UPDATING" || 'exit'
       else
-        >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
-        'exit' '1'
+        ./zsh4humans-"$v"/sc/setup '-n' "$Z4H"                      || 'exit'
       fi
-
-      if '[' "$?" '!=' '0' ']'; then
-        >&2 'printf' "%s\n" "$err"
-        >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"
-        'exit' '1'
-      fi
-
-      'command' 'tar' '-xzf' 'snapshot.tar.gz'  || 'exit'
-      './'*'-'*'/sc/setup' '-n' "$Z4H"          || 'exit'
       'command' 'rm' '-rf' '--' "$dir"          || 'exit'
       'command' 'mv' '-f' '--' './'*'-'* "$dir" || 'exit'
     )
@@ -242,7 +266,7 @@ fi
 >&2 'printf' '\n'
 >&2 'printf' '\033[33mz4h\033[0m: \033[31mcommand failed\033[0m: \033[32m.\033[0m \033[4;33m"$Z4H"\033[0m\033[4m/z4h.zsh\033[0m\n'
 
-'[' '-e' "$Z4H"/tmp/updating ']' && 'return' '1'
+'[' '-e' "$Z4H"/.updating ']' && 'return' '1'
 
 >&2 'printf' '\033[33mz4h\033[0m: enabling \033[1mrecovery mode\033[0m\n'
 >&2 'printf' '\n'

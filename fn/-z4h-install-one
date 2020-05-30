@@ -1,4 +1,4 @@
-local url postinstall
+local url postinstall command
 
 if [[ $1 == */* ]]; then
   url=https://github.com/$1/archive/master.tar.gz
@@ -6,37 +6,26 @@ if [[ $1 == */* ]]; then
 else
   local -a channel
   zstyle -a :z4h:$1 channel channel || channel=(stable)
-  [[ $1 == zsh4humans ]] && url=https://github.com/romkatv/zsh4humans/archive/${Z4H_URL:t}.tar.gz
-  case $+url-$#channel-$channel[1] in
-    ?-1-stable)  : ${url:=https://github.com/zsh4humans/$1/archive/z4h-stable.tar.gz};;
-    ?-1-testing) : ${url:=https://github.com/zsh4humans/$1/archive/z4h-testing.tar.gz};;
-    ?-1-dev)
+  case $#channel-$channel[1] in
+    2-command) command=$channel[2];;
+    1-stable)  url=https://github.com/zsh4humans/$1/archive/z4h-stable.tar.gz;;
+    1-testing) url=https://github.com/zsh4humans/$1/archive/z4h-testing.tar.gz;;
+    1-dev)
       case $1 in
-        fzf)                     ${url:=https://github.com/junegunn/$1/archive/master.tar.gz};;
-        fzf-tab)                 ${url:=https://github.com/Aloxaf/$1/archive/master.tar.gz};;
-        powerlevel10k)           ${url:=https://github.com/romkatv/$1/archive/master.tar.gz};;
-        zsh-completions)         ${url:=https://github.com/zsh-users/$1/archive/master.tar.gz};;
-        zsh-autosuggestions)     ${url:=https://github.com/zsh-users/$1/archive/master.tar.gz};;
-        zsh-syntax-highlighting) ${url:=https://github.com/zsh-users/$1/archive/master.tar.gz};;
-        zsh4humans) ;;
+        fzf)                     url=https://github.com/junegunn/$1/archive/master.tar.gz;;
+        fzf-tab)                 url=https://github.com/Aloxaf/$1/archive/master.tar.gz;;
+        powerlevel10k)           url=https://github.com/romkatv/$1/archive/master.tar.gz;;
+        zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         *)
           print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
           return 1
         ;;
       esac
     ;;
-    0-1-none)
+    1-none)
       zf_mkdir -p -- $Z4H/$1 || return
-      return
-    ;;
-    ?-2-command)
-      if [[ -e $Z4H/tmp/updating ]]; then
-        print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
-      else
-        print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
-      fi
-      local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$Z4H/$1
-      eval $channel[2] || return
       return
     ;;
     *)
@@ -51,7 +40,7 @@ else
   (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
 fi
 
-if [[ $1 == zsh4humans || -e $Z4H/tmp/updating ]]; then
+if [[ -e $Z4H/.updating ]]; then
   print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
 else
   print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
@@ -75,28 +64,38 @@ local old new
   fi
 
   (
-    local err
-    builtin cd -q -- $new || exit
-    if (( $+commands[curl] )); then
-      err="$(command curl -fsSLo snapshot.tar.gz -- $url 2>&1)"
-    elif (( $+commands[wget] )); then
-      err="$(command wget -O snapshot.tar.gz -- $url 2>&1)"
+    if [[ -n $command ]]; then
+      local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$new/$1
+      () { eval $command } || exit 1
+      if [[ ! -d $new/$1 ]]; then
+        print -Pru2 -- "%F{3}z4h%f: custom command failed to install: %F{1}${new//\%/%%}/${1//\%/%%}%f"
+        exit 1
+      fi
+      builtin cd -q -- $new/$1 || exit
     else
-      print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
-      exit 1
+      builtin cd -q -- $new || exit
+      local err
+      if (( $+commands[curl] )); then
+        err="$(command curl -fsSLo snapshot.tar.gz -- $url 2>&1)"
+      elif (( $+commands[wget] )); then
+        err="$(command wget -O snapshot.tar.gz -- $url 2>&1)"
+      else
+        print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
+        exit 1
+      fi
+      if (( $? )); then
+        print -ru2 -- $err
+        print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+        exit 1
+      fi
+      command tar -xzf snapshot.tar.gz || exit
+      local dirs=(./${1:t}-*(N/))
+      if (( $#dirs != 1 )); then
+        print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
+        return 1
+      fi
+      builtin cd -q -- $dirs || exit
     fi
-    if (( $? )); then
-      print -ru2 -- $err
-      print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
-      exit 1
-    fi
-    command tar -xzf snapshot.tar.gz || exit
-    local dirs=(./${1:t}-*(N/))
-    if (( $#dirs != 1 )); then
-      print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
-      return 1
-    fi
-    builtin cd -q -- $dirs || exit
     local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=${(%):-%/}
     eval $postinstall || exit
   ) || return

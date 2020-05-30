@@ -9,7 +9,7 @@ local success
       local -a last_update_ts
       if zstat -A last_update_ts +mtime -- $Z4H/cache/last-update-ts 2>/dev/null &&
         (( EPOCHSECONDS - last_update_ts[1] >= 86400 * days )) &&
-        [[ ! -e $Z4H/tmp/updating ]]; then
+        [[ ! -e $Z4H/.updating ]]; then
         local REPLY
         {
           read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && REPLY=y

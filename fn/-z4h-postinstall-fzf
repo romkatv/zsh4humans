@@ -1,6 +1,6 @@
 eval "$_z4h_opt"
 
-if [[ -e $Z4H/tmp/updating ]]; then
+if [[ -e $Z4H/.updating ]]; then
   print -ru2 -- ${(%):-"%F{3}z4h%f: updating %Bfzf%b binary"}
 else
   print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}

@@ -1,5 +1,5 @@
 if '[' '-z' "${ZSH_VERSION-}" ']' || ! 'eval' '[[ "$ZSH_VERSION" == (5.<4->*|<6->.*) ]]'; then
-  '.' "$Z4H"/romkatv/zsh4humans/sc/exec-zsh-i || 'return'
+  '.' "$Z4H"/zsh4humans/sc/exec-zsh-i || 'return'
 fi
 
 () {
@@ -39,7 +39,7 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
     print -Pru2 -- "%F{3}z4h%f: confusing config origin: %F{1}${zshrc//\%/%%}%f"
     return 1
   fi
-  if [[ $1 != $Z4H/romkatv/zsh4humans/main.zsh ]]; then
+  if [[ $1 != $Z4H/zsh4humans/main.zsh ]]; then
     print -Pru2 -- "%F{3}z4h%f: confusing %Umain.zsh%u location: %F{1}${1//\%/%%}%f"
     return 1
   fi
@@ -55,12 +55,12 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
 
 typeset -gaU cdpath fpath mailpath path
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-path=($Z4H/bin $Z4H/junegunn/fzf/bin $path)
-fpath+=($Z4H/romkatv/zsh4humans/fn $Z4H/fn $Z4H/zsh-users/zsh-completions/src)
+path=($Z4H/bin $Z4H/fzf/bin $path)
+fpath+=($Z4H/zsh4humans/fn $Z4H/fn $Z4H/zsh-completions/src)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 
-autoload -Uz -- $Z4H/romkatv/zsh4humans/fn/[^_]*(:t) || return
+autoload -Uz -- $Z4H/zsh4humans/fn/[^_]*(:t) || return
 
 function compinit() {}
 
@@ -93,12 +93,7 @@ function z4h() {
     }
     typeset -gri _z4h_init_called=1
     _z4h_install_queue+=(
-      Aloxaf/fzf-tab
-      zsh-users/zsh-autosuggestions
-      zsh-users/zsh-completions
-      zsh-users/zsh-syntax-highlighting
-      junegunn/fzf
-      romkatv/powerlevel10k)
+      fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
     if ! -z4h-install-many; then
       -z4h-error-command init
       return 1

@@ -84,8 +84,8 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
 fi
 
 if '[' '-n' "${Z4H-}" '-a' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v3' ']' &&
-   '[' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/romkatv/zsh4humans/main.zsh ']'; then
-  if '.' "$Z4H"/romkatv/zsh4humans/main.zsh; then
+   '[' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/zsh4humans/main.zsh ']'; then
+  if '.' "$Z4H"/zsh4humans/main.zsh; then
     'setopt' 'aliases'
     'return'
   fi
@@ -190,12 +190,11 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       'exit' '1'
     fi
 
-    >&2 'printf' '\033[33mz4h\033[0m: installing \033[1m%s\033[0m\n' "romkatv/zsh4humans"
+    >&2 'printf' '\033[33mz4h\033[0m: installing \033[1m%s\033[0m\n' "zsh4humans"
 
-    dir="$Z4H"/romkatv/zsh4humans
+    dir="$Z4H"/zsh4humans
     url="https://github.com/romkatv/zsh4humans/archive/v$v.tar.gz"
 
-    'command' 'mkdir' '-p' '--' "$Z4H"/romkatv || 'exit'
     if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
       tmpdir="$('command' 'mktemp' '-d' "$dir".XXXXXXXXXX)"
     else
@@ -235,7 +234,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
     ret="$?"
     'command' 'rm' '-rf' '--' "$tmpdir" || 'exit'
     'exit' "$ret"
-  ) && '.' "$Z4H"/romkatv/zsh4humans/main.zsh && 'setopt' 'aliases' && 'return'
+  ) && '.' "$Z4H"/zsh4humans/main.zsh && 'setopt' 'aliases' && 'return'
 fi
 
 '[' '-n' "${ZSH_VERSION-}" ']' && 'setopt' 'aliases'

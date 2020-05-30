@@ -1,40 +1,45 @@
 local url postinstall
 
-if [[ $1 == romkatv/zsh4humans ]]; then
+if [[ $1 == zsh4humans ]]; then
   url=https://github.com/romkatv/zsh4humans/archive/${Z4H_URL:t}.tar.gz
   print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
 else
-  local channel
-  zstyle -s :z4h:$1 channel channel || channel=stable
-
-  if [[ $channel == (stable|testing) ]]; then
-    local pkg=(
-      romkatv/powerlevel10k
-      junegunn/fzf
-      Aloxaf/fzf-tab
-      zsh-users/zsh-completions
-      zsh-users/zsh-autosuggestions
-      zsh-users/zsh-syntax-highlighting)
-    (( $pkg[(Ie)$1] )) || channel=dev
-  fi
-
-  case $channel in
-    stable)  url=https://github.com/zsh4humans/${1:t}/archive/z4h-stable.tar.gz;;
-    testing) url=https://github.com/zsh4humans/${1:t}/archive/z4h-testing.tar.gz;;
-    dev)     url=https://github.com/$1/archive/master.tar.gz;;
-    *)
-      print -Pru2 -- '%F{3}z4h%f: invalid zstyle'
-      print -Pru2 -- ''
-      print -Pru2 -- "  %F{2}zstyle%f :z4h:${(q)1//\%/%%} channel %F{1}${(q)channel//\%/%%}%f"
-      print -Pru2 -- ''
-      print -Pru2 -- 'Supported values: %Bstable%b, %Btesting%b and %Bdev%b.'
-      return 1
-    ;;
-  esac
-
-  if ! zstyle -s :z4h:$1 postinstall postinstall; then
-    postinstall=z4h-postinstall-${1:t}
-    (( $+functions[$postinstall] )) || postinstall=
+  if [[ $1 == */* ]]; then
+    url=https://github.com/$1/archive/master.tar.gz
+    local cmd
+    if zstyle -a :z4h:$1 postinstall cmd && (( $#cmd )); then
+      postinstall="${(j: :)${(@q)cmd}} ${(q)1}"
+    fi
+  else
+    local channel
+    zstyle -s :z4h:$1 channel channel || channel=stable
+    case $channel in
+      stable)  url=https://github.com/zsh4humans/$1/archive/z4h-stable.tar.gz;;
+      testing) url=https://github.com/zsh4humans/$1/archive/z4h-testing.tar.gz;;
+      dev)
+        case $1 in
+          fzf)                     url=https://github.com/junegunn/$1/archive/master.tar.gz;;
+          fzf-tab)                 url=https://github.com/Aloxaf/$1/archive/master.tar.gz;;
+          powerlevel10k)           url=https://github.com/romkatv/$1/archive/master.tar.gz;;
+          zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+          zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+          zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+          *)
+            print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
+            return 1
+          ;;
+        esac
+      ;;
+      *)
+        print -Pru2 -- '%F{3}z4h%f: invalid zstyle'
+        print -Pru2 -- ''
+        print -Pru2 -- "  %F{2}zstyle%f :z4h:${(q)1//\%/%%} channel %F{1}${(q)channel//\%/%%}%f"
+        print -Pru2 -- ''
+        print -Pru2 -- 'Supported values: %Bstable%b, %Btesting%b and %Bdev%b.'
+        return 1
+      ;;
+    esac
+    (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
   fi
 
   if [[ -e $Z4H/tmp/updating ]]; then

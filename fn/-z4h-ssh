@@ -2,7 +2,7 @@ local cfg_set=(.zshenv .zprofile .zshrc .zlogin .zlogout)
 local cfg_add=(.p10k{,-ascii}{,-8color}.zsh)
 
 local version
-IFS= read -r version <$Z4H/romkatv/zsh4humans/version || return
+IFS= read -r version <$Z4H/zsh4humans/version || return
 
 local dump
 dump="$(
@@ -20,7 +20,7 @@ command ssh -t "$@" '"set" "-ue" || "exit"
 "export" Z4H_SSH="1"
 "export" LC_ALL="C"
 (
-  IFS="" "read" "-r" "_z4h_v" <"$Z4H"/romkatv/zsh4humans/version &&
+  IFS="" "read" "-r" "_z4h_v" <"$Z4H"/zsh4humans/version &&
     "[" "$_z4h_v" "=" '${(qqq)version}' "]"
 ) 2>/dev/null || "command" "rm" "-rf" "--" "$Z4H" || "exit"
 "command" "mkdir" "-p" "--" "$ZDOTDIR"

@@ -9,9 +9,9 @@ local new=$Z4H.new.$$
   local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
   local z4h=${${${(q)Z4H}/#${(q)home}/'~'}//\%/%%}
 
-  Z4H=$new -z4h-install-one romkatv/zsh4humans      || return
-  $new/romkatv/zsh4humans/sc/setup -o $Z4H -n $new  || return
-  print -n >$new/tmp/updating                       || return
+  Z4H=$new -z4h-install-one zsh4humans     || return
+  $new/zsh4humans/sc/setup -o $Z4H -n $new || return
+  print -n >$new/tmp/updating              || return
   Z4H=$new Z4H_UPDATING=1 </dev/null >/dev/null $_z4h_exe -ic '
     (( $? )) && "exit" "1"
     "builtin" "emulate" "zsh" "-o" "no_aliases"

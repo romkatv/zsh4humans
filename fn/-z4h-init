@@ -154,13 +154,13 @@ fi
 
 FZF_COMPLETION_TRIGGER=''                            # file completion without trigger
 fzf_default_completion=z4h-expand-or-complete        # file completion falls back to regular
-z4h source $Z4H/junegunn/fzf/shell/completion.zsh    # load fzf-completion
-z4h source $Z4H/junegunn/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
+z4h source $Z4H/fzf/shell/completion.zsh    # load fzf-completion
+z4h source $Z4H/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
 
 zstyle ':fzf-tab:*' prefix       ''         # remove '·'
 zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
 bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
-z4h source $Z4H/Aloxaf/fzf-tab/fzf-tab.zsh  # load fzf-tab-complete
+z4h source $Z4H/fzf-tab/fzf-tab.zsh         # load fzf-tab-complete
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
@@ -422,12 +422,12 @@ zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
 () {
   local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
-  z4h source $Z4H/romkatv/powerlevel10k/powerlevel10k.zsh-theme
+  z4h source $Z4H/powerlevel10k/powerlevel10k.zsh-theme
 }
 z4h source $POWERLEVEL9K_CONFIG_FILE
 -z4h-set-term-title-precmd || return
 
-z4h source $Z4H/zsh-users/zsh-autosuggestions/zsh-autosuggestions.zsh
+z4h source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh
 precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
 
 eval '
@@ -508,7 +508,7 @@ function -z4h-post-init() {
 
   () {
     local -hA widgets=()
-    z4h source $Z4H/zsh-users/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     eval '_zsh_highlight() {
       if [[ "$#BUFFER" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-$#BUFFER}" ]]; then
         region_highlight=()

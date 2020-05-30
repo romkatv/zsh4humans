@@ -1,13 +1,13 @@
 local files=(
-  $Z4H/Aloxaf/fzf-tab/{fzf-tab.zsh,lib/zsh-ls-colors/ls-colors.zsh}
-  $Z4H/junegunn/fzf/shell/*.zsh
-  $Z4H/romkatv/powerlevel10k/{*.zsh-theme,internal/*.zsh,gitstatus/*.zsh,gitstatus/install}
-  $Z4H/zsh-users/zsh-autosuggestions/{zsh-autosuggestions.zsh,src/**/*.zsh}
-  $Z4H/zsh-users/zsh-syntax-highlighting/{zsh-syntax-highlighting.zsh,highlighters/*/*.zsh}
-  $Z4H/romkatv/zsh4humans/main.zsh
-  $Z4H/romkatv/zsh4humans/sc/exec-zsh-i
-  $Z4H/romkatv/zsh4humans/fn/z4h-*
-  $Z4H/romkatv/zsh4humans/fn/-z4h-*
-  $Z4H/z4h.zsh)  # this file must be last because its presence gates the call
+  $Z4H/fzf-tab/{fzf-tab.zsh,lib/zsh-ls-colors/ls-colors.zsh}
+  $Z4H/fzf/shell/*.zsh
+  $Z4H/powerlevel10k/{*.zsh-theme,internal/*.zsh,gitstatus/*.zsh,gitstatus/install}
+  $Z4H/zsh-autosuggestions/{zsh-autosuggestions.zsh,src/**/*.zsh}
+  $Z4H/zsh-syntax-highlighting/{zsh-syntax-highlighting.zsh,highlighters/*/*.zsh}
+  $Z4H/zsh4humans/main.zsh
+  $Z4H/zsh4humans/sc/exec-zsh-i
+  $Z4H/zsh4humans/fn/z4h-*
+  $Z4H/zsh4humans/fn/-z4h-*
+  $Z4H/z4h.zsh)  # this file must be last because the presence of z4h.zsh.zwc gates the call
 local file
 for file in $files; do -z4h-compile $file; done

@@ -52,8 +52,8 @@ local success
 
   function '-z4h-install-many-parallel'() {
     local fd head=() tail=()
-    local p10k=romkatv/powerlevel10k omz=ohmyzsh/ohmyzsh
-    local queue=(${(M)_z4h_install_queue:#$p10k} ${_z4h_install_queue:#$p10k})
+    local omz=ohmyzsh/ohmyzsh
+    local queue=(${(M)_z4h_install_queue:#powerlevel10k} ${_z4h_install_queue:#powerlevel10k})
     queue=(${queue:#$omz} ${(M)queue:#$omz})
     for repo in $queue; do
       if (( $#head + $#tail == 4 )); then
@@ -63,7 +63,7 @@ local success
         shift 1 head
       fi
       exec {fd}< <( (-z4h-install-one $repo 2>&1 ) || zf_rm -f -- $success ) || return
-      [[ $repo == $p10k ]] && tail+=$fd || head+=$fd
+      [[ $repo == powerlevel10k ]] && tail+=$fd || head+=$fd
     done
     for fd in $head $tail; do
       <&$fd >&2 || return

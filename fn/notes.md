@@ -215,14 +215,14 @@ Change the structure of `$Z4H` to this:
 `z4h.zsh` is in fact a pure POSIX sh script. It looks like this:
 
 ```sh
-if [ -e "$Z4H"/romkatv/zsh4humans/main.zsh ]; then
-  . "$Z4H"/romkatv/zsh4humans/main.zsh
+if [ -e "$Z4H"/zsh4humans/main.zsh ]; then
+  . "$Z4H"/zsh4humans/main.zsh
   return
 fi
 
 # git clone, curl or wget romkatv/zsh4humans
 
-. "$Z4H"/romkatv/zsh4humans/main.zsh
+. "$Z4H"/zsh4humans/main.zsh
 ```
 
 `romkatv/zsh4humans` shouldn't be hard-coded but derived from `$Z4H_URL`.

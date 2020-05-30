@@ -111,7 +111,8 @@ function z4h-cd-up() { cd .. && -z4h-redraw-prompt }
 
 function z4h-do-nothing() {}
 
-autoload -Uz up-line-or-beginning-search down-line-or-beginning-search run-help || return
+autoload -Uz up-line-or-beginning-search down-line-or-beginning-search || return
+autoload -Uz run-help ${^fpath}/run-help-*(N:t)                        || return
 (( $+aliases[run-help] )) && unalias run-help  # make run-help more useful
 
 zle -N up-line-or-beginning-search

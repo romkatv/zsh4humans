@@ -22,6 +22,13 @@ autoload -Uz add-zsh-hook                           || return
 add-zsh-hook -- preexec -z4h-set-term-title-preexec || return
 add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 
+local pkg
+typeset -gA _z4h_use
+for pkg in fzf fzf-tab powerlevel10k zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
+  zstyle -t :z4h:$pkg none || _z4h_use[$pkg]=1
+done
+typeset -grA _z4h_use
+
 local p10k_cfg=
 # If the current locale isn't UTF-8, change it to an UTF-8 one.
 # Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
@@ -33,7 +40,10 @@ local p10k_cfg=
   export LC_ALL=${loc[(r)(#i)C.UTF(-|)8]:-${loc[(r)(#i)en_US.UTF(-|)8]:-$loc[1]}}
 } && [[ $TERM != (dumb|linux) ]] || p10k_cfg+=-ascii
 (( terminfo[colors] >= 256 )) || p10k_cfg+=-8color
-: ${POWERLEVEL9K_CONFIG_FILE:=$ZDOTDIR/.p10k${p10k_cfg}.zsh}
+
+if (( _z4h_use[powerlevel10k] )); then
+  : ${POWERLEVEL9K_CONFIG_FILE:=$ZDOTDIR/.p10k${p10k_cfg}.zsh}
+fi
 
 # Enable command_not_found_handler if possible.
 if (( $+functions[command_not_found_handler] )); then
@@ -53,12 +63,12 @@ elif (( $+commands[brew] )); then
     eval "$_z4h_opt"
     [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
     local repo
-    repo="$(brew --repository 2>/dev/null)" || return
+    repo="$(command brew --repository 2>/dev/null)" || return
     [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
     function command_not_found_handler() {
       eval "$_z4h_opt"
       local msg
-      if msg="$(brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
+      if msg="$(command brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
         print -ru2 -- $msg
       else
         print -ru2 -- "zsh: command not found: $1"
@@ -122,17 +132,6 @@ zle -N z4h-fzf-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
 
-if (( terminfo[colors] >= 256 )); then
-  typeset -g  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244' # the default is hard to see
-  typeset -gA ZSH_HIGHLIGHT_STYLES=(comment fg=96)     # the default is hard to see
-else
-  typeset -g  ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold'  # the default is >= 8 (invalid)
-fi
-
-ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
-ZSH_AUTOSUGGEST_MANUAL_REBIND=1             # disable a very slow obscure feature
-
 PROMPT_EOL_MARK='%K{red} %k'   # mark the missing \n at the end of a comand output with a red block
 READNULLCMD=less               # use `less` instead of the default `more`
 WORDCHARS=''                   # only alphanums make up words in word-based zle widgets
@@ -145,22 +144,25 @@ fi
 HISTSIZE=1000000000                    # infinite command history
 SAVEHIST=1000000000                    # infinite command history
 
-if [[ ${commands[find]:A} == */busybox* ]]; then
-  local fs=
-else
-  local fs="-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc"
+if (( _z4h_use[fzf] )); then
+  if [[ ${commands[find]:A} == */busybox* ]]; then
+    local fs=
+  else
+    local fs="-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc"
+  fi
+  : ${FZF_ALT_C_COMMAND:="command find -L . -mindepth 1 \( -path '*/\.*' "$fs" \) -prune -o -type d -print 2>/dev/null | cut -b3-"}
+  : {FZF_COMPLETION_TRIGGER=}                    # file completion without trigger
+  fzf_default_completion=z4h-expand-or-complete  # file completion falls back to regular
+  z4h source $Z4H/fzf/shell/completion.zsh       # load fzf-completion
+  z4h source $Z4H/fzf/shell/key-bindings.zsh     # load fzf-cd-widget
 fi
-: ${FZF_ALT_C_COMMAND:="command find -L . -mindepth 1 \( -path '*/\.*' "$fs" \) -prune -o -type d -print 2>/dev/null | cut -b3-"}
 
-FZF_COMPLETION_TRIGGER=''                            # file completion without trigger
-fzf_default_completion=z4h-expand-or-complete        # file completion falls back to regular
-z4h source $Z4H/fzf/shell/completion.zsh    # load fzf-completion
-z4h source $Z4H/fzf/shell/key-bindings.zsh  # load fzf-cd-widget
-
-zstyle ':fzf-tab:*' prefix       ''         # remove '·'
-zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
-bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
-z4h source $Z4H/fzf-tab/fzf-tab.zsh         # load fzf-tab-complete
+if (( _z4h_use[fzf-tab] )); then
+  zstyle ':fzf-tab:*' prefix       ''         # remove '·'
+  zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
+  bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
+  z4h source $Z4H/fzf-tab/fzf-tab.zsh         # load fzf-tab-complete
+fi
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
@@ -264,8 +266,8 @@ bindkey   -M emacs '^[M'     z4h-autosuggest-accept         # alt+M
 # Undo.
 bindkey   -M viins '^_'      undo                           # ctrl+/
 # Redo.
-bindkey   -M emacs '^[\'     redo                           # alt+/
-# bindkey -M viins '^[\'     redo                           # alt+/
+bindkey   -M emacs '^[/'     redo                           # alt+/
+# bindkey -M viins '^[/'     redo                           # alt+/
 # Expand alias/glob/parameter.
 bindkey   -M emacs '^ '      z4h-expand                     # ctrl+space
 bindkey   -M viins '^ '      z4h-expand                     # ctrl+space
@@ -347,43 +349,6 @@ else
   bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
 fi
 
-# Tell zsh-autosuggestions how to handle different widgets.
-typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
-typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
-  zle-line-init
-  zle-line-finish
-  z4h-up-local-history
-  z4h-down-local-history
-  z4h-up-global-history
-  z4h-down-global-history
-  z4h-fzf-history
-)
-typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
-  forward-word
-  emacs-forward-word
-  vi-forward-word
-  vi-forward-word-end
-  vi-forward-blank-word
-  vi-forward-blank-word-end
-  vi-find-next-char
-  vi-find-next-char-skip
-)
-typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
-  z4h-end-of-buffer
-)
-
-if zstyle -T :z4h:autosuggestions forward-char accept; then
-  ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
-else
-  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
-fi
-
-if zstyle -T :z4h:autosuggestions end-of-line accept; then
-  ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
-else
-  ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
-fi
-
 # Use lesspipe if available. It allows you to use less on binary files (zip archives, etc.).
 if (( $#commands[(i)lesspipe(|.sh)] )); then
   export LESSOPEN="| /usr/bin/env $commands[(i)lesspipe(|.sh)] %s 2>&-"
@@ -419,58 +384,126 @@ zstyle ':completion:*'                  use-cache       true
 zstyle ':completion:*'                  cache-path      $Z4H/cache/zcompcache-$ZSH_VERSION
 zstyle ':completion:*'                  list-colors     ${(s.:.)LS_COLORS}
 
-# Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
-() {
-  local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
-  z4h source $Z4H/powerlevel10k/powerlevel10k.zsh-theme
-}
-z4h source $POWERLEVEL9K_CONFIG_FILE
--z4h-set-term-title-precmd || return
-
-z4h source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh
-precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
-
-eval '
-  _zsh_autosuggest_clear() {
-    _zsh_autosuggest_invoke_original_widget $@
-    local -i retval=$?
-    typeset -g _z4h_autosuggest_buffer="$BUFFER"
-    unset _z4h_autosuggestion
-    -z4h-autosuggest-fetch
-    return retval
+if (( _z4h_use[powerlevel10k] )); then
+  # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
+  () {
+    local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
+    z4h source $Z4H/powerlevel10k/powerlevel10k.zsh-theme
   }
-  _zsh_autosuggest_modify() {
-    _zsh_autosuggest_invoke_original_widget $@
-    local -i retval=$?
-    -z4h-autosuggest-fetch
-    return retval
-  }
-  _zsh_autosuggest_accept() {
-    -z4h-autosuggest-fetch
-    () { '$functions[_zsh_autosuggest_accept]' } "$@"
-    local -i retval=$?
-    -z4h-autosuggest-store
-    return retval
-  }
-  _zsh_autosuggest_partial_accept() {
-    -z4h-autosuggest-fetch
-    () { '$functions[_zsh_autosuggest_partial_accept]' } "$@"
-    local -i retval=$?
-    -z4h-autosuggest-store
-    return retval
-  }
-  _zsh_autosuggest_execute() {
-    -z4h-autosuggest-fetch
-    () { '$functions[_zsh_autosuggest_execute]' } "$@"
-    local -i retval=$?
-    -z4h-autosuggest-store
-    return retval
-  }'
-
-if (( $+widgets[zle-line-pre-redraw] )); then
-  zle -A -- zle-line-pre-redraw -z4h-orig-zle-line-pre-redraw
+  z4h source $POWERLEVEL9K_CONFIG_FILE
+  -z4h-set-term-title-precmd || return
 fi
-zle -N -- zle-line-pre-redraw -z4h-zle-line-pre-redraw
+
+if (( _z4h_use[zsh-autosuggestions] )); then
+  if (( terminfo[colors] >= 256 )); then
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'        # the default is hard to see
+  else
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold' # the default is outside of 8-color range
+  fi
+
+  ZSH_AUTOSUGGEST_MANUAL_REBIND=1
+
+  # Tell zsh-autosuggestions how to handle different widgets.
+  typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
+  typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
+    zle-line-init
+    zle-line-finish
+    z4h-up-local-history
+    z4h-down-local-history
+    z4h-up-global-history
+    z4h-down-global-history
+    z4h-fzf-history
+  )
+  typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
+    forward-word
+    emacs-forward-word
+    vi-forward-word
+    vi-forward-word-end
+    vi-forward-blank-word
+    vi-forward-blank-word-end
+    vi-find-next-char
+    vi-find-next-char-skip
+  )
+  typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
+    z4h-end-of-buffer
+  )
+
+  if zstyle -T :z4h:autosuggestions forward-char accept; then
+    ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
+  else
+    ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
+  fi
+
+  if zstyle -T :z4h:autosuggestions end-of-line accept; then
+    ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
+  else
+    ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(end-of-line vi-end-of-line vi-add-eol)
+  fi
+
+  z4h source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh
+fi
+
+if (( _z4h_use[zsh-syntax-highlighting] )); then
+  if (( terminfo[colors] >= 256 )); then
+    typeset -gA ZSH_HIGHLIGHT_STYLES=(comment fg=96)  # the default is hard to see
+  fi
+  ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
+  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
+fi
+
+if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
+  if (( $+widgets[zle-line-pre-redraw] )); then
+    zle -A -- zle-line-pre-redraw -z4h-orig-zle-line-pre-redraw
+  fi
+  zle -N -- zle-line-pre-redraw -z4h-zle-line-pre-redraw
+
+  precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
+
+  eval '
+    _zsh_autosuggest_highlight_reset() {
+      region_highlight[-1]=()
+    }
+    _zsh_autosuggest_highlight_apply() {
+      (( ${+POSTDISPLAY} )) || local -h POSTDISPLAY
+      region_highlight+=(
+          "$#BUFFER $(($#BUFFER + $#POSTDISPLAY)) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
+    }
+    _zsh_autosuggest_clear() {
+      _zsh_autosuggest_invoke_original_widget $@
+      local -i retval=$?
+      typeset -g _z4h_autosuggest_buffer="$BUFFER"
+      unset _z4h_autosuggestion
+      -z4h-autosuggest-fetch
+      return retval
+    }
+    _zsh_autosuggest_modify() {
+      _zsh_autosuggest_invoke_original_widget $@
+      local -i retval=$?
+      -z4h-autosuggest-fetch
+      return retval
+    }
+    _zsh_autosuggest_accept() {
+      -z4h-autosuggest-fetch
+      () { '$functions[_zsh_autosuggest_accept]' } "$@"
+      local -i retval=$?
+      -z4h-autosuggest-store
+      return retval
+    }
+    _zsh_autosuggest_partial_accept() {
+      -z4h-autosuggest-fetch
+      () { '$functions[_zsh_autosuggest_partial_accept]' } "$@"
+      local -i retval=$?
+      -z4h-autosuggest-store
+      return retval
+    }
+    _zsh_autosuggest_execute() {
+      -z4h-autosuggest-fetch
+      () { '$functions[_zsh_autosuggest_execute]' } "$@"
+      local -i retval=$?
+      -z4h-autosuggest-store
+      return retval
+    }'
+fi
 
 function -z4h-post-init() {
   eval "$_z4h_opt"
@@ -506,31 +539,33 @@ function -z4h-post-init() {
   autoload -Uz bashcompinit
   bashcompinit
 
-  () {
-    local -hA widgets=()
+  if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
+    () {
+      local -hA widgets=()
+      z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+      eval '_zsh_highlight() {
+        if [[ "$#BUFFER" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-$#BUFFER}" ]]; then
+          region_highlight=()
+          return
+        fi
+        local -ih PENDING=0 KEYS_QUEUED_COUNT=0
+        '$functions[_zsh_highlight]'
+      }'
+    }
+    local suggest_special=(
+      zle-line-init
+      zle-line-finish
+      zle-isearch-update
+      $ZSH_AUTOSUGGEST_EXECUTE_WIDGETS
+      $ZSH_AUTOSUGGEST_CLEAR_WIDGETS
+      $ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS
+      $ZSH_AUTOSUGGEST_ACCEPT_WIDGETS)
+    typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${${(k)widgets}:|suggest_special})
+    unset ZSH_AUTOSUGGEST_USE_ASYNC
+    _zsh_autosuggest_start
+  elif (( _z4h_use[zsh-syntax-highlighting] )); then
     z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-    eval '_zsh_highlight() {
-      if [[ "$#BUFFER" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-$#BUFFER}" ]]; then
-        region_highlight=()
-        return
-      fi
-      local -ih PENDING=0 KEYS_QUEUED_COUNT=0
-      '$functions[_zsh_highlight]'
-    }'
-  }
-
-  local suggest_special=(
-    zle-line-init
-    zle-line-finish
-    zle-isearch-update
-    $ZSH_AUTOSUGGEST_EXECUTE_WIDGETS
-    $ZSH_AUTOSUGGEST_CLEAR_WIDGETS
-    $ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS
-    $ZSH_AUTOSUGGEST_ACCEPT_WIDGETS)
-  typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${${(k)widgets}:|suggest_special})
-  unset ZSH_AUTOSUGGEST_USE_ASYNC
-
-  _zsh_autosuggest_start
+  fi
 }
 
 precmd_functions=(-z4h-post-init $precmd_functions)

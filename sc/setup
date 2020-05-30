@@ -42,10 +42,10 @@ if [ -z "$new" ]; then
   exit 1
 fi
 
-
-
 command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache "$new"/tmp || exit
-command cp -f -- "$self"/../z4h.zsh "$new/"                      || exit
+if [ ! -L "$new"/z4h.zsh ]; then
+  command cp -f -- "$self"/../z4h.zsh "$new"/                    || exit
+fi
 if [ ! -e "$new"/cache/last-update-ts ]; then
   echo -n >"$new"/cache/last-update-ts                           || exit
 fi

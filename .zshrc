@@ -29,7 +29,7 @@ fi
 . "$Z4H"/z4h.zsh || return
 
 # 'ask': ask to update; 'no': disable auto-update.
-zstyle ':z4h:' auto-update                     ask
+zstyle ':z4h:'                auto-update      ask
 # Auto-update this often; has no effect if auto-update is 'no'.
 zstyle ':z4h:'                auto-update-days 28
 # Stability vs freshness of plugins: stable, testing or dev.

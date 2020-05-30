@@ -6,8 +6,8 @@ local files=(
   $Z4H/zsh-syntax-highlighting/{zsh-syntax-highlighting.zsh,highlighters/*/*.zsh}
   $Z4H/zsh4humans/main.zsh
   $Z4H/zsh4humans/sc/exec-zsh-i
-  $Z4H/zsh4humans/fn/z4h-*
-  $Z4H/zsh4humans/fn/-z4h-*
+  $Z4H/zsh4humans/fn/z4h-*~*.zwc
+  $Z4H/zsh4humans/fn/-z4h-*~*.zwc
   $Z4H/z4h.zsh)  # this file must be last because the presence of z4h.zsh.zwc gates the call
 local file
 for file in $files; do -z4h-compile $file; done

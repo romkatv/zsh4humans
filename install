@@ -88,7 +88,7 @@ if '[' '-n' "$rcs" ']'; then
   done
 fi
 
-url='https://raw.githubusercontent.com/romkatv/zsh4humans/v2/.zshrc'
+url='https://raw.githubusercontent.com/romkatv/zsh4humans/v3/.zshrc'
 
 >&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
 

@@ -41,14 +41,14 @@ If you want a great shell that just works, this project is for you.
 2. Execute this command.
 ```shell
 if command -v curl >/dev/null 2>&1; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v2/install)"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v3/install)"
 else
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v2/install)"
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v3/install)"
 fi
 ```
 
 The installer backs up the existing Zsh startup files, downloads [.zshrc](
-  https://github.com/romkatv/zsh4humans/blob/v2/.zshrc), installs everything necessary for Zsh For
+  https://github.com/romkatv/zsh4humans/blob/v3/.zshrc), installs everything necessary for Zsh For
 Humans and opens a new shell. It asks for confirmation on every step so that you are always in
 control. Installation requires `curl` or `wget`. It does not require `git`, `zsh`, `sudo` or
 anything else.
@@ -60,7 +60,7 @@ you exit Zsh, the image is deleted.
 
 ```zsh
 docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v2/install)"'
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v3/install)"'
 ```
 
 ## Usage

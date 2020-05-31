@@ -91,6 +91,11 @@ function z4h-down-global-history() {
   -z4h-with-local-history 0 down-line-or-beginning-search "$@"
 }
 
+function z4h-forward-word()       { -z4h-with-forward-word  .forward-word       }
+function z4h-kill-word()          { -z4h-with-forward-word  .kill-word          }
+function z4h-backward-word()      { -z4h-with-backward-word .backward-word      }
+function z4h-backward-kill-word() { -z4h-with-backward-word .backward-kill-word }
+
 function z4h-beginning-of-buffer() { CURSOR=0 }
 function z4h-end-of-buffer() { CURSOR=$#BUFFER }
 function z4h-expand() { zle _expand_alias || zle .expand-word || true }
@@ -118,6 +123,10 @@ autoload -Uz run-help ${^fpath}/run-help-*(N:t)                        || return
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
 zle -N z4h-expand
+zle -N z4h-forward-word
+zle -N z4h-kill-word
+zle -N z4h-backward-word
+zle -N z4h-backward-kill-word
 zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer
@@ -250,8 +259,13 @@ bindkey   -M viins '^[[3~'   delete-char                    # delete
 # Delete the character behind the cursor.
 bindkey   -M viins '^?'      backward-delete-char           # bs
 # Delete next word.
-bindkey   -M emacs '^[[3;5~' kill-word                      # ctrl+del
-bindkey   -M emacs '^[[3;3~' kill-word                      # alt+del
+bindkey   -M emacs '^[[3;5~' z4h-kill-word                  # ctrl+del
+bindkey   -M emacs '^[[3;3~' z4h-kill-word                  # alt+del
+# Delete previous word.
+bindkey   -M emacs '^W'      z4h-backward-kill-word         # ctrl+w
+bindkey   -M emacs '^[^H'    z4h-backward-kill-word         # ctrl+alt+bs
+bindkey   -M emacs '^[^?'    z4h-backward-kill-word         # alt+bs
+
 # Delete line before cursor.
 bindkey   -M emacs '^[k'     backward-kill-line             # alt+k
 bindkey   -M emacs '^[K'     backward-kill-line             # alt+K
@@ -308,10 +322,10 @@ bindkey   -M vicmd '^[[6~'   z4h-do-nothing                 # pagedown
 
 if zstyle -t :z4h: cd-key ctrl; then
   # Move cursor one word backward.
-  bindkey -M emacs '^[[1;3D' backward-word                  # alt+left
+  bindkey -M emacs '^[[1;3D' z4h-backward-word              # alt+left
   bindkey -M viins '^[[1;3D' vi-backward-word               # alt+left
   # Move cursor one word forward.
-  bindkey -M emacs '^[[1;3C' forward-word                   # alt+right
+  bindkey -M emacs '^[[1;3C' z4h-forward-word               # alt+right
   bindkey -M viins '^[[1;3C' vi-forward-word                # alt+right
   # cd into the previous directory.
   bindkey -M emacs '^[[1;5D' z4h-cd-back                    # ctrl+left
@@ -331,10 +345,10 @@ if zstyle -t :z4h: cd-key ctrl; then
   bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
 else
   # Move cursor one word backward.
-  bindkey -M emacs '^[[1;5D' backward-word                  # ctrl+left
+  bindkey -M emacs '^[[1;5D' z4h-backward-word                  # ctrl+left
   bindkey -M viins '^[[1;5D' vi-backward-word               # ctrl+left
   # Move cursor one word forward.
-  bindkey -M emacs '^[[1;5C' forward-word                   # ctrl+right
+  bindkey -M emacs '^[[1;5C' z4h-forward-word                   # ctrl+right
   bindkey -M viins '^[[1;5C' vi-forward-word                # ctrl+right
   # cd into the previous directory.
   bindkey -M emacs '^[[1;3D' z4h-cd-back                    # alt+left
@@ -420,6 +434,7 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     z4h-fzf-history
   )
   typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
+    z4h-forward-word
     forward-word
     emacs-forward-word
     vi-forward-word

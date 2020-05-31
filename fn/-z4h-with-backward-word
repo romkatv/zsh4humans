@@ -1,0 +1,10 @@
+emulate -L zsh -o extended_glob
+local -a match mbegin mend
+if [[ $LBUFFER == (#b)(*[[:space:]])[^[:space:]]##[[:space:]]# ]]; then
+  local prefix=$match[1]
+  LBUFFER[1,$#prefix]=
+  zle "$@"
+  LBUFFER[1,0]=$prefix
+else
+  zle "$@"
+fi

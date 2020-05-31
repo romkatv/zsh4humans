@@ -194,7 +194,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
 
     dir="$Z4H"/zsh4humans
 
-    if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
+    if command -v 'mktemp' >'/dev/null' 2>&1; then
       tmpdir="$('command' 'mktemp' '-d' "$dir".XXXXXXXXXX)"
     else
       tmpdir="$dir".tmp."$$"
@@ -218,9 +218,9 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       if '[' '-z' "${Z4H_BOOTSTRAP_COMMAND-}" ']'; then
         url="https://github.com/romkatv/zsh4humans/archive/v$v.tar.gz"
 
-        if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
+        if command -v 'curl' >'/dev/null' 2>&1; then
           err="$('command' 'curl' '-fsSLo' 'snapshot.tar.gz' '--' "$url" 2>&1)"
-        elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
+        elif command -v 'wget' >'/dev/null' 2>&1; then
           err="$('command' 'wget' '-O' 'snapshot.tar.gz' '--' "$url" 2>&1)"
         else
           >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
@@ -279,13 +279,13 @@ if [ "${ZDOTDIR:-$HOME}" '=' "$HOME" ]; then
 else
   >&2 'printf' '  \033[32m%s\033[0m \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m\n' "${VISUAL:-${EDITOR:-vi}}"
 fi
-if 'command' '-v' 'zsh' >'/dev/null' 2>&1; then
+if command -v 'zsh' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'Retry Zsh initialization:\n'
   >&2 'printf' '\n'
   >&2 'printf' '  \033[4;32mexec\033[0m \033[32mzsh\033[0m\n'
 fi
-if '[' '-n' "${ZSH_VERSION-}" ']' && 'command' '-v' 'z4h' >'/dev/null' 2>&1; then
+if '[' '-n' "${ZSH_VERSION-}" ']' && command -v 'z4h' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'If errors persist and you are desperate:\n'
   >&2 'printf' '\n'
@@ -298,12 +298,12 @@ if '[' '-n' "$Z4H" '-a' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/z4h.zsh ']'; then
   >&2 'printf' '  \033[35m# nuke the entire site from orbit\033[0m\n'
   >&2 'printf' '  \033[4;32msudo\033[0m \033[32mrm\033[0m -rf -- \033[4;33m"%s"\033[0m\n' "$Z4H"
 fi
-if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
+if command -v 'curl' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'Give up and start over:\n'
   >&2 'printf' '\n'
   >&2 'printf' '  \033[32msh\033[0m -c \033[33m"\033[0m$(\033[32mcurl\033[0m -fsSL \033[4mhttps://raw.githubusercontent.com/romkatv/zsh4humans/v3/install\033[0m)\033[33m"\033[0m\n'
-elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
+elif command -v 'wget' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'Give up and start over:\n'
   >&2 'printf' '\n'

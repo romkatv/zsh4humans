@@ -1,7 +1,7 @@
 # This file gets sourced. It never returns succeeds.
 
 _z4h_try_exec_zsh_i() {
-  'command' '-v' "$1" >'/dev/null' 2>&1 || 'return' '0'
+  command -v "$1" >'/dev/null' 2>&1 || 'return' '0'
   'command' "$1" '-fc' '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]' <'/dev/null' >'/dev/null' 2>&1 ||
     'return' '0'
   >&2 'printf' '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
@@ -25,7 +25,7 @@ _z4h_exec_zsh_i() {
   >&2 'printf' '\033[33mz4h\033[0m: fetching \033[32mZsh 5.8\033[0m installer\n'
 
   'local' 'install'
-  if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
+  if command -v 'mktemp' >'/dev/null' 2>&1; then
     install="$('command' 'mktemp' "$Z4H"/tmp/install-zsh.XXXXXXXXXX)"
   else
     install="$Z4H"/tmp/install-zsh.tmp."$$"
@@ -42,9 +42,9 @@ _z4h_exec_zsh_i() {
     fi
     install="${install##*/}"
     'local' 'err'
-    if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
+    if command -v 'curl' >'/dev/null' 2>&1; then
       err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
-    elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
+    elif command -v 'wget' >'/dev/null' 2>&1; then
       err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
     else
       >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
@@ -59,7 +59,7 @@ _z4h_exec_zsh_i() {
   )
 
   'local' 'zshdir'
-  if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
+  if command -v 'mktemp' >'/dev/null' 2>&1; then
     zshdir="$('command' 'mktemp' "$Z4H"/tmp/zshdir.XXXXXXXXXX)"
   else
     zshdir="$Z4H"/tmp/zshdir.tmp."$$"

@@ -23,9 +23,9 @@ case "$platform" in
   ;;
 esac
 
-if 'command' '-v' 'curl' >'/dev/null' 2>&1; then
+if command -v 'curl' >'/dev/null' 2>&1; then
   fetch='command curl -fsSLo'
-elif 'command' '-v' 'wget' >'/dev/null' 2>&1; then
+elif command -v 'wget' >'/dev/null' 2>&1; then
   fetch='command wget -O'
 else
   >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
@@ -46,7 +46,7 @@ backup_dir=''
 
 if '[' '-n' "$rcs" ']'; then
   backup_dir='zsh-backup'
-  if 'command' '-v' 'date' >'/dev/null' 2>&1; then
+  if command -v 'date' >'/dev/null' 2>&1; then
     backup_dir="$backup_dir/$('command' 'date' '+%Y-%m-%d-%H-%M-%S')"
   fi
   if [ '-e' "$HOME/$backup_dir" ]; then
@@ -92,7 +92,7 @@ url='https://raw.githubusercontent.com/romkatv/zsh4humans/v3/.zshrc'
 
 >&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
 
-if 'command' '-v' 'mktemp' >'/dev/null' 2>&1; then
+if command -v 'mktemp' >'/dev/null' 2>&1; then
   zshrc="$('command' 'mktemp' "$HOME"/.zshrc.XXXXXXXXXX)"
 else
   zshrc="$HOME"/.zshrc.tmp."$$"

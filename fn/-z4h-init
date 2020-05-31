@@ -386,10 +386,9 @@ export LESS='-iRFXMx4'
 export PAGER=less
 
 # LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
-export LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:'
-LS_COLORS+='cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:'
-LS_COLORS+='st=37;44:ex=01;32:'
-export LSCOLORS='ExGxFxdaCxDaDahbadacec'
+export LS_COLORS='rs=0:no=00:mi=00:mh=00:ln=01;36:or=01;31:di=01;34:ow=04;01;34:st=34:tw=04;34:'
+LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32:'
+export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'

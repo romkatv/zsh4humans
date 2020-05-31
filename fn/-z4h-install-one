@@ -48,7 +48,7 @@ fi
 
 local dst=$Z4H/$1
 
-[[ -d ${dst:h} ]] || zf_mkdir -p -- ${dst:h} || return
+zf_mkdir -p -- ${dst:h} 2>/dev/null || zf_mkdir -p -- ${dst:h} || return
 
 local old new
 
@@ -64,11 +64,11 @@ local old new
   fi
 
   (
+    local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$new/${1:t}
     if [[ -n $command ]]; then
-      local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$new/$1
       () { eval $command } || exit 1
-      if [[ ! -d $new/$1 ]]; then
-        print -Pru2 -- "%F{3}z4h%f: custom command failed to install: %F{1}${new//\%/%%}/${1//\%/%%}%f"
+      if [[ ! -d $Z4H_PACKAGE_DIR ]]; then
+        print -Pru2 -- "%F{3}z4h%f: custom command failed to install: %F{1}${Z4H_PACKAGE_DIR//\%/%%}%f"
         exit 1
       fi
     else
@@ -97,9 +97,8 @@ local old new
         zf_mv -- $dirs[1] ./${1:t} || exit
       fi
     fi
-    local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=${(%):-%/}
-    builtin cd -q -- $new/${1:t} || exit
-    eval $postinstall            || exit
+    builtin cd -q -- $Z4H_PACKAGE_DIR || exit
+    eval $postinstall                 || exit
   ) || return
 
   [[ ! -e $dst ]] || zf_mv -- $dst $old/ || return

@@ -567,7 +567,7 @@ function -z4h-post-init() {
       local -hA widgets=()
       z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
       eval '_zsh_highlight() {
-        if [[ "$#BUFFER" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-$#BUFFER}" ]]; then
+        if [[ "${#BUFFER}" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}}" ]]; then
           region_highlight=()
           return
         fi

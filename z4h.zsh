@@ -190,7 +190,11 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       'exit' '1'
     fi
 
-    >&2 'printf' '\033[33mz4h\033[0m: installing \033[1m%s\033[0m\n' "zsh4humans"
+    if '[' '-e' "$Z4H"/.updating ']'; then
+      >&2 'printf' '\033[33mz4h\033[0m: installing \033[1m%s\033[0m\n' "zsh4humans"
+    else
+      >&2 'printf' '\033[33mz4h\033[0m: updating \033[1m%s\033[0m\n' "zsh4humans"
+    fi
 
     dir="$Z4H"/zsh4humans
 

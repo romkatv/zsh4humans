@@ -9,22 +9,22 @@ if [[ -z "$BUFFER" || "$CONTEXT" != "start" ]]; then
 else
   () {
     if [[ "$BUFFER" == "${_z4h_autosuggest_buffer-}"* ]]; then
-      if (( $#BUFFER == $#_z4h_autosuggest_buffer )); then
+      if (( ${#BUFFER} == ${#_z4h_autosuggest_buffer} )); then
         POSTDISPLAY="${_z4h_autosuggestion-}"
         return
       elif (( ${+_z4h_autosuggestion} )) &&
-           [[ "$_z4h_autosuggestion" == "${BUFFER:$#_z4h_autosuggest_buffer}"* ]]; then
-        POSTDISPLAY="${_z4h_autosuggestion:$(($#BUFFER - $#_z4h_autosuggest_buffer))}"
+           [[ "$_z4h_autosuggestion" == "${BUFFER:${#_z4h_autosuggest_buffer}}"* ]]; then
+        POSTDISPLAY="${_z4h_autosuggestion:$((${#BUFFER} - ${#_z4h_autosuggest_buffer}))}"
         typeset -g _z4h_autosuggest_buffer="$BUFFER"
         typeset -g _z4h_autosuggestion="$POSTDISPLAY"
         return
       fi
     fi
     local suggestion
-    if [[ "$#BUFFER" -le "${ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE:-$#BUFFER}" ]]; then
+    if [[ "${#BUFFER}" -le "${ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE:-${#BUFFER}}" ]]; then
       _zsh_autosuggest_fetch_suggestion "$BUFFER"
     fi
-    POSTDISPLAY="${suggestion:$#BUFFER}"
+    POSTDISPLAY="${suggestion:${#BUFFER}}"
     typeset -g _z4h_autosuggest_buffer="$BUFFER"
     typeset -g _z4h_autosuggestion="$POSTDISPLAY"
   }

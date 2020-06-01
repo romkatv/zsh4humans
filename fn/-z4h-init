@@ -480,12 +480,11 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
       region_highlight[-1]=()
     }
     _zsh_autosuggest_highlight_apply() {
-      (( ${+POSTDISPLAY} )) || local -h POSTDISPLAY
       region_highlight+=(
-          "$#BUFFER $(($#BUFFER + $#POSTDISPLAY)) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
+          "$#BUFFER $(($#BUFFER + ${#POSTDISPLAY-})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
     }
     _zsh_autosuggest_clear() {
-      _zsh_autosuggest_invoke_original_widget $@
+      _zsh_autosuggest_invoke_original_widget "$@"
       local -i retval=$?
       typeset -g _z4h_autosuggest_buffer="$BUFFER"
       unset _z4h_autosuggestion
@@ -493,12 +492,16 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
       return retval
     }
     _zsh_autosuggest_modify() {
-      _zsh_autosuggest_invoke_original_widget $@
+      _zsh_autosuggest_invoke_original_widget "$@"
       local -i retval=$?
       -z4h-autosuggest-fetch
       return retval
     }
     _zsh_autosuggest_accept() {
+      if (( CURSOR < ${#BUFFER} -1 )) || [[ $CURSOR -lt ${#BUFFER} && "$KEYMAP" != "vicmd" ]]; then
+        _zsh_autosuggest_invoke_original_widget "$@"
+        return
+      fi
       -z4h-autosuggest-fetch
       () { '$functions[_zsh_autosuggest_accept]' } "$@"
       local -i retval=$?
@@ -506,6 +509,10 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
       return retval
     }
     _zsh_autosuggest_partial_accept() {
+      if (( CURSOR < ${#BUFFER} -1 )) || [[ $CURSOR -lt ${#BUFFER} && "$KEYMAP" != "vicmd" ]]; then
+        _zsh_autosuggest_invoke_original_widget $@
+        return
+      fi
       -z4h-autosuggest-fetch
       () { '$functions[_zsh_autosuggest_partial_accept]' } "$@"
       local -i retval=$?

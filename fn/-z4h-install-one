@@ -63,43 +63,41 @@ local old new
     zf_mkdir -p -- $old $new || return
   fi
 
-  (
-    local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$new/${1:t}
-    if [[ -n $command ]]; then
-      () { eval $command } || exit 1
-      if [[ ! -d $Z4H_PACKAGE_DIR ]]; then
-        print -Pru2 -- "%F{3}z4h%f: custom command failed to install: %F{1}${Z4H_PACKAGE_DIR//\%/%%}%f"
-        exit 1
-      fi
-    else
-      builtin cd -q -- $new || exit
-      local err
-      if (( $+commands[curl] )); then
-        err="$(command curl -fsSLo snapshot.tar.gz -- $url 2>&1)"
-      elif (( $+commands[wget] )); then
-        err="$(command wget -O snapshot.tar.gz -- $url 2>&1)"
-      else
-        print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
-        exit 1
-      fi
-      if (( $? )); then
-        print -ru2 -- $err
-        print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
-        exit 1
-      fi
-      command tar -xzf snapshot.tar.gz || exit
-      local dirs=(./${1:t}-*(N/))
-      if (( $#dirs != 1 )); then
-        print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
-        return 1
-      fi
-      if [[ $dirs[1] != ./${1:t} ]]; then
-        zf_mv -- $dirs[1] ./${1:t} || exit
-      fi
+  local Z4H_PACKAGE_NAME=$1 Z4H_PACKAGE_DIR=$new/${1:t}
+
+  if [[ -n $command ]]; then
+    () { eval $command } || return 1
+    if [[ ! -d $Z4H_PACKAGE_DIR ]]; then
+      print -Pru2 -- "%F{3}z4h%f: custom command failed to install: %F{1}${Z4H_PACKAGE_DIR//\%/%%}%f"
+      return 1
     fi
-    builtin cd -q -- $Z4H_PACKAGE_DIR || exit
-    eval $postinstall                 || exit
-  ) || return
+  else
+    local err
+    if (( $+commands[curl] )); then
+      err="$(command curl -fsSL -- $url 2>&1 >$new/snapshot.tar.gz)"
+    elif (( $+commands[wget] )); then
+      err="$(command wget -O-   -- $url 2>&1 >$new/snapshot.tar.gz)"
+    else
+      print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
+      return 1
+    fi
+    if (( $? )); then
+      print -ru2 -- $err
+      print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+      return 1
+    fi
+    command tar -C $new -xzf $new/snapshot.tar.gz || return
+    local dirs=($new/${1:t}-*(N/))
+    if (( $#dirs != 1 )); then
+      print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
+      return 1
+    fi
+    if [[ $dirs[1] != $new/${1:t} ]]; then
+      zf_mv -- $dirs[1] $new/${1:t} || return
+    fi
+  fi
+
+  eval $postinstall                 || return
 
   [[ ! -e $dst ]] || zf_mv -- $dst $old/ || return
   zf_mv -- $new/${1:t} $dst

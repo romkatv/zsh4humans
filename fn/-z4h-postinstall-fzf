@@ -5,12 +5,12 @@ if [[ -e $Z4H/.updating ]]; then
 else
   print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}
 fi
-local BASH_SOURCE=(./install) err
+local BASH_SOURCE=($Z4H_PACKAGE_DIR/install) err
 if ! err=$(local opt && emulate sh && set -- --bin && source "${BASH_SOURCE[0]}" 2>&1); then
   print -ru2 -- $err
   return 1
 fi
-if [[ -h ./bin/fzf ]]; then
-  command cp -- ./bin/fzf ./bin/fzf.tmp || return
-  zf_mv -f -- ./bin/fzf.tmp ./bin/fzf   || return
+if [[ -h $Z4H_PACKAGE_DIR/bin/fzf ]]; then
+  command cp -- $Z4H_PACKAGE_DIR/bin/fzf $Z4H_PACKAGE_DIR/bin/fzf.tmp || return
+  zf_mv -f -- $Z4H_PACKAGE_DIR/bin/fzf.tmp $Z4H_PACKAGE_DIR/bin/fzf   || return
 fi

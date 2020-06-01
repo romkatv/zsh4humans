@@ -35,17 +35,11 @@ _z4h_exec_zsh_i() {
   'local' zsh_url='https://raw.githubusercontent.com/romkatv/zsh-bin/master/install'
 
   (
-    if '[' '-n' "${ZSH_VERSION-}" ]; then
-      'builtin' 'cd' '-q' '--' "$Z4H"/tmp || 'exit' '1'
-    else
-      'cd' '--' "$Z4H"/tmp                || 'exit' '1'
-    fi
-    install="${install##*/}"
     'local' 'err'
     if command -v 'curl' >'/dev/null' 2>&1; then
-      err="$(command curl -fsSLo "$install" -- "$zsh_url" 2>&1)"
+      err="$(command curl -fsSL -- "$zsh_url" 2>&1 >"$install")"
     elif command -v 'wget' >'/dev/null' 2>&1; then
-      err="$(command wget -O "$install" -- "$zsh_url" 2>&1)"
+      err="$(command wget -O-   -- "$zsh_url" 2>&1 >"$install")"
     else
       >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
       'return' '1'

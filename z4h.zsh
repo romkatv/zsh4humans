@@ -209,19 +209,13 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
         'eval' "$Z4H_BOOTSTRAP_COMMAND" || 'exit'
       fi
 
-      if '[' '-n' "${ZSH_VERSION-}" ']'; then
-        'builtin' 'cd' '-q' '--' "$tmpdir" || 'exit'
-      else
-        'cd' '--' "$tmpdir"                || 'exit'
-      fi
-
       if '[' '-z' "${Z4H_BOOTSTRAP_COMMAND-}" ']'; then
         url="https://github.com/romkatv/zsh4humans/archive/v$v.tar.gz"
 
         if command -v 'curl' >'/dev/null' 2>&1; then
-          err="$('command' 'curl' '-fsSLo' 'snapshot.tar.gz' '--' "$url" 2>&1)"
+          err="$('command' 'curl' '-fsSL' '--' "$url" 2>&1 >"$tmpdir"/snapshot.tar.gz)"
         elif command -v 'wget' >'/dev/null' 2>&1; then
-          err="$('command' 'wget' '-O' 'snapshot.tar.gz' '--' "$url" 2>&1)"
+          err="$('command' 'wget' '-O-'   '--' "$url" 2>&1 >"$tmpdir"/snapshot.tar.gz)"
         else
           >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
           'exit' '1'
@@ -233,7 +227,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
           'exit' '1'
         fi
 
-        'command' 'tar' '-xzf' 'snapshot.tar.gz' || 'exit'
+        'command' 'tar' '-C' "$tmpdir" '-xzf' "$tmpdir"/snapshot.tar.gz || 'exit'
       fi
 
       if '[' '-e' "$Z4H"/.updating ']'; then
@@ -247,12 +241,12 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
           fi
           'exit' '1'
         fi
-        ./zsh4humans-"$v"/sc/setup '-n' "$Z4H" '-o' "$Z4H_UPDATING" || 'exit'
+        "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H" '-o' "$Z4H_UPDATING" || 'exit'
       else
-        ./zsh4humans-"$v"/sc/setup '-n' "$Z4H"                      || 'exit'
+        "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H"                      || 'exit'
       fi
-      'command' 'rm' '-rf' '--' "$dir"          || 'exit'
-      'command' 'mv' '-f' '--' './'*'-'* "$dir" || 'exit'
+      'command' 'rm' '-rf' '--' "$dir"                          || 'exit'
+      'command' 'mv' '-f' '--' "$tmpdir"/zsh4humans-"$v" "$dir" || 'exit'
     )
 
     ret="$?"

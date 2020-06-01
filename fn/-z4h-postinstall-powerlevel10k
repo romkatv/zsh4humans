@@ -9,7 +9,7 @@ fi
 (
   unset -m 'GITSTATUS_*~GITSTATUS_CACHE_DIR'
   export GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR
-  ./gitstatus/install -f
+  $Z4H_PACKAGE_DIR/gitstatus/install -f
 ) || return
 
 zf_mkdir -p -- $Z4H/cache/powerlevel10k/p10k-root

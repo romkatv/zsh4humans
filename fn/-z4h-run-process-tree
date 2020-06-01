@@ -1,12 +1,12 @@
 # Copied from https://github.com/romkatv/run-process-tree.
 
-zmodload zsh/parameter zsh/param/private      || return
-local -P opt=(${(kv)options[@]})              || return
-local -P pat=(${patchars[@]})                 || return
-local -P dis_pat=(${dis_patchars[@]})         || return
-emulate -L zsh                                || return
-setopt monitor traps_async pipe_fail no_unset || return
-zmodload zsh/system                           || return
+zmodload zsh/parameter zsh/param/private                 || return
+local -P opt=(${(kv)options[@]})                         || return
+local -P pat=(${patchars[@]})                            || return
+local -P dis_pat=(${dis_patchars[@]})                    || return
+emulate -L zsh                                           || return
+setopt monitor traps_async pipe_fail no_unset no_bg_nice || return
+zmodload zsh/system                                      || return
 
 local -P stdout REPLY
 exec {stdout}>&1 || return

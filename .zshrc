@@ -41,7 +41,7 @@ zstyle ':z4h:'                cd-key           alt
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     accept
 
-if (( UID && UID == EUID && ! Z4H_SSH )); then
+if (( UID && UID == EUID && ! $#Z4H_SSH )); then
   # When logged in as a regular user and not via `z4h ssh`, check that
   # login shell is zsh and offer to change it if it isn't.
   z4h chsh

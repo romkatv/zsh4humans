@@ -1,6 +1,24 @@
 local cfg_set=(.zshenv .zprofile .zshrc .zlogin .zlogout)
 local cfg_add=(.p10k{,-ascii}{,-8color}.zsh)
 
+local args=("$@")
+
+while (( $# )); do
+  case "$1" in
+    --) shift; break;;
+    -(b|c|D|E|e|F|I|i|J|L|l|m|O|o|p||Q|R|S|W|w)) shift;;
+    -*);;
+    *) break;;
+  esac
+  (( $# )) && shift
+done
+
+local srv=${1##*@}
+if [[ -z $srv || $# != 1 ]] || zstyle -t :z4h:ssh:$srv passthrough; then
+  command ssh "${args[@]}"
+  return
+fi
+
 local version
 IFS= read -r version <$Z4H/zsh4humans/version || return
 
@@ -14,10 +32,10 @@ dump="$(
   fi
   tar -czh -- $files | base64 | tr -d '\n')" || return
 
-command ssh -t "$@" '"set" "-ue" || "exit"
+command ssh -t "${args[@]}" '"set" "-ue" || "exit"
 "export" ZDOTDIR="$HOME"
 "export" Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
-"export" Z4H_SSH="1"
+"export" Z4H_SSH='${(qqq)srv}'
 "export" LC_ALL="C"
 (
   IFS="" "read" "-r" "_z4h_v" <"$Z4H"/zsh4humans/version &&

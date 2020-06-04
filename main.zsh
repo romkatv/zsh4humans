@@ -95,7 +95,7 @@ function z4h() {
     _z4h_install_queue+=(
       fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
     if ! -z4h-install-many; then
-      -z4h-error-command init
+      [[ -e $Z4H/.updating ]] || -z4h-error-command init
       return 1
     fi
     # Enable Powerlevel10k instant prompt.

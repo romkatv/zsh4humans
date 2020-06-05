@@ -1,3 +1,5 @@
+setopt xtrace
+
 local old=$Z4H.old.$$
 local new=$Z4H.new.$$
 
@@ -31,7 +33,7 @@ local new=$Z4H.new.$$
   zf_rm -- $new/tmp/update-successful                    || return
   zf_rm -- $new/.updating                                || return
   if ! zf_mv -f -- $Z4H $old 2>/dev/null; then
-    zf_rm -rf -- $old                                    || return
+    zf_rm -rf -- $Z4H                                    || return
   fi
   zf_mv -f -- $new $Z4H                                  || return
 } always {

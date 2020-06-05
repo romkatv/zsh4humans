@@ -100,15 +100,57 @@ function z4h-beginning-of-buffer() { CURSOR=0 }
 function z4h-end-of-buffer() { CURSOR=$#BUFFER }
 function z4h-expand() { zle _expand_alias || zle .expand-word || true }
 
-if (( $+terminfo[rmam] && $+terminfo[smam] )); then
-  function z4h-expand-or-complete() {
-    # Show '...' while completing. No `emulate -L zsh` to pick up dotglob if it's set.
-    print -rn -- ${terminfo[rmam]}${(%):-"%F{red}...%f"}${terminfo[smam]}
-    zle fzf-tab-complete
+function -z4h-fzf() {
+  eval "$_z4h_opt"
+  print >$TTY
+  {
+    local choice again
+    choice="$($Z4H/fzf/bin/fzf "$@")" || return
+    if [[ $choice != $'\n'* ]]; then
+      again=1
+      print -r -- $'\n'${choice#*$'\n'}
+    else
+      print -r -- $choice
+    fi
+  } always {
+    print -n "$again" >$_z4h_fzf_called
   }
-else
-  function z4h-expand-or-complete() { zle fzf-tab-complete }
-fi
+}
+
+function z4h-expand-or-complete() {
+  local esc line col
+  while true; do
+    IFS='[;' read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
+    local lbuf="$LBUFFER"
+    local post="$POSTDISPLAY"
+    POSTDISPLAY='..'
+    region_highlight+=(
+      "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
+    zle -R
+    {
+      local _z4h_fzf_called="$Z4H"/tmp/fzf-called."${sysparams[pid]}"
+      zf_rm -f -- "$_z4h_fzf_called" || return
+      zle fzf-tab-complete
+    } always {
+      local -i err=$?
+      local -a stat=()
+      if zstat +size -A stat -- "$_z4h_fzf_called" 2>/dev/null; then
+        zf_rm -f -- "$_z4h_fzf_called" || err=$?
+        echoti cuu 1
+        (( col > 1 )) && echoti cuf $((col-1))
+      fi
+      if (( err || !stat[1] )) || [[ "$LBUFFER" != */ || "$LBUFFER" == "$lbuf" ]]; then
+        POSTDISPLAY="$post"
+        region_highlight[-1]=()
+        break
+      fi
+      zle .split-undo
+      zle -R
+      POSTDISPLAY="$post"
+      region_highlight[-1]=()
+    }
+  done
+}
 
 function z4h-cd-back() { -z4h-cd-rotate +1 }
 function z4h-cd-forward() { -z4h-cd-rotate -0 }
@@ -171,10 +213,14 @@ if (( _z4h_use[fzf] )); then
 fi
 
 if (( _z4h_use[fzf-tab] )); then
+  FZF_TAB_COMMAND=-z4h-fzf
   zstyle ':fzf-tab:*' prefix       ''         # remove '·'
   zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
   bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
   z4h source $Z4H/fzf-tab/fzf-tab.zsh         # load fzf-tab-complete
+  eval "function fzf-tab-complete() {
+    ${functions[fzf-tab-complete]//zle (.reset-prompt|redisplay|-R)/}
+  }"
 fi
 
 # Delete all existing keymaps and reset to the default state.
@@ -495,11 +541,13 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
 
   eval '
     _zsh_autosuggest_highlight_reset() {
-      region_highlight[-1]=()
+      [[ -z "${POSTDISPLAY-}" ]] || region_highlight[-1]=()
     }
     _zsh_autosuggest_highlight_apply() {
-      region_highlight+=(
-          "$#BUFFER $(($#BUFFER + ${#POSTDISPLAY-})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
+      if [[ -n "${POSTDISPLAY-}" ]]; then
+        region_highlight+=(
+          "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
+      fi
     }
     _zsh_autosuggest_clear() {
       _zsh_autosuggest_invoke_original_widget "$@"

@@ -1,6 +1,5 @@
 emulate -L zsh -o extended_glob
 local -a match mbegin mend
-typeset -p LBUFFER RBUFFER >>/tmp/log
 if [[ $RBUFFER == (#b)[^[:space:]]#[[:space:]]##([^[:space:]]*) ]]; then
   local suffix=$match[1]
   RBUFFER[-$#suffix,-1]=

@@ -13,13 +13,17 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   'typeset' '-gri' _z4h_source_called='1'
 
   'emulate' 'zsh'
-  'setopt' 'auto_cd'    'no_bg_nice'    'no_flow_control'  'hist_find_no_dups'
-  'setopt' 'c_bases'    'hist_verify'   'auto_param_slash' 'hist_ignore_space'
-  'setopt' 'multios'    'always_to_end' 'complete_in_word' 'interactive_comments'
-  'setopt' 'path_dirs'  'extended_glob' 'extended_history' 'hist_expire_dups_first'
-  'setopt' 'auto_pushd' 'share_history' 'hist_ignore_dups' 'no_prompt_bang' 
-  'setopt' 'prompt_cr'  'prompt_sp'     'prompt_percent'   'no_prompt_subst'
-  'setopt' 'no_bg_nice' 'no_aliases'    'typeset_silent'
+  'setopt'                                                                     \
+    'hist_expire_dups_first' 'hist_expire_dups_first' 'hist_expire_dups_first' \
+    'always_to_end'          'auto_cd'                'auto_param_slash'       \
+    'auto_pushd'             'c_bases'                'complete_in_word'       \
+    'extended_glob'          'extended_history'       'hist_expire_dups_first' \
+    'hist_find_no_dups'      'hist_ignore_dups'       'hist_ignore_space'      \
+    'hist_verify'            'interactive_comments'   'multios'                \
+    'no_aliases'             'no_bg_nice'             'no_bg_nice'             \
+    'no_flow_control'        'no_prompt_bang'         'no_prompt_subst'        \
+    'prompt_cr'              'prompt_percent'         'prompt_sp'              \
+    'share_history'          'typeset_silent'
 
   PS1="%B%F{2}%n@%m%f %F{4}%~%f
 %F{%(?.2.1)}%#%f%b "

@@ -2,19 +2,19 @@ local cfg_set=(.zshenv .zprofile .zshrc .zlogin .zlogout)
 local cfg_add=(.p10k{,-ascii}{,-8color}.zsh)
 
 local args=("$@")
+local pos=()
 
 while (( $# )); do
   case "$1" in
-    --) shift; break;;
-    -(b|c|D|E|e|F|I|i|J|L|l|m|O|o|p||Q|R|S|W|w)) shift;;
-    -*);;
-    *) break;;
+    --) pos+=("${@:2}"); break;;
+    -*) [[ bcDEeFIiJLlmOopQRSWw == *${1[-1]}* ]] && shift;;
+    *)  pos+=("$1");;
   esac
   (( $# )) && shift
 done
 
-local srv=${1##*@}
-if [[ -z $srv || $# != 1 ]] || zstyle -t :z4h:ssh:$srv passthrough; then
+local srv
+if [[ $#pos != 1 || -z ${srv::=${pos[1]##*@}} ]] || zstyle -t :z4h:ssh:$srv passthrough; then
   command ssh "${args[@]}"
   return
 fi

@@ -31,11 +31,9 @@ local new=$Z4H.new.$$
   zf_rm -- $new/tmp/update-successful                    || return
   zf_rm -- $new/.updating                                || return
   if ! zf_mv -f -- $Z4H $old 2>/dev/null; then
-    zf_rm -rf -- $Z4H/cache/gitstatus                    || return
-    zf_mv -f -- $Z4H $old                                || return
+    zf_rm -rf -- $old                                    || return
   fi
   zf_mv -f -- $new $Z4H                                  || return
-  zf_rm -rf -- $old                                      || return
 } always {
   if (( $? )); then
     -z4h-error-command update

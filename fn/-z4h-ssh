@@ -44,7 +44,7 @@ command ssh -t "${args[@]}" '"set" "-ue" || "exit"
 "command" "mkdir" "-p" "--" "$ZDOTDIR"
 (
   if "[" "-n" "${ZSH_VERSION-}" "]"; then
-    "emulate" "sh" "-o" "err_return" "-o" "no_unset"
+    "emulate" "sh" "-o" "err_return" "-o" "no_unset" "-o" "monitor"
     "builtin" "cd" "-q" "--" "$ZDOTDIR"
   else
     "cd" "--" "$ZDOTDIR"

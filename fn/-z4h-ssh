@@ -1,61 +1,68 @@
-local args=("$@")
-local pos=()
-
-while (( $# )); do
-  case "$1" in
-    --) pos+=("${@:2}"); break;;
-    -*) [[ bcDEeFIiJLlmOopQRSWw == *${1[-1]}* ]] && shift;;
-    *)  pos+=("$1");;
+local -i i
+local -a pos
+for ((i = 1; i <= $#; ++i)); do
+  case $*[i] in
+    --) (( ++i <= $# )) && pos+=({$i..$#}); break;;
+    -*) [[ bcDEeFIiJLlmOopQRSWw == *${${*[i]}[-1]}* ]] && ((++i));;
+    *)  pos+=($i);;
   esac
-  (( $# )) && shift
 done
 
-local srv
-if [[ $#pos != 1 || -z ${srv::=${pos[1]##*@}} ]] || zstyle -t :z4h:ssh:$srv passthrough; then
-  command ssh "${args[@]}"
+if (( $#pos != 1 )); then
+  command ssh "$@"
   return
 fi
 
-local version
-IFS= read -r version <$Z4H/zsh4humans/version || return
+local user_host=$*[pos[1]]
+local host=${user_host##*@}
+if [[ -z $host ]] || zstyle -t :z4h:ssh:$host passthrough; then
+  command ssh "$@"
+  return
+fi
 
 local -a set_files add_files
-zstyle -a :z4h:ssh:$srv set-files set_files || set_files=(.zshenv .zprofile .zshrc .zlogin .zlogout)
-zstyle -a :z4h:ssh:$srv add-files add_files || add_files=(.p10k{,-ascii}{,-8color}.zsh)
+if ! zstyle -a :z4h:ssh:$host set-files set_files; then
+  set_files=(.zshenv .zprofile .zshrc .zlogin .zlogout)
+fi
+if ! zstyle -a :z4h:ssh:$host add-files add_files; then
+  add_files=(.p10k{,-ascii}{,-8color}.zsh)
+fi
 
-local dump
-dump="$(
-  builtin cd -q -- $ZDOTDIR || exit
-  local files=($^set_files(N^/) $^cfg_add(N^/))
-  if (( ! $files[(I).zshrc] )); then
-    print -Pru2 -- '%F{3}z4h%f: file not found: %F{1}'${ZDOTDIR//\%/%%}'/.zshrc%f'
-    exit 1
-  fi
-  tar -czh -- $files | base64 | tr -d '\n')" || return
+local overlap=(${set_files:*add_files})
+if (( $#overlap )); then
+  overlap='%1F'${(j:%f,%1F :)${(@q)overlap//\%/%%}}'%f'
+  print -Pru2 -- '%F{3}z4h%f: listed both in %Bset-files%b and in %Badd-files%b: '$overlap
+  return 1
+fi
 
-command ssh -t "${args[@]}" '"set" "-ue" || "exit"
-"export" ZDOTDIR="$HOME"
-"export" Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
-"export" Z4H_SSH='${(qqq)srv}'
-"export" LC_ALL="C"
-(
-  IFS="" "read" "-r" "_z4h_v" <"$Z4H"/zsh4humans/version &&
-    "[" "$_z4h_v" "=" '${(qqq)version}' "]"
-) 2>/dev/null || "command" "rm" "-rf" "--" "$Z4H" || "exit"
-"command" "mkdir" "-p" "--" "$ZDOTDIR"
-(
-  if "[" "-n" "${ZSH_VERSION-}" "]"; then
-    "emulate" "sh" "-o" "err_return" "-o" "no_unset" "-o" "monitor"
-    "builtin" "cd" "-q" "--" "$ZDOTDIR"
-  else
-    "cd" "--" "$ZDOTDIR"
-  fi
-  _z4h_d="-D"
-  _z4h_w=""
-  "echo" "Cg==" | "command" "base64" "-d" >"/dev/null" 2>&1 && _z4h_d="-d"
-  "command" "rm" "-rf" "--" '${(j: :)set_files}'
-  "command" "tar" "--help" 2>&1 | "command" "grep" "-qF" "--" "--warning=" 2>/dev/null && _z4h_w="--warning=no-unknown-keyword"
-  "echo" "'$dump'" | "command" "base64" $_z4h_d | "command" "tar" $_z4h_w "-xz"
-)
-"set" "+ue"
-. "$ZDOTDIR"/.zshrc'
+if (( ! $set_files[(Ie).zshrc] && ! $add_files[(Ie).zshrc] )); then
+  print -Pru2 -- '%F{3}z4h%f: %U.zshrc%u is listed neither in %Bset-files%b nor in %Badd-files%b'
+  return 1
+fi
+
+local -aU all_files=($ZDOTDIR/$^set_files(N-.) $ZDOTDIR/$^cfg_add(N-.))
+all_files=(${all_files#$ZDOTDIR/})
+if (( ! $all_files[(Ie).zshrc] )); then
+  print -Pru2 -- '%F{3}z4h%f: file not found: %F{1}'${ZDOTDIR//\%/%%}'/.zshrc%f'
+  return 1
+fi
+
+local script connection=${(%):-%n}:$host
+script="$(<$Z4H/zsh4humans/sc/ssh-bootstrap)" || return
+script=${script/'^CONNECTION^'/${(qqq)connection}}
+script=${script/'^SET_FILES^'/${(j: :)${(@qqq)set_files}}}
+script=${script/'^DUMP_POS^'/${(r:8:: :)${#script}}}
+
+local file=.z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
+{
+  print -r -- $script >$Z4H/tmp/$file                          || return
+  command tar -C $ZDOTDIR -czh -- $all_files >>$Z4H/tmp/$file  || return
+  local args=("$@")
+  args[pos[1],pos[1]-1]=('-T')
+  command ssh "${args[@]}" "/bin/cat >~/$file" <$Z4H/tmp/$file || return
+} always {
+  zf_rm -f -- $Z4H/tmp/$file
+}
+
+args[pos[1]]='-t'
+command ssh "${args[@]}" "/bin/sh ~/$file" || return

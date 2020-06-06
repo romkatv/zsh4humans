@@ -1,40 +1,39 @@
 # Copied from https://github.com/romkatv/run-process-tree.
 
-zmodload zsh/parameter zsh/param/private                 || return
-local -P opt=(${(kv)options[@]})                         || return
-local -P pat=(${patchars[@]})                            || return
-local -P dis_pat=(${dis_patchars[@]})                    || return
+zmodload zsh/parameter                                   || return
+local opt=(${(kv)options[@]})                            || return
+local pat=(${patchars[@]})                               || return
+local dis_pat=(${dis_patchars[@]})                       || return
 emulate -L zsh                                           || return
 setopt monitor traps_async pipe_fail no_unset no_bg_nice || return
 zmodload zsh/system                                      || return
 
-local -P stdout REPLY
+local stdout REPLY
 exec {stdout}>&1 || return
 {
   {
-    local -Pi pipe
-    local -P gid=$sysparams[pid]
-    local -P sig=(ABRT EXIT HUP ILL INT PIPE QUIT TERM ZERR)
-    local -P trap=(trap "trap - $sig; kill -- -$sysparams[pid]" $sig)
+    local -i pipe
+    local sig=(ABRT EXIT HUP ILL INT PIPE QUIT TERM ZERR)
+    local trap=(trap "trap - $sig; kill -- -$sysparams[pid]" $sig)
 
     exec {pipe}>&1 1>&$stdout || return
     $trap
 
     {
       $trap
-      while sleep 1 && print -u $pipe .; do; done
+      while command sleep 1 && print -u $pipe .; do; done
     } 2>/dev/null &
-    local -Pi watchdog=$!
+    local -i watchdog=$!
 
     {
       trap - ZERR
       exec {pipe}>&- || return
-      enable -p -- $pat
-      disable -p -- $dis_pat
+      builtin enable -p -- $pat
+      builtin disable -p -- $dis_pat
       options=($opt zle off monitor off)
-      "$@"
+      () { "$@" } "$@"
     } &
-    local -Pi ret
+    local -i ret
     wait $! || ret=$?
 
     trap "exit $ret" TERM

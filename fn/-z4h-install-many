@@ -51,7 +51,7 @@ local success
   fi
 
   function '-z4h-install-many-parallel'() {
-    local fd head=() tail=()
+    local repo fd head=() tail=()
     local omz=ohmyzsh/ohmyzsh
     local queue=(${(M)_z4h_install_queue:#powerlevel10k} ${_z4h_install_queue:#powerlevel10k})
     queue=(${queue:#$omz} ${(M)queue:#$omz})

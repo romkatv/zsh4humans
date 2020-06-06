@@ -1,6 +1,3 @@
-local cfg_set=(.zshenv .zprofile .zshrc .zlogin .zlogout)
-local cfg_add=(.p10k{,-ascii}{,-8color}.zsh)
-
 local args=("$@")
 local pos=()
 
@@ -22,10 +19,14 @@ fi
 local version
 IFS= read -r version <$Z4H/zsh4humans/version || return
 
+local -a set_files add_files
+zstyle -a :z4h:ssh:$srv set-files set_files || set_files=(.zshenv .zprofile .zshrc .zlogin .zlogout)
+zstyle -a :z4h:ssh:$srv add-files add_files || add_files=(.p10k{,-ascii}{,-8color}.zsh)
+
 local dump
 dump="$(
   builtin cd -q -- $ZDOTDIR || exit
-  local files=($^cfg_set(N^/) $^cfg_add(N^/))
+  local files=($^set_files(N^/) $^cfg_add(N^/))
   if (( ! $files[(I).zshrc] )); then
     print -Pru2 -- '%F{3}z4h%f: file not found: %F{1}'${ZDOTDIR//\%/%%}'/.zshrc%f'
     exit 1
@@ -52,7 +53,7 @@ command ssh -t "${args[@]}" '"set" "-ue" || "exit"
   _z4h_d="-D"
   _z4h_w=""
   "echo" "Cg==" | "command" "base64" "-d" >"/dev/null" 2>&1 && _z4h_d="-d"
-  "command" "rm" "-rf" "--" '${(j: :)cfg_set}'
+  "command" "rm" "-rf" "--" '${(j: :)set_files}'
   "command" "tar" "--help" 2>&1 | "command" "grep" "-qF" "--" "--warning=" 2>/dev/null && _z4h_w="--warning=no-unknown-keyword"
   "echo" "'$dump'" | "command" "base64" $_z4h_d | "command" "tar" $_z4h_w "-xz"
 )

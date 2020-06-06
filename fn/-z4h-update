@@ -1,5 +1,3 @@
-setopt xtrace
-
 local old=$Z4H.old.$$
 local new=$Z4H.new.$$
 

@@ -3,6 +3,7 @@ local -a pos
 for ((i = 1; i <= $#; ++i)); do
   case $*[i] in
     --) (( ++i <= $# )) && pos+=({$i..$#}); break;;
+    -O) command ssh "$@"; return;;
     -*) [[ bcDEeFIiJLlmOopQRSWw == *${${*[i]}[-1]}* ]] && ((++i));;
     *)  pos+=($i);;
   esac

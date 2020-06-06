@@ -41,14 +41,14 @@ if (( ! $set_files[(Ie).zshrc] && ! $add_files[(Ie).zshrc] )); then
   return 1
 fi
 
-local -aU all_files=($ZDOTDIR/$^set_files(N-.) $ZDOTDIR/$^cfg_add(N-.))
+local -aU all_files=($ZDOTDIR/$^set_files(N-.) $ZDOTDIR/$^add_files(N-.))
 all_files=(${all_files#$ZDOTDIR/})
 if (( ! $all_files[(Ie).zshrc] )); then
   print -Pru2 -- '%F{3}z4h%f: file not found: %F{1}'${ZDOTDIR//\%/%%}'/.zshrc%f'
   return 1
 fi
 
-local script connection=${(%):-%n}:$host
+local script connection=${(%):-%m}:$host
 script="$(<$Z4H/zsh4humans/sc/ssh-bootstrap)" || return
 script=${script/'^CONNECTION^'/${(qqq)connection}}
 script=${script/'^SET_FILES^'/${(j: :)${(@qqq)set_files}}}

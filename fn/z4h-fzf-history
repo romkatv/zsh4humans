@@ -1,30 +1,37 @@
 # fzf-history-widget with duplicate removal, preview and syntax highlighting (requires `bat`).
 
-local tmp
+eval "$_z4h_opt"
+
+local tmp esc line col
+IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
+print >$TTY || return
+local restore='echoti cuu 1; (( col > 1 )) && echoti cuf $((col-1))'
+
 {
-  () {
-    eval "$_z4h_opt"
-    local bind='?:toggle-preview,ctrl-h:backward-kill-word,ctrl-r:up,ctrl-s:down'
-    local preview='printf "%s" {}'
-    (( $+commands[bat] )) && preview+=' | bat -l bash --color always -pp'
-    tmp=${TMPDIR:-/tmp}/zsh-hist.$sysparams[pid]
-    print -rNC1 -- "${(@u)history}" |
-      fzf --read0 --no-multi --tiebreak=index --cycle --height=80%             \
-          --preview-window=down:40%:wrap --preview=$preview --tabstop 1        \
-          --bind=$bind --query=$LBUFFER                                        \
-      >$tmp || return
-    local cmd
-    while true; do
-      sysread 'cmd[$#cmd+1]' && continue
-      (( $? == 5 ))          || return
-      break
-    done <$tmp
-    [[ $cmd == *$'\n' ]] || return
-    cmd[-1]=
-    [[ -n $cmd ]] || return
-    zle .vi-fetch-history -n $(($#history - ${${history[@]}[(ie)$cmd]} + 1))
-  }
+  local bind='?:toggle-preview,ctrl-h:backward-kill-word,ctrl-r:up,ctrl-s:down'
+  local preview='printf "%s" {}'
+  (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp'
+  tmp=${TMPDIR:-/tmp}/zsh-hist.$sysparams[pid]
+  print -rNC1 -- "${(@u)history}" |
+    fzf --read0 --no-multi --tiebreak=index --cycle --height=80%             \
+        --preview-window=down:40%:wrap --preview=$preview --tabstop 1        \
+        --bind=$bind --query=$LBUFFER                                        \
+    >$tmp 2>$TTY || return
+  eval $restore
+  restore=
+  local cmd
+  while true; do
+    sysread 'cmd[$#cmd+1]' && continue
+    (( $? == 5 ))          || return
+    break
+  done <$tmp
+  [[ $cmd == *$'\n' ]] || return
+  cmd[-1]=
+  [[ -n $cmd ]] || return
+  zle .vi-fetch-history -n $(($#history - ${${history[@]}[(ie)$cmd]} + 1))
+  BUFFER=$cmd
+  CURSOR=$#BUFFER
 } always {
+  eval $restore
   [[ -z "$tmp" ]] || zf_rm -f -- "$tmp"
-  zle .reset-prompt
 }

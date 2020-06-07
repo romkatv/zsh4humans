@@ -554,8 +554,10 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
     _zsh_autosuggest_clear() {
       _zsh_autosuggest_invoke_original_widget "$@"
       local -i retval=$?
-      typeset -g _z4h_autosuggest_buffer="$BUFFER"
-      unset _z4h_autosuggestion
+      if (( ! retval )); then
+        typeset -g _z4h_autosuggest_buffer="$BUFFER"
+        unset _z4h_autosuggestion
+      fi
       -z4h-autosuggest-fetch
       return retval
     }

@@ -456,6 +456,8 @@ export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
 zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'
+zstyle ':completion:*'                  verbose         yes
+zstyle ':completion:::::'               insert-tab      pending
 zstyle ':completion:*'                  completer       _complete
 zstyle ':completion:*:*:-subscript-:*'  tag-order       indexes parameters
 zstyle ':completion:*'                  squeeze-slashes true

@@ -22,7 +22,7 @@ fi
 }
 
 if [[ ! -o interactive ]]; then
-  print -Pru2 -- "%F{3}z4h%f: starting interactive %F{2}zsh%f"
+  # print -Pru2 -- "%F{3}z4h%f: starting interactive %F{2}zsh%f"
   exec -- $_z4h_exe -i || return
 fi
 

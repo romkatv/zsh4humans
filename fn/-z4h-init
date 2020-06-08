@@ -247,7 +247,7 @@ for keymap in emacs viins vicmd; do
   bindkey -M $keymap -s '^[OF'     '^[[F'    # end
 
   # TTY sends different key codes. Translate them to xterm equivalents.
-  # Missing: {ctrl,alt}+{up,down,left,right,home,end,delete}.
+  # Missing: {ctrl,alt,shift}+{up,down,left,right,home,end}, {ctrl,alt}+delete.
   bindkey -M $keymap -s '^[[1~'    '^[[H'    # home
   bindkey -M $keymap -s '^[[4~'    '^[[F'    # end
 
@@ -268,6 +268,12 @@ for keymap in emacs viins vicmd; do
   bindkey -M $keymap -s '^[^[[7~'  '^[[1;3H' # alt+home
   bindkey -M $keymap -s '^[^[[8~'  '^[[1;3F' # alt+end
   bindkey -M $keymap -s '^[^[[3~'  '^[[3;3~' # alt+delete
+  bindkey -M $keymap -s '^[[a'     '^[[1;2A' # shift+up
+  bindkey -M $keymap -s '^[[b'     '^[[1;2B' # shift+down
+  bindkey -M $keymap -s '^[[d'     '^[[1;2D' # shift+left
+  bindkey -M $keymap -s '^[[c'     '^[[1;2C' # shift+right
+  bindkey -M $keymap -s '^[[7$'    '^[[1;2H' # shift+home
+  bindkey -M $keymap -s '^[[8$'    '^[[1;2F' # shift+end
 
   # Tmux sends different key codes. Translate them to xterm equivalents.
   bindkey -M $keymap -s '^[[1~'    '^[[H'    # home
@@ -292,9 +298,6 @@ for keymap in emacs viins vicmd; do
   bindkey -M $keymap -s '^[[1;9C'  '^[[1;3C' # alt+right
   bindkey -M $keymap -s '^[[1;9H'  '^[[1;3H' # alt+home
   bindkey -M $keymap -s '^[[1;9F'  '^[[1;3F' # alt+end
-
-  # Ancient xterm sends different key codes. Translate them to modern xterm equivalents.
-  bindkey -M $keymap -s '\M-C\M-?' '^[^?'    # alt+backspace
 done
 
 # Move cursor one char backward.

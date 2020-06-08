@@ -25,7 +25,7 @@ add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 local pkg
 typeset -gA _z4h_use
 for pkg in fzf fzf-tab powerlevel10k zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
-  zstyle -t :z4h:$pkg none || _z4h_use[$pkg]=1
+  zstyle -t :z4h:$pkg channel none || _z4h_use[$pkg]=1
 done
 typeset -grA _z4h_use
 

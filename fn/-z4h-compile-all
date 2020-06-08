@@ -1,9 +1,9 @@
 local files=(
-  $Z4H/fzf-tab/{fzf-tab.zsh,lib/zsh-ls-colors/ls-colors.zsh}
-  $Z4H/fzf/shell/*.zsh
-  $Z4H/powerlevel10k/{*.zsh-theme,internal/*.zsh,gitstatus/*.zsh,gitstatus/install}
-  $Z4H/zsh-autosuggestions/{zsh-autosuggestions.zsh,src/**/*.zsh}
-  $Z4H/zsh-syntax-highlighting/{zsh-syntax-highlighting.zsh,highlighters/*/*.zsh}
+  $Z4H/fzf-tab/{fzf-tab.zsh,lib/zsh-ls-colors/ls-colors.zsh}(N)
+  $Z4H/fzf/shell/*.zsh(N)
+  $Z4H/powerlevel10k/{*.zsh-theme,internal/*.zsh,gitstatus/*.zsh,gitstatus/install}(N)
+  $Z4H/zsh-autosuggestions/{zsh-autosuggestions.zsh,src/**/*.zsh}(N)
+  $Z4H/zsh-syntax-highlighting/{zsh-syntax-highlighting.zsh,highlighters/*/*.zsh}(N)
   $Z4H/zsh4humans/main.zsh
   $Z4H/zsh4humans/sc/exec-zsh-i
   $Z4H/zsh4humans/fn/z4h-*~*.zwc

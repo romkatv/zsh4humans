@@ -103,4 +103,4 @@ fi
 }
 
 args[pos[1]]='-t'
-command ssh "${args[@]}" "/bin/sh -x $remote_script" || return
+command ssh "${args[@]}" "/bin/sh $remote_script" || return

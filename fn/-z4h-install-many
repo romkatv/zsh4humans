@@ -1,3 +1,5 @@
+emulate -L zsh -o xtrace
+
 local success
 
 {

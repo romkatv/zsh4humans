@@ -100,11 +100,10 @@ function z4h() {
     fi
     # Enable Powerlevel10k instant prompt.
     () {
-      zstyle -t :z4h:powerlevel10k none && return
+      zstyle -t :z4h:powerlevel10k channel none && return
       local user=${(%):-%n}
       local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
       [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
-      [[ -e $XDG_CACHE_HOME/p10k-root ]] || zf_mkdir -p -- $XDG_CACHE_HOME/p10k-root 2>/dev/null
       source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
     }
     () {

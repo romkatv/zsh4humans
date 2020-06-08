@@ -354,21 +354,25 @@ bindkey   -M emacs '^[/'     redo                           # alt+/
 # Expand alias/glob/parameter.
 bindkey   -M emacs '^ '      z4h-expand                     # ctrl+space
 bindkey   -M viins '^ '      z4h-expand                     # ctrl+space
-# Generic command completion.
-bindkey   -M emacs '\t'      z4h-expand-or-complete         # tab
-bindkey   -M viins '\t'      z4h-expand-or-complete         # tab
-bindkey   -M vicmd '\t'      z4h-expand-or-complete         # tab
-# Deep file completion.
-bindkey   -M emacs '^[i'     fzf-completion                 # alt+i
-bindkey   -M emacs '^[I'     fzf-completion                 # alt+I
-# bindkey -M viins '^[i'     fzf-completion                 # alt+i
-# bindkey -M viins '^[I'     fzf-completion                 # alt+I
-# bindkey -M vicmd '^[i'     fzf-completion                 # alt+i
-# bindkey -M vicmd '^[I'     fzf-completion                 # alt+I
-# Command history.
-bindkey   -M emacs '^R'      z4h-fzf-history                # ctrl+r
-bindkey   -M viins '^R'      z4h-fzf-history                # ctrl+r
-bindkey   -M vicmd '^R'      z4h-fzf-history                # ctrl+r
+if (( _z4h_use[fzf-tab] )); then
+  # Generic command completion.
+  bindkey   -M emacs '\t'      z4h-expand-or-complete         # tab
+  bindkey   -M viins '\t'      z4h-expand-or-complete         # tab
+  bindkey   -M vicmd '\t'      z4h-expand-or-complete         # tab
+fi
+if (( _z4h_use[fzf] )); then
+  # Deep file completion.
+  bindkey   -M emacs '^[i'     fzf-completion                 # alt+i
+  bindkey   -M emacs '^[I'     fzf-completion                 # alt+I
+  # bindkey -M viins '^[i'     fzf-completion                 # alt+i
+  # bindkey -M viins '^[I'     fzf-completion                 # alt+I
+  # bindkey -M vicmd '^[i'     fzf-completion                 # alt+i
+  # bindkey -M vicmd '^[I'     fzf-completion                 # alt+I
+  # Command history.
+  bindkey   -M emacs '^R'      z4h-fzf-history                # ctrl+r
+  bindkey   -M viins '^R'      z4h-fzf-history                # ctrl+r
+  bindkey   -M vicmd '^R'      z4h-fzf-history                # ctrl+r
+fi
 # Show help for the command at cursor.
 bindkey   -M emacs '^[h'     run-help                       # alt+h
 bindkey   -M emacs '^[H'     run-help                       # alt+H
@@ -403,10 +407,12 @@ if zstyle -t :z4h: cd-key ctrl; then
   bindkey -M emacs '^[[1;5A' z4h-cd-up                      # ctrl+up
   bindkey -M viins '^[[1;5A' z4h-cd-up                      # ctrl+up
   bindkey -M vicmd '^[[1;5A' z4h-cd-up                      # ctrl+up
-  # cd into a subdirectory (interactive).
-  bindkey -M emacs '^[[1;5B' fzf-cd-widget                  # ctrl+down
-  bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
-  bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
+  if (( _z4h_use[fzf] )); then
+    # cd into a subdirectory (interactive).
+    bindkey -M emacs '^[[1;5B' fzf-cd-widget                  # ctrl+down
+    bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
+    bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
+  fi
 else
   # Move cursor one word backward.
   bindkey -M emacs '^[[1;5D' z4h-backward-word              # ctrl+left
@@ -426,10 +432,12 @@ else
   bindkey -M emacs '^[[1;3A' z4h-cd-up                      # alt+up
   bindkey -M viins '^[[1;3A' z4h-cd-up                      # alt+up
   bindkey -M vicmd '^[[1;3A' z4h-cd-up                      # alt+up
-  # cd into a subdirectory (interactive).
-  bindkey -M emacs '^[[1;3B' fzf-cd-widget                  # alt+down
-  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
-  bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
+  if (( _z4h_use[fzf] )); then
+    # cd into a subdirectory (interactive).
+    bindkey -M emacs '^[[1;3B' fzf-cd-widget                  # alt+down
+    bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
+    bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
+  fi
 fi
 
 # Use lesspipe if available. It allows you to use less on binary files (zip archives, etc.).

@@ -1,3 +1,8 @@
+# TODO:
+#
+#   - add :z4h:ssh:$host env ZDOTDIR='~' Z4H='blah'
+#   - add :z4h:ssh:$host ssh-flags -o ControlMaster=auto -o ControlPersist=10 -o ControlPath=$HOME/.ssh/control-master-%h-%p-%r
+
 local -i i
 local -a pos
 for ((i = 1; i <= $#; ++i)); do
@@ -21,49 +26,81 @@ if [[ -z $host ]] || zstyle -t :z4h:ssh:$host passthrough; then
   return
 fi
 
-local -a set_files add_files
-if ! zstyle -a :z4h:ssh:$host set-files set_files; then
-  set_files=(.zshenv .zprofile .zshrc .zlogin .zlogout)
-fi
-if ! zstyle -a :z4h:ssh:$host add-files add_files; then
-  add_files=(.p10k{,-ascii}{,-8color}.zsh)
+local -a files
+if ! zstyle -a :z4h:ssh:$host files files; then
+  files=(
+    $ZDOTDIR/.zshenv   '"$ZDOTDIR"/.zshenv'
+    $ZDOTDIR/.zprofile '"$ZDOTDIR"/.zprofile'
+    $ZDOTDIR/.zshrc    '"$ZDOTDIR"/.zshrc'
+    $ZDOTDIR/.zlogin   '"$ZDOTDIR"/.zlogin'
+    $ZDOTDIR/.zlogout  '"$ZDOTDIR"/.zlogout')
+  local file
+  for file in .p10k{,-ascii}{,-8color}.zsh; do
+    [[ -e $ZDOTDIR/$file ]] && files+=($ZDOTDIR/$file '"$ZDOTDIR"/'${(q)file})
+  done
 fi
 
-local overlap=(${set_files:*add_files})
-if (( $#overlap )); then
-  overlap='%1F'${(j:%f,%1F :)${(@q)overlap//\%/%%}}'%f'
-  print -Pru2 -- '%F{3}z4h%f: listed both in %Bset-files%b and in %Badd-files%b: '$overlap
+if (( $#files % 2 )); then
+  print -Pru2 -- "%F{3}z4h%f: odd number of elements: %F{1}zstyle :z4h:ssh:${host//\%/%%}%f"
   return 1
 fi
 
-if (( ! $set_files[(Ie).zshrc] && ! $add_files[(Ie).zshrc] )); then
-  print -Pru2 -- '%F{3}z4h%f: %U.zshrc%u is listed neither in %Bset-files%b nor in %Badd-files%b'
+if (( ! $#files )); then
+  print -Pru2 -- "%F{3}z4h%f: zero elements: %F{1}zstyle :z4h:ssh:${host//\%/%%}%f"
   return 1
 fi
 
-local -aU all_files=($ZDOTDIR/$^set_files(N-.) $ZDOTDIR/$^add_files(N-.))
-all_files=(${all_files#$ZDOTDIR/})
-if (( ! $all_files[(Ie).zshrc] )); then
-  print -Pru2 -- '%F{3}z4h%f: file not found: %F{1}'${ZDOTDIR//\%/%%}'/.zshrc%f'
-  return 1
+local tmpdir
+if (( $+commands[mktemp] )); then
+  tmpdir=$(command mktemp -d -- $Z4H/tmp/ssh.XXXXXXXXXX) || return
+else
+  tmpdir=$Z4H/tmp/ssh.tmp.$sysparams[pid]
+  zf_rm -rf -- $tmpdir || return
+  zf_mkdir -- $tmpdir || return
 fi
 
-local script connection=${(%):-%m}:$host
-script="$(<$Z4H/zsh4humans/sc/ssh-bootstrap)" || return
-script=${script/'^CONNECTION^'/${(qqq)connection}}
-script=${script/'^SET_FILES^'/${(j: :)${(@qqq)set_files}}}
-script=${script/'^DUMP_POS^'/${(r:8:: :)${#script}}}
-
-local file=.z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
 {
-  print -r -- $script >$Z4H/tmp/$file                          || return
-  command tar -C $ZDOTDIR -czh -- $all_files >>$Z4H/tmp/$file  || return
+  local -i i
+  local -a sources destinations
+  for ((i = 1; i < $#files; i += 2)); do
+    local src=$files[i]
+    local dst=$files[i+1]
+    if [[ -z $src || -z $dst ]]; then
+      print -Pru2 -- "%F{3}z4h%f: empty values: %F{1}zstyle :z4h:ssh:${host//\%/%%}%f"
+      return 1
+    fi
+    destinations+=($dst)
+    [[ -e $src ]] || continue
+    local target=${src:A}
+    if [[ -z $target(#qN.) && -z $target(#qN/) ]]; then
+      print -Pru2 -- "%F{3}z4h%f: unsupported file type: %F{1}${src//\%/%%}%f"
+      return 1
+    fi
+    if [[ ${tmpdir:A} == $target(|/*) ]]; then
+      print -Pru2 -- "%F{3}z4h%f: cannot send file: %F{1}${src//\%/%%}%f"
+      return 1
+    fi
+    command ln -s -- $target $tmpdir/$((i/2)) || return
+    sources+=($((i/2)))
+  done
+
+  local script connection=${(%):-%m}:$host
+  script="$(<$Z4H/zsh4humans/sc/ssh-bootstrap)" || return
+  script=${script/'^CONNECTION^'/${(qqq)connection}}
+  script=${script/'^DESTINATIONS^'/${(j: :)destinations}}
+  script=${script/'^DUMP_POS^'/${(r:8:: :)${#script}}}
+
+  print -r -- $script >$tmpdir/script                          || return
+  if (( $#sources )); then
+    command tar -C $tmpdir -czhf - -- $sources >>$tmpdir/script  || return
+  fi
   local args=("$@")
   args[pos[1],pos[1]-1]=('-T')
-  command ssh "${args[@]}" "/bin/cat >~/$file" <$Z4H/tmp/$file || return
+  local remote_script=/tmp/z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
+  command ssh "${args[@]}" "/bin/cat >$remote_script" <$tmpdir/script || return
 } always {
-  zf_rm -f -- $Z4H/tmp/$file
+  zf_rm -rf -- $tmpdir
 }
 
 args[pos[1]]='-t'
-command ssh "${args[@]}" "/bin/sh ~/$file" || return
+command ssh "${args[@]}" "/bin/sh -x $remote_script" || return

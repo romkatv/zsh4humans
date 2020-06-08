@@ -1,51 +1,74 @@
 #!/bin/sh
 
-(
-  if '[' '-n' "${ZSH_VERSION-}" ']'; then
-    'emulate' 'sh' '-o' 'err_exit' '-o' 'no_unset' '-o' 'no_aliases'
-    'builtin' 'cd' '-q' '--' "$HOME"
-  else
-    'set' '-ue'
-    'cd' '--' "$HOME"
+if '[' '-n' "${ZSH_VERSION-}" ']'; then
+  'emulate' 'sh' '-o' 'no_aliases'
+else
+  'set' '+ue'
+fi
+
+_z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--" "$0" "$@"'
+_z4h_ssh_sh=">&2 'printf' '\\n\\033[33mz4h\\033[0m: starting \\033[32msh\\033[0m\\n'; 'exec' 'sh' '-i'"
+'trap' "$_z4h_ssh_cleanup; 'exit' '1'" 'HUP' 'INT' 'TERM'
+'trap' "$_z4h_ssh_cleanup; $_z4h_ssh_sh" 'EXIT'
+'unset' '_z4h_ssh_cleanup' '_z4h_ssh_sh'
+
+'export' ZDOTDIR="$HOME"
+'export' Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
+'export' Z4H_SSH=^CONNECTION^
+'export' LC_ALL="C"
+
+for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp'; do
+  if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then
+    >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_ssh_cmd"'\033[0m\n'
+    'exit' '1'
   fi
+done
 
-  _z4h_sig='HUP INT TERM EXIT'
+'unset' '_z4h_ssh_cmd'
 
-  'trap' '"trap" "-" $_z4h_sig; "command" "rm" "-f" "--" "$0"' $_z4h_sig
+case "$('command' 'tar' '--help' 2>&1)" in
+  *--warning=*) _z4h_ssh_tar_w='--warning=no-unknown-keyword';;
+  *) _z4h_ssh_tar_w=''
+esac
 
-  'export' ZDOTDIR="$HOME"
-  'export' Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
-  'export' Z4H_SSH=^CONNECTION^
-  'export' LC_ALL="C"
+if command -v 'mktemp' >'/dev/null' 2>&1; then
+  _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
+else
+  _z4h_ssh_tmp="${TMPDIR:-/tmp}"/z4h-ssh.tmp."$$"
+  '[' '!' '-e' "$_z4h_ssh_tmp" ']' || 'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
+  'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
+fi
 
-  for _z4h_cmd in 'tar' 'tail' 'rm'; do
-    if ! command -v "$_z4h_cmd" >'/dev/null' 2>&1; then
-      >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_cmd"'\033[0m\n'
-      'exit' '1'
+'set' '--' "$_z4h_ssh_tmp"
+'unset' '_z4h_ssh_tmp'
+
+'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' '-C' "$1" $_z4h_ssh_tar_w '-xzf' '-' || 'exit'
+
+'unset' '_z4h_ssh_tar_w'
+'command' 'rm' '-f' '--' "$0" || 'exit'
+'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
+
+_z4h_ssh_src='0'
+
+for _z4h_ssh_dst in ^DESTINATIONS^; do
+  if '[' '-e' "$_z4h_ssh_dst" ']'; then
+    'command' 'rm' '-rf' '--' "$_z4h_ssh_dst" || 'exit'
+  fi
+  if '[' '-e' "$1"/"$_z4h_ssh_src" ']'; then
+    _z4h_ssh_dir="${_z4h_ssh_dst%/*}"
+    if '[' '!' '-e' "$_z4h_ssh_dir" ]; then
+      'command' 'mkdir' '-p' '--' "$_z4h_ssh_dir" || 'exit'
     fi
-  done
-
-  'unset' '_z4h_cmd'
-
-  case "$('command' 'tar' '--help' 2>&1)" in
-    *--warning=*) _z4h_tar_w='--warning=no-unknown-keyword';;
-    *) _z4h_tar_w=''
-  esac
-
-  'command' 'rm' '-rf' '--' ^SET_FILES^
-  'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' $_z4h_tar_w '-xz'
-  'command' 'rm' '-f' '--' "$0"
-
-  'trap' '-' $_z4h_sig
-
-  if '[' '-n' "${ZSH_VERSION-}" ']'; then
-    'emulate' 'zsh'
-  else
-    'set' '+ue'
+    if ! 'command' 'mv' '-f' '--' "$1"/"$_z4h_ssh_src" "$_z4h_ssh_dst" 2>'/dev/null'; then
+      'command' 'cp' '-rf' '--' "$1"/"$_z4h_ssh_src" "$_z4h_ssh_dst" || 'exit'
+    fi
   fi
+  _z4h_ssh_src=$((_z4h_ssh_src + 1))
+done
 
-  . "$ZDOTDIR"/.zshrc
-) && 'exit'
+'rm' '-rf' '--' "$1" || 'exit'
+'set' '--'
 
+. "$ZDOTDIR"/.zshrc
 >&2 'printf' '\n\033[33mz4h\033[0m: starting \033[32msh\033[0m\n'
 'exec' 'sh' '-i'

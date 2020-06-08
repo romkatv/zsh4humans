@@ -1,4 +1,4 @@
-emulate -L zsh -o xtrace
+emulate -L zsh
 
 local success
 

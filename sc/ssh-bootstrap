@@ -1,45 +1,51 @@
 #!/bin/sh
 
-if '[' '-n' "${ZSH_VERSION-}" ']'; then
-  'emulate' 'sh' '-o' 'err_exit' '-o' 'no_unset' '-o' 'no_aliases'
-  'builtin' 'cd' '-q' '--' "$HOME"
-else
-  'set' '-ue'
-  'cd' '--' "$HOME"
-fi
-
-'trap' '"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-f" "--" "$0"' 'HUP' 'INT' 'TERM' 'EXIT'
-
-'export' ZDOTDIR="$HOME"
-'export' Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
-'export' Z4H_SSH=^CONNECTION^
-'export' LC_ALL="C"
-
-for _z4h_cmd in 'tar' 'tail' 'rm'; do
-  if ! command -v "$_z4h_cmd" >'/dev/null' 2>&1; then
-    >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_cmd"'\033[0m\n'
-    'exit' '1'
+(
+  if '[' '-n' "${ZSH_VERSION-}" ']'; then
+    'emulate' 'sh' '-o' 'err_exit' '-o' 'no_unset' '-o' 'no_aliases'
+    'builtin' 'cd' '-q' '--' "$HOME"
+  else
+    'set' '-ue'
+    'cd' '--' "$HOME"
   fi
-done
 
-'unset' '_z4h_cmd'
+  _z4h_sig='HUP INT TERM EXIT'
 
-case "$('command' 'tar' '--help' 2>&1)" in
-  *--warning=*) _z4h_tar_w='--warning=no-unknown-keyword';;
-  *) _z4h_tar_w=''
-esac
+  'trap' '"trap" "-" $_z4h_sig; "command" "rm" "-f" "--" "$0"' $_z4h_sig
 
-'command' 'rm' '-rf' '--' ^SET_FILES^
-'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' $_z4h_tar_w '-xz'
-'command' 'rm' '-f' '--' "$0"
+  'export' ZDOTDIR="$HOME"
+  'export' Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
+  'export' Z4H_SSH=^CONNECTION^
+  'export' LC_ALL="C"
 
-'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
+  for _z4h_cmd in 'tar' 'tail' 'rm'; do
+    if ! command -v "$_z4h_cmd" >'/dev/null' 2>&1; then
+      >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_cmd"'\033[0m\n'
+      'exit' '1'
+    fi
+  done
 
-if '[' '-n' "${ZSH_VERSION-}" ']'; then
-  'emulate' 'zsh'
-else
-  'set' '+ue'
-fi
+  'unset' '_z4h_cmd'
 
-. "$ZDOTDIR"/.zshrc
-'exit' '1'
+  case "$('command' 'tar' '--help' 2>&1)" in
+    *--warning=*) _z4h_tar_w='--warning=no-unknown-keyword';;
+    *) _z4h_tar_w=''
+  esac
+
+  'command' 'rm' '-rf' '--' ^SET_FILES^
+  'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' $_z4h_tar_w '-xz'
+  'command' 'rm' '-f' '--' "$0"
+
+  'trap' '-' $_z4h_sig
+
+  if '[' '-n' "${ZSH_VERSION-}" ']'; then
+    'emulate' 'zsh'
+  else
+    'set' '+ue'
+  fi
+
+  . "$ZDOTDIR"/.zshrc
+) && 'exit'
+
+>&2 'printf' '\n\033[33mz4h\033[0m: starting \033[32msh\033[0m\n'
+'exec' 'sh' '-i'

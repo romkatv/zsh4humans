@@ -1,15 +1,17 @@
 eval "$_z4h_opt"
 
-if [[ -e $Z4H/.updating ]]; then
-  print -ru2 -- ${(%):-"%F{3}z4h%f: updating %Bgitstatus%b binary"}
-else
-  print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bgitstatus%b binary"}
+zf_mkdir -p -- $Z4H/cache/powerlevel10k/p10k-root || return
+
+if [[ $GITSTATUS_AUTO_INSTALL != 0 ]]; then
+  if [[ -e $Z4H/.updating ]]; then
+    print -ru2 -- ${(%):-"%F{3}z4h%f: updating %Bgitstatus%b binary"}
+  else
+    print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bgitstatus%b binary"}
+  fi
+
+  (
+    unset -m 'GITSTATUS_*~GITSTATUS_CACHE_DIR'
+    export GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR
+    $Z4H_PACKAGE_DIR/gitstatus/install -f
+  ) || return
 fi
-
-(
-  unset -m 'GITSTATUS_*~GITSTATUS_CACHE_DIR'
-  export GITSTATUS_CACHE_DIR=$GITSTATUS_CACHE_DIR
-  $Z4H_PACKAGE_DIR/gitstatus/install -f
-) || return
-
-zf_mkdir -p -- $Z4H/cache/powerlevel10k/p10k-root

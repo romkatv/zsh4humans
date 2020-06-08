@@ -216,7 +216,7 @@ if (( _z4h_use[fzf-tab] )); then
   FZF_TAB_COMMAND=-z4h-fzf
   zstyle ':fzf-tab:*' prefix       ''         # remove '·'
   zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
-  bindkey '\t' expand-or-complete             # fzf-tab reads it during initialization
+  bindkey '^I' expand-or-complete             # fzf-tab reads it during initialization
   z4h source $Z4H/fzf-tab/fzf-tab.zsh         # load fzf-tab-complete
   eval "function fzf-tab-complete() {
     ${functions[fzf-tab-complete]//zle (.reset-prompt|redisplay|-R)/}
@@ -298,180 +298,113 @@ for keymap in emacs viins vicmd; do
 done
 
 # Move cursor one char backward.
-bindkey   -M emacs '^[[D'    backward-char                  # left
-bindkey   -M viins '^[[D'    vi-backward-char               # left
+bindkey   '^[[D'    backward-char                  # left
 # Move cursor one char forward.
-bindkey   -M emacs '^[[C'    forward-char                   # right
-bindkey   -M viins '^[[C'    vi-forward-char                # right
+bindkey   '^[[C'    forward-char                   # right
 # Move cursor one line up or fetch the previous command from LOCAL history.
-bindkey   -M emacs '^P'      z4h-up-local-history           # ctrl+p
-bindkey   -M emacs '^[[A'    z4h-up-local-history           # up
-bindkey   -M viins '^[[A'    z4h-up-local-history           # up
-bindkey   -M vicmd 'k'       z4h-up-local-history           # k
+bindkey   '^P'      z4h-up-local-history           # ctrl+p
+bindkey   '^[[A'    z4h-up-local-history           # up
 # Move cursor one line down or fetch the next command from LOCAL history.
-bindkey   -M emacs '^N'      z4h-down-local-history         # ctrl-n
-bindkey   -M emacs '^[[B'    z4h-down-local-history         # down
-bindkey   -M viins '^[[B'    z4h-down-local-history         # down
-bindkey   -M vicmd 'j'       z4h-down-local-history         # j
+bindkey   '^N'      z4h-down-local-history         # ctrl-n
+bindkey   '^[[B'    z4h-down-local-history         # down
 # Move cursor one line up or fetch the previous command from GLOBAL history.
-bindkey   -M emacs '^[[1;5A' z4h-up-global-history          # ctrl+up
-bindkey   -M viins '^[[1;5A' z4h-up-global-history          # ctrl+up
+bindkey   '^[[1;5A' z4h-up-global-history          # ctrl+up
 # Move cursor one line down or fetch the next command from GLOBAL history.
-bindkey   -M emacs '^[[1;5B' z4h-down-global-history        # ctrl+down
-bindkey   -M viins '^[[1;5B' z4h-down-global-history        # ctrl+down
+bindkey   '^[[1;5B' z4h-down-global-history        # ctrl+down
 # Move cursor to the beginning of line.
-bindkey   -M emacs '^[[H'    beginning-of-line              # home
-bindkey   -M viins '^[[H'    vi-beginning-of-line           # home
-bindkey   -M vicmd '^[[H'    vi-beginning-of-line           # home
+bindkey   '^[[H'    beginning-of-line              # home
 # Move cursor to the end of line.
-bindkey   -M emacs '^[[F'    end-of-line                    # end
-bindkey   -M viins '^[[F'    vi-end-of-line                 # end
-bindkey   -M vicmd '^[[F'    vi-end-of-line                 # end
+bindkey   '^[[F'    end-of-line                    # end
 # Move cursor to the beginning of buffer.
-bindkey   -M emacs '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
-bindkey   -M emacs '^[[1;3H' z4h-beginning-of-buffer        # alt+home
-bindkey   -M viins '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
-bindkey   -M viins '^[[1;3H' z4h-beginning-of-buffer        # alt+home
-bindkey   -M vicmd '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
-bindkey   -M vicmd '^[[1;3H' z4h-beginning-of-buffer        # alt+home
+bindkey   '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
+bindkey   '^[[1;3H' z4h-beginning-of-buffer        # alt+home
 # Move cursor to the end of buffer.
-bindkey   -M emacs '^[[1;5F' z4h-end-of-buffer              # ctrl+end
-bindkey   -M emacs '^[[1;3F' z4h-end-of-buffer              # alt+end
-bindkey   -M viins '^[[1;5F' z4h-end-of-buffer              # ctrl+end
-bindkey   -M viins '^[[1;3F' z4h-end-of-buffer              # alt+end
-bindkey   -M vicmd '^[[1;5F' z4h-end-of-buffer              # ctrl+end
-bindkey   -M vicmd '^[[1;3F' z4h-end-of-buffer              # alt+end
+bindkey   '^[[1;5F' z4h-end-of-buffer              # ctrl+end
+bindkey   '^[[1;3F' z4h-end-of-buffer              # alt+end
 # Delete the character under the cursor.
-bindkey   -M emacs '^D'      delete-char                    # delete
-bindkey   -M emacs '^[[3~'   delete-char                    # delete
-bindkey   -M viins '^[[3~'   delete-char                    # delete
-# Delete the character behind the cursor.
-bindkey   -M viins '^?'      backward-delete-char           # bs
+bindkey   '^D'      delete-char                    # delete
+bindkey   '^[[3~'   delete-char                    # delete
 # Delete next word.
-bindkey   -M emacs '^[d'     z4h-kill-word                  # alt+d
-bindkey   -M emacs '^[D'     z4h-kill-word                  # alt+D
-bindkey   -M emacs '^[[3;5~' z4h-kill-word                  # ctrl+del
-bindkey   -M emacs '^[[3;3~' z4h-kill-word                  # alt+del
+bindkey   '^[d'     z4h-kill-word                  # alt+d
+bindkey   '^[D'     z4h-kill-word                  # alt+D
+bindkey   '^[[3;5~' z4h-kill-word                  # ctrl+del
+bindkey   '^[[3;3~' z4h-kill-word                  # alt+del
 # Delete previous word.
-bindkey   -M emacs '^W'      z4h-backward-kill-word         # ctrl+w
-bindkey   -M emacs '^[^H'    z4h-backward-kill-word         # ctrl+alt+bs
-bindkey   -M emacs '^[^?'    z4h-backward-kill-word         # alt+bs
+bindkey   '^W'      z4h-backward-kill-word         # ctrl+w
+bindkey   '^[^H'    z4h-backward-kill-word         # ctrl+alt+bs
+bindkey   '^[^?'    z4h-backward-kill-word         # alt+bs
 
 # Delete line before cursor.
-bindkey   -M emacs '^[k'     backward-kill-line             # alt+k
-bindkey   -M emacs '^[K'     backward-kill-line             # alt+K
+bindkey   '^[k'     backward-kill-line             # alt+k
+bindkey   '^[K'     backward-kill-line             # alt+K
 # Delete all lines.
-bindkey   -M emacs '^[j'     kill-buffer                    # alt+j
-bindkey   -M emacs '^[J'     kill-buffer                    # alt+J
+bindkey   '^[j'     kill-buffer                    # alt+j
+bindkey   '^[J'     kill-buffer                    # alt+J
 # Push buffer to ephemeral history (won't be saved to HISTFILE) and delete all lines.
-bindkey   -M emacs '^[o'     z4h-stash-buffer               # alt+o
-bindkey   -M emacs '^[O'     z4h-stash-buffer               # alt+O
+bindkey   '^[o'     z4h-stash-buffer               # alt+o
+bindkey   '^[O'     z4h-stash-buffer               # alt+O
 # Accept autosuggestion.
-bindkey   -M emacs '^[m'     z4h-autosuggest-accept         # alt+m
-bindkey   -M emacs '^[M'     z4h-autosuggest-accept         # alt+M
-# bindkey -M viins '^[m'     z4h-autosuggest-accept         # alt+m
-# bindkey -M viins '^[M'     z4h-autosuggest-accept         # alt+M
-# bindkey -M vicmd '^[m'     z4h-autosuggest-accept         # alt+m
-# bindkey -M vicmd '^[M'     z4h-autosuggest-accept         # alt+M
-# Undo.
-bindkey   -M viins '^_'      undo                           # ctrl+/
+bindkey   '^[m'     z4h-autosuggest-accept         # alt+m
+bindkey   '^[M'     z4h-autosuggest-accept         # alt+M
 # Redo.
-bindkey   -M emacs '^[/'     redo                           # alt+/
-# bindkey -M viins '^[/'     redo                           # alt+/
+bindkey   '^[/'     redo                           # alt+/
 # Expand alias/glob/parameter.
-bindkey   -M emacs '^ '      z4h-expand                     # ctrl+space
-bindkey   -M viins '^ '      z4h-expand                     # ctrl+space
+bindkey   '^ '      z4h-expand                     # ctrl+space
 if (( _z4h_use[fzf-tab] )); then
   # Generic command completion.
-  bindkey   -M emacs '\t'      z4h-expand-or-complete         # tab
-  bindkey   -M viins '\t'      z4h-expand-or-complete         # tab
-  bindkey   -M vicmd '\t'      z4h-expand-or-complete         # tab
+  bindkey '^I'      z4h-expand-or-complete         # tab
 fi
 if (( _z4h_use[fzf] )); then
   # Deep file completion.
-  bindkey   -M emacs '^[i'     fzf-completion                 # alt+i
-  bindkey   -M emacs '^[I'     fzf-completion                 # alt+I
-  # bindkey -M viins '^[i'     fzf-completion                 # alt+i
-  # bindkey -M viins '^[I'     fzf-completion                 # alt+I
-  # bindkey -M vicmd '^[i'     fzf-completion                 # alt+i
-  # bindkey -M vicmd '^[I'     fzf-completion                 # alt+I
+  bindkey '^[i'     fzf-completion                 # alt+i
+  bindkey '^[I'     fzf-completion                 # alt+I
   # Command history.
-  bindkey   -M emacs '^R'      z4h-fzf-history                # ctrl+r
-  bindkey   -M viins '^R'      z4h-fzf-history                # ctrl+r
-  bindkey   -M vicmd '^R'      z4h-fzf-history                # ctrl+r
+  bindkey '^R'      z4h-fzf-history                # ctrl+r
 fi
 # Show help for the command at cursor.
-bindkey   -M emacs '^[h'     run-help                       # alt+h
-bindkey   -M emacs '^[H'     run-help                       # alt+H
-# bindkey -M viins '^[h'     run-help                       # alt+h
-# bindkey -M viins '^[H'     run-help                       # alt+H
-# bindkey -M vicmd '^[h'     run-help                       # alt+h
-# bindkey -M vicmd '^[H'     run-help                       # alt+H
+bindkey   '^[h'     run-help                       # alt+h
+bindkey   '^[H'     run-help                       # alt+H
 # Do nothing (better than printing '~').
-bindkey   -M emacs '^[[5~'   z4h-do-nothing                 # pageup
-bindkey   -M emacs '^[[6~'   z4h-do-nothing                 # pagedown
-bindkey   -M viins '^[[5~'   z4h-do-nothing                 # pageup
-bindkey   -M viins '^[[6~'   z4h-do-nothing                 # pagedown
-bindkey   -M vicmd '^[[5~'   z4h-do-nothing                 # pageup
-bindkey   -M vicmd '^[[6~'   z4h-do-nothing                 # pagedown
+bindkey   '^[[5~'   z4h-do-nothing                 # pageup
+bindkey   '^[[6~'   z4h-do-nothing                 # pagedown
 
 # Move cursor one word backward.
-bindkey   -M emacs '^[b'     z4h-backward-word              # alt+b
-bindkey   -M emacs '^[B'     z4h-backward-word              # alt+B
+bindkey   '^[b'     z4h-backward-word              # alt+b
+bindkey   '^[B'     z4h-backward-word              # alt+B
 
 # Move cursor one word forward.
-bindkey   -M emacs '^[f'     z4h-forward-word               # alt+f
-bindkey   -M emacs '^[F'     z4h-forward-word               # alt+F
+bindkey   '^[f'     z4h-forward-word               # alt+f
+bindkey   '^[F'     z4h-forward-word               # alt+F
 
 if zstyle -t :z4h: cd-key ctrl; then
   # Move cursor one word backward.
-  bindkey -M emacs '^[[1;3D' z4h-backward-word              # alt+left
-  bindkey -M viins '^[[1;3D' vi-backward-word               # alt+left
+  bindkey '^[[1;3D' z4h-backward-word              # alt+left
   # Move cursor one word forward.
-  bindkey -M emacs '^[[1;3C' z4h-forward-word               # alt+right
-  bindkey -M viins '^[[1;3C' vi-forward-word                # alt+right
+  bindkey '^[[1;3C' z4h-forward-word               # alt+right
   # cd into the previous directory.
-  bindkey -M emacs '^[[1;5D' z4h-cd-back                    # ctrl+left
-  bindkey -M viins '^[[1;5D' z4h-cd-back                    # ctrl+left
-  bindkey -M vicmd '^[[1;5D' z4h-cd-back                    # ctrl+left
+  bindkey '^[[1;5D' z4h-cd-back                    # ctrl+left
   # cd into the next directory.
-  bindkey -M emacs '^[[1;5C' z4h-cd-forward                 # ctrl+right
-  bindkey -M viins '^[[1;5C' z4h-cd-forward                 # ctrl+right
-  bindkey -M vicmd '^[[1;5C' z4h-cd-forward                 # ctrl+right
+  bindkey '^[[1;5C' z4h-cd-forward                 # ctrl+right
   # cd into the parent directory.
-  bindkey -M emacs '^[[1;5A' z4h-cd-up                      # ctrl+up
-  bindkey -M viins '^[[1;5A' z4h-cd-up                      # ctrl+up
-  bindkey -M vicmd '^[[1;5A' z4h-cd-up                      # ctrl+up
+  bindkey '^[[1;5A' z4h-cd-up                      # ctrl+up
   if (( _z4h_use[fzf] )); then
     # cd into a subdirectory (interactive).
-    bindkey -M emacs '^[[1;5B' fzf-cd-widget                  # ctrl+down
-    bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
-    bindkey -M viins '^[[1;5B' fzf-cd-widget                  # ctrl+down
+    bindkey '^[[1;5B' fzf-cd-widget                # ctrl+down
   fi
 else
   # Move cursor one word backward.
-  bindkey -M emacs '^[[1;5D' z4h-backward-word              # ctrl+left
-  bindkey -M viins '^[[1;5D' vi-backward-word               # ctrl+left
+  bindkey '^[[1;5D' z4h-backward-word              # ctrl+left
   # Move cursor one word forward.
-  bindkey -M emacs '^[[1;5C' z4h-forward-word               # ctrl+right
-  bindkey -M viins '^[[1;5C' vi-forward-word                # ctrl+right
+  bindkey '^[[1;5C' z4h-forward-word               # ctrl+right
   # cd into the previous directory.
-  bindkey -M emacs '^[[1;3D' z4h-cd-back                    # alt+left
-  bindkey -M viins '^[[1;3D' z4h-cd-back                    # alt+left
-  bindkey -M vicmd '^[[1;3D' z4h-cd-back                    # alt+left
+  bindkey '^[[1;3D' z4h-cd-back                    # alt+left
   # cd into the next directory.
-  bindkey -M emacs '^[[1;3C' z4h-cd-forward                 # alt+right
-  bindkey -M viins '^[[1;3C' z4h-cd-forward                 # alt+right
-  bindkey -M vicmd '^[[1;3C' z4h-cd-forward                 # alt+right
+  bindkey '^[[1;3C' z4h-cd-forward                 # alt+right
   # cd into the parent directory.
-  bindkey -M emacs '^[[1;3A' z4h-cd-up                      # alt+up
-  bindkey -M viins '^[[1;3A' z4h-cd-up                      # alt+up
-  bindkey -M vicmd '^[[1;3A' z4h-cd-up                      # alt+up
+  bindkey '^[[1;3A' z4h-cd-up                      # alt+up
   if (( _z4h_use[fzf] )); then
     # cd into a subdirectory (interactive).
-    bindkey -M emacs '^[[1;3B' fzf-cd-widget                  # alt+down
-    bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
-    bindkey -M viins '^[[1;3B' fzf-cd-widget                  # alt+down
+    bindkey '^[[1;3B' fzf-cd-widget                # alt+down
   fi
 fi
 

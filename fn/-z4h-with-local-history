@@ -8,3 +8,4 @@ shift
 } always {
   zle .set-local-history -n 0
 }
+return 0

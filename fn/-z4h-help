@@ -21,6 +21,11 @@ case $ARGC-$1 in
         print -Pr -- ""
         print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
       ;;
+      compile)
+        print -Pr -- "usage: %F{2}z4h%f %Bcompile%b %Ufile%u..."
+        print -Pr -- ""
+        print -Pr -- "Compile Zsh files if they exists. This is done with current options."
+      ;;
       ssh)
         -z4h-help-ssh
         return
@@ -49,6 +54,7 @@ case $ARGC-$1 in
     print -Pru$fd -- "           %Bupdate%b"
     print -Pru$fd -- "           %Binit%b"
     print -Pru$fd -- "           %Bsource%b %Ufile%u"
+    print -Pru$fd -- "           %Bcompile%b %Ufile%u..."
     print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
     print -Pru$fd -- "           %Bchsh%b"
     print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"

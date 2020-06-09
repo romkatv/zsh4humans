@@ -71,53 +71,62 @@ function compdef() {
 
 # Main zsh4humans function. Type `z4h help` for usage.
 function z4h() {
-  [[ "$ARGC-$1" != 2-source ]] || {
-    [[ -e "$2" ]] || return
-    -z4h-compile "$2" || true
-    local file="$2"
-    set --
-    source -- "$file"
-    return
-  }
-
-  [[ "${(e)_z4h_param_pat}" == "$_z4h_param_sig" ]] || {
-    eval "$_z4h_opt"
-    -z4h-error-param-changed
-    return 1
-  }
-
-  [[ "$ARGC-$1" != 1-init ]] || {
-    (( ! ${+_z4h_init_called} )) || {
-      print -ru2 ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
-      return 1
-    }
-    typeset -gri _z4h_init_called=1
-    _z4h_install_queue+=(
-      fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
-    if ! -z4h-install-many; then
-      [[ -e $Z4H/.updating ]] || -z4h-error-command init
-      return 1
-    fi
-    # Enable Powerlevel10k instant prompt.
-    () {
-      zstyle -t :z4h:powerlevel10k channel none && return
-      local user=${(%):-%n}
-      local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
-      [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
-      source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
-    }
-    () {
+  case "$ARGC-$1" in
+    2-source)
+      [[ -e "$2" ]] || return
+      -z4h-compile "$2" || true
+      local file="$2"
+      set --
+      source -- "$file"
+      return
+    ;;
+    <2->-compile)
+      local -i ret
+      local file
+      [[ "$2" == -- ]] && shift
+      for file in "${@:2}"; do
+        [[ -e "$file" ]] && -z4h-compile "$file" || ret=$?
+      done
+      return ret
+    ;;
+    *)
+      [[ "${(e)_z4h_param_pat}" == "$_z4h_param_sig" ]] || {
+        eval "$_z4h_opt"
+        -z4h-error-param-changed
+        return 1
+      }
+    ;|
+    1-init)
+      (( ! ${+_z4h_init_called} )) || {
+        print -ru2 ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
+        return 1
+      }
+      typeset -gri _z4h_init_called=1
+      _z4h_install_queue+=(
+        fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
+      if ! -z4h-install-many; then
+        [[ -e $Z4H/.updating ]] || -z4h-error-command init
+        return 1
+      fi
+      # Enable Powerlevel10k instant prompt.
+      () {
+        zstyle -t :z4h:powerlevel10k channel none && return
+        local user=${(%):-%n}
+        local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
+        [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
+        source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
+      }
+      () {
+        eval "$_z4h_opt"
+        -z4h-init && return
+        [[ -e $Z4H/.updating ]] || -z4h-error-command init
+        return 1
+      }
+      return
+    ;;
+    *)
       eval "$_z4h_opt"
-      -z4h-init && return
-      [[ -e $Z4H/.updating ]] || -z4h-error-command init
-      return 1
-    }
-    return
-  }
-
-  eval "$_z4h_opt"
-
-  case $ARGC-$1 in
+    ;|
     <->-install)
       local -i flush OPTIND
       local opt OPTARG

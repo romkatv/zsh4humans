@@ -1,5 +1,23 @@
-[[ "$1".zwc -nt "$1" ]] && return
-[[ -w "${1:h}"       ]] || return
+# Runs with user options.
+#
+# Precondition: [[ -e $1 ]].
+
+local -a stat
+
+# Checking [[ -e "$1".zwc ]] is faster than redirecting stderr of zstat to /dev/null.
+[[ -e "$1".zwc ]] && zstat +mtime -A stat -- "$1" "$1".zwc && {
+  # Negative indices to handle ksh_arrays.
+  (( stat[-1] == stat[-2] + 1 )) && return  # common case
+  stat[-1]=()
+} || {
+  zstat +mtime -A stat -- "$1" || return
+}
+
+[[ -w "${1:h}" ]] || return
+
+local t
+builtin strftime -s t '%Y%m%d%H%M.%S' $((stat + 1))
+
 local tmp="$1".tmp."${sysparams[pid]}".zwc
 {
   # This zf_rm is to work around bugs in NTFS and/or WSL. The following code fails there:
@@ -11,7 +29,10 @@ local tmp="$1".tmp."${sysparams[pid]}".zwc
   # The last command produces this error:
   #
   #   zf_mv: a: permission denied
-  zcompile -R -- "$tmp" "$1" && zf_rm -f -- "$1".zwc && zf_mv -f -- "$tmp" "$1".zwc
+  zcompile -R -- "$tmp" "$1"       &&
+    command touch -ct $t -- "$tmp" &&
+    zf_rm -f -- "$1".zwc           &&
+    zf_mv -f -- "$tmp" "$1".zwc
 } always {
-  (( $? )) && zf_rm -f -- "$tmp"
+  (( $? )) && zf_rm -f -- "$tmp" "$1".zwc 2>/dev/null
 }

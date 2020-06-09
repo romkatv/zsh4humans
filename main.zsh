@@ -73,7 +73,7 @@ function compdef() {
 function z4h() {
   [[ "$ARGC-$1" != 2-source ]] || {
     [[ -e "$2" ]] || return
-    [[ "$2".zwc -nt "$2" ]] || -z4h-compile "$2" || true
+    -z4h-compile "$2" || true
     local file="$2"
     set --
     source -- "$file"

@@ -598,7 +598,7 @@ function -z4h-post-init() {
   unfunction compinit compdef
   autoload -Uz compinit
   compinit -u -d $dump
-  [[ ! -r $dump ]] || [[ $dump.zwc -nt $dump ]] || -z4h-compile $dump
+  [[ ! -r $dump ]] || -z4h-compile $dump
 
   # Replay compdef calls.
   local args

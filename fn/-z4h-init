@@ -575,6 +575,13 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
       -z4h-autosuggest-store
       return retval
     }'
+
+  local action
+	for action in clear modify fetch suggest accept partial_accept execute enable disable toggle; do
+    eval "_zsh_autosuggest_widget_$action() {
+      ${functions[_zsh_autosuggest_widget_$action]/zle -R}
+    }"
+  done
 fi
 
 function -z4h-post-init() {

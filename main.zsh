@@ -108,6 +108,9 @@ function z4h() {
         [[ -e $Z4H/.updating ]] || -z4h-error-command init
         return 1
       fi
+      if (( _z4h_installed_something )); then
+        print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
+      fi
       # Enable Powerlevel10k instant prompt.
       () {
         zstyle -t :z4h:powerlevel10k channel none && return

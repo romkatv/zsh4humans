@@ -37,6 +37,8 @@ local success
   have=(${have#$Z4H/})
   _z4h_install_queue=(${_z4h_install_queue:|have})
 
+  (( $#_z4h_install_queue )) && typeset -gi _z4h_installed_something=1
+
   if (( $#_z4h_install_queue <= 1 )) || [[ -o interactive && $ZSH_SUBSHELL != 0 ]]; then
     for repo in ${_z4h_install_queue:|have}; do
       -z4h-install-one $repo || return

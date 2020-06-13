@@ -90,10 +90,16 @@ fi
   script=${script/'^DESTINATIONS^'/${(j: :)destinations}}
   script=${script/'^DUMP_POS^'/${(r:8:: :)${#script}}}
 
-  print -r -- $script >$tmpdir/script                          || return
+  print -r -- $script >$tmpdir/script || return
+
   if (( $#sources )); then
-    command tar -C $tmpdir -czhf - -- $sources >>$tmpdir/script  || return
+    local tar_version tar_opt
+    if tar_version=$(command tar --version 2>/dev/null) && [[ $tar_version == *'GNU tar'* ]]; then
+      tar_opt=(--owner=0 --group=0)
+    fi
+    command tar -C $tmpdir $tar_opt -czhf - -- $sources >>$tmpdir/script || return
   fi
+
   local args=("$@")
   args[pos[1],pos[1]-1]=('-T')
   local remote_script=/tmp/z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM

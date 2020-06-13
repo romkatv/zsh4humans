@@ -26,10 +26,12 @@ done
 
 'unset' '_z4h_ssh_cmd'
 
-case "$('command' 'tar' '--help' 2>&1)" in
-  *--warning=*) _z4h_ssh_tar_w='--warning=no-unknown-keyword';;
-  *) _z4h_ssh_tar_w=''
-esac
+_z4h_ssh_tar_w=
+if _z4h_ssh_tar_v="$('command' 'tar' '--version' 2>&1)"; then
+  case "$_z4h_ssh_tar_v" in
+    *'GNU tar'*) _z4h_ssh_tar_w='--warning=no-unknown-keyword --no-same-owner';;
+  esac
+fi
 
 if command -v 'mktemp' >'/dev/null' 2>&1; then
   _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
@@ -44,7 +46,7 @@ fi
 
 'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' '-C' "$1" $_z4h_ssh_tar_w '-xzf' '-' || 'exit'
 
-'unset' '_z4h_ssh_tar_w'
+'unset' '_z4h_ssh_tar_w' '_z4h_ssh_tar_v'
 'command' 'rm' '-f' '--' "$0" || 'exit'
 'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
 

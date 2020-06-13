@@ -1,0 +1,10 @@
+local -i ret
+
+if (( ${+widgets[-z4h-orig-zle-line-init]} )); then
+  zle -z4h-orig-zle-line-init "$@" || ret=$?
+fi
+
+unset POSTDISPLAY
+region_highlight=()
+
+return ret

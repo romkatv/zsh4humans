@@ -180,6 +180,7 @@ zle -N z4h-down-global-history
 zle -N z4h-cd-back
 zle -N z4h-cd-forward
 zle -N z4h-cd-up
+zle -N z4h-cd-down
 zle -N z4h-fzf-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
@@ -208,7 +209,6 @@ if (( _z4h_use[fzf] )); then
   : ${FZF_COMPLETION_TRIGGER=}                   # file completion without trigger
   fzf_default_completion=z4h-expand-or-complete  # file completion falls back to regular
   z4h source $Z4H/fzf/shell/completion.zsh       # load fzf-completion
-  z4h source $Z4H/fzf/shell/key-bindings.zsh     # load fzf-cd-widget
   unfunction -m '_fzf_complete_*'
 fi
 
@@ -392,7 +392,7 @@ if zstyle -t :z4h: cd-key ctrl; then
   bindkey '^[[1;5A' z4h-cd-up                      # ctrl+up
   if (( _z4h_use[fzf] )); then
     # cd into a subdirectory (interactive).
-    bindkey '^[[1;5B' fzf-cd-widget                # ctrl+down
+    bindkey '^[[1;5B' z4h-cd-down                  # ctrl+down
   fi
 else
   # Move cursor one word backward.
@@ -407,7 +407,7 @@ else
   bindkey '^[[1;3A' z4h-cd-up                      # alt+up
   if (( _z4h_use[fzf] )); then
     # cd into a subdirectory (interactive).
-    bindkey '^[[1;3B' fzf-cd-widget                # alt+down
+    bindkey '^[[1;3B' z4h-cd-down                  # alt+down
   fi
 fi
 
@@ -469,8 +469,6 @@ if (( _z4h_use[zsh-autosuggestions] )); then
   # Tell zsh-autosuggestions how to handle different widgets.
   typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
   typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
-    zle-line-init
-    zle-line-finish
     z4h-up-local-history
     z4h-down-local-history
     z4h-up-global-history
@@ -513,10 +511,13 @@ if (( _z4h_use[zsh-syntax-highlighting] )); then
 fi
 
 if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
-  if (( $+widgets[zle-line-pre-redraw] )); then
-    zle -A -- zle-line-pre-redraw -z4h-orig-zle-line-pre-redraw
-  fi
-  zle -N -- zle-line-pre-redraw -z4h-zle-line-pre-redraw
+  local event
+  for event in pre-redraw init finish; do
+    if (( $+widgets[zle-line-$event] )); then
+      zle -A -- zle-line-$event -z4h-orig-zle-line-$event
+    fi
+    zle -N -- zle-line-$event -z4h-zle-line-$event
+  done
 
   precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
 
@@ -620,7 +621,10 @@ function -z4h-post-init() {
 
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
     () {
-      local -hA widgets=()
+      local -hA widgets=(
+        zle-line-finish    user:_zsh_highlight_widget_zle-line-finish
+        zle-isearch-update user:_zsh_highlight_widget_zle-isearch-update
+      )
       z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
       eval '_zsh_highlight() {
         if [[ "${#BUFFER}" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}}" ]]; then
@@ -632,9 +636,6 @@ function -z4h-post-init() {
       }'
     }
     local suggest_special=(
-      zle-line-init
-      zle-line-finish
-      zle-isearch-update
       $ZSH_AUTOSUGGEST_EXECUTE_WIDGETS
       $ZSH_AUTOSUGGEST_CLEAR_WIDGETS
       $ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS

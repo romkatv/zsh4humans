@@ -13,9 +13,9 @@ local restore='echoti cuu 1; (( col > 1 )) && echoti cuf $((col-1))'
   (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp'
   tmp=${TMPDIR:-/tmp}/zsh-hist.$sysparams[pid]
   print -rNC1 -- "${(@u)history}" |
-    fzf --read0 --no-multi --tiebreak=index --cycle --height=80%             \
-        --preview-window=down:40%:wrap --preview=$preview --tabstop 1        \
-        --bind=$bind --query=$LBUFFER                                        \
+    $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
+        --height=80% --preview-window=down:40%:wrap --preview=$preview \
+        --tabstop 1 --bind=$bind --query=$LBUFFER                      \
     >$tmp 2>$TTY || return
   eval $restore
   restore=
@@ -32,6 +32,8 @@ local restore='echoti cuu 1; (( col > 1 )) && echoti cuf $((col-1))'
   BUFFER=$cmd
   CURSOR=$#BUFFER
 } always {
+  local -i err=$?
   eval $restore
   [[ -z "$tmp" ]] || zf_rm -f -- "$tmp"
+  (( err )) && zle -R
 }

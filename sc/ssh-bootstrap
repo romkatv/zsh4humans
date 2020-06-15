@@ -16,6 +16,7 @@ _z4h_ssh_sh=">&2 'printf' '\\n\\033[33mz4h\\033[0m: starting \\033[32msh\\033[0m
 'export' Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
 'export' Z4H_SSH=^CONNECTION^
 'export' LC_ALL="C"
+'export' P9K_TTY="old"
 
 for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp'; do
   if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then

@@ -55,8 +55,7 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
 
 typeset -gaU cdpath fpath mailpath path
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-path=($Z4H/bin $Z4H/fzf/bin $path)
-fpath+=($Z4H/zsh4humans/fn $Z4H/fn $Z4H/zsh-completions/src)
+fpath+=($Z4H/zsh4humans/fn $Z4H/zsh-completions/src)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 

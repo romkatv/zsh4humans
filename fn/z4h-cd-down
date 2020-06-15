@@ -1,20 +1,53 @@
 ()  {
   eval "$_z4h_opt"
 
-  local dir esc line col
-  IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
-  print >$TTY || return
+  [[ -w $TTY && -r $TTY ]] || return
+
+  local cmd=$FZF_ALT_C_COMMAND
+  if [[ -z $cmd ]]; then
+    local prune=('-name '{.git,.hg,.svn})
+    if [[ $1 == on ]]; then
+      prune+=('-path "*/.*/*"')
+    else
+      prune+=('-path "*/.*"')
+    fi
+    if [[ ${commands[find]:A} != */busybox* ]]; then
+      prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
+    fi
+    prune="\( ${(j: -o :)prune} \) -prune"
+    cmd="command find -L . -mindepth 1 $prune -o -type d -print 2>/dev/null | command cut -b3-"
+  fi
+  local opt="--height ${FZF_TMUX_HEIGHT:-40%} --reverse $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS"
 
   {
-    local opt="--height ${FZF_TMUX_HEIGHT:-40%} --reverse $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS"
-    dir=$(eval $FZF_ALT_C_COMMAND | FZF_DEFAULT_OPTS=$opt $Z4H/fzf/bin/fzf +m) || return
-    [[ -n $dir ]] || return
-    cd -- $dir
-    return
+    -z4h-show-dots
+
+    local esc line col
+    IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
+    print >$TTY || return
+
+    {
+      local dir
+      dir=$(
+        -z4h-cursor-show
+        {
+          eval $cmd | FZF_DEFAULT_OPTS=$opt $Z4H/fzf/bin/fzf +m
+        } always {
+          -z4h-cursor-hide
+        }) || return
+      [[ -n $dir ]] || return
+      cd -- $dir
+      return
+    } always {
+      echoti cuu 1
+      (( col > 1 )) && echoti cuf $((col-1))
+    }
   } always {
-    local -i err=$?
-    echoti cuu 1
-    (( col > 1 )) && echoti cuf $((col-1))
-    (( err )) && zle -R
+    if (( $? )); then
+      zle -R
+      -z4h-cursor-show
+    else
+      zle -R
+    fi
   }
-} && -z4h-redraw-prompt
+} "${options[dotglob]}" && -z4h-redraw-prompt

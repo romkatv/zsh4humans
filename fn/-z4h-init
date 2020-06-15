@@ -59,23 +59,7 @@ elif [[ -x /data/data/com.termux/files/usr/libexec/termux/command-not-found ]]; 
 elif [[ -x /run/current-system/sw/bin/command-not-found ]]; then
   command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
 elif (( $+commands[brew] )); then
-  () {
-    eval "$_z4h_opt"
-    [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
-    local repo
-    repo="$(command brew --repository 2>/dev/null)" || return
-    [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
-    function command_not_found_handler() {
-      eval "$_z4h_opt"
-      local msg
-      if msg="$(command brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
-        print -ru2 -- $msg
-      else
-        print -ru2 -- "zsh: command not found: $1"
-      fi
-      return 127
-    }
-  }
+  -z4h-brew-command-not-found
 fi
 
 function z4h-up-local-history() {
@@ -97,60 +81,14 @@ function z4h-backward-word()      { -z4h-with-backward-word .backward-word      
 function z4h-backward-kill-word() { -z4h-with-backward-word .backward-kill-word }
 
 function z4h-beginning-of-buffer() { CURSOR=0 }
-function z4h-end-of-buffer() { CURSOR=$#BUFFER }
+function z4h-end-of-buffer() {
+  if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+    CURSOR=$((${#BUFFER} - 1))
+  else
+    CURSOR=${#BUFFER}
+  fi
+}
 function z4h-expand() { zle _expand_alias || zle .expand-word || true }
-
-function -z4h-fzf() {
-  eval "$_z4h_opt"
-  print >$TTY
-  {
-    local choice again
-    choice="$($Z4H/fzf/bin/fzf "$@")" || return
-    if [[ $choice != $'\n'* ]]; then
-      again=1
-      print -r -- $'\n'${choice#*$'\n'}
-    else
-      print -r -- $choice
-    fi
-  } always {
-    print -n "$again" >$_z4h_fzf_called
-  }
-}
-
-function z4h-expand-or-complete() {
-  local esc line col
-  while true; do
-    IFS='[;' read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
-    local lbuf="$LBUFFER"
-    local post="$POSTDISPLAY"
-    POSTDISPLAY='..'
-    region_highlight+=(
-      "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
-    zle -R
-    {
-      local _z4h_fzf_called="$Z4H"/tmp/fzf-called."${sysparams[pid]}"
-      zf_rm -f -- "$_z4h_fzf_called" || return
-      zle fzf-tab-complete
-    } always {
-      local -i err=$?
-      local -a stat=()
-      if zstat +size -A stat -- "$_z4h_fzf_called" 2>/dev/null; then
-        zf_rm -f -- "$_z4h_fzf_called" || err=$?
-        echoti cuu 1
-        (( col > 1 )) && echoti cuf $((col-1))
-      fi
-      if (( err || !stat[1] )) || [[ "$LBUFFER" != */ || "$LBUFFER" == "$lbuf" ]]; then
-        POSTDISPLAY="$post"
-        region_highlight[-1]=()
-        break
-      fi
-      zle .split-undo
-      zle -R
-      POSTDISPLAY="$post"
-      region_highlight[-1]=()
-    }
-  done
-}
 
 function z4h-cd-back() { -z4h-cd-rotate +1 }
 function z4h-cd-forward() { -z4h-cd-rotate -0 }
@@ -161,6 +99,14 @@ function z4h-do-nothing() {}
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search || return
 autoload -Uz run-help ${^fpath}/run-help-*(N:t)                        || return
 (( $+aliases[run-help] )) && unalias run-help  # make run-help more useful
+
+if (( $+terminfo[civis] && $+terminfo[cnorm] )) && [[ -w $TTY ]]; then
+  function -z4h-cursor-hide() { [[ -t 1 ]] && echoti civis || echoti civis >"$TTY" }
+  function -z4h-cursor-show() { [[ -t 1 ]] && echoti cnorm || echoti cnorm >"$TTY" }
+else
+  function -z4h-cursor-hide() {}
+  function -z4h-cursor-show() {}
+fi
 
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
@@ -198,14 +144,6 @@ HISTSIZE=1000000000                    # infinite command history
 SAVEHIST=1000000000                    # infinite command history
 
 if (( _z4h_use[fzf] )); then
-  if (( ! $+FZF_ALT_C_COMMAND )); then
-    local prune=('-name '{.git,.hg,.svn} '-path "*/.*/*"')
-    if [[ ${commands[find]:A} != */busybox* ]]; then
-      prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
-    fi
-    prune="\( ${(j: -o :)prune} \) -prune"
-    FZF_ALT_C_COMMAND="command find -L . -mindepth 1 $prune -o -type d -print 2>/dev/null | command cut -b3-"
-  fi
   : ${FZF_COMPLETION_TRIGGER=}                   # file completion without trigger
   fzf_default_completion=z4h-expand-or-complete  # file completion falls back to regular
   z4h source $Z4H/fzf/shell/completion.zsh       # load fzf-completion
@@ -521,68 +459,120 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
 
   precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
 
-  eval '
-    _zsh_autosuggest_highlight_reset() {
-      [[ -z "${POSTDISPLAY-}" ]] || region_highlight[-1]=()
-    }
-    _zsh_autosuggest_highlight_apply() {
-      if [[ -n "${POSTDISPLAY-}" ]]; then
-        region_highlight+=(
-          "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
-      fi
-    }
-    _zsh_autosuggest_clear() {
-      _zsh_autosuggest_invoke_original_widget "$@"
-      local -i retval=$?
-      if (( ! retval )); then
-        typeset -g _z4h_autosuggest_buffer="$BUFFER"
-        unset _z4h_autosuggestion
-      fi
-      -z4h-autosuggest-fetch
-      return retval
-    }
-    _zsh_autosuggest_modify() {
-      _zsh_autosuggest_invoke_original_widget "$@"
-      local -i retval=$?
-      -z4h-autosuggest-fetch
-      return retval
-    }
-    _zsh_autosuggest_accept() {
-      if (( CURSOR < ${#BUFFER} -1 )) || [[ $CURSOR -lt ${#BUFFER} && "$KEYMAP" != "vicmd" ]]; then
-        _zsh_autosuggest_invoke_original_widget "$@"
-        return
-      fi
-      -z4h-autosuggest-fetch
-      () { '$functions[_zsh_autosuggest_accept]' } "$@"
-      local -i retval=$?
-      -z4h-autosuggest-store
-      return retval
-    }
-    _zsh_autosuggest_partial_accept() {
-      if (( CURSOR < ${#BUFFER} -1 )) || [[ $CURSOR -lt ${#BUFFER} && "$KEYMAP" != "vicmd" ]]; then
-        _zsh_autosuggest_invoke_original_widget $@
-        return
-      fi
-      -z4h-autosuggest-fetch
-      () { '$functions[_zsh_autosuggest_partial_accept]' } "$@"
-      local -i retval=$?
-      -z4h-autosuggest-store
-      return retval
-    }
-    _zsh_autosuggest_execute() {
-      -z4h-autosuggest-fetch
-      () { '$functions[_zsh_autosuggest_execute]' } "$@"
-      local -i retval=$?
-      -z4h-autosuggest-store
-      return retval
-    }'
+  _zsh_autosuggest_widget_execute() {
+    if [[ -n $POSTDISPLAY ]]; then
+      BUFFER=$BUFFER$POSTDISPLAY
+      region_highlight[-1]=()
+      typeset -g _z4h_autosuggest_buffer=$BUFFER
+      unset _z4h_autosuggestion POSTDISPLAY
+    fi
+    zle .accept-line
+  }
 
-  local action
-	for action in clear modify fetch suggest accept partial_accept execute enable disable toggle; do
-    eval "_zsh_autosuggest_widget_$action() {
-      ${functions[_zsh_autosuggest_widget_$action]/zle -R}
-    }"
-  done
+  _zsh_autosuggest_widget_clear() {
+    _zsh_autosuggest_invoke_original_widget "$@"
+    local -i ret=$?
+    if [[ $CONTEXT == start ]]; then
+      [[ -z $POSTDISPLAY ]] || region_highlight[-1]=()
+      if (( ret )); then
+        -z4h-autosuggest-fetch
+      else
+        typeset -g _z4h_autosuggest_buffer=$BUFFER
+        unset _z4h_autosuggestion POSTDISPLAY
+      fi
+    fi
+    return ret
+  }
+
+  _zsh_autosuggest_widget_accept() {
+    if [[ -z $POSTDISPLAY ||
+          $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
+          $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
+      _zsh_autosuggest_invoke_original_widget "$@"
+      return
+    fi
+    BUFFER="$BUFFER$POSTDISPLAY"
+    region_highlight[-1]=()
+    unset _z4h_autosuggestion POSTDISPLAY
+    _zsh_autosuggest_invoke_original_widget "$@"
+    local -i ret=$?
+    typeset -g _z4h_autosuggest_buffer="$BUFFER"
+    if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+      CURSOR=$((${#BUFFER} - 1))
+    else
+      CURSOR=${#BUFFER}
+    fi
+    return ret
+  }
+
+  _zsh_autosuggest_widget_partial_accept() {
+    if [[ -z $POSTDISPLAY ||
+          $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
+          $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
+      _zsh_autosuggest_invoke_original_widget "$@"
+      return
+    fi
+    local -i buf_len=${#BUFFER}
+    BUFFER="$BUFFER$POSTDISPLAY"
+    _zsh_autosuggest_invoke_original_widget "$@"
+    local -i ret=$?
+    local -i cursor=CURSOR
+    [[ $KEYMAP == vicmd ]] && (( ++cursor ))
+    if (( cursor > buf_len )); then
+      BUFFER=${BUFFER:0:$cursor}
+      POSTDISPLAY=${POSTDISPLAY:$((cursor - buf_len))}
+    else
+      BUFFER=${BUFFER:0:$buf_len}
+    fi
+    typeset -g _z4h_autosuggest_buffer=$BUFFER
+    return ret
+  }
+
+  _zsh_autosuggest_widget_modify() {
+    _zsh_autosuggest_invoke_original_widget "$@"
+    local -i retval=$?
+    [[ -z $POSTDISPLAY ]] || region_highlight[-1]=()
+    -z4h-autosuggest-fetch
+    return retval
+  }
+
+  _zsh_autosuggest_widget_fetch() {
+    [[ -z $POSTDISPLAY ]] || region_highlight[-1]=()
+    -z4h-autosuggest-fetch
+  }
+
+  _zsh_autosuggest_widget_suggest() {
+    [[ -z $BUFFER || $CONTEXT != start ]] && return
+    [[ -z $POSTDISPLAY ]] || region_highlight[-1]=()
+    POSTDISPLAY=${1-}
+    typeset -g _z4h_autosuggest_buffer="$BUFFER"
+    typeset -gi _z4h_autosuggestion=1
+    if [[ -n $POSTDISPLAY ]]; then
+      region_highlight+=(
+        "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
+    fi
+  }
+
+  _zsh_autosuggest_widget_enable() {
+    (( ${+_ZSH_AUTOSUGGEST_DISABLED} )) || return 0
+    unset _ZSH_AUTOSUGGEST_DISABLED
+    _zsh_autosuggest_widget_fetch
+  }
+
+  _zsh_autosuggest_widget_disable() {
+    (( ${+_ZSH_AUTOSUGGEST_DISABLED} )) && return
+    typeset -g _ZSH_AUTOSUGGEST_DISABLED
+    [[ -z $POSTDISPLAY ]] || region_highlight[-1]=()
+    unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion
+  }
+
+  _zsh_autosuggest_widget_toggle() {
+    if (( ${+_ZSH_AUTOSUGGEST_DISABLED} )); then
+      _zsh_autosuggest_widget_enable
+    else
+      _zsh_autosuggest_widget_disable
+    fi
+  }
 fi
 
 function -z4h-post-init() {
@@ -626,8 +616,9 @@ function -z4h-post-init() {
         zle-isearch-update user:_zsh_highlight_widget_zle-isearch-update
       )
       z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+      preexec_functions=(${preexec_functions:#_zsh_highlight_preexec_hook})
       eval '_zsh_highlight() {
-        if [[ "${#BUFFER}" -gt "${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}}" ]]; then
+        if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
           region_highlight=()
           return
         fi

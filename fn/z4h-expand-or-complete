@@ -1,0 +1,36 @@
+[[ -w $TTY && -r $TTY ]] || return
+
+{
+  -z4h-cursor-hide
+
+  local esc line col
+  while true; do
+    {
+      -z4h-show-dots
+      IFS='[;' read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
+      local lbuf=$LBUFFER
+
+      {
+        local _z4h_fzf_called="$Z4H"/tmp/fzf-called."${sysparams[pid]}"
+        zf_rm -f -- "$_z4h_fzf_called" || return
+        fzf-tab-complete
+      } always {
+        local -i err=$?
+        local -a stat=()
+        if zstat +size -A stat -- "$_z4h_fzf_called" 2>/dev/null; then
+          zf_rm -f -- "$_z4h_fzf_called" || err=$?
+          echoti cuu 1
+          (( col > 1 )) && echoti cuf $((col-1))
+        fi
+        (( err )) && return err
+        [[ $stat != 1 || $LBUFFER != */ || $LBUFFER == $lbuf ]] && return
+        zle .split-undo || return
+      }
+    } always {
+      -z4h-redraw-buffer
+    }
+  done
+} always {
+  zle -R
+  -z4h-cursor-show
+}

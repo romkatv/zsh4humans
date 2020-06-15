@@ -1,12 +1,10 @@
-local -i c=$((${+terminfo[civis]} && ${+terminfo[cnorm]}))
 {
-  (( c )) && echoti civis
+  -z4h-cursor-hide
   local f
   for f in chpwd "${chpwd_functions[@]}" precmd "${precmd_functions[@]}"; do
     [[ "${+functions[$f]}" == 0 ]] || "$f" &>/dev/null || true
   done
   zle .reset-prompt
-  # zle -R
 } always {
-  (( c )) && echoti cnorm
+  -z4h-cursor-show
 }

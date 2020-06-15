@@ -1,0 +1,17 @@
+local -i cursor=CURSOR
+local postdisplay=$POSTDISPLAY
+POSTDISPLAY=..
+if [[ -n $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE ]]; then
+  local style=$ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE
+elif (( terminfo[colors] >= 256 )); then
+  local style='fg=244'
+else
+  local style='fg=black,bold'
+fi
+region_highlight+=("$#BUFFER $(($#BUFFER + $#POSTDISPLAY)) $style")
+[[ $KEYMAP == vicmd ]] && CURSOR=$(($#BUFFER-1)) || CURSOR=$#BUFFER
+-z4h-cursor-hide
+zle -R
+CURSOR=cursor
+POSTDISPLAY=$postdisplay
+region_highlight[-1]=()

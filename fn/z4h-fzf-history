@@ -2,38 +2,54 @@
 
 eval "$_z4h_opt"
 
-local tmp esc line col
-IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
-print >$TTY || return
-local restore='echoti cuu 1; (( col > 1 )) && echoti cuf $((col-1))'
+[[ -w $TTY && -r $TTY ]] || return
+
+local bind='?:toggle-preview,ctrl-h:backward-kill-word,ctrl-r:up,ctrl-s:down'
+local preview='printf "%s" {}'
+(( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp'
+local tmp=$Z4H/tmp/fzf-history.$sysparams[pid]
 
 {
-  local bind='?:toggle-preview,ctrl-h:backward-kill-word,ctrl-r:up,ctrl-s:down'
-  local preview='printf "%s" {}'
-  (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp'
-  tmp=${TMPDIR:-/tmp}/zsh-hist.$sysparams[pid]
-  print -rNC1 -- "${(@u)history}" |
-    $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
-        --height=80% --preview-window=down:40%:wrap --preview=$preview \
-        --tabstop 1 --bind=$bind --query=$LBUFFER                      \
-    >$tmp 2>$TTY || return
-  eval $restore
-  restore=
-  local cmd
-  while true; do
-    sysread 'cmd[$#cmd+1]' && continue
-    (( $? == 5 ))          || return
-    break
-  done <$tmp
-  [[ $cmd == *$'\n' ]] || return
-  cmd[-1]=
-  [[ -n $cmd ]] || return
-  zle .vi-fetch-history -n $(($#history - ${${history[@]}[(ie)$cmd]} + 1))
-  BUFFER=$cmd
-  CURSOR=$#BUFFER
+  -z4h-show-dots
+
+  local esc line col
+  IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
+  print >$TTY || return
+
+  {
+    -z4h-cursor-show
+    {
+      print -rNC1 -- "${(@u)history}" |
+        $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
+            --height=80% --preview-window=down:40%:wrap --preview=$preview \
+            --tabstop 1 --bind=$bind --query=$LBUFFER                      \
+        >$tmp 2>$TTY || return
+    } always {
+      -z4h-cursor-hide
+    }
+    local cmd
+    while true; do
+      sysread 'cmd[$#cmd+1]' && continue
+      (( $? == 5 ))          || return
+      break
+    done <$tmp
+    [[ $cmd == *$'\n' ]] || return
+    cmd[-1]=
+    [[ -n $cmd ]] || return
+    zle .vi-fetch-history -n $(($#history - ${${history[@]}[(ie)$cmd]} + 1))
+    BUFFER=$cmd
+    CURSOR=$#BUFFER
+    if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
+      typeset -g _z4h_autosuggest_buffer=$BUFFER
+      unset _z4h_autosuggestion POSTDISPLAY
+      -z4h-redraw-buffer
+    fi
+    return 0
+  } always {
+    echoti cuu 1
+    (( col > 1 )) && echoti cuf $((col-1))
+  }
 } always {
-  local -i err=$?
-  eval $restore
-  [[ -z "$tmp" ]] || zf_rm -f -- "$tmp"
-  (( err )) && zle -R
+  zle -R
+  -z4h-cursor-show
 }

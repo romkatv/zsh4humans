@@ -1,4 +1,8 @@
-_zsh_autosuggest_highlight_reset
+if (( ${+_z4h_redraw_fd} )); then
+  zle -F "$_z4h_redraw_fd"
+  exec {_z4h_redraw_fd}>&-
+  unset _z4h_redraw_fd
+fi
+
 _zsh_highlight
 -z4h-autosuggest-fetch
-_zsh_autosuggest_highlight_apply

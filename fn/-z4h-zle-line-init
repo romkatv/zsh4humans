@@ -4,7 +4,15 @@ if (( ${+widgets[-z4h-orig-zle-line-init]} )); then
   zle -z4h-orig-zle-line-init "$@" || ret=$?
 fi
 
-unset POSTDISPLAY
+if (( ${+_z4h_redraw_fd} )); then
+  zle -F "$_z4h_redraw_fd"
+  exec {_z4h_redraw_fd}>&-
+  unset _z4h_redraw_fd
+fi
+
+unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion _zsh_highlight__highlighter_${^ZSH_HIGHLIGHT_HIGHLIGHTERS}_cache
+typeset -g _ZSH_HIGHLIGHT_PRIOR_BUFFER=
+typeset -gi _ZSH_HIGHLIGHT_PRIOR_CURSOR=CURSOR
 region_highlight=()
 
 return ret

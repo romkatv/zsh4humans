@@ -1,32 +1,29 @@
-if (( ${+_z4h_redraw_fd} )); then
-  zle -F "$_z4h_redraw_fd"
-  exec {_z4h_redraw_fd}>&-
-  unset _z4h_redraw_fd
-fi
-
-if [[ -z "$BUFFER" || "$CONTEXT" != "start" ]]; then
+if [[ -z $BUFFER || $CONTEXT != start ]]; then
   unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion
 else
   () {
     if [[ "$BUFFER" == "${_z4h_autosuggest_buffer-}"* ]]; then
       if (( ${#BUFFER} == ${#_z4h_autosuggest_buffer} )); then
-        POSTDISPLAY="${_z4h_autosuggestion-}"
         return
-      elif (( ${+_z4h_autosuggestion} )) &&
-           [[ "$_z4h_autosuggestion" == "${BUFFER:${#_z4h_autosuggest_buffer}}"* ]]; then
-        POSTDISPLAY="${_z4h_autosuggestion:$((${#BUFFER} - ${#_z4h_autosuggest_buffer}))}"
+      elif [[ ${+_z4h_autosuggestion} == 1 &&
+              $POSTDISPLAY == ${BUFFER:${#_z4h_autosuggest_buffer}}* ]]; then
+        POSTDISPLAY="${POSTDISPLAY:$((${#BUFFER} - ${#_z4h_autosuggest_buffer}))}"
         typeset -g _z4h_autosuggest_buffer="$BUFFER"
-        typeset -g _z4h_autosuggestion="$POSTDISPLAY"
         return
       fi
     fi
     local suggestion
-    if [[ "${#BUFFER}" -le "${ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE:-${#BUFFER}}" ]]; then
+    if [[ ${+_ZSH_AUTOSUGGEST_DISABLED} == 0 &&
+          ${#BUFFER} -le ${ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE:-${#BUFFER}} ]]; then
       _zsh_autosuggest_fetch_suggestion "$BUFFER"
     fi
-    POSTDISPLAY="${suggestion:${#BUFFER}}"
+    POSTDISPLAY=${suggestion:${#BUFFER}}
     typeset -g _z4h_autosuggest_buffer="$BUFFER"
-    typeset -g _z4h_autosuggestion="$POSTDISPLAY"
+    typeset -gi _z4h_autosuggestion=1
   }
-  [[ -n "$POSTDISPLAY" ]] || unset POSTDISPLAY
+fi
+
+if [[ -n $POSTDISPLAY ]]; then
+  region_highlight+=(
+    "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")
 fi

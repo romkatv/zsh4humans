@@ -1,9 +1,9 @@
 local -i cursor=CURSOR
 {
-  if [[ "$KEYMAP" == "vicmd" && -n "$BUFFER" ]]; then
-    CURSOR=$(($#BUFFER - 1))
+  if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+    CURSOR=$((${#BUFFER} - 1))
   else
-    CURSOR=$#BUFFER
+    CURSOR=${#BUFFER}
   fi
   zle autosuggest-accept
 } always {

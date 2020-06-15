@@ -1,0 +1,15 @@
+eval "$_z4h_opt"
+print >$TTY
+{
+  local choice again
+  choice="$(-z4h-cursor-show; $Z4H/fzf/bin/fzf "$@" 2>$TTY)" || return
+  if [[ $choice != $'\n'* ]]; then
+    again=1
+    print -r -- $'\n'${choice#*$'\n'}
+  else
+    print -r -- $choice
+  fi
+} always {
+  print -n "$again" >$_z4h_fzf_called
+  -z4h-cursor-hide
+}

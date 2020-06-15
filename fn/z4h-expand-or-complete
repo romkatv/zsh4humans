@@ -27,7 +27,9 @@
         zle .split-undo || return
       }
     } always {
-      -z4h-redraw-buffer
+      if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
+        -z4h-redraw-buffer
+      fi
     }
   done
 } always {

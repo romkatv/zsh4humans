@@ -6,19 +6,18 @@ else
   'set' '+ue'
 fi
 
-_z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--" "$0" "$@"'
-_z4h_ssh_sh=">&2 'printf' '\\n\\033[33mz4h\\033[0m: starting \\033[32msh\\033[0m\\n'; 'exec' 'sh' '-i'"
-'trap' "$_z4h_ssh_cleanup; 'exit' '1'" 'HUP' 'INT' 'TERM'
-'trap' "$_z4h_ssh_cleanup; $_z4h_ssh_sh" 'EXIT'
-'unset' '_z4h_ssh_cleanup' '_z4h_ssh_sh'
+'set' '--' "$0"
 
-'export' ZDOTDIR="$HOME"
-'export' Z4H="${XDG_CACHE_HOME:-$HOME/.cache}"/zsh4humans
-'export' Z4H_SSH=^CONNECTION^
-'export' LC_ALL="C"
+_z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--" "$@" 2>"/dev/null"'
+_z4h_ssh_err=">&2 'printf' '\\n\\033[33mz4h\\033[0m: failed to start \\033[32mzsh\\033[0m on the remote host\\n\\nSee error messages above to identify the culprit.\\n\\nStart interactive \\033[32msh\\033[0m on the remote host:\\n\\n  \\033[32mz4h\\033[0m \\033[1mssh\\033[0m ^ARGS^ sh -i\\n\\n'"
+'trap' "$_z4h_ssh_cleanup; 'exit' '1'" 'HUP' 'INT' 'TERM'
+'trap' "$_z4h_ssh_cleanup; $_z4h_ssh_err" 'EXIT'
+
+'export' Z4H_SSH=^Z4H_SSH^
 'export' P9K_TTY="old"
 
-for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp'; do
+
+for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp' 'ln'; do
   if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then
     >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_ssh_cmd"'\033[0m\n'
     'exit' '1'
@@ -27,10 +26,10 @@ done
 
 'unset' '_z4h_ssh_cmd'
 
-_z4h_ssh_tar_w=
+_z4h_ssh_tar_opt=
 if _z4h_ssh_tar_v="$('command' 'tar' '--version' 2>&1)"; then
   case "$_z4h_ssh_tar_v" in
-    *'GNU tar'*) _z4h_ssh_tar_w='--warning=no-unknown-keyword --no-same-owner';;
+    *'GNU tar'*) _z4h_ssh_tar_opt='--warning=no-unknown-keyword --no-same-owner';;
   esac
 fi
 
@@ -42,18 +41,24 @@ else
   'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
 fi
 
-'set' '--' "$_z4h_ssh_tmp"
+'set' '--' "$@" "$_z4h_ssh_tmp"
 'unset' '_z4h_ssh_tmp'
 
-'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' '-C' "$1" $_z4h_ssh_tar_w '-xzf' '-' || 'exit'
+'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' '-C' "$1" $_z4h_ssh_tar_opt '-xzf' '-' || 'exit'
 
-'unset' '_z4h_ssh_tar_w' '_z4h_ssh_tar_v'
+'unset' '_z4h_ssh_tar_opt'
 'command' 'rm' '-f' '--' "$0" || 'exit'
-'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
+'shift'
 
 _z4h_ssh_src='0'
 
-for _z4h_ssh_dst in ^DESTINATIONS^; do
+'set' '-f'
+
+for _z4h_ssh_dst in ^COPY_TO^; do
+  if '[' '-z' "$_z4h_ssh_dst" ']'; then
+    >&2 'printf' '\033[33mz4h\033[0m: empty file destination path \033[31mnumber'$((_z4h_ssh_src+1))'\033[0m\n'
+    'exit' '1'
+  fi
   if '[' '-e' "$_z4h_ssh_dst" ']'; then
     'command' 'rm' '-rf' '--' "$_z4h_ssh_dst" || 'exit'
   fi
@@ -66,12 +71,65 @@ for _z4h_ssh_dst in ^DESTINATIONS^; do
       'command' 'cp' '-rf' '--' "$1"/"$_z4h_ssh_src" "$_z4h_ssh_dst" || 'exit'
     fi
   fi
-  _z4h_ssh_src=$((_z4h_ssh_src + 1))
+  _z4h_ssh_src="$((_z4h_ssh_src + 1))"
 done
 
-'rm' '-rf' '--' "$1" || 'exit'
-'set' '--'
+'set' '+f'
 
-. "$ZDOTDIR"/.zshrc
->&2 'printf' '\n\033[33mz4h\033[0m: starting \033[32msh\033[0m\n'
-'exec' 'sh' '-i'
+'unset' '_z4h_ssh_src'
+'rm' '-rf' '--' "$1" || 'exit'
+'set' '--' "$0"
+'echo' '-n' >"$0" || 'exit'
+
+(
+  'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
+  'unset' '_z4h_ssh_cleanup' '_z4h_ssh_err' '_z4h_ssh_tar_v'
+  . "$ZDOTDIR"/.zshrc
+  _z4h_ssh_ret="$?"
+  'command' 'rm' '--' "$0" || 'exit'
+  'exit' "$_z4h_ssh_ret"
+  # >&2 'printf' '\n\033[33mz4h\033[0m: starting \033[32msh\033[0m\n'
+)
+
+_z4h_ssh_ret="${?#0}"
+'[' '-e' "$0" ']' || 'exit' "${_z4h_ssh_ret:-1}"
+
+'trap' "$_z4h_ssh_cleanup" 'EXIT'
+
+if command -v 'mktemp' >'/dev/null' 2>&1; then
+  _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
+else
+  _z4h_ssh_tmp="${TMPDIR:-/tmp}"/z4h-ssh.tmp."$$"
+  '[' '!' '-e' "$_z4h_ssh_tmp" ']' || 'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
+  'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
+fi
+
+'set' '--' "$@" "$_z4h_ssh_tmp"
+
+_z4h_ssh_dst='0'
+_z4h_ssh_dst_list=''
+
+for _z4h_ssh_src in ^RETRIEVE_FROM^; do
+  if '[' '-z' "$_z4h_ssh_src" ']'; then
+    >&2 'printf' '\033[33mz4h\033[0m: empty file source path \033[31mnumber'$((_z4h_ssh_dst+1))'\033[0m\n'
+    'exit' '1'
+  fi
+  if '[' '-e' "$_z4h_ssh_src" ']'; then
+    'command' 'ln' '-s' '--' "$_z4h_ssh_src" "$_z4h_ssh_tmp"/"$_z4h_ssh_dst" || 'exit'
+    _z4h_ssh_dst_list="$_z4h_ssh_dst_list $_z4h_ssh_dst"
+  fi
+  _z4h_ssh_dst="$((_z4h_ssh_dst + 1))"
+done
+
+'[' "$_z4h_ssh_dst" '=' '0' ']' && 'exit' "${_z4h_ssh_ret:-0}"
+
+if '[' '-n' "$_z4h_ssh_dst_list" ']'; then
+  case "$_z4h_ssh_tar_v" in
+    *'GNU tar'*) _z4h_ssh_tar_opt='--owner=0 --group=0';;
+  esac
+  'command' 'tar' '-C' "$_z4h_ssh_tmp" $tar_opt '-czhf' "$0" '--' $_z4h_ssh_dst_list || 'exit'
+fi
+
+'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
+'trap' '-' 'EXIT'
+'exit' "${_z4h_ssh_ret:-0}"

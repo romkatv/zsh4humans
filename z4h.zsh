@@ -39,7 +39,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'typeset' '-gri' _z4h_custom_histfile='1'
   else
     'typeset' '-gri' _z4h_custom_histfile='0'
-    HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+    HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history${Z4H_SSH:+.$Z4H_SSH}"
   fi
 
   'bindkey' '-d'

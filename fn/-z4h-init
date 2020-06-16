@@ -138,10 +138,18 @@ ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab com
 zle_highlight=('paste:none')   # disable highlighting of text pasted into the command line
 
 if (( ! _z4h_custom_histfile )); then
-  HISTFILE=${ZDOTDIR:-~}/.zsh_history  # save command history in this file
+  if [[ -n $Z4H_SSH ]]; then
+    HISTFILE=${ZDOTDIR:-~}/.zsh_history.$Z4H_SSH
+    local hist
+    for hist in ~/.zsh_history.*:${Z4H_SSH##*:}~$HISTFILE(N); do
+      fc -RI $hist
+    done
+  else
+    HISTFILE=${ZDOTDIR:-~}/.zsh_history
+  fi
 fi
-HISTSIZE=1000000000                    # infinite command history
-SAVEHIST=1000000000                    # infinite command history
+HISTSIZE=1000000000  # infinite command history
+SAVEHIST=1000000000  # infinite command history
 
 if (( _z4h_use[fzf] )); then
   : ${FZF_COMPLETION_TRIGGER=}                   # file completion without trigger

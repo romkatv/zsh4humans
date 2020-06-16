@@ -23,7 +23,8 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'no_aliases'             'no_bg_nice'             'no_bg_nice'             \
     'no_flow_control'        'no_prompt_bang'         'no_prompt_subst'        \
     'prompt_cr'              'prompt_percent'         'prompt_sp'              \
-    'share_history'          'typeset_silent'         'monitor'
+    'share_history'          'typeset_silent'         'hist_save_no_dups'      \
+    'monitor'
 
   PS1="%B%F{2}%n@%m%f %F{4}%~%f
 %F{%(?.2.1)}%#%f%b "

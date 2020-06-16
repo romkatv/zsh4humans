@@ -69,6 +69,14 @@ fi
       print -Pru2 -- "%F{3}z4h%f: empty values: %F{1}zstyle :z4h:ssh:${host//\%/%%}%f"
       return 1
     fi
+    if [[ $src == */ ]]; then
+      print -Pru2 -- "%F{3}z4h%f: file path ending in %B/%b: %F{1}${src//\%/%%}%f"
+      return 1
+    fi
+    if [[ ${(Q)dst} == */ ]]; then
+      print -Pru2 -- "%F{3}z4h%f: file path ending in %B/%b: %F{1}${dst//\%/%%}%f"
+      return 1
+    fi
     destinations+=($dst)
     [[ -e $src ]] || continue
     local target=${src:A}

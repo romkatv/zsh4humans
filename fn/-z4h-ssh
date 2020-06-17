@@ -1,87 +1,170 @@
-# TODO:
+# TODO: write proper docs for these configuration options.
 #
-#   - add :z4h:ssh:$z4h_ssh_host env ZDOTDIR='~' Z4H='blah'
-#   - add :z4h:ssh:$z4h_ssh_host ssh-flags -o ControlMaster=auto -o ControlPersist=10 -o ControlPath=$HOME/.ssh/control-master-%h-%p-%r
+# zstyle ':z4h:ssh:my_host' passthrough         'yes'
+# zstyle ':z4h:ssh:*'       send-extra-files    '~/foo' '"$ZDOTDIR"/bar'
+# zstyle ':z4h:ssh:*'       receive-extra-files '~/foo' '"$ZDOTDIR"/bar'
+# zstyle ':z4h:ssh:*'       ssh-command         'command ssh'
+#
+# z4h-ssh-configure() {
+#   z4h_ssh_prelude+=(
+#     "export BLAH=${(q)BLAH}"
+#   )
+#   z4h_ssh_send_files+=(
+#     ~/foo   '~/foo'
+#     $ZDOTDIR/bar '"$ZDOTDIR"/bar'
+#   )
+#   z4h_ssh_setup+=(
+#     'echo "setting up"'
+#   )
+#   z4h_ssh_run=(
+#     'echo "starting z4h"'
+#     $z4h_ssh_launch_commands
+#   )
+#   z4h_ssh_teardown+=(
+#     'echo "tearing down"'
+#   )
+#   z4h_ssh_retrieve_files+=(
+#     '~/foo'          ~/foo
+#     '"$ZDOTDIR"/bar' $ZDOTDIR/bar
+#   )
+# }
 
-if false; then
-  zstyle ':z4h:ssh:*' send-extra-files '~/.vimrc' '"$HOME"/vim'
-
-  z4h-ssh-configure() {
-    z4h_ssh_setup+=(
-      'export PATH="/usr/local/bin:$PATH"'
-    )
-    z4h_ssh_send_files+=(
-      $HOME/.vim   '"$HOME"/.vim'
-      $HOME/.vimrc '"$HOME"/.vimrc'
-    )
-    z4h_ssh_run=(
-      'echo yo'
-      $z4h_ssh_launch_commands
-    )
-    z4h_ssh_teardown+=(
-      'echo yo'
-    )
-    z4h_ssh_retrieve_files+=(
-      '"$HOME"/.vimrc' "$HOME"/.vimrc
-    )
-  }
-fi
-
-local -i i
+local -i must_passthrough i
 local -a pos
 for ((i = 1; i <= $#; ++i)); do
   case $*[i] in
     --) (( ++i <= $# )) && pos+=({$i..$#}); break;;
-    -O) command ssh "$@"; return;;
+    -O) must_passthrough=1; ((++i));;
     -*) [[ bcDEeFIiJLlmOopQRSWw == *${${*[i]}[-1]}* ]] && ((++i));;
     *)  pos+=($i);;
   esac
 done
 
-if (( $#pos != 1 )); then
-  command ssh "$@"
-  return
+local z4h_ssh_host
+if (( $#pos == 1 )); then
+  local user_host=$*[pos[1]]
+  z4h_ssh_host=${${user_host##*@}%%:*}
+fi
+local -r z4h_ssh_host
+
+[[ -n $z4h_ssh_host ]] || must_passthrough=1
+
+local -i z4h_ssh_passthrough=must_passthrough
+zstyle -t :z4h:ssh:$z4h_ssh_host passthrough && z4h_ssh_passthrough=1
+
+local default_ssh_command=(
+  command ssh
+    -o ControlMaster=auto
+    -o ControlPersist=5
+    -o ControlPath=~/.ssh/control-master/sock-%h-%p-%r)
+
+local -a z4h_ssh_command
+if ! zstyle -a :z4h:ssh:$z4h_ssh_host ssh-command z4h_ssh_command; then
+  z4h_ssh_command=($default_ssh_command)
 fi
 
-local user_host=$*[pos[1]]
-local -r z4h_ssh_host=${${user_host##*@}%%:*}
-if [[ -z $z4h_ssh_host ]] || zstyle -t :z4h:ssh:$z4h_ssh_host passthrough; then
-  command ssh "$@"
-  return
-fi
+local -a z4h_ssh_prelude z4h_ssh_setup z4h_ssh_send_files z4h_ssh_run
+local -a z4h_ssh_teardown z4h_ssh_retrieve_files
 
-local z4h_ssh_setup=(
-  '"export" ZDOTDIR="$HOME"'
-  '"export" LC_ALL="$C"')
+if (( !must_passthrough )); then
+  local connection=${(%):-%m}:$z4h_ssh_host
 
-local z4h_ssh_send_files=(
-  $ZDOTDIR/.zshenv   '"$ZDOTDIR"/.zshenv'
-  $ZDOTDIR/.zprofile '"$ZDOTDIR"/.zprofile'
-  $ZDOTDIR/.zshrc    '"$ZDOTDIR"/.zshrc'
-  $ZDOTDIR/.zlogin   '"$ZDOTDIR"/.zlogin'
-  $ZDOTDIR/.zlogout  '"$ZDOTDIR"/.zlogout')
-local file
-for file in $ZDOTDIR/.p10k{,-ascii}{,-8color}.zsh(N) $ZDOTDIR/.zsh_history.*:$z4h_ssh_host(N); do
-  z4h_ssh_send_files+=($file '"$ZDOTDIR"/'${(q)file:t})
-done
-local -a extra_files
-if zstyle -a :z4h:ssh:$z4h_ssh_host send-extra-files extra_files; then
-  local src dst
-  for dst in $extra_files; do
-    eval "src=$dst"
-    z4h_ssh_send_files+=("$src" "$dst")
+  z4h_ssh_prelude=(
+    '"export" ZDOTDIR="$HOME"'
+    '"export" LC_ALL="$C"')
+
+  z4h_ssh_send_files=(
+    $ZDOTDIR/.zshenv   '"$ZDOTDIR"/.zshenv'
+    $ZDOTDIR/.zprofile '"$ZDOTDIR"/.zprofile'
+    $ZDOTDIR/.zshrc    '"$ZDOTDIR"/.zshrc'
+    $ZDOTDIR/.zlogin   '"$ZDOTDIR"/.zlogin'
+    $ZDOTDIR/.zlogout  '"$ZDOTDIR"/.zlogout')
+
+  local file
+  for file in $ZDOTDIR/.p10k{,-ascii}{,-8color}.zsh(N) $ZDOTDIR/.zsh_history.*:$z4h_ssh_host(N); do
+    z4h_ssh_send_files+=($file '"$ZDOTDIR"/'${(q)file:t})
   done
+
+  local -a extra_files
+  if zstyle -a :z4h:ssh:$z4h_ssh_host send-extra-files extra_files; then
+    local src dst
+    for dst in $extra_files; do
+      eval "src=$dst"
+      z4h_ssh_send_files+=("$src" "$dst")
+    done
+  fi
+
+  z4h_ssh_run=(
+    'if "[" "-f" "$ZDOTDIR"/.zshrc "-a" "-r" "$ZDOTDIR"/.zshrc "]"; then'
+    '  . "$ZDOTDIR"/.zshrc'
+    'else'
+    '  >&2 "printf" "\\033[33mz4h\\033[0m: not a readable file: \\033[31m%s\033[0m\n" "$ZDOTDIR"/.zshrc'
+    '  false'
+    'fi')
+
+  z4h_ssh_retrieve_files=(
+    '"$ZDOTDIR"'/.zsh_history.${(q)connection} $ZDOTDIR/.zsh_history.$connection)
+
+  if zstyle -a :z4h:ssh:$z4h_ssh_host retrieve-extra-files extra_files; then
+    local src dst
+    for src in $extra_files; do
+      eval "dst=$src"
+      z4h_ssh_retrieve_files+=("$src" "$dst")
+    done
+  fi
 fi
 
-local z4h_ssh_run=()
-
-if (( $#files % 2 )); then
-  print -Pru2 -- "%F{3}z4h%f: odd number of elements: %F{1}zstyle :z4h:ssh:${z4h_ssh_host//\%/%%}%f"
-  return 1
+local configure
+if zstyle -s :z4h:ssh:$z4h_ssh_host configure configure; then
+  eval $configure || return
+elif (( $+functions[z4h-ssh-configure] )); then
+  z4h-ssh-configure || return
 fi
 
-if (( ! $#files )); then
-  print -Pru2 -- "%F{3}z4h%f: zero elements: %F{1}zstyle :z4h:ssh:${z4h_ssh_host//\%/%%}%f"
+if (( ! $#z4h_ssh_command )); then
+  print -Pru2 -- '%F{3}z4h%f: empty %F{1}z4h_ssh_command%f\n'
+fi
+
+if [[ ${(pj:\0:)z4h_ssh_command} == ${(pj:\0:)default_ssh_command} &&
+      ! -d ~/.ssh/control-master && -n ~(#qNU) ]]; then
+  zf_mkdir -pm 700 ~/.ssh/control-master || return
+  {
+    >~/.ssh/control-master/README <<\END
+This directory has been created by `z4h ssh`. It stores control sockets
+for SSH connections. See ControlMaster, ControlPath and ControlPersist
+in `man ssh_config`. This directory must not be writable by anyone other
+than the current user.
+END
+  } || return
+fi
+
+if (( must_passthrough || z4h_ssh_passthrough )); then
+  "${z4h_ssh_command[@]}" "$@"
+  return
+fi
+
+local var
+for var in z4h_ssh_send_files z4h_ssh_retrieve_files; do
+  local elems=("${(@P)var}")
+  if (( $#elems % 2 )); then
+    print -Pru2 -- "%F{3}z4h%f: odd number of elements in %F{1}$var%f\n"
+    return 1
+  fi
+  local file
+  for file in $elems; do
+    if [[ -z $file ]]; then
+      print -Pru2 -- "%F{3}z4h%f: empty element(s) in %F{1}$var%f\n"
+      return 1
+    fi
+    if [[ $file == */ ]]; then
+      print -Pru2 -- "%F{3}z4h%f: element(s) of %$var%b end with %B/%b: %F{1}${file//\%/%%}%f"
+      return 1
+    fi
+  done
+done
+
+if (( $#z4h_ssh_retrieve_files && ! $+commands[base64] )); then
+  print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}base64%f\n'
   return 1
 fi
 
@@ -96,23 +179,11 @@ fi
 
 {
   local -i i
-  local -a sources destinations
-  for ((i = 1; i < $#files; i += 2)); do
-    local src=$files[i]
-    local dst=$files[i+1]
-    if [[ -z $src || -z $dst ]]; then
-      print -Pru2 -- "%F{3}z4h%f: empty values: %F{1}zstyle :z4h:ssh:${z4h_ssh_host//\%/%%}%f"
-      return 1
-    fi
-    if [[ $src == */ ]]; then
-      print -Pru2 -- "%F{3}z4h%f: file path ending in %B/%b: %F{1}${src//\%/%%}%f"
-      return 1
-    fi
-    if [[ ${(Q)dst} == */ ]]; then
-      print -Pru2 -- "%F{3}z4h%f: file path ending in %B/%b: %F{1}${dst//\%/%%}%f"
-      return 1
-    fi
-    destinations+=($dst)
+  local -a indices send_to
+  for ((i = 1; i < $#z4h_ssh_send_files; i += 2)); do
+    local src=$z4h_ssh_send_files[i]
+    local dst=$z4h_ssh_send_files[i+1]
+    send_to+=($dst)
     [[ -e $src ]] || continue
     local target=${src:A}
     if [[ -z $target(#qN.) && -z $target(#qN/) ]]; then
@@ -124,32 +195,155 @@ fi
       return 1
     fi
     command ln -s -- $target $tmpdir/$((i/2)) || return
-    sources+=($((i/2)))
+    indices+=($((i/2)))
   done
 
-  local script connection=${(%):-%m}:$z4h_ssh_host
+  local -a retrieve_from retrieve_to
+  local from to
+  for from to in $z4h_ssh_retrieve_files; do
+    retrieve_from+=($from)
+    retrieve_to+=($to)
+  done
+
+  local dump_marker=${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
+
+  local script
   script="$(<$Z4H/zsh4humans/sc/ssh-bootstrap)" || return
-  script=${script/'^CONNECTION^'/${(qqq)connection}}
-  script=${script/'^DESTINATIONS^'/${(j: :)destinations}}
-  script=${script/'^DUMP_POS^'/${(r:8:: :)${#script}}}
+  script=${script//'^HOST^'/${(q)z4h_ssh_host}}
+  script=${script//'^SSH_ARGS^'/${(q)${(j: :)@}}}
+  script=${script//'^Z4H_SSH^'/${(q)connection}}
+  script=${script//'^PRELUDE^'/${(F)z4h_ssh_prelude}}
+  script=${script//'^SEND_TO^'/${(j: :)send_to}}
+  script=${script//'^SETUP^'/${(F)z4h_ssh_setup}}
+  script=${script//'^RUN^'/${(F)z4h_ssh_run}}
+  script=${script//'^TEARDOWN^'/${(F)z4h_ssh_teardown}}
+  script=${script//'^RETRIEVE_FROM^'/${(j: :)retrieve_from}}
+  script=${script//'^DUMP_MARKER^'/${(q)dump_marker}}
+  script=${script//'^DUMP_POS^'/${(r:8:: :)${#script}}}
 
   print -r -- $script >$tmpdir/script || return
 
-  if (( $#sources )); then
-    local tar_version tar_opt
-    if tar_version=$(command tar --version 2>/dev/null) && [[ $tar_version == *'GNU tar'* ]]; then
-      tar_opt=(--owner=0 --group=0)
-    fi
-    command tar -C $tmpdir $tar_opt -czhf - -- $sources >>$tmpdir/script || return
+  local tar_v tar_c_opt tar_x_opt
+  if tar_v=$(command tar --version 2>/dev/null) && [[ $tar_v == *'GNU tar'* ]]; then
+    tar_c_opt=(--owner=0 --group=0)
+    tar_x_opt=(--warning=no-unknown-keyword --no-same-owner)
+  fi
+
+  if (( $#indices )); then
+    command tar -C $tmpdir $tar_c_opt -czhf - -- $indices >>$tmpdir/script || return
   fi
 
   local args=("$@")
   args[pos[1],pos[1]-1]=('-T')
   local remote_script=/tmp/z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
-  command ssh "${args[@]}" "/bin/cat >$remote_script" <$tmpdir/script || return
+  "${z4h_ssh_command[@]}" "${args[@]}" "/bin/cat >$remote_script" <$tmpdir/script || return
 } always {
   zf_rm -rf -- $tmpdir
 }
 
 args[pos[1]]='-t'
-command ssh "${args[@]}" "/bin/sh $remote_script" || return
+
+(  # subshell to avoid TTOU
+
+{ "${z4h_ssh_command[@]}" "${args[@]}" "/bin/sh $remote_script" || return 1 } | {
+  (( $#retrieve_from )) || return 0
+
+  if (( $+commands[mktemp] )); then
+    tmpdir=$(command mktemp -d -- $Z4H/tmp/ssh.XXXXXXXXXX) || return
+  else
+    tmpdir=$Z4H/tmp/ssh.tmp.$sysparams[pid]
+    zf_rm -rf -- $tmpdir || return
+    zf_mkdir -- $tmpdir || return
+  fi
+
+  {
+    local buf=
+    local mark=$'\004z\0004\000h'$dump_marker
+    while true; do
+      sysread 'buf[$#buf+1]' || return $(( $? != 5 ))
+      if [[ $buf != *$mark[1]* ]]; then
+        print -rn -- $buf
+        buf=
+        continue
+      fi
+      while true; do
+        print -rn -- ${buf%%$mark[1]*}
+        buf=$mark[1]${buf#*$mark[1]}
+        local -i prefix=$(($#buf < $#mark ? $#buf : $#mark))
+        [[ ${buf:0:$prefix} == ${mark:0:$prefix} ]] && break
+        print -rn -- $buf[1]
+        buf[1]=""
+        if [[ $buf != *$mark[1]* ]]; then
+          print -rn -- $buf
+          buf=
+          break
+        fi
+      done
+      [[ -n $buf ]] || continue
+      while (( $#buf < $#mark )) && [[ $mark == $buf* ]]; do
+        # What should we do if the output ends with a proper prefix of mark?
+        # Print it or not? Return an error or not? We choose to not print and return
+        # success iff we've reached eof.
+        sysread -s $(($#mark - $#buf)) 'buf[$#buf+1]' && continue
+        return $(( $? != 5 ))
+      done
+      if [[ $buf != $mark* ]]; then
+        while true; do
+          print -rn -- $buf[1]
+          buf[1]=""
+          if [[ $buf != *$mark[1]* ]]; then
+            print -rn -- $buf
+            buf=
+            break
+          fi
+          print -rn -- ${buf%%$mark[1]*}
+          buf=$mark[1]${buf#*$mark[1]}
+          [[ $mark == $buf* ]] && break
+        done
+        continue
+      fi
+      buf[1,$#mark]=""
+      while (( $#buf < 16 )); do
+        sysread -s $((16 - $#buf)) 'buf[$#buf+1]' && continue
+        return $(( $? != 5 ))
+      done
+      [[ $buf[1,16] == <->' '## ]] || return
+      local -i len=buf[1,16]
+      buf=${buf:16}
+      (( len )) || continue
+      {
+        local -i n=$((len < $#buf ? len : $#buf))
+        print -rn -- $buf[1,n] || return
+        (( len -= n ))
+        buf[1,n]=""
+        while (( len )); do
+          sysread -s $((len > 65636 ? 65636 : len)) -o 1 -c n || return $(( $? != 5 ))
+          (( len -= n, 1 ))
+        done
+      } >$tmpdir/dump.base64 || return
+      if base64 -d <<<'Cg==' 2>/dev/null; then
+        local base64_opt=-d
+      else
+        local base64_opt=-D
+      fi
+      <$tmpdir/dump.base64 command base64 $base64_opt |
+        command tar -C $tmpdir $tar_x_opt -xzf - || return
+      local -i i
+      for i in {1..$#retrieve_to}; do
+        local src=$tmpdir/$((i-1))
+        local dst=$retrieve_to[i]
+        [[ -e $src ]] || continue
+        if [[ -e $dst ]]; then
+          zf_rm -rf -- $dst || return
+        fi
+        if ! command mv -f -- $src $dst 2>/dev/null; then
+          command cp -rf -- $src $dst || return
+        fi
+      done
+    done
+  } always {
+    zf_rm -rf -- $tmpdir
+  }
+}
+
+)  # subshell

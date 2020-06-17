@@ -1,64 +1,98 @@
 #!/bin/sh
 
 if '[' '-n' "${ZSH_VERSION-}" ']'; then
-  'emulate' 'sh' '-o' 'no_aliases'
+  'emulate' 'sh' '-o' 'no_aliases' '-o' 'no_glob'
 else
-  'set' '+ue'
+  'set' '-f'
 fi
 
 'set' '--' "$0"
 
+_z4h_ssh_error() {
+  >&2 'printf' '\n'
+  >&2 'printf' '\033[33mz4h\033[0m: failed to start \033[32mzsh\033[0m on \033[1m%s\033[0m\n' ^HOST^
+  >&2 'printf' '\n'
+  >&2 'printf' 'See error messages above to identify the culprit.\n'
+  >&2 'printf' '\n'
+  >&2 'printf' 'Open login shell on \033[1m%s\033[0m:\n' ^HOST^
+  >&2 'printf' '\n'
+  >&2 'printf' '  \033[4;32mcommand\033[0m \033[32mssh\033[0m %s\n' ^SSH_ARGS^
+  >&2 'printf' '\n'
+  >&2 'printf' 'Open interactive \033[32msh\033[0m on \033[1m%s\033[0m:\n' ^HOST^
+  >&2 'printf' '\n'
+  >&2 'printf' '  \033[4;32mcommand\033[0m \033[32mssh\033[0m %s sh -i\n' ^SSH_ARGS^
+  >&2 'printf' '\n'
+  >&2 'printf' 'Configure \033[32mz4h\033[0m \033[1mssh\033[0m to open login shell on \033[1m%s\033[0m (like above):\n' ^HOST^
+  >&2 'printf' '\n'
+  >&2 'printf' '  \033[32mzstyle\033[0m \033[33m\047:z4h:ssh:%s\047\033[0m passthrough yes\n' ^HOST^
+  >&2 'printf' '\n'
+}
+
+_z4h_ssh_mktemp() {
+  if command -v 'mktemp' >'/dev/null' 2>&1; then
+    _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
+  else
+    _z4h_ssh_tmp="${TMPDIR:-/tmp}"/z4h-ssh.tmp."$$"
+    '[' '!' '-e' "$_z4h_ssh_tmp" ']' || 'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
+    'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
+  fi
+}
+
 _z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--" "$@" 2>"/dev/null"'
-_z4h_ssh_err=">&2 'printf' '\\n\\033[33mz4h\\033[0m: failed to start \\033[32mzsh\\033[0m on the remote host\\n\\nSee error messages above to identify the culprit.\\n\\nStart interactive \\033[32msh\\033[0m on the remote host:\\n\\n  \\033[32mz4h\\033[0m \\033[1mssh\\033[0m ^ARGS^ sh -i\\n\\n'"
-'trap' "$_z4h_ssh_cleanup; 'exit' '1'" 'HUP' 'INT' 'TERM'
-'trap' "$_z4h_ssh_cleanup; $_z4h_ssh_err" 'EXIT'
+'trap' "$_z4h_ssh_cleanup; 'exit' '129'"   'HUP'
+'trap' "$_z4h_ssh_cleanup; 'exit' '130'"   'INT'
+'trap' "$_z4h_ssh_cleanup; 'exit' '143'"   'TERM'
+'trap' "$_z4h_ssh_cleanup; _z4h_ssh_error" 'EXIT'
 
 'export' Z4H_SSH=^Z4H_SSH^
 'export' P9K_TTY="old"
+^PRELUDE^
 
-
-for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp' 'ln'; do
+for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp' 'ln' 'wc' 'cat'; do
   if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then
     >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_ssh_cmd"'\033[0m\n'
     'exit' '1'
   fi
 done
 
-'unset' '_z4h_ssh_cmd'
-
-_z4h_ssh_tar_opt=
+_z4h_ssh_tar_c_opt=
+_z4h_ssh_tar_x_opt=
 if _z4h_ssh_tar_v="$('command' 'tar' '--version' 2>&1)"; then
   case "$_z4h_ssh_tar_v" in
-    *'GNU tar'*) _z4h_ssh_tar_opt='--warning=no-unknown-keyword --no-same-owner';;
+    *'GNU tar'*)
+      _z4h_ssh_tar_c_opt='--owner=0 --group=0'
+      _z4h_ssh_tar_x_opt='--warning=no-unknown-keyword --no-same-owner'
+    ;;
   esac
 fi
 
-if command -v 'mktemp' >'/dev/null' 2>&1; then
-  _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
-else
-  _z4h_ssh_tmp="${TMPDIR:-/tmp}"/z4h-ssh.tmp."$$"
-  '[' '!' '-e' "$_z4h_ssh_tmp" ']' || 'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
-  'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
-fi
-
+_z4h_ssh_mktemp
 'set' '--' "$@" "$_z4h_ssh_tmp"
-'unset' '_z4h_ssh_tmp'
 
-'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" | 'command' 'tar' '-C' "$1" $_z4h_ssh_tar_opt '-xzf' '-' || 'exit'
+'command' 'tail' '-c' '+'^DUMP_POS^ '--' "$0" \
+  | 'command' 'tar' '-C' "$_z4h_ssh_tmp" $_z4h_ssh_tar_x_opt '-xzf' '-' || 'exit'
 
-'unset' '_z4h_ssh_tar_opt'
 'command' 'rm' '-f' '--' "$0" || 'exit'
 'shift'
 
 _z4h_ssh_src='0'
 
-'set' '-f'
-
-for _z4h_ssh_dst in ^COPY_TO^; do
-  if '[' '-z' "$_z4h_ssh_dst" ']'; then
-    >&2 'printf' '\033[33mz4h\033[0m: empty file destination path \033[31mnumber'$((_z4h_ssh_src+1))'\033[0m\n'
-    'exit' '1'
-  fi
+for _z4h_ssh_dst in ^SEND_TO^; do
+  case "$_z4h_ssh_dst" in
+    '')
+      >&2 'printf' '\033[33mz4h\033[0m: \033[31mz4h_ssh_send_files[%s]\033[0m is empty after expansion\n' "$((2 * _z4h_ssh_src + 2))"
+      'exit' '1'
+    ;;
+    */)
+      >&2 'printf' '\033[33mz4h\033[0m: \033[1mz4h_ssh_send_files[%s]\033[0m ends with \033[1m/\033[0m after expansion: \033[31m%s\033[0m\n' "$((2 * _z4h_ssh_src + 2))" "$_z4h_ssh_dst"
+      'exit' '1'
+    ;;
+    /*);;
+    *)
+      >&2 'printf' '\033[33mz4h\033[0m: \033[1mz4h_ssh_send_files[%s]\033[0m is not absolute: \033[31m%s\033[0m\n' "$((2 * _z4h_ssh_src + 2))" "$_z4h_ssh_dst"
+      'exit' '1'
+    ;;
+  esac
   if '[' '-e' "$_z4h_ssh_dst" ']'; then
     'command' 'rm' '-rf' '--' "$_z4h_ssh_dst" || 'exit'
   fi
@@ -74,36 +108,35 @@ for _z4h_ssh_dst in ^COPY_TO^; do
   _z4h_ssh_src="$((_z4h_ssh_src + 1))"
 done
 
-'set' '+f'
+'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
 
-'unset' '_z4h_ssh_src'
-'rm' '-rf' '--' "$1" || 'exit'
+^SETUP^
+
 'set' '--' "$0"
 'echo' '-n' >"$0" || 'exit'
 
 (
   'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
-  'unset' '_z4h_ssh_cleanup' '_z4h_ssh_err' '_z4h_ssh_tar_v'
-  . "$ZDOTDIR"/.zshrc
+  'unset' '-f' '_z4h_ssh_error' '_z4h_ssh_mktemp'
+  'unset' '_z4h_ssh_cleanup' '_z4h_ssh_tar_v' '_z4h_ssh_tar_c_opt' '_z4h_ssh_tar_x_opt'
+  'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst'
+  'set' '+f'
+  ^RUN^
   _z4h_ssh_ret="$?"
   'command' 'rm' '--' "$0" || 'exit'
   'exit' "$_z4h_ssh_ret"
-  # >&2 'printf' '\n\033[33mz4h\033[0m: starting \033[32msh\033[0m\n'
 )
 
 _z4h_ssh_ret="${?#0}"
 '[' '-e' "$0" ']' || 'exit' "${_z4h_ssh_ret:-1}"
 
 'trap' "$_z4h_ssh_cleanup" 'EXIT'
+'rm' '-f' '--' "$0" || 'exit'
+'set' '--'
 
-if command -v 'mktemp' >'/dev/null' 2>&1; then
-  _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
-else
-  _z4h_ssh_tmp="${TMPDIR:-/tmp}"/z4h-ssh.tmp."$$"
-  '[' '!' '-e' "$_z4h_ssh_tmp" ']' || 'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
-  'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
-fi
+^TEARDOWN^
 
+_z4h_ssh_mktemp
 'set' '--' "$@" "$_z4h_ssh_tmp"
 
 _z4h_ssh_dst='0'
@@ -111,7 +144,7 @@ _z4h_ssh_dst_list=''
 
 for _z4h_ssh_src in ^RETRIEVE_FROM^; do
   if '[' '-z' "$_z4h_ssh_src" ']'; then
-    >&2 'printf' '\033[33mz4h\033[0m: empty file source path \033[31mnumber'$((_z4h_ssh_dst+1))'\033[0m\n'
+    >&2 'printf' '\033[33mz4h\033[0m: empty file source path \033[31mnumber '$((_z4h_ssh_dst+1))'\033[0m\n'
     'exit' '1'
   fi
   if '[' '-e' "$_z4h_ssh_src" ']'; then
@@ -123,13 +156,38 @@ done
 
 '[' "$_z4h_ssh_dst" '=' '0' ']' && 'exit' "${_z4h_ssh_ret:-0}"
 
-if '[' '-n' "$_z4h_ssh_dst_list" ']'; then
-  case "$_z4h_ssh_tar_v" in
-    *'GNU tar'*) _z4h_ssh_tar_opt='--owner=0 --group=0';;
-  esac
-  'command' 'tar' '-C' "$_z4h_ssh_tmp" $tar_opt '-czhf' "$0" '--' $_z4h_ssh_dst_list || 'exit'
+_z4h_dump_size='0'
+
+if command -v 'base64' >'/dev/null' 2>&1 && command -v 'tr' >'/dev/null' 2>&1; then
+  if '[' '-n' "$_z4h_ssh_dst_list" ']'; then
+    case "$_z4h_ssh_tar_v" in
+      *'GNU tar'*) _z4h_ssh_tar_opt='--owner=0 --group=0';;
+    esac
+    'command' 'tar' '-C' "$_z4h_ssh_tmp" $tar_opt '-czhf' "$_z4h_ssh_tmp"/dump.tar.gz \
+      '--' $_z4h_ssh_dst_list || 'exit'
+    'base64' <"$_z4h_ssh_tmp"/dump.tar.gz >"$_z4h_ssh_tmp"/dump.base64 || 'exit'
+    'command' 'tr' '-d' '\n' <"$_z4h_ssh_tmp"/dump.base64 >"$_z4h_ssh_tmp"/dump.base64-sl || 'exit'
+    _z4h_dump_size="$('command' 'wc' '-c' <"$_z4h_ssh_tmp"/dump.base64-sl)" || 'exit'
+  fi
 fi
 
-'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
-'trap' '-' 'EXIT'
+while '[' "${_z4h_dump_size# }" '!=' "$_z4h_dump_size" ']'; do
+  _z4h_dump_size="${_z4h_dump_size# }"
+done
+
+'[' "${#_z4h_dump_size}" '-lt' '16' ']' || _z4h_dump_size='0'
+
+while '[' "${#_z4h_dump_size}" '-lt' '16' ']'; do
+  _z4h_dump_size="$_z4h_dump_size "
+done
+
+cp -- "$_z4h_ssh_tmp"/dump.base64-sl ~/dump.base64
+
+{
+  'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ "$_z4h_dump_size" || exit
+  'command' 'cat' '--' "$_z4h_ssh_tmp"/dump.base64-sl || 'exit'
+} 2>'/dev/null'
+
+'command' 'rm' '-rf' '--' "$@" || 'exit'
+'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
 'exit' "${_z4h_ssh_ret:-0}"

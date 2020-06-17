@@ -583,3 +583,11 @@ zstyle ':z4h:romkatv/powerlevel10k' channel command ln -s ~/powerlevel10k
 ```
 
 The command is called with an extra argument designating target directory.
+
+---
+
+Move the top of `~/.zshrc` to `~/.zshenv`. To make it work, `z4h ssh` will need to start
+interactive sh.
+
+---
+

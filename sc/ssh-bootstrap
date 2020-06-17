@@ -136,6 +136,11 @@ _z4h_ssh_ret="${?#0}"
 
 ^TEARDOWN^
 
+if ^EMPTY_RETRIEVE_FROM^; then
+  'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
+  'exit' "${_z4h_ssh_ret:-0}"
+fi
+
 _z4h_ssh_mktemp
 'set' '--' "$@" "$_z4h_ssh_tmp"
 
@@ -153,8 +158,6 @@ for _z4h_ssh_src in ^RETRIEVE_FROM^; do
   fi
   _z4h_ssh_dst="$((_z4h_ssh_dst + 1))"
 done
-
-'[' "$_z4h_ssh_dst" '=' '0' ']' && 'exit' "${_z4h_ssh_ret:-0}"
 
 _z4h_dump_size='0'
 

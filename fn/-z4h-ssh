@@ -217,6 +217,11 @@ fi
   script=${script//'^SETUP^'/${(F)z4h_ssh_setup}}
   script=${script//'^RUN^'/${(F)z4h_ssh_run}}
   script=${script//'^TEARDOWN^'/${(F)z4h_ssh_teardown}}
+  if (( $#retrieve_from )); then
+    script=${script//'^EMPTY_RETRIEVE_FROM^'/"'false'"}
+  else
+    script=${script//'^EMPTY_RETRIEVE_FROM^'/"'true'"}
+  fi
   script=${script//'^RETRIEVE_FROM^'/${(j: :)retrieve_from}}
   script=${script//'^DUMP_MARKER^'/${(q)dump_marker}}
   script=${script//'^DUMP_POS^'/${(r:8:: :)${#script}}}
@@ -243,11 +248,14 @@ fi
 
 args[pos[1]]='-t'
 
+if (( ! $#retrieve_from )); then
+  "${z4h_ssh_command[@]}" "${args[@]}" "/bin/sh $remote_script"
+  return
+fi
+
 (  # subshell to avoid TTOU
 
 { "${z4h_ssh_command[@]}" "${args[@]}" "/bin/sh $remote_script" || return 1 } | {
-  (( $#retrieve_from )) || return 0
-
   if (( $+commands[mktemp] )); then
     tmpdir=$(command mktemp -d -- $Z4H/tmp/ssh.XXXXXXXXXX) || return
   else

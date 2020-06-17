@@ -102,9 +102,6 @@ if (( !must_passthrough )); then
     '  false'
     'fi')
 
-  z4h_ssh_retrieve_files=(
-    '"$ZDOTDIR"'/.zsh_history.${(q)connection} $ZDOTDIR/.zsh_history.$connection)
-
   if zstyle -a :z4h:ssh:$z4h_ssh_host retrieve-extra-files extra_files; then
     local src dst
     for src in $extra_files; do

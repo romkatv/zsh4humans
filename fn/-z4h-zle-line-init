@@ -1,7 +1,7 @@
 local -i ret
 
 if (( ${+widgets[-z4h-orig-zle-line-init]} )); then
-  zle -z4h-orig-zle-line-init "$@" || ret=$?
+  zle -- -z4h-orig-zle-line-init "$@" || ret=$?
 fi
 
 if (( ${+_z4h_redraw_fd} )); then

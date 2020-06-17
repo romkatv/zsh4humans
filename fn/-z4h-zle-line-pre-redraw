@@ -1,7 +1,7 @@
 local -i ret
 
 if (( ${+widgets[-z4h-orig-zle-line-pre-redraw]} )); then
-  zle -z4h-orig-zle-line-pre-redraw "$@" || ret=$?
+  zle -- -z4h-orig-zle-line-pre-redraw "$@" || ret=$?
 fi
 
 if (( PENDING || KEYS_QUEUED_COUNT )); then

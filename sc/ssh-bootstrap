@@ -10,21 +10,21 @@ fi
 
 _z4h_ssh_error() {
   >&2 'printf' '\n'
-  >&2 'printf' '\033[33mz4h\033[0m: failed to start \033[32mzsh\033[0m on \033[1m%s\033[0m\n' ^HOST^
+  >&2 'printf' '\033[33mz4h\033[0m: failed to start \033[32mzsh\033[0m on \033[1m%s\033[0m\n' ^SSH_HOST^
   >&2 'printf' '\n'
   >&2 'printf' 'See error messages above to identify the culprit.\n'
   >&2 'printf' '\n'
-  >&2 'printf' 'Open login shell on \033[1m%s\033[0m:\n' ^HOST^
+  >&2 'printf' 'Open login shell on \033[1m%s\033[0m:\n' ^SSH_HOST^
   >&2 'printf' '\n'
   >&2 'printf' '  \033[4;32mcommand\033[0m \033[32mssh\033[0m %s\n' ^SSH_ARGS^
   >&2 'printf' '\n'
-  >&2 'printf' 'Open interactive \033[32msh\033[0m on \033[1m%s\033[0m:\n' ^HOST^
+  >&2 'printf' 'Open interactive \033[32msh\033[0m on \033[1m%s\033[0m:\n' ^SSH_HOST^
   >&2 'printf' '\n'
   >&2 'printf' '  \033[4;32mcommand\033[0m \033[32mssh\033[0m %s sh -i\n' ^SSH_ARGS^
   >&2 'printf' '\n'
-  >&2 'printf' 'Configure \033[32mz4h\033[0m \033[1mssh\033[0m to open login shell on \033[1m%s\033[0m (like above):\n' ^HOST^
+  >&2 'printf' 'Configure \033[32mz4h\033[0m \033[1mssh\033[0m to open login shell on \033[1m%s\033[0m (like above):\n' ^SSH_HOST^
   >&2 'printf' '\n'
-  >&2 'printf' '  \033[32mzstyle\033[0m \033[33m\047:z4h:ssh:%s\047\033[0m passthrough yes\n' ^HOST^
+  >&2 'printf' '  \033[32mzstyle\033[0m \033[33m\047:z4h:ssh:%s\047\033[0m passthrough yes\n' ^SSH_HOST^
   >&2 'printf' '\n'
 }
 
@@ -43,6 +43,9 @@ _z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--
 'trap' "$_z4h_ssh_cleanup; 'exit' '130'"   'INT'
 'trap' "$_z4h_ssh_cleanup; 'exit' '143'"   'TERM'
 'trap' "$_z4h_ssh_cleanup; _z4h_ssh_error" 'EXIT'
+
+z4h_ssh_host=^SSH_HOST^
+z4h_ssh_client=^SSH_CLIENT^
 
 'export' Z4H_SSH=^Z4H_SSH^
 'export' P9K_TTY="old"
@@ -78,6 +81,7 @@ _z4h_ssh_mktemp
 _z4h_ssh_src='0'
 
 for _z4h_ssh_dst in ^SEND_TO^; do
+  _z4h_ssh_src="$((_z4h_ssh_src + 1))"
   case "$_z4h_ssh_dst" in
     '')
       >&2 'printf' '\033[33mz4h\033[0m: \033[31mz4h_ssh_send_files[%s]\033[0m is empty after expansion\n' "$((2 * _z4h_ssh_src + 2))"
@@ -105,7 +109,6 @@ for _z4h_ssh_dst in ^SEND_TO^; do
       'command' 'cp' '-rf' '--' "$1"/"$_z4h_ssh_src" "$_z4h_ssh_dst" || 'exit'
     fi
   fi
-  _z4h_ssh_src="$((_z4h_ssh_src + 1))"
 done
 
 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
@@ -119,10 +122,12 @@ done
   'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
   'unset' '-f' '_z4h_ssh_error' '_z4h_ssh_mktemp'
   'unset' '_z4h_ssh_cleanup' '_z4h_ssh_tar_v' '_z4h_ssh_tar_c_opt' '_z4h_ssh_tar_x_opt'
-  'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst'
+  'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst' 'z4h_ssh_host'
+  'unset' 'z4h_ssh_client'
   'set' '+f'
   ^RUN^
   _z4h_ssh_ret="$?"
+  'set' '-f'
   'command' 'rm' '--' "$0" || 'exit'
   'exit' "$_z4h_ssh_ret"
 )
@@ -148,6 +153,7 @@ _z4h_ssh_dst='0'
 _z4h_ssh_dst_list=''
 
 for _z4h_ssh_src in ^RETRIEVE_FROM^; do
+  _z4h_ssh_dst="$((_z4h_ssh_dst + 1))"
   if '[' '-z' "$_z4h_ssh_src" ']'; then
     >&2 'printf' '\033[33mz4h\033[0m: empty file source path \033[31mnumber '$((_z4h_ssh_dst+1))'\033[0m\n'
     'exit' '1'
@@ -156,7 +162,6 @@ for _z4h_ssh_src in ^RETRIEVE_FROM^; do
     'command' 'ln' '-s' '--' "$_z4h_ssh_src" "$_z4h_ssh_tmp"/"$_z4h_ssh_dst" || 'exit'
     _z4h_ssh_dst_list="$_z4h_ssh_dst_list $_z4h_ssh_dst"
   fi
-  _z4h_ssh_dst="$((_z4h_ssh_dst + 1))"
 done
 
 _z4h_dump_size='0'

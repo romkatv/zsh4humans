@@ -169,11 +169,6 @@ if (( $#z4h_ssh_retrieve_files && ! $+commands[base64] )); then
   return 1
 fi
 
-print z4h_ssh_send_files
-printf '%s => %s\n' "${(@kv)z4h_ssh_send_files}" | LC_ALL=C sort
-print z4h_ssh_retrieve_files
-printf '%s => %s\n' "${(@kv)z4h_ssh_retrieve_files}" | LC_ALL=C sort
-
 local tmpdir
 if (( $+commands[mktemp] )); then
   tmpdir=$(command mktemp -d -- $Z4H/tmp/ssh.XXXXXXXXXX) || return

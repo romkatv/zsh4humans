@@ -189,11 +189,11 @@ while '[' "${#_z4h_dump_size}" '-lt' '16' ']'; do
   _z4h_dump_size="$_z4h_dump_size "
 done
 
-cp -- "$_z4h_ssh_tmp"/dump.base64-sl ~/dump.base64
-
 {
   'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ "$_z4h_dump_size" || exit
-  'command' 'cat' '--' "$_z4h_ssh_tmp"/dump.base64-sl || 'exit'
+  if '[' "$_z4h_dump_size" '!=' '0               ' ']'; then
+    'command' 'cat' '--' "$_z4h_ssh_tmp"/dump.base64-sl || 'exit'
+  fi
 } 2>'/dev/null'
 
 'command' 'rm' '-rf' '--' "$@" || 'exit'

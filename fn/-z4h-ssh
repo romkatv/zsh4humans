@@ -73,7 +73,7 @@ if (( !must_passthrough )); then
 
   z4h_ssh_prelude=(
     '"export" ZDOTDIR="$HOME"'
-    '"export" LC_ALL="$C"')
+    '"export" LC_ALL="C"')
 
   z4h_ssh_send_files=(
     $ZDOTDIR/.zshenv   '"$ZDOTDIR"/.zshenv'

@@ -593,3 +593,17 @@ interactive sh.
 
 Move `$ZDOTDIR` to `~/.zsh`, leave just `~/.zshenv` in the home directory. Also leave a symlink
 form `~/.zshrc` to `~/.ssh/.zshrc` so that users and bad tools don't get confused.
+
+---
+
+When retrieving files in `z4h ssh` and there is no base64 either on local or remote host, use this
+for encoding:
+
+```zsh
+od -t x1 -An -v | tr -d '[:space:]'
+```
+
+Decode with `sysread`, followed by `print -n -- ${buf//(#m)??/'\x'$MATCH}`. This can be done
+while reading from the network to speed things up.
+
+This encoding has 50% overhead compared to base64.

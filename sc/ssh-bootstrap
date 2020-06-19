@@ -44,10 +44,10 @@ _z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--
 'trap' "$_z4h_ssh_cleanup; 'exit' '143'"   'TERM'
 'trap' "$_z4h_ssh_cleanup; _z4h_ssh_error" 'EXIT'
 
-z4h_ssh_host=^SSH_HOST^
 z4h_ssh_client=^SSH_CLIENT^
+z4h_ssh_host=^SSH_HOST^
 
-'export' Z4H_SSH=^Z4H_SSH^
+'export' Z4H_SSH="$z4h_ssh_client":"$z4h_ssh_host"
 'export' P9K_TTY="old"
 ^PRELUDE^
 

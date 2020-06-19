@@ -40,7 +40,7 @@ for ((i = 1; i <= $#; ++i)); do
   esac
 done
 
-local -r zsh_ssh_client=${${(%):-%m}:-unknown}
+local -r z4h_ssh_client=${${(%):-%m}:-unknown}
 
 local z4h_ssh_host
 if (( $#pos == 1 )); then
@@ -69,8 +69,6 @@ local -A z4h_ssh_send_files z4h_ssh_retrieve_files
 local -a z4h_ssh_prelude z4h_ssh_setup z4h_ssh_run z4h_ssh_teardown 
 
 if (( !must_passthrough )); then
-  local connection=$z4h_ssh_client:$z4h_ssh_host
-
   z4h_ssh_prelude=(
     '"export" ZDOTDIR="$HOME"'
     '"export" LC_ALL="C"')
@@ -213,7 +211,6 @@ fi
   script=${script//'^SSH_HOST^'/${(q)z4h_ssh_host}}
   script=${script//'^SSH_CLIENT^'/${(q)z4h_ssh_client}}
   script=${script//'^SSH_ARGS^'/${(q)${(j: :)@}}}
-  script=${script//'^Z4H_SSH^'/${(q)connection}}
   script=${script//'^PRELUDE^'/${(F)z4h_ssh_prelude}}
   script=${script//'^SEND_TO^'/${(j: :)send_to}}
   script=${script//'^SETUP^'/${(F)z4h_ssh_setup}}

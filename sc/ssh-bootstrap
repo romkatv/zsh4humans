@@ -64,7 +64,7 @@ if _z4h_ssh_tar_v="$('command' 'tar' '--version' 2>&1)"; then
   case "$_z4h_ssh_tar_v" in
     *'GNU tar'*)
       _z4h_ssh_tar_c_opt='--owner=0 --group=0'
-      _z4h_ssh_tar_x_opt='--warning=no-unknown-keyword --no-same-owner'
+      _z4h_ssh_tar_x_opt='--warning=no-unknown-keyword --warning=no-timestamp --no-same-owner'
     ;;
   esac
 fi

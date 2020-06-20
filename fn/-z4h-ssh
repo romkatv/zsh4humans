@@ -230,7 +230,7 @@ fi
   local tar_v tar_c_opt tar_x_opt
   if tar_v=$(command tar --version 2>/dev/null) && [[ $tar_v == *'GNU tar'* ]]; then
     tar_c_opt=(--owner=0 --group=0)
-    tar_x_opt=(--warning=no-unknown-keyword --no-same-owner)
+    tar_x_opt=(--warning=no-unknown-keyword --warning=no-timestamp --no-same-owner)
   fi
 
   if (( $#indices )); then

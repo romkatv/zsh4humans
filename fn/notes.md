@@ -607,3 +607,28 @@ Decode with `sysread`, followed by `print -n -- ${buf//(#m)??/'\x'$MATCH}`. This
 while reading from the network to speed things up.
 
 This encoding has 50% overhead compared to base64.
+
+---
+
+Protect scripts against rogue aliases as functions as described in the EXAMPLES section of
+https://pubs.opengroup.org/onlinepubs/9699919799/utilities/command.html. Use `unset -f` on
+all builtins, too.
+
+```zsh
+IFS=' 	
+'
+'unset' '-f' 'unalias' '[' 'cat' ...
+'unalias' '-a'
+PATH="$(command -p getconf PATH):$PATH"
+...
+```
+
+This can be broken only by function `unset`.
+
+---
+
+Add `z4h pack` that produces `install-z4h` file. It should be similar to the bootstrap script
+created by `z4h ssh`. It should be all ASCII. It should respect `:z4h:pack:tag extra-files` and
+similar. `tag` is the value passed via optional `-t tag`. Defaults to emty. This allows one to
+define different file sets for different packs. By default the same set of files as sent by ssh
+should be packed, plus all history files.

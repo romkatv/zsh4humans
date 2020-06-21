@@ -610,6 +610,10 @@ This encoding has 50% overhead compared to base64.
 
 ---
 
+Make history over ssh more robust so that it never gets overwritten.
+
+---
+
 Protect scripts against rogue aliases as functions as described in the EXAMPLES section of
 https://pubs.opengroup.org/onlinepubs/9699919799/utilities/command.html. Use `unset -f` on
 all builtins, too.

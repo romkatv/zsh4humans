@@ -54,6 +54,7 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
 } ${${(%):-%x}:a} || return
 
 typeset -gaU cdpath fpath mailpath path
+path=($Z4H/fzf/bin $path)
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 fpath+=($Z4H/zsh4humans/fn $Z4H/zsh-completions/src)
 

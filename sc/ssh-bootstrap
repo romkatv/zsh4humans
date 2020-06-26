@@ -125,6 +125,7 @@ done
   'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst' 'z4h_ssh_host'
   'unset' 'z4h_ssh_client'
   'set' '+f'
+  'set' '--'
   ^RUN^
   _z4h_ssh_ret="$?"
   'set' '-f'

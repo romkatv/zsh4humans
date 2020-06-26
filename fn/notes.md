@@ -592,7 +592,7 @@ interactive sh.
 ---
 
 Move `$ZDOTDIR` to `~/.zsh`, leave just `~/.zshenv` in the home directory. Also leave a symlink
-form `~/.zshrc` to `~/.ssh/.zshrc` so that users and bad tools don't get confused.
+form `~/.zshrc` to `~/.zsh/.zshrc` so that users and bad tools don't get confused.
 
 ---
 

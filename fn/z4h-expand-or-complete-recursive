@@ -1,0 +1,46 @@
+if (( ! ${+functions[-z4h-orig-path-files]} )); then
+  autoload +X -Uz _path_files
+  functions[-z4h-orig-path-files]=${functions[_path_files]}
+fi
+local -i _z4h_killed
+local _z4h_orig_zle
+{
+  function _path_files() {
+    print -r -- $0 ${(qqq)@} >>/tmp/log
+    local _z4h_orig_compadd="${functions[compadd]:-&}"
+    {
+      function compadd() {
+        print -r -- $0 ${(qqq)@} >>/tmp/log
+        local -a opts AOD f p s W
+        zparseopts -E -a opts {O,A,D}+:=oad \
+          {P,p,d,X,i,S,s,I,x,r,R,W,F,M,E,J,V}+: {f,q,e,Q,n,U,C,a,l,k,o,1,2}+
+        if (( ! $#oad )); then
+          local -a matches
+          builtin compadd -A matches "$@"
+          typeset -p matches >>/tmp/log
+        fi
+        () {
+          eval "${_z4h_orig_compadd:/&/builtin compadd \"\$@\"}"
+        } "$@"
+      }
+      -z4h-orig-path-files "$@"
+    } always {
+      if [[ $_z4h_orig_compadd == '&' ]]; then
+        unset -f compadd
+      else
+        functions[compadd]=$_z4h_orig_compadd
+      fi
+    }
+    #typeset -g _z4h_orig_zle="${functions[zle]:-&}"
+    #function zle() { [[ ${1-} == -M ]] || builtin zle "$@"; }
+    #kill -INT $$
+  }
+  zle z4h-expand-or-complete
+} always {
+  functions[_path_files]=${functions[-z4h-orig-path-files]}
+  if [[ $_z4h_orig_zle == '&' ]]; then
+    unfunction zle
+  elif [[ -n $_z4h_orig_zle ]]; then
+    functions[zle]=$_z4h_orig_zle
+  fi
+}

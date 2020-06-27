@@ -127,6 +127,7 @@ done
   'set' '+f'
   'set' '--'
   export _z4h_ssh_feedback="$0"
+  Z4H_BOOTSTRAPPING='1'
   ^RUN^
   _z4h_ssh_ret="$?"
   'set' '-f'

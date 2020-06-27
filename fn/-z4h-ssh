@@ -97,10 +97,10 @@ if (( !must_passthrough )); then
   fi
 
   z4h_ssh_run=(
-    'if "[" "-f" "$ZDOTDIR"/.zshrc "-a" "-r" "$ZDOTDIR"/.zshrc "]"; then
-      "." "$ZDOTDIR"/.zshrc
+    'if "[" "-f" "$ZDOTDIR"/.zshenv "-a" "-r" "$ZDOTDIR"/.zshenv "]"; then
+      "." "$ZDOTDIR"/.zshenv
     else
-      >&2 "printf" "\\033[33mz4h\\033[0m: not a readable file: \\033[31m%s\033[0m\n" "$ZDOTDIR"/.zshrc
+      >&2 "printf" "\\033[33mz4h\\033[0m: not a readable file: \\033[31m%s\033[0m\n" "$ZDOTDIR"/.zshenv
       "false"
     fi')
 

@@ -372,7 +372,7 @@ LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01
 export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
-zstyle ':completion:*'                  matcher-list    'm:{a-zA-Z}={A-Za-z}' 'l:|=* r:|=*'
+zstyle ':completion:*'                  matcher-list    'm:{[:lower:]}={[:upper:]}' 'l:|=* r:|=*'
 zstyle ':completion:*'                  verbose         yes
 zstyle ':completion:::::'               insert-tab      pending
 zstyle ':completion:*'                  completer       _complete
@@ -577,6 +577,9 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
     fi
   }
 fi
+
+# zle -N z4h-expand-or-complete-recursive
+# bindkey '^[[Z' z4h-expand-or-complete-recursive
 
 function -z4h-post-init() {
   eval "$_z4h_opt"

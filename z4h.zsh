@@ -14,7 +14,6 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
 
   'emulate' 'zsh'
   'setopt'                                                                     \
-    'hist_expire_dups_first' 'hist_expire_dups_first' 'hist_expire_dups_first' \
     'always_to_end'          'auto_cd'                'auto_param_slash'       \
     'auto_pushd'             'c_bases'                'complete_in_word'       \
     'extended_glob'          'extended_history'       'hist_expire_dups_first' \
@@ -40,6 +39,11 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   else
     'typeset' '-gri' _z4h_custom_histfile='0'
     HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+  fi
+
+  if '[' '-n' "${_z4h_ssh_feedback-}" ']'; then
+    { 'print' '-r' '--' "HISTFILE=${(q)HISTFILE}" >"$_z4h_ssh_feedback"; } 2>'/dev/null'
+    'unset' '_z4h_ssh_feedback'
   fi
 
   'bindkey' '-d'

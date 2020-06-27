@@ -126,6 +126,7 @@ done
   'unset' 'z4h_ssh_client'
   'set' '+f'
   'set' '--'
+  export _z4h_ssh_feedback="$0"
   ^RUN^
   _z4h_ssh_ret="$?"
   'set' '-f'
@@ -137,6 +138,7 @@ _z4h_ssh_ret="${?#0}"
 '[' '-e' "$0" ']' || 'exit' "${_z4h_ssh_ret:-1}"
 
 'trap' "$_z4h_ssh_cleanup" 'EXIT'
+'.' "$0"
 'rm' '-f' '--' "$0" || 'exit'
 'set' '--'
 

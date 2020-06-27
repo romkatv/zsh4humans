@@ -98,10 +98,10 @@ if (( !must_passthrough )); then
 
   z4h_ssh_run=(
     'if "[" "-f" "$ZDOTDIR"/.zshrc "-a" "-r" "$ZDOTDIR"/.zshrc "]"; then
-      . "$ZDOTDIR"/.zshrc
+      "." "$ZDOTDIR"/.zshrc
     else
       >&2 "printf" "\\033[33mz4h\\033[0m: not a readable file: \\033[31m%s\033[0m\n" "$ZDOTDIR"/.zshrc
-      false
+      "false"
     fi')
 
   if zstyle -a :z4h:ssh:$z4h_ssh_host retrieve-extra-files extra_files; then
@@ -110,6 +110,12 @@ if (( !must_passthrough )); then
       eval "dst=$src"
       z4h_ssh_retrieve_files[$src]=$dst
     done
+  fi
+
+  local local_hist local_hist_tmp
+  if zstyle -s :z4h:ssh:$z4h_ssh_host retrieve-history local_hist; then
+    local_hist_tmp=$Z4H/tmp/ssh-history.tmp.$sysparams[pid]
+    z4h_ssh_retrieve_files[\$HISTFILE]=$local_hist_tmp
   fi
 fi
 
@@ -349,9 +355,14 @@ fi
           command cp -rf -- $src $dst || return
         fi
       done
+      if [[ -s $local_hist_tmp ]]; then
+        () {
+          () { fc -pa -- $1 $HISTSIZE $SAVEHIST } $1 && zf_mv -f -- $1 $local_hist
+        } =(command cat -- $local_hist $local_hist_tmp) || return
+      fi
     done
   } always {
-    zf_rm -rf -- $tmpdir
+    zf_rm -rf -- $tmpdir $local_hist_tmp
   }
 }
 

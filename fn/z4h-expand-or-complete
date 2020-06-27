@@ -23,7 +23,7 @@
           (( col > 1 )) && echoti cuf $((col-1))
         fi
         (( err )) && return err
-        [[ $stat != 1 || $LBUFFER != */ || $LBUFFER == $lbuf ]] && return
+        [[ $stat != 1 || $LBUFFER == ($lbuf|*' ') ]] && return
         zle .split-undo || return
       }
     } always {

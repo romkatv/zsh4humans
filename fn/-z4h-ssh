@@ -71,7 +71,9 @@ local -a z4h_ssh_prelude z4h_ssh_setup z4h_ssh_run z4h_ssh_teardown
 if (( !must_passthrough )); then
   z4h_ssh_prelude=(
     '"export" ZDOTDIR="$HOME"'
-    '"export" LC_ALL="C"')
+    'if command -v "locale" >"/dev/null" 2>&1; then
+      "export" LC_ALL="C"
+    fi')
 
   z4h_ssh_send_files=(
     $ZDOTDIR/.zshenv   '"$ZDOTDIR"/.zshenv'
@@ -95,12 +97,12 @@ if (( !must_passthrough )); then
   fi
 
   z4h_ssh_run=(
-    'if "[" "-f" "$ZDOTDIR"/.zshrc "-a" "-r" "$ZDOTDIR"/.zshrc "]"; then'
-    '  . "$ZDOTDIR"/.zshrc'
-    'else'
-    '  >&2 "printf" "\\033[33mz4h\\033[0m: not a readable file: \\033[31m%s\033[0m\n" "$ZDOTDIR"/.zshrc'
-    '  false'
-    'fi')
+    'if "[" "-f" "$ZDOTDIR"/.zshrc "-a" "-r" "$ZDOTDIR"/.zshrc "]"; then
+      . "$ZDOTDIR"/.zshrc
+    else
+      >&2 "printf" "\\033[33mz4h\\033[0m: not a readable file: \\033[31m%s\033[0m\n" "$ZDOTDIR"/.zshrc
+      false
+    fi')
 
   if zstyle -a :z4h:ssh:$z4h_ssh_host retrieve-extra-files extra_files; then
     local src dst

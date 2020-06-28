@@ -116,7 +116,7 @@ done
 ^SETUP^
 
 'set' '--' "$0"
-'echo' '-n' >"$0" || 'exit'
+'printf' '' >"$0" || 'exit'
 
 (
   'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'

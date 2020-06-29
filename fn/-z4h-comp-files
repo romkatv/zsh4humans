@@ -1,5 +1,7 @@
--z4h-present-files() {
+-z4h-present-files-slow() {
   emulate -L zsh -o cbases -o octalzeroes
+
+  local -i list_types=$1
 
   local -a list_colors
   zstyle -a ":completion:$_fzf_tab_curcontext" list-colors list_colors
@@ -100,7 +102,7 @@
         print -lr -- $words
         eval $cmd
       } | {
-        -z4h-present-files
+        -z4h-present-files-slow $list_types
       } | {
         -z4h-cursor-show
         $Z4H/fzf/bin/fzf $opt 2>$TTY

@@ -54,14 +54,15 @@
   [[ $2 == on ]] && list_types=1
   local word_prefix=$3
   local path_prefix=$4
-  local words=("${@:5}")
+  local -i only_dirs=$5
+  local words=("${@:6}")
 
   compstate[list]=
   compstate[insert]=
 
   [[ -w $TTY && -r $TTY ]] || return
 
-  local prune=('-name '{.git,.hg,.svn})
+  local -a prune
   if (( dot_glob )); then
     prune+=('-path "*/.*/*"')
   else
@@ -71,10 +72,12 @@
     prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
   fi
   prune="\( ${(j: -o :)prune} \) -prune"
+  local filter
+  (( only_dirs )) && filter='-type d'
   local dirs=($path_prefix${^${(Q)words:#.*}}(-FN:t))
   dirs=(./${^dirs})
   dirs=${(j: :)${(q)dirs}}
-  local cmd="command find -L $dirs -mindepth 1 $prune -o -print 2>/dev/null | command cut -b3-"
+  local cmd="command find -L $dirs -mindepth 1 $prune -o $filter -print 2>/dev/null | command cut -b3-"
   local opt=(
     --ansi
     --nth=2

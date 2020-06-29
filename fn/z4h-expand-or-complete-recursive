@@ -18,13 +18,14 @@ local -a _z4h_words
 local -i _z4h_recursive
 local -i _z4h_zle_call_num
 local -i _z4h_in_path_files
+local -i _z4h_only_dirs=1
 
 {
   function _fzf_tab__main_complete() {
     -z4h-orig-fzf-tab-main-complete
     if (( _z4h_recursive == 1 )); then
       typeset -gi _fzf_tab_ignored=1
-      -z4h-comp-files "$_z4h_word_prefix" "$_z4h_path_prefix" "${_z4h_words[@]}"
+      -z4h-comp-files "$_z4h_word_prefix" "$_z4h_path_prefix" "$_z4h_only_dirs" "${_z4h_words[@]}"
     fi
   }
  
@@ -45,6 +46,7 @@ local -i _z4h_in_path_files
       if (( ! $#nDOA )); then
         local -a matches
         () {
+          print -r -- compadd -A matches "${(q-)@}" >>/tmp/log
           builtin compadd -A matches "$@"
           (( ${#matches} )) || return 0
           emulate -L zsh
@@ -75,6 +77,11 @@ local -i _z4h_in_path_files
   }
 
   function _path_files() {
+    print -r -- _path_files "${(q-)@}" >>/tmp/log
+    local -a opts files dirs pats ignore
+    zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
+      P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n
+    (( $#f || ! $#dirs )) && _z4h_only_dirs=0
     local -ir _z4h_in_path_files=1
     -z4h-orig-path-files "$@"
   }

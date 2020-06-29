@@ -2,8 +2,8 @@ if (( ! ${+functions[-z4h-orig-path-files]} )); then
   autoload +X -Uz _path_files
   functions[-z4h-orig-path-files]=${functions[_path_files]}
 fi
-if (( ! ${+functions[-z4h-orig-fzf-tab-get]} )); then
-  functions[-z4h-orig-fzf-tab-get]=${functions[_fzf_tab_get]}
+if (( ! ${+functions[-z4h-orig-fzf-tab-main-complete]} )); then
+  functions[-z4h-orig-fzf-tab-main-complete]=${functions[_fzf_tab__main_complete]}
 fi
 if (( ! ${+functions[-z4h-orig-compadd]} )); then
   functions[-z4h-orig-compadd]=${functions[compadd]:-'builtin compadd "$@"'}
@@ -11,19 +11,6 @@ fi
 if (( ! ${+functions[-z4h-orig-zle]} )); then
   functions[-z4h-orig-zle]=${functions[zle]:-'builtin zle "$@"'}
 fi
-
-function _z4h_comp_insert() {
-  echo here >>/tmp/log
-  _z4h_words=(lol)
-  builtin compadd -UQf -p "$_z4h_word_prefix" -W "$_z4h_path_prefix" -o nosort -a _z4h_words
-  #compstate[list]=
-  #compstate[insert]=all
-}
-
-zle -C -- -z4h-comp-insert complete-word _generic
-zstyle ':completion:-z4h-comp-insert:*' completer _z4h_comp_insert
-#zstyle ':completion:-z4h-comp-insert:*' completer _all_matches _z4h_comp_insert
-#zstyle ':completion:-z4h-comp-insert:*' insert true
 
 local _z4h_word_prefix
 local _z4h_path_prefix
@@ -33,12 +20,12 @@ local -i _z4h_zle_call_num
 local -i _z4h_in_path_files
 
 {
-  function _fzf_tab_get() {
-    if [[ $_z4h_recursive == 1 && $# == 3 && $1 == -s && $2 == ignore && $3 == ignore ]]; then
-      typeset -g ignore=99999999
-      return
+  function _fzf_tab__main_complete() {
+    -z4h-orig-fzf-tab-main-complete
+    if (( _z4h_recursive == 1 )); then
+      typeset -gi _fzf_tab_ignored=1
+      -z4h-comp-files "$_z4h_word_prefix" "$_z4h_path_prefix" "${_z4h_words[@]}"
     fi
-    -z4h-orig-fzf-tab-get "$@"
   }
  
   function zle() {
@@ -51,47 +38,43 @@ local -i _z4h_in_path_files
   }
 
   function compadd() {
-    exec 3>&2 2>>/tmp/log
-    {
-      setopt xtrace
-      print -r -- $0 ${(qqq)@} >>/tmp/log
-      if (( _z4h_recursive != -1 )); then
-        local -a opts nDOA Q f s S I W U i P p
-        zparseopts -E -a opts {D,O,A}+:=nDOA n+=nDOA Q+=Q f+=f s+:=s S+:=S I+:=I W+:=W \
-          U+:=U i+:=i P+:=P p+:=p {a,k,q,e,l,1,2,C}+ {F,d,J,X,x,V,r,R,E,M}+: o+::
-        if (( ! $#nDOA )); then
-          local -a matches
-          () {
-            builtin compadd -A matches "$@"
-            (( ${#matches} )) || return 0
-            emulate -L zsh
-            (( _z4h_in_path_files && $#Q && $#f )) || return
-            [[ -z $s[2] && -z $S[2] && -z $I[2] && $W[2] == */ ]] || return
-            local prefix=${U:-$IPREFIX}$i[2]$P[2]$p[2]
-            if (( $#_z4h_words )); then
-              [[ $W[2] == $_z4h_path_prefix && $prefix == $_z4h_word_prefix ]] || return
-            else
-              _z4h_word_prefix=$prefix
-              _z4h_path_prefix=$W[2]
+    if (( _z4h_recursive != -1 )); then
+      local -a opts nDOA Q f s S I W U i P p
+      zparseopts -E -a opts {D,O,A}+:=nDOA n+=nDOA Q+=Q f+=f s+:=s S+:=S I+:=I W+:=W \
+        U+:=U i+:=i P+:=P p+:=p {a,k,q,e,l,1,2,C}+ {F,d,J,X,x,V,r,R,E,M}+: o+::
+      if (( ! $#nDOA )); then
+        local -a matches
+        () {
+          builtin compadd -A matches "$@"
+          (( ${#matches} )) || return 0
+          emulate -L zsh
+          (( _z4h_in_path_files && $#Q && $#f )) || return
+          [[ -z $s[2] && -z $S[2] && -z $I[2] && $#W -ge 2 && $W[2] == (|*/) ]] || return
+          local prefix=${U:-$IPREFIX}$i[2]$P[2]$p[2]
+          if (( $#_z4h_words )); then
+            [[ $W[2] == $_z4h_path_prefix && $prefix == $_z4h_word_prefix ]] || return
+          else
+            _z4h_word_prefix=$prefix
+            _z4h_path_prefix=$W[2]
+          fi
+          _z4h_words+=($matches)
+          if (( ! _z4h_recursive )); then
+            local dirs=($_z4h_path_prefix${^matches}(-FN))
+            if (( $#dirs )); then
+              _z4h_recursive=1
+              typeset -gi _fzf_tab_ignored=1
             fi
-            _z4h_words+=($matches)
-            if (( ! _z4h_recursive )); then
-              local dirs=(${^_z4h_path_prefix}(-FN))
-              (( ! $#dirs )) || _z4h_recursive=1
-            fi
-          } "$@" || _z4h_recursive=-1
-          typeset -p _z4h_word_prefix _z4h_path_prefix _z4h_words _z4h_recursive >>/tmp/log
-        fi
+          fi
+        } "$@" || {
+          _z4h_recursive=-1
+          typeset -gi _fzf_tab_ignored=0
+        }
       fi
-    } always {
-      unsetopt xtrace
-      exec 2>&3 3>&-
-    }
+    fi
     -z4h-orig-compadd "$@"
   }
 
   function _path_files() {
-    print -r -- $0 ${(qqq)@} >>/tmp/log
     local -ir _z4h_in_path_files=1
     -z4h-orig-path-files "$@"
   }
@@ -99,11 +82,7 @@ local -i _z4h_in_path_files
   zle z4h-expand-or-complete
 } always {
   functions[_path_files]=${functions[-z4h-orig-path-files]}
-  functions[_fzf_tab_get]=${functions[-z4h-orig-fzf-tab-get]}
+  functions[_fzf_tab__main_complete]=${functions[-z4h-orig-fzf-tab-main-complete]}
   functions[compadd]=${functions[-z4h-orig-compadd]}
   functions[zle]=${functions[-z4h-orig-zle]}
 }
-
-if (( _z4h_recursive == 1 )); then
-  zle -w -- -z4h-comp-insert
-fi

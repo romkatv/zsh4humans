@@ -1,0 +1,113 @@
+-z4h-present-files() {
+  emulate -L zsh -o cbases -o octalzeroes
+
+  local -a list_colors
+  zstyle -a ":completion:$_fzf_tab_curcontext" list-colors list_colors
+  local -A namecolors=(${(@s:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+  local -A modecolors=(${(@Ms:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+
+  local filepath nul=$'\0'
+  while IFS= read -r filepath; do
+    local dpre= dsuf= REPLY= reply=() stat=() lstat=()
+    if (( $#list_colors )); then
+      if zstat -A lstat -L -- $filepath; then
+        (( lstat[3] & 0170000 )) && zstat -A stat -- $filepath
+
+        fzf-tab-lscolors::from-mode $filepath "$lstat[3]" $stat[3]
+        [[ -z $REPLY ]] && fzf-tab-lscolors::from-name $filepath
+
+        if [[ -n $lstat[14] ]]; then
+          local sym_color=$REPLY
+          local rsv_color=$REPLY
+          local rsv=$lstat[14]
+          if zstat -A stat -- $rsv; then
+            fzf-tab-lscolors::from-mode $rsv $stat[3]
+            [[ -z $REPLY ]] && fzf-tab-lscolors::from-name $rsv
+            rsv_color=$REPLY
+            (( stat[3] & 040000 && list_types )) && rsv+=/
+          fi
+          dpre=$'\033[0m\033['$sym_color'm'
+          dsuf+=$'\033[0m -> \033['$rsv_color'm'$rsv
+        else
+          dpre=$'\033[0m\033['$REPLY'm'
+          (( lstat[3] & 040000 && list_types )) && filepath+=/
+        fi
+      fi
+    elif (( list_types )); then
+      if zstat -A lstat -L -- $filepath; then
+        if (( lstat[3] & 040000 )); then
+          filepath+=/
+        elif (( (lstat[3] & 0120000) == 0120000 )); then
+          filepath+=@
+        fi
+      fi
+    fi
+    print -r -- "$dpre$nul${(q)filepath}$nul$dsuf"
+  done
+}
+
+()  {
+  eval "$_z4h_opt"
+
+  local -i dot_glob list_types
+  [[ $1 == on ]] && dot_glob=1
+  [[ $2 == on ]] && list_types=1
+  local word_prefix=$3
+  local path_prefix=$4
+  local words=("${@:5}")
+
+  compstate[list]=
+  compstate[insert]=
+
+  [[ -w $TTY && -r $TTY ]] || return
+
+  local prune=('-name '{.git,.hg,.svn})
+  if (( dot_glob )); then
+    prune+=('-path "*/.*/*"')
+  else
+    prune+=('-path "*/.*"')
+  fi
+  if [[ ${commands[find]:A} != */busybox* ]]; then
+    prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
+  fi
+  prune="\( ${(j: -o :)prune} \) -prune"
+  local dirs=($path_prefix${^${(Q)words:#.*}}(-FN:t))
+  dirs=(./${^dirs})
+  dirs=${(j: :)${(q)dirs}}
+  local cmd="command find -L $dirs -mindepth 1 $prune -o -print 2>/dev/null | command cut -b3-"
+  local opt=(
+    --ansi
+    --nth=2
+    --delimiter='\x00'
+    --layout=reverse
+    --height=${FZF_TMUX_HEIGHT:-75%}
+    --tiebreak=begin
+    --multi
+    --bind=tab:down,btab:up,ctrl-space:toggle)
+
+  print >$TTY
+  {
+    local choice
+    choice="$(
+      exec 2>/dev/null
+      unsetopt pipe_fail
+      [[ -n $path_prefix ]] && builtin cd -q -- $path_prefix
+      {
+        print -lr -- $words
+        eval $cmd
+      } | {
+        -z4h-present-files
+      } | {
+        -z4h-cursor-show
+        $Z4H/fzf/bin/fzf $opt 2>$TTY
+      }
+    )" && [[ -n $choice ]] || return
+  } always {
+    print -n >$_z4h_fzf_called
+    -z4h-cursor-hide
+  }
+
+  builtin compadd -UQf -p "$word_prefix" -W "$path_prefix" -o nosort - ${${${(f)choice}#*$'\0'}%$'\0'*}
+  builtin compadd -U -qS '' -R _fzf_tab_remove_space ''
+  compstate[insert]=all
+} "${options[dot_glob]}" "${options[list_types]}" "$@"

@@ -119,6 +119,7 @@ zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer
 zle -N z4h-expand-or-complete
+zle -N z4h-expand-or-complete-recursive
 zle -N z4h-up-local-history
 zle -N z4h-down-local-history
 zle -N z4h-up-global-history
@@ -142,13 +143,6 @@ if (( ! _z4h_custom_histfile )); then
 fi
 HISTSIZE=1000000000  # infinite command history
 SAVEHIST=1000000000  # infinite command history
-
-if (( _z4h_use[fzf] )); then
-  : ${FZF_COMPLETION_TRIGGER=}                   # file completion without trigger
-  fzf_default_completion=z4h-expand-or-complete  # file completion falls back to regular
-  z4h source $Z4H/fzf/shell/completion.zsh       # load fzf-completion
-  unfunction -m '_fzf_complete_*'
-fi
 
 if (( _z4h_use[fzf-tab] )); then
   FZF_TAB_COMMAND=-z4h-fzf
@@ -294,11 +288,9 @@ bindkey   '^ '      z4h-expand                     # ctrl+space
 if (( _z4h_use[fzf-tab] )); then
   # Generic command completion.
   bindkey '^I'      z4h-expand-or-complete         # tab
+  bindkey '^[[Z'    z4h-expand-or-complete-recursive  # shift+tab
 fi
 if (( _z4h_use[fzf] )); then
-  # Deep file completion.
-  bindkey '^[i'     fzf-completion                 # alt+i
-  bindkey '^[I'     fzf-completion                 # alt+I
   # Command history.
   bindkey '^R'      z4h-fzf-history                # ctrl+r
 fi
@@ -579,9 +571,6 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
     fi
   }
 fi
-
-# zle -N z4h-expand-or-complete-recursive
-# bindkey '^[[Z' z4h-expand-or-complete-recursive
 
 function -z4h-post-init() {
   eval "$_z4h_opt"

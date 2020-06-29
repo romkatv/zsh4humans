@@ -636,3 +636,12 @@ created by `z4h ssh`. It should be all ASCII. It should respect `:z4h:pack:tag e
 similar. `tag` is the value passed via optional `-t tag`. Defaults to emty. This allows one to
 define different file sets for different packs. By default the same set of files as sent by ssh
 should be packed, plus all history files.
+
+---
+
+Pass consistent bindings to fzf: ctrl+k, alt+j, etc.
+
+---
+
+`z4h-expand-or-complete` can check the number of completion candidates and create a smaller fzf
+window if there aren't many of them.

@@ -82,6 +82,7 @@
     --ansi
     --nth=2
     --delimiter='\x00'
+    --no-sort
     --layout=reverse
     --height=${FZF_TMUX_HEIGHT:-75%}
     --tiebreak=begin
@@ -110,7 +111,12 @@
     -z4h-cursor-hide
   }
 
-  builtin compadd -UQf -p "$word_prefix" -W "$path_prefix" -o nosort - ${${${(f)choice}#*$'\0'}%$'\0'*}
-  builtin compadd -U -qS '' -R _fzf_tab_remove_space ''
-  compstate[insert]=all
+  choice=(${${${(f)choice}#*$'\0'}%$'\0'*})
+  builtin compadd -UQf -p "$word_prefix" -W "$path_prefix" -o nosort - $choice
+  if (( $#choice == 1 )); then
+    compstate[insert]=2
+    [[ $RBUFFER == ' '* ]] || compstate[insert]+=' '
+  else
+    compstate[insert]=all
+  fi
 } "${options[dot_glob]}" "${options[list_types]}" "$@"

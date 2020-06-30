@@ -1,55 +1,16 @@
+# Uses parameters:
+#
+#   - list_types
+#   - list_colors
+
 eval "$_z4h_opt"
 setopt octalzeroes
-
-local -i list_types=$1
-local ctx=$2
-
-local -a list_colors
-zstyle -a :completion:$ctx list-colors list_colors
-if [[ .${(pj:\0:)list_colors} != $_z4h_last_list_colors ]]; then
-  typeset -g _z4h_last_list_colors=.${(pj:\0:)list_colors}
-  typeset -gA _z4h_name_colors=(${(@s:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
-  typeset -gA _z4h_mode_colors=(${(@Ms:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
-  typeset -gA _z4h_mode_codes=()
-  () {
-    local -i8 a b c d
-    local -a codes
-    for a in 0140000 0100000 0060000 0040000 0020000 0010000; do
-      for b in 0 04000 02000; do
-        for c in 0 01000 00002 01002; do
-          for d in 0 1; do
-            codes=()
-            if (( a != 0100000 )); then
-              if   (( a == 0140000 )); then codes+=($_z4h_mode_colors[so])
-              elif (( a == 0060000 )); then codes+=($_z4h_mode_colors[bd])
-              elif (( a == 0040000 )); then codes+=($_z4h_mode_colors[di])
-              elif (( a == 0020000 )); then codes+=($_z4h_mode_colors[cd])
-              elif (( a == 0010000 )); then codes+=($_z4h_mode_colors[pi]); fi
-
-              if   (( c == 01000   )); then codes+=($_z4h_mode_colors[st])
-              elif (( c == 00002   )); then codes+=($_z4h_mode_colors[ow])
-              elif (( c == 01002   )); then codes+=($_z4h_mode_colors[tw]); fi
-            fi
-            (( $#codes )) || (( ! c )) || codes+=($_z4h_mode_colors[ex])
-            _z4h_mode_codes[$((a|b|c|d))]=${(j:;:)codes}
-          done
-        done
-      done
-    done
-  }
-fi
 
 [[ $_z4h_mode_colors[ln] != target ]]
 local -i ln_target=$?
 
-local -a suf=(
-  $'\0'  $'\0'  $'\0'  $'\0'
-  $'/\0' $'\0'  $'\0'  $'\0'
-  $'\0'  $'\0'  $'\0@' $'\0'
-  $'\0'  $'\0'  $'\0'  $'\0'
-)
-
 local slash=('/')
+local suf=('' '' '' '/' '' '' '' '' '' '@')
 
 local -i10 m
 local buf file
@@ -66,30 +27,39 @@ while true; do
   buf=$files[-1]
   files[-1]=()
   if (( ! $#list_colors && ! list_types )) || ! zstat -L -A mode +mode -- $files; then
-    print -lr -- $'\0'${^${(@q)files}}$'\0'
+    printf '%1$s\0%1$q\n' $files
     continue
   fi
   if (( ! $#list_colors )); then
-    mode=(${(@)mode/(#m)*/$suf[$(((MATCH & 0170000) >> 12 + 1))]})
-    printf '\0%q%s\n' ${files:^mode}
+    printf '%2$s\0%2$q%1$s\n' ${"${(@)mode/(#m)*/$suf[$(((MATCH & 0170000) >> 12))]}":^files}
     continue
   fi
   for file m in ${files:^mode}; do
     if (( (m & 0170000) == 0120000 )); then
       if ! zstat -L -A link +link -- $file; then
-        print -r -- $'\033['${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m'
+        printf '%1$s\0\e[%2$sm%1$q\e[0m\n' \
+          "$file" "${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${file:t}]}"
       elif ! zstat -A mode +mode -- $file; then
-        print -r -- $'\033['${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m -> \033['${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${link:t}]}$'m\0'${(q)link}$'\0\033[0m'
+        printf '%1$s\0\e[%2$sm%1$q\e[0m -> \e[%4$sm%3$q\e[0m\n'              \
+          "$file" "${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${file:t}]}" \
+          "$link" "${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${link:t}]}" 
       else
         m=mode[1]
         if (( ln_target )); then
-          printf '\033[%1$sm\0%2$q\0\033[0m -> \033[%1$sm%3$q\033[0m\n' "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${link:t}]}" "$file" "$link"$slash[$(( list_types && (m & 0170000) == 040000 ))]
+          printf '%1$s\0\e[%3$sm%1$q\e[0m -> \e[%3$sm%2$q\e[0m\n'               \
+            "$file" "$link$slash[$(( list_types && (m & 0170000) == 040000 ))]" \
+            "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${link:t}]}"
         else
-          print -r -- $'\033['${_z4h_mode_colors[ln]:-$_z4h_name_colors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m -> \033['${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${link:t}]}$'m\0'${(q)link}$slash[$(( list_types && (m & 0170000) == 040000 ))]$'\0\033[0m'
+          printf '%1$s\0\e[%2$sm%1$q\e[0m -> \e[%4$sm%3$q\e[0m\n'              \
+            "$file" "${_z4h_mode_colors[ln]:-$_z4h_name_colors[(k)${file:t}]}" \
+            "$link$slash[$(( list_types && (m & 0170000) == 040000 ))]"        \
+            "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${link:t}]}"
         fi
       fi
-      continue
+    else
+      printf '%1$s\0\e[%3$sm%1$q%2$s\e[0m\n'                           \
+        "$file" "$slash[$(( list_types && (m & 0170000) == 040000 ))]" \
+        "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${file:t}]}"
     fi
-    print -r -- $'\033['${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${file:t}]}$'m\0'${(q)file}$'\0'$slash[$(( list_types && (m & 0170000) == 040000 ))]$'\033[0m'
   done
 done

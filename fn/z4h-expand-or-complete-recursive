@@ -1,3 +1,5 @@
+[[ -w $TTY && -r $TTY ]] || return
+
 if (( ! ${+functions[-z4h-orig-path-files]} )); then
   autoload +X -Uz _path_files
   functions[-z4h-orig-path-files]=${functions[_path_files]}
@@ -11,14 +13,6 @@ fi
 if (( ! ${+functions[-z4h-orig-zle]} )); then
   functions[-z4h-orig-zle]=${functions[zle]:-'builtin zle "$@"'}
 fi
-
-local _z4h_word_prefix
-local _z4h_path_prefix
-local -a _z4h_words
-local -i _z4h_recursive
-local -i _z4h_zle_call_num
-local -i _z4h_in_path_files
-local -i _z4h_only_dirs=1
 
 {
   function _fzf_tab__main_complete() {
@@ -84,10 +78,49 @@ local -i _z4h_only_dirs=1
     -z4h-orig-path-files "$@"
   }
 
-  zle z4h-expand-or-complete
+  -z4h-cursor-hide
+
+  local esc line col
+  while true; do
+    {
+      -z4h-show-dots
+      IFS='[;' read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
+      local lbuf=$LBUFFER
+
+      {
+        local _z4h_fzf_called="$Z4H"/tmp/fzf-called."${sysparams[pid]}"
+        zf_rm -f -- "$_z4h_fzf_called" || return
+        local _z4h_word_prefix=
+        local _z4h_path_prefix=
+        local -a _z4h_words=()
+        local -i _z4h_recursive=0
+        local -i _z4h_zle_call_num=0
+        local -i _z4h_in_path_files=0
+        local -i _z4h_only_dirs=1
+        fzf-tab-complete
+      } always {
+        local -i err=$?
+        local -a stat=()
+        if zstat +size -A stat -- "$_z4h_fzf_called" 2>/dev/null; then
+          zf_rm -f -- "$_z4h_fzf_called" || err=$?
+          echoti cuu 1
+          (( col > 1 )) && echoti cuf $((col-1))
+        fi
+        (( err )) && return err
+        [[ $stat != 1 || $LBUFFER == ($lbuf|*' ') ]] && return
+        zle .split-undo || return
+      }
+    } always {
+      if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
+        -z4h-redraw-buffer
+      fi
+    }
+  done
 } always {
   functions[_path_files]=${functions[-z4h-orig-path-files]}
   functions[_fzf_tab__main_complete]=${functions[-z4h-orig-fzf-tab-main-complete]}
   functions[compadd]=${functions[-z4h-orig-compadd]}
   functions[zle]=${functions[-z4h-orig-zle]}
+  zle -R
+  -z4h-cursor-show
 }

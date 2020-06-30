@@ -39,9 +39,9 @@ fzf-tab-lscolors::from-mode () {
 	[[ -n ${REPLY::=${(j:;:)codes}} ]]
 }
 
-zmodload zsh/stat
+zmodload zsh/stat zsh/system
 
-emulate -L zsh -o cbases -o octalzeroes
+emulate -L zsh -o cbases -o octalzeroes -o extendedglob
 
 local -i list_types=$1
 
@@ -50,7 +50,9 @@ local -a list_colors
 list_colors=( 'rs=0' 'no=00' 'mi=00' 'mh=00' 'ln=01;36' 'or=01;31' 'di=01;34' 'ow=04;01;34' 'st=34' 'tw=04;34' 'pi=01;33' 'so=01;33' 'do=01;33' 'bd=01;33' 'cd=01;33' 'su=01;35' 'sg=01;35' 'ca=01;35' 'ex=01;32' '' )
 local -A namecolors=(${(@s:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
 local -A modecolors=(${(@Ms:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
-unset "modecolors[ln]"
+
+[[ $modecolors[ln] != target ]]
+local -i ln_target=$?
 
 local -A codes
 
@@ -62,10 +64,8 @@ local -A codes
       for c in 0 01000 00002 01002; do
         for d in 0 1; do
           m='a|b|c|d'
-          (( m == 040001 )) && setopt xtrace
           fzf-tab-lscolors::from-mode '' $m
           codes[$m]=$REPLY
-          unsetopt xtrace
         done
       done
     done
@@ -80,53 +80,54 @@ local -A codes
   done
 }
 
-local filepath nul=$'\0'
+local -a suf=(
+  $'\0'  $'\0'  $'\0'  $'\0'
+  $'/\0' $'\0'  $'\0'  $'\0'
+  $'\0'  $'\0'  $'\0@' $'\0'
+  $'\0'  $'\0'  $'\0'  $'\0'
+)
+
 local -i10 m
+local buf file
+local -a files mode link
+local MATCH MBEGIN MEND
 
-local buf
 while true; do
-  [[ -t 99 ]]  # todo: replace with 2
-  sysread -t 0 'buf[$#buf+1]' && continue
-  (( $? == 5 ))          || return
-  break
-done
-
-while IFS= read -r filepath; do
-  local dpre= dsuf= REPLY= reply=() stat=() lstat=()
-  if (( $#list_colors )); then
-    if zstat -A lstat -L -- $filepath; then
-      # (( lstat[3] & 0170000 )) && zstat -A stat -- $filepath
-      # fzf-tab-lscolors::from-mode $filepath "$lstat[3]" $stat[3]
-      # [[ -z $REPLY ]] && fzf-tab-lscolors::from-name $filepath
-      m=lstat[3]
-      m='m & 64002 | ((m & 73) != 0)'
-      REPLY=${codes[$m]:-$namecolors[(k)${filepath:t}]}
-
-      if false && [[ -n $lstat[14] ]]; then
-        local sym_color=$REPLY
-        local rsv_color=$REPLY
-        local rsv=$lstat[14]
-        if zstat -A stat -- $rsv; then
-          fzf-tab-lscolors::from-mode $rsv $stat[3]
-          [[ -z $REPLY ]] && fzf-tab-lscolors::from-name $rsv
-          rsv_color=$REPLY
-          (( stat[3] & 040000 && list_types )) && rsv+=/
-        fi
-        dpre=$'\033[0m\033['$sym_color'm'
-        dsuf+=$'\033[0m -> \033['$rsv_color'm'$rsv
-      else
-        dpre=$'\033[0m\033['$REPLY'm'
-        (( lstat[3] & 040000 && list_types )) && filepath+=/
-      fi
-    fi
-  elif (( list_types )); then
-    if zstat -A lstat -L -- $filepath; then
-      if (( lstat[3] & 040000 )); then
-        filepath+=/
-      elif (( (lstat[3] & 0120000) == 0120000 )); then
-        filepath+=@
-      fi
-    fi
+  while [[ $buf != *$'\n'* ]]; do
+    sysread -s 4096 'buf[$#buf+1]' && continue
+    (( $? == 5 ))                  || return
+    return
+  done
+  files=("${(@f)buf}")
+  buf=$files[-1]
+  files[-1]=()
+  if ! zstat -L -A mode +mode -- $files; then
+    print -lr -- $'\0'${^${(@q)files}}$'\0'
+    continue
   fi
-  print -r -- "$dpre$nul${(q)filepath}$nul$dsuf"
+  if (( ! $#list_colors )); then
+    mode=(${(@)mode/(#m)*/$suf[$(((MATCH & 0170000) >> 12 + 1))]})
+    printf '\0%q%s\n' ${files:^mode}
+    continue
+  fi
+  for file m in ${files:^mode}; do
+    if (( (m & 0170000) == 0120000 )); then
+      if ! zstat -L -A link +link -- $file; then
+        print -r -- $'\033['${modecolors[or]:-$namecolors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m'
+      elif ! zstat -A mode +mode -- $file; then
+        print -r -- $'\033['${modecolors[or]:-$namecolors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m -> \033['${modecolors[or]:-$namecolors[(k)${link:t}]}$'m\0'${(q)link}$'\0\033[0m'
+      else
+        m=mode[1]
+        (( (m & 0170000) == 040000 )) && link[1]+=/
+        if (( ln_target )); then
+          printf '\033[%1$sm\0%2$q\0\033[0m -> \033[%1$sm%3$q\033[0m\n' "${codes[$((m & 64002 | ((m & 73) != 0)))]:-$namecolors[(k)${link:t}]}" "$file" "$link"
+        else
+          print -r -- $'\033['${modecolors[ln]:-$namecolors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m -> \033['${codes[$((m & 64002 | ((m & 73) != 0)))]:-$namecolors[(k)${link:t}]}$'m\0'${(q)link}$'\0\033[0m'
+        fi
+      fi
+      continue
+    fi
+    (( (m & 0170000) == 040000 )) && file+=/
+    print -r -- $'\033['${codes[$((m & 64002 | ((m & 73) != 0)))]:-$namecolors[(k)${file:t}]}$'m\0'${(q)file}$'\0\033[0m'
+  done
 done

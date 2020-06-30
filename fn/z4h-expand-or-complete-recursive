@@ -46,7 +46,6 @@ local -i _z4h_only_dirs=1
       if (( ! $#nDOA )); then
         local -a matches
         () {
-          print -r -- compadd -A matches "${(q-)@}" >>/tmp/log
           builtin compadd -A matches "$@"
           (( ${#matches} )) || return 0
           emulate -L zsh
@@ -77,7 +76,6 @@ local -i _z4h_only_dirs=1
   }
 
   function _path_files() {
-    print -r -- _path_files "${(q-)@}" >>/tmp/log
     local -a opts files dirs pats ignore
     zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
       P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n

@@ -102,7 +102,7 @@
         print -lr -- $words
         eval $cmd
       } | {
-        -z4h-present-files-slow $list_types
+        -z4h-present-files $list_types $_fzf_tab_curcontext
       } | {
         -z4h-cursor-show
         $Z4H/fzf/bin/fzf $opt 2>$TTY

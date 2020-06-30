@@ -84,6 +84,7 @@
     local choice again
     choice="$(
       unsetopt pipe_fail
+      exec 2>/dev/null
       [[ -n $path_prefix ]] && builtin cd -q -- $path_prefix
       {
         print -lr -- $words

@@ -39,8 +39,6 @@ if [[ .${(pj:\0:)list_colors} != $_z4h_last_list_colors ]]; then
   }
 fi
 
-typeset -p _z4h_mode_codes >>/tmp/log
-
 [[ $_z4h_mode_colors[ln] != target ]]
 local -i ln_target=$?
 

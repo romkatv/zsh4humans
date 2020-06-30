@@ -1,5 +1,6 @@
 ()  {
   eval "$_z4h_opt"
+  setopt octalzeroes
 
   local -i dot_glob list_types
   [[ $1 == on ]] && dot_glob=1

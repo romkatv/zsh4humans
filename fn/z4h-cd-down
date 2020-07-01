@@ -13,7 +13,7 @@
     local dirs=(./*(-/N))
   fi
 
-  local non_empty=(${^dirs}(-F))
+  local non_empty=(${^dirs}(-FN))
 
   local -a cmd
   if (( $#non_empty )); then

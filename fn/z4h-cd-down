@@ -13,8 +13,10 @@
     local dirs=(./*(-/N))
   fi
 
+  local non_empty=(${^dirs}(-F))
+
   local -a cmd
-  if (( $#dirs )); then
+  if (( $#non_empty )); then
     local -a prune
     if (( dot_glob )); then
       prune=(-path '*/.*/*')
@@ -24,8 +26,14 @@
     if [[ ${commands[find]:A} != */busybox* ]]; then
       prune+=(-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc)
     fi
-    cmd=(command find -L $dirs -mindepth 1 '(' $prune ')' -prune -o -type d -print)
+    cmd=(command find -L $non_empty -mindepth 1 '(' $prune ')' -prune -o -type d -print)
   fi
+
+  local query char
+  for char in ${(s::)dirs[1]}; do
+    [[ -z ${dirs:#$query$char*} ]] || break
+    query+=$char
+  done
 
   local opt=(
     --with-nth=2
@@ -33,9 +41,11 @@
     --ansi
     --exact
     --layout=reverse
-    --height=50%
+    --height=$(( ! $#non_empty && ($#dirs + 2) < 60 * LINES ? $#dirs + 2 : 60 * LINES / 100 ))
     --tiebreak=length,begin,index
     --no-multi
+    --cycle
+    --query=${query:2}
     --bind=tab:down,btab:up)
 
   -z4h-set-list-colors complete:cd:: "$list_types"

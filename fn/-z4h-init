@@ -155,6 +155,7 @@ if (( _z4h_use[fzf-tab] )); then
     --nth=2,3                                            \
     --delimiter='\000'                                   \
     --layout=reverse                                     \
+    --exact                                              \
     --tiebreak=begin                                     \
     --multi                                              \
     --cycle                                              \

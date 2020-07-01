@@ -34,46 +34,53 @@ fi
 
   function compadd() {
     if (( _z4h_recursive != -1 )); then
-      local -a opts nDOA Q f s S I W U i P p
-      zparseopts -E -a opts {D,O,A}+:=nDOA n+=nDOA Q+=Q f+=f s+:=s S+:=S I+:=I W+:=W \
-        U+:=U i+:=i P+:=P p+:=p {a,k,q,e,l,1,2,C}+ {F,d,J,X,x,V,r,R,E,M}+: o+::
-      if (( ! $#nDOA )); then
-        local -a matches
-        () {
-          builtin compadd -A matches "$@"
-          (( ${#matches} )) || return 0
-          emulate -L zsh
-          (( _z4h_in_path_files && $#Q && $#f )) || return
-          [[ -z $s[2] && -z $S[2] && -z $I[2] && $#W -ge 2 && $W[2] == (|*/) ]] || return
-          local prefix=${U:-$IPREFIX}$i[2]$P[2]$p[2]
-          if (( $#_z4h_words )); then
-            [[ $W[2] == $_z4h_path_prefix && $prefix == $_z4h_word_prefix ]] || return
-          else
-            _z4h_word_prefix=$prefix
-            _z4h_path_prefix=$W[2]
-          fi
-          _z4h_words+=($matches)
-          if (( ! _z4h_recursive )); then
-            # This used to be done only if there are non-empty dirs among $matches.
-            # Now it's done unconditionally to take advantage of better file colorizer
-            # and more robust fzf layount in z4h.
-            _z4h_recursive=1
-            typeset -gi _fzf_tab_ignored=1
-          fi
-        } "$@" || {
-          _z4h_recursive=-1
-          typeset -gi _fzf_tab_ignored=0
-        }
-      fi
+      () {
+        local -a _z4h_{opts,nDOA,Q,f,s,S,I,W,U,i,P,p}
+        zparseopts -E -a _z4h_opts {D,O,A}+:=_z4h_nDOA n+=_z4h_nDOA       \
+          Q+=_z4h_Q f+=_z4h_f s+:=_z4h_s S+:=_z4h_S I+:=_z4h_I W+:=_z4h_W \
+          U+:=_z4h_U i+:=_z4h_i P+:=_z4h_P p+:=_z4h_p                     \
+          {a,k,q,e,l,1,2,C}+ {F,d,J,X,x,V,r,R,E,M}+: o+::
+        if (( ! ${#_z4h_nDOA} )); then
+          local -a _z4h_matches
+          () {
+            builtin compadd -A _z4h_matches "$@"
+            (( ${#_z4h_matches} )) || return 0
+            emulate -L zsh
+            (( _z4h_in_path_files && $#_z4h_Q && $#_z4h_f )) || return
+            [[ -z $_z4h_s[2] && -z $_z4h_S[2] &&
+               -z $_z4h_I[2] && $#_z4h_W -ge 2 && $_z4h_W[2] == (|*/) ]] || return
+            local prefix=${_z4h_U:-$IPREFIX}$_z4h_i[2]$_z4h_P[2]$_z4h_p[2]
+            if (( $#_z4h_words )); then
+              [[ $_z4h_W[2] == $_z4h_path_prefix && $prefix == $_z4h_word_prefix ]] || return
+            else
+              _z4h_word_prefix=$prefix
+              _z4h_path_prefix=$_z4h_W[2]
+            fi
+            _z4h_words+=($_z4h_matches)
+            if (( ! _z4h_recursive )); then
+              # This used to be done only if there are non-empty dirs among $matches.
+              # Now it's done unconditionally to take advantage of better file colorizer
+              # and more robust fzf layount in z4h.
+              _z4h_recursive=1
+              typeset -gi _fzf_tab_ignored=1
+            fi
+          } "$@" || {
+            typeset -gi _z4h_recursive=-1
+            typeset -gi _fzf_tab_ignored=0
+          }
+        fi
+      } "$@"
     fi
     -z4h-orig-compadd "$@"
   }
 
   function _path_files() {
-    local -a opts files dirs pats ignore
-    zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
-      P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n
-    (( $#f || ! $#dirs )) && _z4h_only_dirs=0
+    () {
+      local -a opts files dirs pats ignore
+      zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
+        P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n
+      (( ${#f} || ! ${#dirs} )) && typeset -gi _z4h_only_dirs=0
+    }
     local -ir _z4h_in_path_files=1
     -z4h-orig-path-files "$@"
   }

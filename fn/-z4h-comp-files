@@ -43,7 +43,7 @@
     opt+=(--expect=$cont)
   fi
 
-  -z4h-set-list-colors $_fzf_tab_curcontext
+  -z4h-set-list-colors "$_fzf_tab_curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
   print >$TTY

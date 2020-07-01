@@ -40,7 +40,7 @@
     --no-multi
     --bind=tab:down,btab:up)
 
-  -z4h-set-list-colors complete:cd::
+  -z4h-set-list-colors complete:cd:: "$list_types"
   local -i list_colors=$((!$?))
 
   {

@@ -7,13 +7,16 @@ local -i list_types=$1
 [[ $_z4h_mode_colors[ln] != target ]]
 local -i ln_target=$?
 
-local slash=('/')
-local suf=('' '' '' '/' '' '' '' '' '' '@')
+local -r nil=$'\0'
+local -r or=$_z4h_mode_colors[or]
+local -r ln=$_z4h_mode_colors[ln]
+local -r suf=('|' '|' '' '' '' '' '/' '/' '' '' '' '' '' '' '' '*' '' '' '@' '@' '' '' '=' '=')
 
-local -i10 m
-local buf file
-local -a files mode link
-local MATCH MBEGIN MEND
+local -i10 m i
+local buf file style
+local -a files modes link link_mode
+local -i MATCH
+local MBEGIN MEND
 
 while true; do
   while [[ $buf != *$'\n'* ]]; do
@@ -21,43 +24,75 @@ while true; do
     (( $? == 5 ))                  || return
     return
   done
+
   files=("${(@f)buf}")
   buf=$files[-1]
   files[-1]=()
-  if (( ! list_colors && ! list_types )) || ! zstat -L -A mode +mode -- $files; then
+
+  if (( ! list_colors && ! list_types )) || ! zstat -L -A modes +mode -- $files; then
     printf '%1$s\0%1$q\n' $files
     continue
   fi
+
   if (( ! list_colors )); then
-    printf '%2$s\0%2$q%1$s\n' ${"${(@)mode/(#m)*/$suf[$(((MATCH & 0170000) >> 12))]}":^files}
+    printf '%2$s\0%2$q%1$s\n' \
+      ${"${(@)modes/(#m)*/$suf[$((((MATCH & 61440) >> 11) | !(MATCH & 73)))]}":^files}
     continue
   fi
-  for file m in ${files:^mode}; do
-    if (( (m & 0170000) == 0120000 )); then
-      if ! zstat -L -A link +link -- $file; then
-        printf '%1$s\0\e[%2$sm%1$q\e[0m\n' \
-          "$file" "${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${file:t}]}"
-      elif ! zstat -A mode +mode -- $file; then
-        printf '%1$s\0\e[%2$sm%1$q\e[0m -> \e[%4$sm%3$q\e[0m\n'              \
-          "$file" "${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${file:t}]}" \
-          "$link" "${_z4h_mode_colors[or]:-$_z4h_name_colors[(k)${link:t}]}" 
-      else
-        m=mode[1]
-        if (( ln_target )); then
-          printf '%1$s\0\e[%3$sm%1$q\e[0m -> \e[%3$sm%2$q\e[0m\n'               \
-            "$file" "$link$slash[$(( list_types && (m & 0170000) == 040000 ))]" \
-            "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${link:t}]}"
+
+  if (( $#_z4h_name_colors )); then
+    # This implementation works whether _z4h_name_colors is empty or not. It's about 30%
+    # slower than the alternative implementation below, which only works if _z4h_name_colors
+    # is empty.
+    for file m in ${files:^modes}; do
+      if [[ ${style::=${${_z4h_mode_codes[$((m & 64075))]:-$'\0'}/%$'\0'/$'\0'$_z4h_name_colors[(ke)$file:t]}} \
+              == $'@\0.' ]]; then
+        if ! zstat -L -A link +link -- $file; then
+          printf '%1$s\0\e[%2$sm%1$q\e[0m\n' $file "${or:-$_z4h_name_colors[$file:t]}"
+        elif ! zstat -A link_mode +mode -- $file; then
+          printf '%1$s\0\e[%2$sm%1$q\e[0m -> \e[%4$sm%3$q\e[0m\n' \
+            $file "${or:-$_z4h_name_colors[$file:t]}"             \
+            $link "${or:-$_z4h_name_colors[$link:t]}"
+        elif (( ln_target )); then
+          printf '%1$s\0\e[%4$sm%1$q\e[0m -> \e[%4$sm%2$q\e[0m%3$s\n' \
+            $file $link                                               \
+            "${(@0)${${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}/%$nil/$nil$_z4h_name_colors[(ke)$link:t]}}"
         else
-          printf '%1$s\0\e[%2$sm%1$q\e[0m -> \e[%4$sm%3$q\e[0m\n'              \
-            "$file" "${_z4h_mode_colors[ln]:-$_z4h_name_colors[(k)${file:t}]}" \
-            "$link$slash[$(( list_types && (m & 0170000) == 040000 ))]"        \
-            "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${link:t}]}"
+          printf '%1$s\0\e[%3$sm%1$q\e[0m -> \e[%5$sm%2$q\e[0m%4$s\n' \
+            $file $link "${ln:-$_z4h_name_colors[$link:t]}"           \
+            "${(@0)${${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}/%$nil/$nil$_z4h_name_colors[(ke)$link:t]}}"
         fi
+      else
+        if [[ $file == script.zsh ]]; then
+          typeset -p style >>/tmp/log
+        fi
+        printf '%1$s\0\e[%3$sm%1$q\e[0m%2$s\n' $file "${(@0)style}"
       fi
-    else
-      printf '%1$s\0\e[%3$sm%1$q%2$s\e[0m\n'                           \
-        "$file" "$slash[$(( list_types && (m & 0170000) == 040000 ))]" \
-        "${_z4h_mode_codes[$((m & 64002 | ((m & 73) != 0)))]:-$_z4h_name_colors[(k)${file:t}]}"
-    fi
-  done
+    done
+  else
+    modes=("${(@)modes:/(#m)*/${_z4h_mode_codes[$((MATCH & 64075))]:-$nil}}")
+    while true; do
+      i=${modes[(i)@*]}
+      if (( i == $#modes + 1 )); then
+        printf '%3$s\0\e[%2$sm%3$q\e[0m%1$s\n' "${(@0)${(@)modes:^files}}"
+        break
+      elif (( i != 1 )); then
+        printf '%3$s\0\e[%2$sm%3$q\e[0m%1$s\n' "${(@0)${(@)modes[1,i-1]:^files}}"
+        shift $((i-1)) modes files
+      fi
+      file=$files[1]
+      shift modes files
+      if ! zstat -L -A link +link -- $file; then
+        printf '%1$s\0\e['$or'm%1$q\e[0m\n' $file
+      elif ! zstat -A link_mode +mode -- $file; then
+        printf '%1$s\0\e['$or'm%1$q\e[0m -> \e['$or'm%2$q\e[0m\n' $file $link
+      elif (( ln_target )); then
+        printf '%1$s\0\e[%4$sm%1$q\e[0m -> \e[%4$sm%2$q\e[0m%3$s\n' \
+          $file $link "${(@0)${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}}"
+      else
+        printf '%1$s\0\e['$ln'm%1$q\e[0m -> \e[%4$sm%2$q\e[0m%3$s\n' \
+          $file $link "${(@0)${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}}"
+      fi
+    done
+  fi
 done

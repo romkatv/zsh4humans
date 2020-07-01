@@ -85,7 +85,7 @@
     -z4h-cursor-hide
   }
 
-  builtin compadd -Uf -p "$word_prefix" -W "$path_prefix" -- $choice
+  builtin compadd -QUf -p "$word_prefix" -W "$path_prefix" -- ${(@q)choice}
   if (( $#choice == 1 )); then
     compstate[insert]=2
     [[ $RBUFFER == ' '* ]] || compstate[insert]+=' '

@@ -81,7 +81,7 @@ fi
       zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
         P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n
       (( ${#f} || ! ${#dirs} )) && typeset -gi _z4h_only_dirs=0
-    }
+    } "$@"
     local -ir _z4h_in_path_files=1
     -z4h-orig-path-files "$@"
   }

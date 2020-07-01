@@ -145,11 +145,24 @@ HISTSIZE=1000000000  # infinite command history
 SAVEHIST=1000000000  # infinite command history
 
 if (( _z4h_use[fzf-tab] )); then
-  FZF_TAB_COMMAND=-z4h-fzf
-  zstyle ':fzf-tab:*' prefix       ''         # remove '·'
-  zstyle ':fzf-tab:*' query-string prefix     # pre-populate fzf query with the longest common prefix
-  bindkey '^I' expand-or-complete             # fzf-tab reads it during initialization
-  z4h source $Z4H/fzf-tab/fzf-tab.zsh         # load fzf-tab-complete
+  bindkey '^I' expand-or-complete          # fzf-tab reads it during initialization
+  zstyle ':fzf-tab:*' prefix       ''      # remove '·'
+  zstyle ':fzf-tab:*' query-string prefix  # pre-populate fzf query with the longest common prefix
+  zstyle ':fzf-tab:*' command      -z4h-fzf              \
+    --ansi                                               \
+    --expect='$continuous_trigger'                       \
+    --color='hl:$(( $#headers == 0 ? 108 : 255 ))'       \
+    --nth=2,3                                            \
+    --delimiter='\000'                                   \
+    --layout=reverse                                     \
+    --tiebreak=begin                                     \
+    --multi                                              \
+    --cycle                                              \
+    --bind=tab:down,btab:up,change:top,ctrl-space:toggle \
+    --query='$query'                                     \
+    --header-lines='$#headers'                           \
+    --height='$(( 100 * ($#candidates + 2) < 60 * LINES ? $#candidates + 2 : 60 * LINES / 100 ))'
+  z4h source $Z4H/fzf-tab/fzf-tab.zsh
   eval "function fzf-tab-complete() {
     ${functions[fzf-tab-complete]//zle (.reset-prompt|redisplay|-R)/}
   }"

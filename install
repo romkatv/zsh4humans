@@ -88,40 +88,53 @@ if '[' '-n' "$rcs" ']'; then
   done
 fi
 
-url='https://raw.githubusercontent.com/romkatv/zsh4humans/v3/.zshrc'
+zshenv=
+zshrc=
 
->&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
+'trap' '"trap" "-" "INT" "TERM" "EXIT"; "command" "rm" "-f" "--" "$zshenv" "$zshrc" 2>/dev/null' \
+  'INT' 'TERM' 'EXIT'
 
 if command -v 'mktemp' >'/dev/null' 2>&1; then
+  zshenv="$('command' 'mktemp' "$HOME"/.zshenv.XXXXXXXXXX)"
   zshrc="$('command' 'mktemp' "$HOME"/.zshrc.XXXXXXXXXX)"
 else
+  zshenv="$HOME"/.zshenv.tmp."$$"
   zshrc="$HOME"/.zshrc.tmp."$$"
 fi
 
-(
-  if ! err="$($fetch "$zshrc" '--' "$url" 2>&1)"; then
-    >&2 'printf' "%s\n" "$err"
-    >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"
-    'exit' '1'
-  fi
+url='https://raw.githubusercontent.com/romkatv/zsh4humans/v3'
 
-  if '[' '-n' "$backup_dir" ']'; then
-    'command' 'mkdir' '-p' '--' "$backup_dir"
-    for f in $rcs; do
-      'command' 'cp' '--' "$f" "$backup_dir"/
-    done
-  fi
+>&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshenv\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
+if ! err="$($fetch "$zshenv" '--' "$url"/.zshenv 2>&1)"; then
+  >&2 'printf' "%s\n" "$err"
+  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/.zshenv
+  'exit' '1'
+fi
 
-  if '[' '-n' "$rcs" ']'; then
-    'command' 'rm' '-f' '--' $rcs
-  fi
+>&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
+if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc 2>&1)"; then
+  >&2 'printf' "%s\n" "$err"
+  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/.zshrc
+  'exit' '1'
+fi
 
-  'command' 'mv' '--' "$zshrc" ~/'.zshrc'
+if '[' '-n' "$backup_dir" ']'; then
+  'command' 'mkdir' '-p' '--' "$backup_dir"
+  for f in $rcs; do
+    'command' 'cp' '--' "$f" "$backup_dir"/
+  done
+fi
 
-  >&2 'printf' '\033[33mz4h\033[0m: bootstrapping \033[32mzsh\033[0m environment\n'
-  'export' ZDOTDIR="$HOME"
-  '.' ~/'.zshrc'
-) && 'exit'
+if '[' '-n' "$rcs" ']'; then
+  'command' 'rm' '-f' '--' $rcs
+fi
 
-'command' 'rm' '-f' '--' "$zshrc" 2>'/dev/null'
-'exit' '1'
+'command' 'mv' '--' "$zshenv" ~/'.zshenv'
+'command' 'mv' '--' "$zshrc" ~/'.zshrc'
+
+'trap' '-' 'INT' 'TERM' 'EXIT'
+
+>&2 'printf' '\033[33mz4h\033[0m: bootstrapping \033[32mzsh\033[0m environment\n'
+'export' ZDOTDIR="$HOME"
+Z4H_BOOTSTRAPPING='1'
+'.' ~/'.zshenv'

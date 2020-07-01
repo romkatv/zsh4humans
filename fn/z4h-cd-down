@@ -27,15 +27,13 @@
     cmd=(command find -L $dirs -mindepth 1 '(' $prune ')' -prune -o -type d -print)
   fi
 
-  typeset -p cmd >>/tmp/log
-
   local opt=(
     --with-nth=2
     --delimiter='\000'
     --ansi
     --exact
     --layout=reverse
-    --height=75%
+    --height=50%
     --tiebreak=length,begin,index
     --no-multi
     --bind=tab:down,btab:up)

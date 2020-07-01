@@ -63,9 +63,6 @@ while true; do
             "${(@0)${${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}/%$nil/$nil$_z4h_name_colors[(ke)$link:t]}}"
         fi
       else
-        if [[ $file == script.zsh ]]; then
-          typeset -p style >>/tmp/log
-        fi
         printf '%1$s\0\e[%3$sm%1$q\e[0m%2$s\n' $file "${(@0)style}"
       fi
     done

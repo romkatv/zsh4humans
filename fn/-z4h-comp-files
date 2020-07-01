@@ -43,7 +43,7 @@
     --ansi
     --exact
     --layout=reverse
-    --height=$(( ! $#dirs && ($#words + 2) < 60 * LINES ? $#words + 2 : 60 * LINES / 100 ))
+    --height=$(( ! $#dirs && 100 * ($#words + 2) < 60 * LINES ? $#words + 2 : 60 * LINES / 100 ))
     --tiebreak=length,begin,index
     --multi
     --cycle

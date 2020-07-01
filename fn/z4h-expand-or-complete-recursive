@@ -76,6 +76,7 @@ fi
 
   function _path_files() {
     () {
+      # TODO: respect pats and ignore somehow.
       local -a opts files dirs pats ignore
       zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
         P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n

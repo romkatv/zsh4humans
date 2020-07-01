@@ -36,6 +36,8 @@
   done
 
   local opt=(
+    --print-query
+    --expect=alt-enter
     --with-nth=2
     --delimiter='\000'
     --ansi
@@ -72,13 +74,17 @@
         $Z4H/fzf/bin/fzf $opt 2>$TTY
       }
     )" && [[ -n $choice ]] || return
-    [[ $choice == $'\n'* ]] || again=1
+    choice=("${(@f)choice}")
+    case $choice[2] in
+      $cont) again=1;&  # fallthrough
+      '') choice=(${${choice:2}%$'\0'*});;
+      alt-enter) choice=${(Q)choice[1]};;
+    esac
   } always {
     print -n "$again" >$_z4h_fzf_called
     -z4h-cursor-hide
   }
 
-  choice=(${${(f)${choice#*$'\n'}}%$'\0'*})
   builtin compadd -Uf -p "$word_prefix" -W "$path_prefix" -o nosort - $choice
   if (( $#choice == 1 )); then
     compstate[insert]=2

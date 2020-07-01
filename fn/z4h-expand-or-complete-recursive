@@ -54,11 +54,11 @@ fi
           fi
           _z4h_words+=($matches)
           if (( ! _z4h_recursive )); then
-            local dirs=($_z4h_path_prefix${^matches}(-FN))
-            if (( $#dirs )); then
-              _z4h_recursive=1
-              typeset -gi _fzf_tab_ignored=1
-            fi
+            # This used to be done only if there are non-empty dirs among $matches.
+            # Now it's done unconditionally to take advantage of better file colorizer
+            # and more robust fzf layount in z4h.
+            _z4h_recursive=1
+            typeset -gi _fzf_tab_ignored=1
           fi
         } "$@" || {
           _z4h_recursive=-1

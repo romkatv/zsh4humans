@@ -1,23 +1,47 @@
 ()  {
   eval "$_z4h_opt"
 
+  local -i dot_glob list_types
+  [[ $1 == on ]] && dot_glob=1
+  [[ $2 == on ]] && list_types=1
+
   [[ -w $TTY && -r $TTY ]] || return
 
-  local cmd=$FZF_ALT_C_COMMAND
-  if [[ -z $cmd ]]; then
-    local prune=('-name '{.git,.hg,.svn})
-    if [[ $1 == on ]]; then
-      prune+=('-path "*/.*/*"')
+  if (( dot_glob )); then
+    local dirs=(./*(-/DN))
+  else
+    local dirs=(./*(-/N))
+  fi
+
+  local -a cmd
+  if (( $#dirs )); then
+    local -a prune
+    if (( dot_glob )); then
+      prune=(-path '*/.*/*')
     else
-      prune+=('-path "*/.*"')
+      prune=(-path '*/.*')
     fi
     if [[ ${commands[find]:A} != */busybox* ]]; then
-      prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
+      prune+=(-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc)
     fi
-    prune="\( ${(j: -o :)prune} \) -prune"
-    cmd="command find -L . -mindepth 1 $prune -o -type d -print 2>/dev/null | command cut -b3-"
+    cmd=(command find -L $dirs -mindepth 1 '(' $prune ')' -prune -o -type d -print)
   fi
-  local opt="--height ${FZF_TMUX_HEIGHT:-40%} --reverse $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS"
+
+  typeset -p cmd >>/tmp/log
+
+  local opt=(
+    --with-nth=2
+    --delimiter='\000'
+    --ansi
+    --exact
+    --layout=reverse
+    --height=75%
+    --tiebreak=length,begin,index
+    --no-multi
+    --bind=tab:down,btab:up)
+
+  -z4h-set-list-colors complete:cd::
+  local -i list_colors=$((!$?))
 
   {
     -z4h-show-dots
@@ -29,9 +53,14 @@
     {
       local dir
       dir=$(
-        -z4h-cursor-show
+        unsetopt pipe_fail
+        exec 2>/dev/null
         {
-          eval $cmd | FZF_DEFAULT_OPTS=$opt $Z4H/fzf/bin/fzf +m
+          print -rC1 -- $dirs
+          "${cmd[@]}"
+        } | command cut -b3- | -z4h-present-files $list_colors $list_types | {
+          -z4h-cursor-show
+          $Z4H/fzf/bin/fzf $opt 2>$TTY
         } always {
           -z4h-cursor-hide
         }) || return
@@ -50,4 +79,4 @@
       zle -R
     fi
   }
-} "${options[dotglob]}" && -z4h-redraw-prompt
+} "${options[dotglob]}" "${options[list_types]}" && -z4h-redraw-prompt

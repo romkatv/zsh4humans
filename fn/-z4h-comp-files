@@ -33,10 +33,9 @@
     --delimiter='\000'
     --ansi
     --exact
-    --no-sort
     --layout=reverse
     --height=75%
-    --tiebreak=length,begin
+    --tiebreak=length,begin,index
     --multi
     --bind=tab:down,btab:up,ctrl-space:toggle)
   local cont

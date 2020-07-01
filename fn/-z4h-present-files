@@ -1,10 +1,8 @@
-# Uses parameters:
-#
-#   - list_types
-#   - list_colors
-
 eval "$_z4h_opt"
 setopt octalzeroes
+
+local -i list_colors=$1
+local -i list_types=$1
 
 [[ $_z4h_mode_colors[ln] != target ]]
 local -i ln_target=$?
@@ -26,11 +24,11 @@ while true; do
   files=("${(@f)buf}")
   buf=$files[-1]
   files[-1]=()
-  if (( ! $#list_colors && ! list_types )) || ! zstat -L -A mode +mode -- $files; then
+  if (( ! list_colors && ! list_types )) || ! zstat -L -A mode +mode -- $files; then
     printf '%1$s\0%1$q\n' $files
     continue
   fi
-  if (( ! $#list_colors )); then
+  if (( ! list_colors )); then
     printf '%2$s\0%2$q%1$s\n' ${"${(@)mode/(#m)*/$suf[$(((MATCH & 0170000) >> 12))]}":^files}
     continue
   fi

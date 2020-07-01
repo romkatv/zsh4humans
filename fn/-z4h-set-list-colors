@@ -1,0 +1,43 @@
+eval "$_z4h_opt"
+setopt octalzeroes
+
+local ctx=$1
+
+local -a list_colors
+zstyle -a :completion:$ctx list-colors list_colors || return
+(( $#list_colors )) || return
+
+if [[ .${(pj:\0:)list_colors} != $_z4h_last_list_colors ]]; then
+  typeset -g _z4h_last_list_colors=.${(pj:\0:)list_colors}
+  typeset -gA _z4h_name_colors=(${(@s:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+  typeset -gA _z4h_mode_colors=(${(@Ms:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+  typeset -gA _z4h_mode_codes=()
+  () {
+    local -i8 a b c d
+    local -a codes
+    for a in 0140000 0100000 0060000 0040000 0020000 0010000; do
+      for b in 0 04000 02000; do
+        for c in 0 01000 00002 01002; do
+          for d in 0 1; do
+            codes=()
+            if (( a != 0100000 )); then
+              if   (( a == 0140000 )); then codes+=($_z4h_mode_colors[so])
+              elif (( a == 0060000 )); then codes+=($_z4h_mode_colors[bd])
+              elif (( a == 0040000 )); then codes+=($_z4h_mode_colors[di])
+              elif (( a == 0020000 )); then codes+=($_z4h_mode_colors[cd])
+              elif (( a == 0010000 )); then codes+=($_z4h_mode_colors[pi]); fi
+
+              if   (( c == 01000   )); then codes+=($_z4h_mode_colors[st])
+              elif (( c == 00002   )); then codes+=($_z4h_mode_colors[ow])
+              elif (( c == 01002   )); then codes+=($_z4h_mode_colors[tw]); fi
+            fi
+            (( $#codes )) || (( ! c )) || codes+=($_z4h_mode_colors[ex])
+            _z4h_mode_codes[$((a|b|c|d))]=${(j:;:)codes}
+          done
+        done
+      done
+    done
+  }
+fi
+
+return 0

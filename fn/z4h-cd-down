@@ -9,27 +9,23 @@
 
   if (( dot_glob )); then
     local dirs=(./*(-/DN))
+    local non_empty=(${^${dirs:#./.*}}/*(D-/Y1N:h:t))
   else
     local dirs=(./*(-/N))
+    local non_empty=(${^dirs}/*(-/Y1N:h:t))
   fi
-
-  local non_empty=(${^dirs}(-FN))
 
   local -a cmd
   if (( $#non_empty )); then
-    local -a prune
-    if (( dot_glob )); then
-      prune=(-path '*/.*/*')
-    else
-      prune=(-path '*/.*')
-    fi
-    if [[ ${commands[find]:A} != */busybox* ]]; then
-      local fs
-      for fs in sysfs devfs devtmpfs proc udev; do
-        prune+=(-o -fstype $fs)
-      done
-    fi
-    cmd=(command find -L $non_empty -mindepth 1 '(' $prune ')' -prune -o -type d -print)
+    cmd+=(command find -L . -xdev -mindepth 2  '!' -type d -prune -o '!' '(')
+    local dir
+    for dir in $non_empty; do
+      cmd+=(-path ./${(b)dir}/'*' -o)
+    done
+    cmd[-1]=(')' -prune)
+    cmd+=(-o -name '.*' -prune)
+    (( dot_glob )) && cmd+=(-print)
+    cmd+=(-o -print)
   fi
 
   local query char

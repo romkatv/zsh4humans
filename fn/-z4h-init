@@ -372,8 +372,8 @@ export LESS='-iRFXMx4'
 export PAGER=less
 
 # LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
-export LS_COLORS='rs=0:no=00:mi=00:mh=00:ln=01;36:or=01;31:di=01;34:ow=04;01;34:st=34:tw=04;34:'
-LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32:'
+export LS_COLORS='fi=00:mi=00:mh=00:ln=01;36:or=01;31:di=01;34:ow=04;01;34:st=34:tw=04;34:'
+LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01;35:ex=01;32'
 export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
@@ -407,8 +407,10 @@ path=(${dirs:|path} $path)
 
 if (( _z4h_use[zsh-autosuggestions] )); then
   if (( terminfo[colors] >= 256 )); then
+    LS_COLORS+=':no=38;5;248'
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=244'        # the default is hard to see
   else
+    LS_COLORS+=':no=1;30'
     ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=black,bold' # the default is outside of 8-color range
   fi
 

@@ -12,6 +12,25 @@
   compstate[list]=
   compstate[insert]=
 
+  if (( only_dirs )); then
+    local filter='-type d'
+    if (( dot_glob )); then
+      local dirs=($path_prefix${^${(Q)words:#.*}}/*(D-/Y1N:h:t))
+    else
+      local dirs=($path_prefix${^${(Q)words:#.*}}/*(-/Y1N:h:t))
+    fi
+  else
+    local filter=
+    if (( dot_glob )); then
+      local dirs=($path_prefix${^${(Q)words:#.*}}/*(DY1N:h:t))
+    else
+      local dirs=($path_prefix${^${(Q)words:#.*}}/*(Y1N:h:t))
+    fi
+  fi
+
+  dirs=(./${^dirs})
+  dirs=${(j: :)${(@Aq)dirs}}
+
   local -a prune
   if (( dot_glob )); then
     prune+=('-path "*/.*/*"')
@@ -22,11 +41,7 @@
     prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
   fi
   prune="\( ${(j: -o :)prune} \) -prune"
-  local filter
-  (( only_dirs )) && filter='-type d'
-  local dirs=($path_prefix${^${(Q)words:#.*}}(-FN:t))
-  dirs=(./${^dirs})
-  dirs=${(j: :)${(@Aq)dirs}}
+
   local cmd="command find -L $dirs -mindepth 1 $prune -o $filter -print | command cut -b3-"
 
   local query char

@@ -57,7 +57,7 @@ fi
               _z4h_path_prefix=$_z4h_W[2]
             fi
             _z4h_words+=($_z4h_matches)
-            if (( ! _z4h_recursive )); then
+            if (( ! _z4h_recursive && $#_z4h_words > 1 )); then
               # This used to be done only if there are non-empty dirs among $matches.
               # Now it's done unconditionally to take advantage of better file colorizer
               # and more robust fzf layount in z4h.

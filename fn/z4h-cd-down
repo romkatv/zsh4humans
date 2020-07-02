@@ -24,7 +24,10 @@
       prune=(-path '*/.*')
     fi
     if [[ ${commands[find]:A} != */busybox* ]]; then
-      prune+=(-o -fstype sysfs -o -fstype devfs -o -fstype devtmpfs -o -fstype proc)
+      local fs
+      for fs in sysfs devfs devtmpfs proc udev; do
+        prune+=(-o -fstype $fs)
+      done
     fi
     cmd=(command find -L $non_empty -mindepth 1 '(' $prune ')' -prune -o -type d -print)
   fi

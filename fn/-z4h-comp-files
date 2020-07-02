@@ -38,7 +38,7 @@
     prune+=('-path "*/.*"')
   fi
   if [[ ${commands[find]:A} != */busybox* ]]; then
-    prune+=('-fstype '{sysfs,devfs,devtmpfs,proc})
+    prune+=('-fstype '{sysfs,devfs,devtmpfs,proc,udev})
   fi
   prune="\( ${(j: -o :)prune} \) -prune"
 

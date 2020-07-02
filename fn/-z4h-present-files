@@ -40,6 +40,14 @@ while true; do
     continue
   fi
 
+  # This doesn't work the same way as GNU ls. See get_color_indicator in
+  # https://git.savannah.gnu.org/cgit/coreutils.git/tree/src/ls.c.
+  #
+  # TODO: fix it.
+  # TODO: see if this can be made faster by invoking `find` with `-printf '%Y\0%m\0%P\n'`,
+  # invoking `zstat -A links +link -- ${files*$'\0'*$'\0'}` and then applying some kind of
+  # crazy expansion.
+
   if (( $#_z4h_name_colors )); then
     # This implementation works whether _z4h_name_colors is empty or not. It's about 30%
     # slower than the alternative implementation below, which only works if _z4h_name_colors

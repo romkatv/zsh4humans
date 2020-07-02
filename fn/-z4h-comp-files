@@ -13,14 +13,12 @@
   compstate[insert]=
 
   if (( only_dirs )); then
-    local filter='-type d'
     if (( dot_glob )); then
       local dirs=($path_prefix${^${(Q)words:#.*}}/*(D-/Y1N:h:t))
     else
       local dirs=($path_prefix${^${(Q)words:#.*}}/*(-/Y1N:h:t))
     fi
   else
-    local filter=
     if (( dot_glob )); then
       local dirs=($path_prefix${^${(Q)words:#.*}}/*(DY1N:h:t))
     else
@@ -28,21 +26,20 @@
     fi
   fi
 
-  dirs=(./${^dirs})
-  dirs=${(j: :)${(@Aq)dirs}}
-
-  local -a prune
-  if (( dot_glob )); then
-    prune+=('-path "*/.*/*"')
-  else
-    prune+=('-path "*/.*"')
+  local -a cmd
+  if (( $#dirs )); then
+    cmd+=(command find -L . -xdev -mindepth 2)
+    (( only_dirs )) && cmd+=('!' -type d -prune -o)
+    cmd+=('!' '(')
+    local dir
+    for dir in $dirs; do
+      cmd+=(-path ./${(b)dir}/'*' -o)
+    done
+    cmd[-1]=(')' -prune)
+    cmd+=(-o -name '.*' -prune)
+    (( dot_glob )) && cmd+=(-print)
+    cmd+=(-o -print)
   fi
-  if [[ ${commands[find]:A} != */busybox* ]]; then
-    prune+=('-fstype '{sysfs,devfs,devtmpfs,proc,udev})
-  fi
-  prune="\( ${(j: -o :)prune} \) -prune"
-
-  local cmd="command find -L $dirs -mindepth 1 $prune -o $filter -print | command cut -b3-"
 
   local query char
   for char in ${(s::)words[1]}; do
@@ -81,7 +78,7 @@
       [[ -n $path_prefix ]] && builtin cd -q -- $path_prefix
       {
         print -lr -- ${(Q)words}
-        [[ -z $dirs ]] || eval $cmd
+        "${cmd[@]}"
       } | {
         -z4h-present-files $list_colors $list_types
       } | {

@@ -47,6 +47,20 @@ while true; do
   # TODO: see if this can be made faster by invoking `find` with `-printf '%Y\0%m\0%P\n'`,
   # invoking `zstat -A links +link -- ${files*$'\0'*$'\0'}` and then applying some kind of
   # crazy expansion.
+  #
+  # Types:
+  #
+  #   ? unknown
+  #   p fifo
+  #   c chardev
+  #   d directory
+  #   b blockdev
+  #   - normal
+  #   s socket
+  #   w whiteout
+  #   l symlink (good)
+  #   L symlink (loop)
+  #   N symlink (nonexistent)
 
   if (( $#_z4h_name_colors )); then
     # This implementation works whether _z4h_name_colors is empty or not. It's about 30%

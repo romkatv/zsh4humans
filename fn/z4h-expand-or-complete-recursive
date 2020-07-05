@@ -1,5 +1,7 @@
 [[ -w $TTY && -r $TTY ]] || return
 
+autoload +X -Uz -- -z4h-fzf
+
 if (( ! ${+functions[-z4h-orig-path-files]} )); then
   autoload +X -Uz _path_files
   functions[-z4h-orig-path-files]=${functions[_path_files]}

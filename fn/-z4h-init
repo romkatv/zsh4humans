@@ -63,7 +63,8 @@ elif (( $+commands[brew] )); then
 fi
 
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
-      -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
+      -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate && $#terminfo != 0 &&
+      -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
   export TERMINFO=${_z4h_exe:h:h}/share/terminfo
 fi
 

@@ -601,7 +601,7 @@ function -z4h-post-init() {
 
   local -aU editors=(
     vi vim nvim emacs nano gedit code kak kate mcedit joe $EDITOR $VISUAL
-    cat less more $PAGER)
+    bat cat less more $PAGER)
   zstyle ':completion:*:*:('${(j:|:)editors}'):*:*' ignored-patterns '*.zwc'
 
   zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"

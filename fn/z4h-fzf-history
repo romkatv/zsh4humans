@@ -5,9 +5,8 @@ eval "$_z4h_opt"
 [[ -w $TTY && -r $TTY ]] || return
 
 local bind='?:toggle-preview,ctrl-h:backward-kill-word,ctrl-r:up,ctrl-s:down'
-local preview='printf "%s" {}'
+local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp'
-local tmp=$Z4H/tmp/fzf-history.$sysparams[pid]
 
 {
   -z4h-show-dots
@@ -16,29 +15,37 @@ local tmp=$Z4H/tmp/fzf-history.$sysparams[pid]
   IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
   print >$TTY || return
 
+  typeset -ga _z4h_naturals
+  if (( $#_z4h_naturals < $#history )); then
+    _z4h_naturals+=({$(($#_z4h_naturals+1))..$#history})
+  fi
+
+  autoload +X -Uz -- -z4h-cursor-show
+
   {
-    -z4h-cursor-show
-    {
-      print -rNC1 -- "${(@u)history}" |
-        $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
-            --height=80% --preview-window=down:40%:wrap --preview=$preview \
-            --tabstop 1 --bind=$bind --query=$LBUFFER                      \
-        >$tmp 2>$TTY || return
-    } always {
-      -z4h-cursor-hide
-    }
-    local cmd
-    while true; do
-      sysread 'cmd[$#cmd+1]' && continue
-      (( $? == 5 ))          || return
-      break
-    done <$tmp
-    [[ $cmd == *$'\n' ]] || return
-    cmd[-1]=
-    [[ -n $cmd ]] || return
-    zle .vi-fetch-history -n $(($#history - ${${history[@]}[(ie)$cmd]} + 1))
-    BUFFER=$cmd
-    CURSOR=$#BUFFER
+    local choice
+    choice=$(
+      unsetopt pipe_fail
+      {
+        printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
+      } | {
+        {
+          -z4h-cursor-show
+          $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
+              --delimiter='\001' --with-nth=2 --exact                        \
+              --height=80% --preview-window=down:40%:wrap --preview=$preview \
+              --tabstop 1 --bind=$bind --query=$LBUFFER 2>$TTY
+        } always {
+          -z4h-cursor-hide
+        }
+      }) && [[ -n $choice ]] || return
+    zle .vi-fetch-history -n $(($#history - ${choice%%$'\1'*} + 1))
+    BUFFER=${choice#*$'\1'}
+    if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+      CURSOR=$(($#BUFFER - 1))
+    else
+      CURSOR=$#BUFFER
+    fi
     if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
       typeset -g _z4h_autosuggest_buffer=$BUFFER
       unset _z4h_autosuggestion POSTDISPLAY

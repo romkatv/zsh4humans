@@ -397,7 +397,6 @@ zstyle ':completion:*:(rm|kill|diff):*' ignore-line       "other"
 zstyle ':completion:*:rm:*'             file-patterns     "*:all-files"
 zstyle ':completion:*'                  use-cache         "true"
 zstyle ':completion:*'                  cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
-zstyle ':completion:*'                  list-colors       "${(@s.:.)LS_COLORS}"
 zstyle ':completion:*:paths'            accept-exact-dirs "true"
 
 if (( _z4h_use[powerlevel10k] )); then
@@ -604,6 +603,8 @@ function -z4h-post-init() {
     vi vim nvim emacs nano gedit code kak kate mcedit joe $EDITOR $VISUAL
     cat less more $PAGER)
   zstyle ':completion:*:*:('${(j:|:)editors}'):*:*' ignored-patterns '*.zwc'
+
+  zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"
 
   # Initialize completions.
   if zstyle -t ':completion::complete:' use-cache; then

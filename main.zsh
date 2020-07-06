@@ -21,6 +21,12 @@ fi
   typeset -gr _z4h_exe=${exe:A}
 }
 
+if ! { zmodload zsh/terminfo zsh/zselect && (( $#terminfo )) ||
+       [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
+          -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]] } 2>/dev/null; then
+  source $Z4H/zsh4humans/sc/exec-zsh-i || return
+fi
+
 if [[ ! -o interactive ]]; then
   # print -Pru2 -- "%F{3}z4h%f: starting interactive %F{2}zsh%f"
   exec -- $_z4h_exe -i || return

@@ -1,9 +1,13 @@
-# This file gets sourced. It never returns succeeds.
+# This file gets sourced. Does not return on success.
 
 _z4h_try_exec_zsh_i() {
-  command -v "$1" >'/dev/null' 2>&1 || 'return' '0'
-  'command' "$1" '-fc' '[[ $ZSH_VERSION == (5.<4->*|<6->.*) ]]' <'/dev/null' >'/dev/null' 2>&1 ||
-    'return' '0'
+  >'/dev/null' 2>&1 command -v "$1" || 'return' '0'
+  <'/dev/null' >'/dev/null' 2>&1 'command' "$1" '-fc' '
+    [[ $ZSH_VERSION == (5.<4->*|<6->.*) ]] || return
+    exe=${${(M)0:#/*}:-$commands[$0]}
+    zmodload zsh/terminfo zsh/zselect && (( $#terminfo )) ||
+      [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $exe == */bin/zsh &&
+         -e ${exe:h:h}/share/zsh/5.8/scripts/relocate ]]' || 'return' '0'
   # >&2 'printf' '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
   'exec' "$1" '-i' || 'return'
 }

@@ -62,8 +62,8 @@ elif (( $+commands[brew] )); then
   -z4h-brew-command-not-found
 fi
 
-if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f &&
-      -e ${_z4h_exe:h:h}/share/zsh/5.8/./scripts/relocate ]]; then
+if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
+      -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
   local -aU terminfo_dirs=(${(s.:.)TERMINFO_DIRS} ${_z4h_exe:h:h}/share/terminfo)
   export TERMINFO_DIRS=${(j.:.)terminfo_dirs}
 fi

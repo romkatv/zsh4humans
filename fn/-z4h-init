@@ -144,6 +144,8 @@ WORDCHARS=''                   # only alphanums make up words in word-based zle 
 ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab completion
 zle_highlight=('paste:none')   # disable highlighting of text pasted into the command line
 
+TIMEFMT='user=%U system=%S cpu=%P total=%*E'  # output format of `time` reserved word
+
 if (( ! _z4h_custom_histfile )); then
   HISTFILE=${ZDOTDIR:-~}/.zsh_history
 fi

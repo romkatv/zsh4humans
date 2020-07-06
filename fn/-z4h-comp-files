@@ -80,7 +80,7 @@
       [[ -n $path_prefix ]] && builtin cd -q -- $path_prefix
       {
         print -lr -- ${(Q)words}
-        "${cmd[@]}"
+        "${cmd[@]}" | command cut -b3-
       } | {
         -z4h-present-files $list_colors $list_types
       } | {

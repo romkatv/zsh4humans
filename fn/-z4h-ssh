@@ -356,6 +356,7 @@ fi
         fi
       done
       if [[ -s $local_hist_tmp ]]; then
+        local TMPPREFIX=$local_hist
         () {
           () { fc -pa -- $1 $HISTSIZE $SAVEHIST } $1 && zf_mv -f -- $1 $local_hist
         } =(command cat -- $local_hist(N) $local_hist_tmp) || return

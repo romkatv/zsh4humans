@@ -598,6 +598,11 @@ function -z4h-post-init() {
 
   add-zsh-hook -d -- precmd -z4h-post-init
 
+  local -aU editors=(
+    vi vim nvim emacs nano gedit code kak kate mcedit joe $EDITOR $VISUAL
+    cat less more $PAGER)
+  zstyle ':completion:*:*:('${(j:|:)editors}'):*:*' ignored-patterns '*.zwc'
+
   # Initialize completions.
   if zstyle -t ':completion::complete:' use-cache; then
     local cache

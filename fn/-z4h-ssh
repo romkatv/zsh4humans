@@ -202,7 +202,7 @@ fi
       print -Pru2 -- "%F{3}z4h%f: cannot send file: %F{1}${src//\%/%%}%f"
       return 1
     fi
-    command ln -s -- $target $tmpdir/$i || return
+    zf_ln -s -- $target $tmpdir/$i || return
     indices+=($i)
   done
 

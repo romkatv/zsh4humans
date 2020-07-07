@@ -37,7 +37,7 @@ typeset -gr _z4h_opt='emulate -L zsh &&
   setopt no_prompt_bang no_bg_nice no_aliases'
 
 zmodload zsh/{datetime,langinfo,parameter,stat,system,terminfo,zutil} || return
-zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
+zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm,zf_rmdir,zf_ln}         || return
 
 () {
   local top=${funcsourcetrace[-1]%:<->}

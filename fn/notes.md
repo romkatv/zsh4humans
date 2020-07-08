@@ -645,8 +645,3 @@ Pass consistent bindings to fzf: ctrl+k, alt+j, etc.
 
 `z4h-expand-or-complete` can check the number of completion candidates and create a smaller fzf
 window if there aren't many of them.
-
----
-
-Fix bash completions. Probably need to define stubs for a few functions and then replay them.
-See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-655048679.

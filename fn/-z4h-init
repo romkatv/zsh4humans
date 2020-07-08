@@ -399,6 +399,10 @@ zstyle ':completion:*'                  use-cache         "true"
 zstyle ':completion:*'                  cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
 zstyle ':completion:*:paths'            accept-exact-dirs "true"
 
+# Make it possible to use completion specifications and functions written for bash.
+autoload -Uz bashcompinit
+bashcompinit
+
 if (( _z4h_use[powerlevel10k] )); then
   # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
   () {
@@ -630,10 +634,6 @@ function -z4h-post-init() {
     compdef "${(@0)args}"
   done
   unset _z4h_compdef
-
-  # Make it possible to use completion specifications and functions written for bash.
-  autoload -Uz bashcompinit
-  bashcompinit
 
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
     () {

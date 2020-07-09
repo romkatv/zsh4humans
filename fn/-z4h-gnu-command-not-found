@@ -1,0 +1,19 @@
+eval "$_z4h_opt"
+
+function command_not_found_handler() {
+  eval "$_z4h_opt"
+  if (( $#functrace >= 2 )); then
+    print -ru2 -- "$functrace[1]: command not found: $1"
+  else
+    local msg="$(/usr/lib/command-not-found --no-failure-msg -- $1 2>&1)"
+    if [[ -n $msg ]]; then
+      print -ru2 -- ${msg#$'\n'}
+    else
+      print -ru2 -- "zsh: command not found: $1"
+    fi
+  fi
+  return 127
+}
+
+unfunction -- -z4h-gnu-command-not-found
+autoload -Uz -- -z4h-gnu-command-not-found

@@ -48,6 +48,8 @@ fi
 # Enable command_not_found_handler if possible.
 if (( $+functions[command_not_found_handler] )); then
   # already installed
+elif [[ -x /usr/lib/command-not-found ]]; then
+  -z4h-gnu-command-not-found
 elif [[ -e /etc/zsh_command_not_found ]]; then
   source /etc/zsh_command_not_found
 elif [[ -e /usr/share/doc/pkgfile/command-not-found.zsh ]]; then

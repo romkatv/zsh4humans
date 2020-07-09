@@ -1,15 +1,26 @@
 eval "$_z4h_opt"
-[[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
-local repo
-repo="$(command brew --repository 2>/dev/null)" || return
-[[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
-function command_not_found_handler() {
-  eval "$_z4h_opt"
-  local msg
-  if msg="$(command brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
-    print -ru2 -- $msg
-  else
-    print -ru2 -- "zsh: command not found: $1"
-  fi
-  return 127
+
+{
+  [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
+  local repo
+  repo="$(command brew --repository 2>/dev/null)" || return
+  [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
+
+  function command_not_found_handler() {
+    eval "$_z4h_opt"
+    if (( $#functrace >= 2 )); then
+      print -ru2 -- "$functrace[1]: command not found: $1"
+    else
+      local msg
+      if msg="$(command brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
+        print -ru2 -- $msg
+      else
+        print -ru2 -- "zsh: command not found: $1"
+      fi
+    fi
+    return 127
+  }
+} always {
+  unfunction -- -z4h-brew-command-not-found
+  autoload -Uz -- -z4h-brew-command-not-found
 }

@@ -76,7 +76,11 @@ function z4h() {
       [[ "$2" != -- ]] || shift
       (( ARGC != 2 )) || {
         [[ -e "$2" ]] || return
-        (( ! compile )) || -z4h-compile "$2" || true
+        (( compile )) && {
+          -z4h-compile "$2" || true
+        } || {
+          [[ ! -e "$2".zwc ]] || zf_rm -f -- "$2".zwc || true
+        }
         local file="$2"
         builtin set --
         builtin source -- "$file"

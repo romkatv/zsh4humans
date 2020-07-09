@@ -17,7 +17,7 @@ case $ARGC-$1 in
         print -Pr -- "Initialize Zsh. Should be called just once from %U.zshrc%u."
       ;;
       source)
-        print -Pr -- "usage: %F{2}z4h%f %Bsource%b %Ufile%u"
+        print -Pr -- "usage: %F{2}z4h%f %Bsource%b [-c] %Ufile%u"
         print -Pr -- ""
         print -Pr -- "Compile and source Zsh file if it exists. This is done with current options."
       ;;
@@ -53,7 +53,7 @@ case $ARGC-$1 in
     print -Pru$fd -- "usage: %F{2}z4h%f %Binstall%b [-f] [%Uuser/project%u]..."
     print -Pru$fd -- "           %Bupdate%b"
     print -Pru$fd -- "           %Binit%b"
-    print -Pru$fd -- "           %Bsource%b %Ufile%u"
+    print -Pru$fd -- "           %Bsource%b [-c] %Ufile%u"
     print -Pru$fd -- "           %Bcompile%b %Ufile%u..."
     print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
     print -Pru$fd -- "           %Bchsh%b"

@@ -24,7 +24,7 @@ fi
 if ! { zmodload zsh/terminfo zsh/zselect && (( $#terminfo )) ||
        [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
           -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]] } 2>/dev/null; then
-  source $Z4H/zsh4humans/sc/exec-zsh-i || return
+  builtin source $Z4H/zsh4humans/sc/exec-zsh-i || return
 fi
 
 if [[ ! -o interactive ]]; then
@@ -67,14 +67,22 @@ function compdef() {
 # Main zsh4humans function. Type `z4h help` for usage.
 function z4h() {
   case "$ARGC-$1" in
-    2-source)
-      [[ -e "$2" ]] || return
-      -z4h-compile "$2" || true
-      local file="$2"
-      set --
-      source -- "$file"
-      return
-    ;;
+    <2->-source)
+      local -i compile
+      [[ "$2" != -c ]] || {
+        compile=1
+        shift
+      }
+      [[ "$2" != -- ]] || shift
+      (( ARGC != 2 )) || {
+        [[ -e "$2" ]] || return
+        (( ! compile )) || -z4h-compile "$2" || true
+        local file="$2"
+        builtin set --
+        builtin source -- "$file"
+        return
+      }
+    ;|
     <2->-compile)
       local -i ret
       local file
@@ -112,7 +120,7 @@ function z4h() {
         local user=${(%):-%n}
         local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
         [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
-        source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
+        builtin source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
       }
       () {
         eval "$_z4h_opt"

@@ -51,9 +51,9 @@ if (( $+functions[command_not_found_handler] )); then
 elif [[ -x /usr/lib/command-not-found ]]; then
   -z4h-gnu-command-not-found
 elif [[ -e /etc/zsh_command_not_found ]]; then
-  source /etc/zsh_command_not_found
+  builtin source /etc/zsh_command_not_found
 elif [[ -e /usr/share/doc/pkgfile/command-not-found.zsh ]]; then
-  source /usr/share/doc/pkgfile/command-not-found.zsh
+  builtin source /usr/share/doc/pkgfile/command-not-found.zsh
 elif [[ -x /usr/libexec/pk-command-not-found && -S /var/run/dbus/system_bus_socket ]]; then
   command_not_found_handler() { /usr/libexec/pk-command-not-found "$@" }
 elif [[ -x /data/data/com.termux/files/usr/libexec/termux/command-not-found ]]; then
@@ -173,7 +173,7 @@ if (( _z4h_use[fzf-tab] )); then
     --query='$query'                                     \
     --header-lines='$#headers'                           \
     --height='$(( 100 * ($#candidates + 2) < 60 * LINES ? $#candidates + 2 : 60 * LINES / 100 ))'
-  z4h source $Z4H/fzf-tab/fzf-tab.zsh
+  builtin source $Z4H/fzf-tab/fzf-tab.zsh
   eval "function fzf-tab-complete() {
     ${functions[fzf-tab-complete]//zle (.reset-prompt|redisplay|-R)/}
   }"
@@ -409,9 +409,9 @@ if (( _z4h_use[powerlevel10k] )); then
   # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
   () {
     local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
-    z4h source $Z4H/powerlevel10k/powerlevel10k.zsh-theme
+    builtin source $Z4H/powerlevel10k/powerlevel10k.zsh-theme
   }
-  z4h source $POWERLEVEL9K_CONFIG_FILE
+  z4h source -c $POWERLEVEL9K_CONFIG_FILE
   -z4h-set-term-title-precmd || return
 fi
 
@@ -462,7 +462,7 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
   fi
 
-  z4h source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh
+  builtin source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh
 fi
 
 if (( _z4h_use[zsh-syntax-highlighting] )); then
@@ -643,7 +643,7 @@ function -z4h-post-init() {
         zle-line-finish    user:_zsh_highlight_widget_zle-line-finish
         zle-isearch-update user:_zsh_highlight_widget_zle-isearch-update
       )
-      z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+      builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
       preexec_functions=(${preexec_functions:#_zsh_highlight_preexec_hook})
       eval '_zsh_highlight() {
         if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
@@ -663,7 +663,7 @@ function -z4h-post-init() {
     unset ZSH_AUTOSUGGEST_USE_ASYNC
     _zsh_autosuggest_start
   elif (( _z4h_use[zsh-syntax-highlighting] )); then
-    z4h source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
   fi
 }
 

@@ -100,7 +100,7 @@ local -i list_colors=$((!$?))
             choice=${choice#*$'\n'}
             [[ -n $choice ]] || return
           fi
-          cd -- $choice || return
+          cd -- ${choice%%$'\0'*} || return
           redraw=1
         } always {
           echoti cuu 1

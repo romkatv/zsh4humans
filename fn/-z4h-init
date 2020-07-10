@@ -126,7 +126,6 @@ zle -N z4h-backward-kill-word
 zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer
-zle -N z4h-expand-or-complete
 zle -N z4h-expand-or-complete-recursive
 zle -N z4h-up-local-history
 zle -N z4h-down-local-history

@@ -50,6 +50,14 @@ local -i list_colors=$((!$?))
         query+=$char
       done
 
+      local bind=(
+        ctrl-h:backward-kill-word
+        alt-j:clear-query
+        ctrl-u:clear-query
+        ctrl-k:kill-line
+        alt-k:unix-line-discard
+        tab:down
+        btab:up)
       local opt=(
         --with-nth=2
         --delimiter='\000'
@@ -61,7 +69,7 @@ local -i list_colors=$((!$?))
         --no-multi
         --cycle
         --query=${query:2}
-        --bind=tab:down,btab:up)
+        --bind=${(j:,:)bind})
       local cont
       if _fzf_tab_get -s continuous-trigger cont && [[ -n $cont ]]; then
         opt+=(--expect=$cont)

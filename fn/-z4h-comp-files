@@ -47,6 +47,16 @@
     query+=$char
   done
 
+  local bind=(
+    ctrl-h:backward-kill-word
+    alt-j:clear-query
+    ctrl-u:clear-query
+    ctrl-k:kill-line
+    alt-k:unix-line-discard
+    tab:down
+    btab:up
+    ctrl-space:toggle
+    ctrl-a:select-all)
   local opt=(
     --print-query
     --expect=alt-enter
@@ -60,7 +70,7 @@
     --multi
     --cycle
     --query=$query
-    --bind=tab:down,btab:up,ctrl-space:toggle)
+    --bind=${(j:,:)bind})
   local cont
   if _fzf_tab_get -s continuous-trigger cont && [[ -n $cont ]]; then
     opt+=(--expect=$cont)

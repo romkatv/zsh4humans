@@ -4,7 +4,14 @@ eval "$_z4h_opt"
 
 [[ -w $TTY && -r $TTY ]] || return
 
-local bind='?:toggle-preview,ctrl-h:backward-kill-word,ctrl-r:up,ctrl-s:down'
+local bind=(
+  ctrl-h:backward-kill-word
+  alt-j:clear-query
+  ctrl-u:clear-query
+  ctrl-k:kill-line
+  alt-k:unix-line-discard
+  ctrl-r:up
+  ctrl-s:down)
 local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp'
 
@@ -34,7 +41,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
           $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
               --delimiter='\001' --with-nth=2 --exact                        \
               --height=80% --preview-window=down:40%:wrap --preview=$preview \
-              --tabstop 1 --bind=$bind --query=$LBUFFER 2>$TTY
+              --tabstop 1 --bind=${(j:,:)bind} --query=$LBUFFER 2>$TTY
         } always {
           -z4h-cursor-hide
         }

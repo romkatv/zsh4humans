@@ -154,23 +154,33 @@ HISTSIZE=1000000000  # infinite command history
 SAVEHIST=1000000000  # infinite command history
 
 if (( _z4h_use[fzf-tab] )); then
+  local bind=(
+    ctrl-h:backward-kill-word
+    alt-j:clear-query
+    ctrl-u:clear-query
+    ctrl-k:kill-line
+    alt-k:unix-line-discard
+    tab:down
+    btab:up
+    ctrl-space:toggle
+    ctrl-a:select-all)
   bindkey '^I' expand-or-complete          # fzf-tab reads it during initialization
   zstyle ':fzf-tab:*' prefix       ''      # remove '·'
   zstyle ':fzf-tab:*' query-string prefix  # pre-populate fzf query with the longest common prefix
-  zstyle ':fzf-tab:*' command      -z4h-fzf              \
-    --ansi                                               \
-    --expect='$continuous_trigger'                       \
-    --color='hl:$(( $#headers == 0 ? 108 : 255 ))'       \
-    --nth=2,3                                            \
-    --delimiter='\000'                                   \
-    --layout=reverse                                     \
-    --exact                                              \
-    --tiebreak=begin                                     \
-    --multi                                              \
-    --cycle                                              \
-    --bind=tab:down,btab:up,change:top,ctrl-space:toggle \
-    --query='$query'                                     \
-    --header-lines='$#headers'                           \
+  zstyle ':fzf-tab:*' command      -z4h-fzf        \
+    --ansi                                         \
+    --expect='$continuous_trigger'                 \
+    --color='hl:$(( $#headers == 0 ? 108 : 255 ))' \
+    --nth=2,3                                      \
+    --delimiter='\000'                             \
+    --layout=reverse                               \
+    --exact                                        \
+    --tiebreak=begin                               \
+    --multi                                        \
+    --cycle                                        \
+    --query='$query'                               \
+    --bind=${(j:,:)bind}                           \
+    --header-lines='$#headers'                     \
     --height='$(( 100 * ($#candidates + 2) < 60 * LINES ? $#candidates + 2 : 60 * LINES / 100 ))'
   builtin source $Z4H/fzf-tab/fzf-tab.zsh
   eval "function fzf-tab-complete() {

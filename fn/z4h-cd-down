@@ -53,8 +53,6 @@
   autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
 
   {
-    -z4h-show-dots
-
     local esc line col
     IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
     print >$TTY || return

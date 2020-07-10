@@ -99,7 +99,7 @@ fi
 
       {
         local _z4h_fzf_called="$Z4H"/tmp/fzf-called."${sysparams[pid]}"
-        zf_rm -f -- "$_z4h_fzf_called" || return
+        [[ ! -e "$_z4h_fzf_called" ]] || zf_rm -f -- "$_z4h_fzf_called" || return
         local _z4h_word_prefix=
         local _z4h_path_prefix=
         local -a _z4h_words=()
@@ -111,7 +111,7 @@ fi
       } always {
         local -i err=$?
         local -a stat=()
-        if zstat +size -A stat -- "$_z4h_fzf_called" 2>/dev/null; then
+        if [[ -e "$_z4h_fzf_called" ]] && zstat +size -A stat -- "$_z4h_fzf_called"; then
           zf_rm -f -- "$_z4h_fzf_called" || err=$?
           echoti cuu 1
           (( col > 1 )) && echoti cuf $((col-1))

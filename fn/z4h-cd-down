@@ -1,89 +1,110 @@
-()  {
-  eval "$_z4h_opt"
+[[ -w $TTY && -r $TTY ]] || return
 
-  local -i dot_glob list_types
-  [[ $1 == on ]] && dot_glob=1
-  [[ $2 == on ]] && list_types=1
+autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
 
-  [[ -w $TTY && -r $TTY ]] || return
+local -i dot_glob list_types
+[[ -o dot_glob   ]] && dot_glob=1
+[[ -o list_types ]] && list_types=1
 
-  if (( dot_glob )); then
-    local dirs=(./*(-/DN))
-    local non_empty=(${^${dirs:#./.*}}/*(D-/Y1N:h:t))
-  else
-    local dirs=(./*(-/N))
-    local non_empty=(${^dirs}/*(-/Y1N:h:t))
-  fi
+-z4h-set-list-colors complete:cd:: $list_types
+local -i list_colors=$((!$?))
 
-  local -a cmd
-  if (( $#non_empty )); then
-    cmd+=(command find -L . -xdev -mindepth 2  '!' -type d -prune -o '!' '(')
-    local dir
-    for dir in $non_empty; do
-      cmd+=(-path ./${(b)dir}/'*' -o)
-    done
-    cmd[-1]=(')' -prune)
-    cmd+=(-o -name '.*' -prune)
-    (( dot_glob )) && cmd+=(-print)
-    cmd+=(-o -print)
-  fi
+{
+  -z4h-cursor-hide
 
-  local query char
-  for char in ${(s::)dirs[1]}; do
-    [[ -z ${dirs:#$query$char*} ]] || break
-    query+=$char
-  done
+  local -i first=1
+  while true; do
+    local -i redraw=0 again=0
+    () {
+      eval "$_z4h_opt"
+      if (( dot_glob )); then
+        local dirs=(./*(-/DN))
+        local non_empty=(${^${dirs:#./.*}}/*(D-/Y1N:h:t))
+      else
+        local dirs=(./*(-/N))
+        local non_empty=(${^dirs}/*(-/Y1N:h:t))
+      fi
 
-  local opt=(
-    --with-nth=2
-    --delimiter='\000'
-    --ansi
-    --exact
-    --layout=reverse
-    --height=$(( ! $#non_empty && 100 * ($#dirs + 2) < 60 * LINES ? $#dirs + 2 : 60 * LINES / 100 ))
-    --tiebreak=length,begin,index
-    --no-multi
-    --cycle
-    --query=${query:2}
-    --bind=tab:down,btab:up)
+      if (( first )); then
+        first=0
+      elif (( ! $#dirs )); then
+        return 0
+      fi
 
-  -z4h-set-list-colors complete:cd:: "$list_types"
-  local -i list_colors=$((!$?))
+      local -a cmd
+      if (( $#non_empty )); then
+        cmd+=(command find -L . -xdev -mindepth 2  '!' -type d -prune -o '!' '(')
+        local dir
+        for dir in $non_empty; do
+          cmd+=(-path ./${(b)dir}/'*' -o)
+        done
+        cmd[-1]=(')' -prune)
+        cmd+=(-o -name '.*' -prune)
+        (( dot_glob )) && cmd+=(-print)
+        cmd+=(-o -print)
+      fi
 
-  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
+      local query char
+      for char in ${(s::)dirs[1]}; do
+        [[ -z ${dirs:#$query$char*} ]] || break
+        query+=$char
+      done
 
-  {
-    local esc line col
-    IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
-    print >$TTY || return
+      local opt=(
+        --with-nth=2
+        --delimiter='\000'
+        --ansi
+        --exact
+        --layout=reverse
+        --height=$(( ! $#non_empty && 100 * ($#dirs + 2) < 60 * LINES ? $#dirs + 2 : 60 * LINES / 100 ))
+        --tiebreak=length,begin,index
+        --no-multi
+        --cycle
+        --query=${query:2}
+        --bind=tab:down,btab:up)
+      local cont
+      if _fzf_tab_get -s continuous-trigger cont && [[ -n $cont ]]; then
+        opt+=(--expect=$cont)
+      fi
 
-    {
-      local dir
-      dir=$(
-        unsetopt pipe_fail
-        exec 2>/dev/null
+      {
+        -z4h-show-dots
+        local esc line col
+        IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
+        print >$TTY || return
+
         {
-          print -rC1 -- $dirs
-          "${cmd[@]}"
-        } | command cut -b3- | -z4h-present-files $list_colors $list_types | {
-          -z4h-cursor-show
-          $Z4H/fzf/bin/fzf $opt 2>$TTY
+          local choice
+          choice=$(
+            unsetopt pipe_fail
+            exec 2>/dev/null
+            {
+              print -rC1 -- $dirs
+              "${cmd[@]}"
+            } | command cut -b3- | -z4h-present-files $list_colors $list_types | {
+              -z4h-cursor-show
+              $Z4H/fzf/bin/fzf $opt 2>$TTY
+            } always {
+              -z4h-cursor-hide
+            }) && [[ -n $choice ]] || return
+          if [[ -n $cont ]]; then
+            [[ $choice == $'\n'* ]] || again=1
+            choice=${choice#*$'\n'}
+            [[ -n $choice ]] || return
+          fi
+          cd -- $choice || return
+          redraw=1
         } always {
-          -z4h-cursor-hide
-        }) || return
-      [[ -n $dir ]] || return
-      cd -- $dir
-      return
-    } always {
-      echoti cuu 1
-      (( col > 1 )) && echoti cuf $((col-1))
-    }
-  } always {
-    if (( $? )); then
-      zle -R
-      -z4h-cursor-show
-    else
-      zle -R
-    fi
-  }
-} "${options[dotglob]}" "${options[list_types]}" && -z4h-redraw-prompt
+          echoti cuu 1
+          (( col > 1 )) && echoti cuf $((col-1))
+        }
+      } always {
+        zle -R
+      }
+    } || return
+    (( redraw )) && -z4h-redraw-prompt 1
+    (( again )) || break
+  done
+} always {
+  -z4h-cursor-show
+}

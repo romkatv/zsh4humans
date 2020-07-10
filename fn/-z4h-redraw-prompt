@@ -10,5 +10,5 @@
   fi
   zle .reset-prompt
 } always {
-  -z4h-cursor-show
+  (( ${1:-0} )) || -z4h-cursor-show
 }

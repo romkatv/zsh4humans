@@ -73,12 +73,6 @@ Maybe this can be done by writing a custom completion function for `man` and ena
 
 ---
 
-If https://github.com/Aloxaf/fzf-tab/pull/70 doesn't get accepted, add a workaround. Patch
-`_fzf_tab_colorize` by replacing `sort -u -t '\0' -k 2` with `-z4h-fzf-tab-colorize-sort`. The
-latter does what the PR does. Do this only when `sort` is from busybox.
-
----
-
 Install `bat`.
 
 ---
@@ -639,9 +633,30 @@ should be packed, plus all history files.
 
 ---
 
-Pass consistent bindings to fzf: ctrl+k, alt+j, etc.
+Support `fzf` customization via `zstyle`. Add nice support for bindings (including continuous
+completion and query insertion via fake actions like `z4h-accept-and-repeat` and
+`z4h-accept-query`). Also allow for low level overrides.
 
----
+```zsh
+zstyle :z4h:expand-or-complete:fzf command  my-fzf
+zstyle :z4h:expand-or-complete:fzf bindings ctrl-u:kill-line
+zstyle :z4h:expand-or-complete:fzf flags    --no-exact
+```
 
-`z4h-expand-or-complete` can check the number of completion candidates and create a smaller fzf
-window if there aren't many of them.
+`flags` and `bindings` have the semantics of *extra* flags and bindings.
+
+Extra flags should be added at the front of standard flags because the first flag wins.
+All flags should be passed to the command (`my-fzf` above) where users can munge them any way they
+like. Use `--foo=bar` syntax to make it easier to remove flags (one argument -- one flag).
+
+Extra bindings could be added at the end of standard bindings because the last binding wins.
+However, in order to handle fake actions such as `z4h-accept-and-repeat` it'll probably be necessary
+to resolve binding conflicts within z4h. The goal is to allow this syntax for disabling continuous
+completion:
+
+```zsh
+zstyle :z4h:expand-or-complete:fzf extra-bindings tab:ignore
+```
+
+`ignore` could be any other legit action. The point is that by default `tab` is bound to
+`z4h-accept-and-repeat` but we rebind it.

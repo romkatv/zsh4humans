@@ -660,3 +660,8 @@ zstyle :z4h:expand-or-complete:fzf extra-bindings tab:ignore
 
 `ignore` could be any other legit action. The point is that by default `tab` is bound to
 `z4h-accept-and-repeat` but we rebind it.
+
+---
+
+Support preview customization in fzf. At the very least allow changing the size (down to 0) of
+preview in history.

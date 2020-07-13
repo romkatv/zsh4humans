@@ -461,6 +461,7 @@ if (( _z4h_use[zsh-autosuggestions] )); then
   )
   typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
     z4h-forward-word
+    z4h-forward-zword
     forward-word
     emacs-forward-word
     vi-forward-word

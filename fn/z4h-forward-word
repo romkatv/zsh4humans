@@ -3,8 +3,8 @@ local -a match mbegin mend
 if [[ $RBUFFER == (#b)[^[:space:]]#[[:space:]]##([^[:space:]]*) ]]; then
   local suffix=$match[1]
   RBUFFER[-$#suffix,-1]=
-  zle $1
+  zle .forward-word
   RBUFFER+=$suffix
 else
-  zle $1
+  zle .forward-word
 fi

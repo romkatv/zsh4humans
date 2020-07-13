@@ -3,8 +3,8 @@ local -a match mbegin mend
 if [[ $LBUFFER == (#b)(*[[:space:]])[^[:space:]]##[[:space:]]# ]]; then
   local prefix=$match[1]
   LBUFFER[1,$#prefix]=
-  zle "$@"
+  zle .backward-word
   LBUFFER[1,0]=$prefix
 else
-  zle "$@"
+  zle .backward-word
 fi

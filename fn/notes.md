@@ -673,3 +673,8 @@ preview in history.
 ---
 
 It's not a good idea to steal the default binding from `^[^H` (<kbd>Ctrl+Atl+Backspace</kbd>).
+
+---
+
+`run-help` has some issues with aliases. See
+https://github.com/romkatv/zsh4humans/issues/35#issuecomment-657515701.

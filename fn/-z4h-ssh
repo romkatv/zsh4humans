@@ -272,6 +272,9 @@ fi
     zf_mkdir -- $tmpdir || return
   fi
 
+  unsetopt multibyte
+  local LC_ALL=C
+
   {
     local buf=
     local mark=$'\004z\0004\000h'$dump_marker

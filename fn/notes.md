@@ -665,3 +665,11 @@ zstyle :z4h:expand-or-complete:fzf extra-bindings tab:ignore
 
 Support preview customization in fzf. At the very least allow changing the size (down to 0) of
 preview in history.
+
+---
+
+<kbd>Ctrl+/</kbd> is a bad binding on some keyboard layouts. See #35.
+
+---
+
+It's not a good idea to steal the default binding from `^[^H` (<kbd>Ctrl+Atl+Backspace</kbd>).

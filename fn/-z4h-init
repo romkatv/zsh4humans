@@ -496,6 +496,8 @@ if (( _z4h_use[zsh-syntax-highlighting] )); then
 fi
 
 if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
+  typeset -gi zsh_highlight__memo_feature=0
+
   local event
   for event in pre-redraw init finish; do
     if (( $+widgets[zle-line-$event] )); then

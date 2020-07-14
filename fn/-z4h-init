@@ -304,6 +304,7 @@ bindkey   '^[[3;3~' z4h-kill-word                  # alt+del
 # Delete previous word.
 bindkey   '^W'      z4h-backward-kill-word         # ctrl+w
 bindkey   '^[^?'    z4h-backward-kill-word         # alt+bs
+bindkey   '^[^H'    z4h-backward-kill-word         # ctrl+alt+bs
 
 # Move cursor one zsh word forward.
 bindkey   '^[[1;6C' z4h-forward-zword              # ctrl+shift+right
@@ -311,8 +312,6 @@ bindkey   '^[[1;6C' z4h-forward-zword              # ctrl+shift+right
 bindkey   '^[[1;6D' z4h-backward-zword             # ctrl+shift+left
 # Delete next zsh word.
 bindkey   '^[[3;6~' z4h-kill-zword                 # ctrl+shift+del
-# Delete previous zsh word.
-bindkey   '^[^H'    z4h-backward-kill-zword        # ctrl+alt+bs
 
 # Delete line before cursor.
 bindkey   '^[k'     backward-kill-line             # alt+k

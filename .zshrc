@@ -47,7 +47,8 @@ if [[ $LC_TERMINAL == iTerm2 ]]; then
 fi
 
 # Define key bindings.
-bindkey -M emacs '^H' backward-kill-word # Ctrl-H and Ctrl-Backspace: Delete previous word.
+bindkey '^H'   z4h-backward-kill-word   # Ctrl+H and Ctrl+Backspace: Delete previous word.
+bindkey '^[^H' z4h-backward-kill-zword  # Ctrl+Alt+Backspace: Delete previous shell word.
 
 # Sort completion candidates when pressing Tab?
 zstyle ':completion:*'                           sort               false

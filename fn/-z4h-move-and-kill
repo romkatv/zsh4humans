@@ -3,7 +3,7 @@ local -i cursor=CURSOR
 emulate -L zsh
 if (( CURSOR > cursor )); then
   BUFFER[cursor+1,CURSOR]=
+  CURSOR=$cursor
 elif (( CURSOR < cursor )); then
   BUFFER[CURSOR+1,cursor]=
 fi
-CURSOR=$cursor

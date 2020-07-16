@@ -54,6 +54,8 @@ path=($Z4H/fzf/bin $path)
 fpath+=($Z4H/zsh4humans/fn $Z4H/zsh-completions/src)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
+: ${ZSH=$Z4H/ohmyzsh/ohmyzsh}
+: ${ZSH_CUSTOM=$Z4H/ohmyzsh/ohmyzsh/custom}
 : ${ZSH_CACHE_DIR=$Z4H/cache/ohmyzsh}
 
 autoload -Uz -- $Z4H/zsh4humans/fn/[^_]*(:t) || return

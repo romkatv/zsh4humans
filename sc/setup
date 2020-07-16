@@ -42,17 +42,17 @@ if [ -z "$new" ]; then
   exit 1
 fi
 
-command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache "$new"/tmp || exit
+command mkdir -p -- "$new"/bin "$new"/fn "$new"/cache/ohmyzsh "$new"/tmp || exit
 if [ ! -L "$new"/z4h.zsh ]; then
-  command cp -f -- "$self"/../z4h.zsh "$new"/                    || exit
+  command cp -f -- "$self"/../z4h.zsh "$new"/                            || exit
 fi
 if [ ! -e "$new"/cache/last-update-ts ]; then
-  echo -n >"$new"/cache/last-update-ts                           || exit
+  echo -n >"$new"/cache/last-update-ts                                   || exit
 fi
 
 if [ -n "$old" -a -d "$old"/stickycache ]; then
-  command rm -rf -- "$new"/stickycache                           || exit
-  command cp -r -- "$old"/stickycache "$new"/stickycache         || exit
+  command rm -rf -- "$new"/stickycache                                   || exit
+  command cp -r -- "$old"/stickycache "$new"/stickycache                 || exit
 else
-  command mkdir -p -- "$new"/stickycache                         || exit
+  command mkdir -p -- "$new"/stickycache                                 || exit
 fi

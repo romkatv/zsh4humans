@@ -660,6 +660,8 @@ function -z4h-post-init() {
   done
   unset _z4h_compdef
 
+  (( $+_comps[kubectl] || ! $+commands[kubectl] )) || compdef -- -z4h-complete-kubectl kubectl
+
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
     () {
       local -hA widgets=(

@@ -421,6 +421,11 @@ zstyle ':completion:*'                  use-cache         "true"
 zstyle ':completion:*'                  cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
 zstyle ':completion:*:paths'            accept-exact-dirs "true"
 
+fpath+=(
+  ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
+  /usr/local/share/zsh/site-functions(FN)
+  /usr/share/zsh/site-functions(FN))
+
 # Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit
 bashcompinit

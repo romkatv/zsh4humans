@@ -661,6 +661,7 @@ function -z4h-post-init() {
   unset _z4h_compdef
 
   (( $+_comps[kubectl] || ! $+commands[kubectl] )) || compdef -- -z4h-complete-kubectl kubectl
+  (( $+_comps[helm]    || ! $+commands[helm]    )) || compdef -- -z4h-complete-helm    helm
 
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
     () {

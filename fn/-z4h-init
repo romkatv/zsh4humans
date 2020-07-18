@@ -423,6 +423,7 @@ zstyle ':completion:*:paths'            accept-exact-dirs "true"
 
 fpath+=(
   ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
+  ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(FN)
   /usr/local/share/zsh/site-functions(FN)
   /usr/share/zsh/site-functions(FN))
 

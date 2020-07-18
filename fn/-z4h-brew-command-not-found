@@ -3,7 +3,7 @@ eval "$_z4h_opt"
 {
   [[ -n $TTY && ( -n $CONTINUOUS_INTEGRATION || -z $MC_SID ) ]] || return
   local repo
-  repo="$(command brew --repository 2>/dev/null)" || return
+  repo="${HOMEBREW_REPOSITORY:-$(command brew --repository 2>/dev/null)}" || return
   [[ -n $repo/Library/Taps/*/*/cmd/brew-command-not-found-init(|.rb)(#q.N) ]] || return
 
   function command_not_found_handler() {

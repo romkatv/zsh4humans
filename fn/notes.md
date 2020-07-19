@@ -678,3 +678,13 @@ It's not a good idea to steal the default binding from `^[^H` (<kbd>Ctrl+Atl+Bac
 
 `run-help` has some issues with aliases. See
 https://github.com/romkatv/zsh4humans/issues/35#issuecomment-657515701.
+
+---
+
+Currently `find` for recursive completions is called with `-xdev`. This should be customizable.
+See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
+
+---
+
+It would be nice if `git` completions printed complete file paths instead of just the first segment.
+See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.

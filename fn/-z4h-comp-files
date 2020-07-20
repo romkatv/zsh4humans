@@ -26,41 +26,6 @@
     fi
   fi
 
-  local -a cmd
-  if (( $#dirs )); then
-    local -aU fss
-    fss=(${(f)"$(command find / . -maxdepth 0 -printf '%F\n' 2>/dev/null)"}) || fss=()
-    if (( $#fss )); then
-      cmd+=(command find -L ./$^dirs)
-      (( only_dirs )) && cmd+=('!' -type d -prune -o)
-      cmd+=(-name '.*')
-      if (( dot_glob )); then
-        cmd+=('(' -path './*/*' -prune -print -o -prune ')')
-      else
-        cmd+=(-prune)
-      fi
-      cmd+=(-o '!' '(')
-      local fs
-      for fs in $fss; do
-        cmd+=(-fstype $fs -o)
-      done
-      cmd[-1]=(')' '(' -path './*/*' -prune -print -o -prune ')')
-      cmd+=(-o -path './*/*' -print)
-    else
-      cmd+=(command find -L . -xdev -mindepth 2)
-      (( only_dirs )) && cmd+=('!' -type d -prune -o)
-      cmd+=('!' '(')
-      local dir
-      for dir in $dirs; do
-        cmd+=(-path ./${(b)dir}/'*' -o)
-      done
-      cmd[-1]=(')' -prune)
-      cmd+=(-o -name '.*' -prune)
-      (( dot_glob )) && cmd+=(-print)
-      cmd+=(-o -print)
-    fi
-  fi
-
   local query char
   for char in ${(s::)words[1]}; do
     [[ -z ${words:#$query$char*} ]] || break
@@ -110,7 +75,7 @@
       [[ -n $path_prefix ]] && builtin cd -q -- $path_prefix
       {
         print -lr -- ${(Q)words}
-        "${cmd[@]}" | command cut -b3-
+        -z4h-find $dot_glob $only_dirs $dirs | command cut -b3-
       } | {
         -z4h-present-files $list_colors $list_types
       } | {

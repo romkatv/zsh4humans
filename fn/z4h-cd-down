@@ -31,38 +31,6 @@ local -i list_colors=$((!$?))
         return 0
       fi
 
-      local -a cmd
-      if (( $#non_empty )); then
-        local -aU fss
-        fss=(${(f)"$(command find / . -maxdepth 0 -printf '%F\n' 2>/dev/null)"}) || fss=()
-        if (( $#fss )); then
-          cmd+=(command find -L ./$^non_empty '!' -type d -prune)
-          cmd+=(-o -name '.*')
-          if (( dot_glob )); then
-            cmd+=('(' -path './*/*' -prune -print -o -prune ')')
-          else
-            cmd+=(-prune)
-          fi
-          cmd+=(-o '!' '(')
-          local fs
-          for fs in $fss; do
-            cmd+=(-fstype $fs -o)
-          done
-          cmd[-1]=(')' '(' -path './*/*' -prune -print -o -prune ')')
-          cmd+=(-o -path './*/*' -print)
-        else
-          cmd+=(command find -L . -xdev -mindepth 2  '!' -type d -prune -o '!' '(')
-          local dir
-          for dir in $non_empty; do
-            cmd+=(-path ./${(b)dir}/'*' -o)
-          done
-          cmd[-1]=(')' -prune)
-          cmd+=(-o -name '.*' -prune)
-          (( dot_glob )) && cmd+=(-print)
-          cmd+=(-o -print)
-        fi
-      fi
-
       local query char
       for char in ${(s::)dirs[1]}; do
         [[ -z ${dirs:#$query$char*} ]] || break
@@ -107,7 +75,7 @@ local -i list_colors=$((!$?))
             exec 2>/dev/null
             {
               print -rC1 -- $dirs
-              "${cmd[@]}"
+              -z4h-find $dot_glob 1 $non_empty
             } | command cut -b3- | -z4h-present-files $list_colors $list_types | {
               -z4h-cursor-show
               $Z4H/fzf/bin/fzf $opt 2>$TTY

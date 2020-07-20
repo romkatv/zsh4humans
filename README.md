@@ -449,7 +449,7 @@ machine or restore it on the original machine.
 ZDOTDIR="$HOME" exec sh -c '. ~/.zshrc'
 ```
 
-This requires requires `curl` or `wget`. It does not require `git`, `zsh`, `sudo` or anything else.
+This requires `curl` or `wget`. It does not require `git`, `zsh`, `sudo` or anything else.
 
 *Note*: If you have Zsh For Humans installed on local host and want to have the same environment
 when you SSH to remote host, use `z4h ssh` command instead of the regular `ssh`. See [SSH](#SSH).

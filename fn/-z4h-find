@@ -7,7 +7,7 @@ local dirs=("${@:3}")
 local -a cmd
 local -aU fss
 fss=(${(f)"$(command find / . -maxdepth 0 -printf '%F\n' 2>/dev/null)"}) || fss=()
-if (( $#fss )); then
+if (( $#fss )) && [[ -z ${(M)fss:#unknown} ]]; then
   cmd+=(command find -L ./$^dirs)
   (( only_dirs )) && cmd+=('!' -type d -prune -o)
   cmd+=(-name '.*')

@@ -4,4 +4,4 @@
     popd -q $1
   done
   (( $#dirstack ))
-} && -z4h-redraw-prompt
+} "$@" && -z4h-redraw-prompt

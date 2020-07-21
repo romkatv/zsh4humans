@@ -48,10 +48,14 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm,zf_rmdir,zf_ln}         || return
   typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
 } ${${(%):-%x}:a} || return
 
-typeset -gaU cdpath fpath mailpath path manpath
+export -T MANPATH=${MANPATH:-:} manpath
+export -T INFOPATH=${INFOPATH:-:} infopath
+typeset -gaU cdpath fpath mailpath path manpath infopath
+
 path=($Z4H/fzf/bin $path)
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 fpath+=($Z4H/zsh4humans/fn $Z4H/zsh-completions/src)
+manpath=($manpath $Z4H/fzf/man '')
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 : ${ZSH=$Z4H/ohmyzsh/ohmyzsh}
@@ -66,9 +70,8 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
     export HOMEBREW_CELLAR=$dir/Cellar
     export HOMEBREW_REPOSITORY=$dir/Homebrew
     path=($dir/bin $dir/sbin $path)
-    manpath=($dir/share/man $manpath)
-    local -aU infopath=($dir/share/info ${(s.:.)INFOPATH})
-    export INFOPATH=${(j.:.)infopath}
+    manpath=($dir/share/man $manpath '')
+    infopath=($dir/share/info $infopath '')
   }
 fi
 

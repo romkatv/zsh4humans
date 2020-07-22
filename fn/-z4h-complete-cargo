@@ -1,4 +1,9 @@
-(( $+commands[rustup] )) || return
+(( $+commands[rustup] && $+commands[rustc] )) || {
+  unset '_comps[cargo]'
+  _default "$@"
+  return
+}
+
 {
   builtin source <(rustup completions zsh cargo)
 } always {

@@ -1,4 +1,9 @@
-(( $+commands[rustup] )) || return
+(( $+commands[rustup] )) || {
+  unset '_comps[rustup]'
+  _default "$@"
+  return
+}
+
 {
   builtin source <(rustup completions zsh rustup)
 } always {

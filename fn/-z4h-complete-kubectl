@@ -1,22 +1,30 @@
 local kubectl="${commands[kubectl]-}"
-[[ -n "$kubectl" ]] || return
-
 local orig_cmd="${_comps[kubectl]-}"
 local comp="$Z4H"/cache/kubectl-completion.zsh
-
-[[ "$comp" -nt "$kubectl" ]] || {
-  local tmp="$comp".tmp."${sysparams[pid]}"
-  "$kubectl" completion zsh >"$tmp" || return
-  zf_mv -f -- "$tmp" "$comp" || return
-  -z4h-compile "$comp" || return
-}
+local cmd
 
 () {
-  emulate -L zsh
-  builtin source -- "$comp"
-  unset LWORD RWORD
-} || true
+  [[ -n "$kubectl" ]] || return
 
-local cmd="${_comps[kubectl]-}"
-[[ "$cmd" != "$orig_cmd" ]] || return
+  [[ "$comp" -nt "$kubectl" ]] || {
+    local tmp="$comp".tmp."${sysparams[pid]}"
+    "$kubectl" completion zsh >"$tmp" || return
+    zf_mv -f -- "$tmp" "$comp" || return
+    -z4h-compile "$comp" || return
+  }
+
+  () {
+    emulate -L zsh
+    builtin source -- "$comp"
+    unset LWORD RWORD
+  } || true
+
+  cmd="${_comps[kubectl]-}"
+  [[ "$cmd" != "$orig_cmd" ]] || return
+} || {
+  builtin unset '_comps[kubectl]'
+  _default "$@"
+  return
+}
+
 builtin eval "$cmd"

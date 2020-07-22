@@ -1,0 +1,6 @@
+(( $+commands[rustup] )) || return
+{
+  builtin source <(rustup completions zsh cargo)
+} always {
+  (( $+functions[_cargo] )) && _comps[cargo]=_cargo || unset '_comps[cargo]'
+}

@@ -670,8 +670,10 @@ function -z4h-post-init() {
   done
   unset _z4h_compdef
 
-  (( $+_comps[kubectl] || ! $+commands[kubectl] )) || compdef -- -z4h-complete-kubectl kubectl
-  (( $+_comps[helm]    || ! $+commands[helm]    )) || compdef -- -z4h-complete-helm    helm
+  local cmd comp
+  for cmd comp in kubectl kubectl helm helm rustup rustup cargo rustup; do
+    (( $+_comps[$cmd] || ! $+commands[$comp] )) || compdef -- -z4h-complete-$cmd $cmd
+  done
 
   if (( 0 && _z4h_use[fzf-tab] )) && [[ $_comps[git] == _git ]]; then
     autoload +X -Uz _git

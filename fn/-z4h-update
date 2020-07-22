@@ -43,4 +43,8 @@ local new=$Z4H.new.$$
 
 print -Pru2 -- "%F{3}z4h%f: %Bupdate successful%b"
 print -Pru2 -- "%F{3}z4h%f: restarting %F{2}zsh%f"
-exec -- $_z4h_exe -i || return
+if [[ -o zle ]]; then
+  exec -- $_z4h_exe -i || return
+else
+  exec -- $_z4h_exe -i --no-zle || return
+fi

@@ -670,9 +670,9 @@ function -z4h-post-init() {
   done
   unset _z4h_compdef
 
-  local cmd comp
-  for cmd comp in kubectl kubectl helm helm rustup rustup cargo rustup; do
-    (( $+_comps[$cmd] || ! $+commands[$comp] )) || compdef -- -z4h-complete-$cmd $cmd
+  local cmd
+  for cmd in kubectl helm rustup cargo; do
+    (( $+_comps[$cmd] || ! $+commands[$cmd] )) || compdef -- -z4h-complete-$cmd $cmd
   done
 
   if (( 0 && _z4h_use[fzf-tab] )) && [[ $_comps[git] == _git ]]; then

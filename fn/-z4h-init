@@ -693,7 +693,7 @@ function -z4h-post-init() {
           _z4h_files=("${(@P)_z4h_files}") 
         fi
         shift -p
-        compadd -f "$@" $_z4h_files
+        compadd -f -M "r:|/=* r:|=*" "$@" $_z4h_files
       }
     fi
   fi

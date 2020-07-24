@@ -688,3 +688,9 @@ See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
 
 It would be nice if `git` completions printed complete file paths instead of just the first segment.
 See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
+
+---
+
+Change `Z4H` to `~/.cache/z4h-v3`. Send the content of `$Z4H/version` over ssh and trigger an update
+from the body of `main.zsh` (by forking, similar to how normal update works) if the installed
+version is older.

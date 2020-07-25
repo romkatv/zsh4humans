@@ -2,6 +2,10 @@
 
 autoload +X -Uz -- -z4h-fzf
 
+if (( ! ${+functions[-z4h-orig-multi-parts]} )); then
+  autoload +X -Uz _multi_parts
+  functions[-z4h-orig-multi-parts]=${functions[_multi_parts]}
+fi
 if (( ! ${+functions[-z4h-orig-path-files]} )); then
   autoload +X -Uz _path_files
   functions[-z4h-orig-path-files]=${functions[_path_files]}
@@ -88,6 +92,22 @@ fi
     -z4h-orig-path-files "$@"
   }
 
+  function _multi_parts() {
+    local _z4h_sep=${@[-2]}
+    local _z4h_array=${@[-1]}
+    shift -p 2
+    [[ $# != 0 && ${@[-1]} == (-|--) ]] && shift -p
+    () {
+      emulate -L zsh
+      if [[ $_z4h_array == '('* ]]; then
+        _z4h_array=(${=_z4h_array[2,-2]})
+      else
+        _z4h_array=("${(@P)_z4h_array}") 
+      fi
+    }
+    compadd -M "r:|${_z4h_sep}=* r:|=*" "$@" - $_z4h_array
+  }
+
   -z4h-cursor-hide
 
   local esc line col
@@ -127,6 +147,7 @@ fi
     }
   done
 } always {
+  functions[_multi_parts]=${functions[-z4h-orig-multi-parts]}
   functions[_path_files]=${functions[-z4h-orig-path-files]}
   functions[_fzf_tab__main_complete]=${functions[-z4h-orig-fzf-tab-main-complete]}
   functions[compadd]=${functions[-z4h-orig-compadd]}

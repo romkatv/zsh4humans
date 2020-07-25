@@ -675,29 +675,6 @@ function -z4h-post-init() {
     (( $+_comps[$cmd] || ! $+commands[$cmd] )) || compdef -- -z4h-complete-$cmd $cmd
   done
 
-  if (( _z4h_use[fzf-tab] )) && [[ $_comps[git] == _git ]] &&
-      zstyle -t :z4h experimental-git-completion; then
-    autoload +X -Uz _git
-    if [[ $functions_source[_git] == */share/zsh/$ZSH_VERSION/functions/_git ]]; then
-      _git
-      local -a match mbegin mend
-      local f
-      for f in __git_files __git_diff-index_files __git_changed-in-working-tree_files __git_tree_files; do
-        functions[$f]=${functions[$f]//(#b)[[:space:]]_multi_parts[[:space:]]([^$'\n;']#)[[:space:]](--|-)[[:space:]]\/[[:space:]]([[:IDENT:]]##)($'\n'|(#e))/ _z4h_git_multi_parts $match[1] - $match[3]$'\n'}
-      done
-      _z4h_git_multi_parts() {
-        local _z4h_files=${@[-1]}
-        if [[ $_z4h_files == '('* ]]; then
-          _z4h_files=(${=_z4h_files[2,-2]})
-        else
-          _z4h_files=("${(@P)_z4h_files}") 
-        fi
-        shift -p
-        compadd -f -M "r:|/=* r:|=*" "$@" $_z4h_files
-      }
-    fi
-  fi
-
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
     () {
       local -hA widgets=(

@@ -64,7 +64,7 @@
   -z4h-set-list-colors "$_fzf_tab_curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
-  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
+  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find
 
   print >$TTY
   {

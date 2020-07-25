@@ -1,6 +1,6 @@
 [[ -w $TTY && -r $TTY ]] || return
 
-autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
+autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find
 
 local -i dot_glob list_types
 [[ -o dot_glob   ]] && dot_glob=1

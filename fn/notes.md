@@ -694,3 +694,7 @@ See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
 Change `Z4H` to `~/.cache/z4h-v3`. Send the content of `$Z4H/version` over ssh and trigger an update
 from the body of `main.zsh` (by forking, similar to how normal update works) if the installed
 version is older.
+
+---
+
+When p10k wizard sees z4h, set instant prompt to `quiet` without asking.

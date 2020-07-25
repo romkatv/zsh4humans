@@ -698,3 +698,13 @@ version is older.
 ---
 
 When p10k wizard sees z4h, set instant prompt to `quiet` without asking.
+
+---
+
+Define `command_not_found_handler` for more operating systems (similarly to how it's done for
+Homebrew and Debian).
+
+---
+
+`command_not_found_handler` should simultaneously use Homebrew and `/usr/lib/command-not-found` if
+both are available.

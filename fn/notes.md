@@ -708,7 +708,3 @@ Homebrew and Debian).
 
 `command_not_found_handler` should simultaneously use Homebrew and `/usr/lib/command-not-found` if
 both are available.
-
----
-
-Make word-based widgets behave like in VS Code.

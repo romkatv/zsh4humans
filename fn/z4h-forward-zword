@@ -1,9 +1,8 @@
 eval "$_z4h_opt"
 local word buf=$BUFFER
 for word in ${(Z:n:)BUFFER} ''; do
-  buf=${buf##[[:space:]]#}
   (( $#buf < $#RBUFFER )) && break
-  buf=${buf:$#word}
+  buf=${${buf##[[:space:]]#}:$#word}
 done
 CURSOR=$(($#BUFFER - $#buf))
 if [[ $KEYMAP == vicmd ]] && (( CURSOR && CURSOR == $#BUFFER )); then

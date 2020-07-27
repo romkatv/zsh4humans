@@ -1,10 +1,15 @@
 emulate -L zsh -o extended_glob
-local -a match mbegin mend
-if [[ $LBUFFER == (#b)(*[[:space:]])[^[:space:]]##[[:space:]]# ]]; then
-  local prefix=$match[1]
-  LBUFFER[1,$#prefix]=
-  zle .backward-word
-  LBUFFER[1,0]=$prefix
+local w=${WORDCHARS//[[:space:][:alnum:]]}
+local buf=${LBUFFER%%[[:space:]]#}
+if (( $#buf < 2 )); then
+  buf=
+elif [[ $buf == *[[:space:]]? ]]; then
+  buf[-1]=
+elif [[ $buf[-2,-1] != *[[:alnum:]$w]* ]]; then
+  buf=${buf%%[^[:space:][:alnum:]$w]#}
 else
-  zle .backward-word
+  [[ $buf == *[[:alnum:]$w] ]] || buf[-1]=
+  buf=${buf%%[[:alnum:]$w]#}
 fi
+(( CURSOR -= $#LBUFFER - $#buf ))
+return 0

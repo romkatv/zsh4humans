@@ -1,21 +1,29 @@
 # When a command is running, display it in the terminal title.
 function -z4h-set-term-title-preexec() {
-  eval "$_z4h_opt"
-  if (( P9K_SSH )); then
-    -z4h-set-term-title ${(%):-"%n@%m: "}$1
-  else
-    -z4h-set-term-title $1
+  emulate -L zsh
+  local _z4h_fmt
+  if ! zstyle -s :z4h term-title-preexec _z4h_fmt; then
+    if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+      _z4h_fmt='%n@%m: ${1//\%/%%}'
+    else
+      _z4h_fmt='${1//\%/%%}'
+    fi
   fi
+  [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt "$@"
 }
 
 # When no command is running, display the current directory in the terminal title.
 function -z4h-set-term-title-precmd() {
-  eval "$_z4h_opt"
-  if (( P9K_SSH )); then
-    -z4h-set-term-title ${(%):-"%n@%m: %~"}
-  else
-    -z4h-set-term-title ${(%):-"%~"}
+  emulate -L zsh
+  local _z4h_fmt
+  if ! zstyle -s :z4h term-title-precmd _z4h_fmt; then
+    if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+      _z4h_fmt='%n@%m: %~'
+    else
+      _z4h_fmt='%~'
+    fi
   fi
+  [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt
 }
 
 autoload -Uz add-zsh-hook                           || return
@@ -388,9 +396,9 @@ else
   fi
 fi
 
-# Use lesspipe if available. It allows you to use less on binary files (zip archives, etc.).
-if (( $#commands[(i)lesspipe(|.sh)] )); then
-  export LESSOPEN="| /usr/bin/env $commands[(i)lesspipe(|.sh)] %s 2>&-"
+# Use lesspipe if available. It allows you to use less on binary files (*.tar.gz, *.jpg, etc.).
+if (( $+commands[lesspipe] || $+commands[lesspipe.sh] )); then
+  export LESSOPEN="| /usr/bin/env ${(q)${commands[lesspipe]:-${commands[lesspipe.sh]}}} %s 2>/dev/null"
 fi
 
 # This affects every invocation of `less`.

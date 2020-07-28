@@ -1,9 +1,12 @@
-# Display $1 in terminal title.
+emulate -L zsh -o no_prompt_bang -o prompt_subst -o prompt_percent
 
-eval "$_z4h_opt"
+local title=$1
+shift
+print -Prnv title -- $title
+title=$'\e]0;'${(V)title}$'\a'
 
 if [[ -t 1 ]]; then
-  print -rn -- $'\e]0;'${(V)1}$'\a'
+  print -rn -- $title
 elif [[ -w $TTY ]]; then
-  print -rn -- $'\e]0;'${(V)1}$'\a' >$TTY
+  print -rn -- $title >$TTY
 fi

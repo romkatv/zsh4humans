@@ -663,13 +663,35 @@ function -z4h-post-init() {
     fi
   fi
 
+  unfunction compinit compdef
+  autoload -Uz compinit
+
   local dump
   zstyle -s ':z4h:compinit' dump-path dump
   : ${dump:=$Z4H/cache/zcompdump-$ZSH_VERSION}
-  unfunction compinit compdef
-  autoload -Uz compinit
-  compinit -u -d $dump
-  [[ ! -r $dump ]] || -z4h-compile $dump
+
+  local -a stat files=(${^fpath}/^([^_]*|*~|*.zwc)(.N))
+  (( ! $#files )) || zstat -A stat +mtime -- $files
+  local real_sig=($ZSH_VERSION $ZSH_PATCHLEVEL $files $stat)
+  real_sig='# '${(V)${(pj:\0:)real_sig}}$'\n'
+
+  local sig
+  if [[ -e $dump ]] &&
+     sysread -s $#real_sig sig <$dump &&
+     [[ $sig == $real_sig ]] &&
+     [[ -e $dump.zwc ]] &&
+     zstat -A stat +mtime -- $dump $dump.zwc &&
+     (( stat[2] == stat[1] + 1 )); then
+    compinit -C -d $dump
+  else
+    local tmp=$Z4H/tmp/zcompdump.$sysparams[pid]
+    zf_rm -f -- $dump $dump.zwc $tmp $tmp.2
+    compinit -C -d $tmp
+    { print -rn -- $real_sig; <$tmp } >$tmp.2
+    zf_rm -f -- $tmp
+    zf_mv -- $tmp.2 $dump
+    -z4h-compile $dump
+  fi
 
   # Replay compdef calls.
   local args

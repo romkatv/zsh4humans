@@ -4,5 +4,7 @@ if (( ${+_z4h_redraw_fd} )); then
   unset _z4h_redraw_fd
 fi
 
-_zsh_highlight
--z4h-autosuggest-fetch
+if zle; then
+  _zsh_highlight
+  -z4h-autosuggest-fetch
+fi

@@ -672,10 +672,6 @@ preview in history.
 
 ---
 
-It's not a good idea to steal the default binding from `^[^H` (<kbd>Ctrl+Atl+Backspace</kbd>).
-
----
-
 `run-help` has some issues with aliases. See
 https://github.com/romkatv/zsh4humans/issues/35#issuecomment-657515701.
 
@@ -683,17 +679,6 @@ https://github.com/romkatv/zsh4humans/issues/35#issuecomment-657515701.
 
 Currently `find` for recursive completions is called with `-xdev`. This should be customizable.
 See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
-
----
-
-It would be nice if `git` completions printed complete file paths instead of just the first segment.
-See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
-
----
-
-Change `Z4H` to `~/.cache/z4h-v3`. Send the content of `$Z4H/version` over ssh and trigger an update
-from the body of `main.zsh` (by forking, similar to how normal update works) if the installed
-version is older.
 
 ---
 

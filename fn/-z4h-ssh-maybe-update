@@ -1,0 +1,17 @@
+# Requires: [[ $Z4H_SSH == <1->:* ]]
+
+eval "$_z4h_opt"
+
+local min_version=${Z4H_SSH%%:*}
+
+local got_version
+got_version=${$(<$Z4H/version)%$'\r'} &&
+  [[ $got_version == <-> ]]           &&
+  (( got_version >= min_version ))    &&
+  return
+
+print -Pru2 -- "%F{3}z4h%f: cached version too old"
+print -Pru2 -- "%F{3}z4h%f: %Binitiating update%b"
+
+Z4H_SSH=0:${Z4H_SSH#*:}
+-z4h-update

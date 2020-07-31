@@ -189,3 +189,5 @@ function z4h() {
     *)        -z4h-help "$@";;
   esac
 }
+
+[[ ${Z4H_SSH-} != <1->:* ]] || -z4h-ssh-maybe-update || return

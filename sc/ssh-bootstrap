@@ -44,10 +44,11 @@ _z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--
 'trap' "$_z4h_ssh_cleanup; 'exit' '143'"   'TERM'
 'trap' "$_z4h_ssh_cleanup; _z4h_ssh_error" 'EXIT'
 
+z4h_min_version=^MIN_VERSION^
 z4h_ssh_client=^SSH_CLIENT^
 z4h_ssh_host=^SSH_HOST^
 
-'export' Z4H_SSH="$z4h_ssh_client":"$z4h_ssh_host"
+'export' Z4H_SSH="$z4h_min_version":"$z4h_ssh_client":"$z4h_ssh_host"
 'export' P9K_TTY="old"
 ^PRELUDE^
 
@@ -122,8 +123,8 @@ done
   'trap' '-' 'HUP' 'INT' 'TERM' 'EXIT'
   'unset' '-f' '_z4h_ssh_error' '_z4h_ssh_mktemp'
   'unset' '_z4h_ssh_cleanup' '_z4h_ssh_tar_v' '_z4h_ssh_tar_c_opt' '_z4h_ssh_tar_x_opt'
-  'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst' 'z4h_ssh_host'
-  'unset' 'z4h_ssh_client'
+  'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst' 'z4h_min_version'
+  'unset' 'z4h_ssh_client' 'z4h_ssh_host'
   'set' '+f'
   'set' '--'
   export _z4h_ssh_feedback="$0"

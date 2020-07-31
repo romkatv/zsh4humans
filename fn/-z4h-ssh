@@ -41,6 +41,14 @@ for ((i = 1; i <= $#; ++i)); do
   esac
 done
 
+local z4h_min_version
+z4h_min_version=${$(<$Z4H/version)%$'\r'} || return
+if [[ $z4h_min_version != <1-> ]]; then
+  print -Pru2 -- '%F{3}z4h%f: invalid file content: %F{1}%U$Z4H/version%f%u'
+  return 1
+fi
+local -r z4h_min_version
+
 local -r z4h_ssh_client=${${(%):-%m}:-unknown}
 
 local z4h_ssh_host
@@ -128,7 +136,8 @@ elif (( $+functions[z4h-ssh-configure] )); then
 fi
 
 if (( ! $#z4h_ssh_command )); then
-  print -Pru2 -- '%F{3}z4h%f: empty %F{1}z4h_ssh_command%f\n'
+  print -Pru2 -- '%F{3}z4h%f: empty %F{1}z4h_ssh_command%f'
+  return 1
 fi
 
 if [[ ${(pj:\0:)z4h_ssh_command} == ${(pj:\0:)default_ssh_command} &&
@@ -152,7 +161,7 @@ fi
 local file
 for file in "${(@kv)z4h_ssh_send_files}"; do
   if [[ -z $file ]]; then
-    print -Pru2 -- '%F{3}z4h%f: empty element(s) in %F{1}z4h_ssh_send_files%f\n'
+    print -Pru2 -- '%F{3}z4h%f: empty element(s) in %F{1}z4h_ssh_send_files%f'
     return 1
   fi
   if [[ $file == */ ]]; then
@@ -162,7 +171,7 @@ for file in "${(@kv)z4h_ssh_send_files}"; do
 done
 for file in "${(@kv)z4h_ssh_retrieve_files}"; do
   if [[ -z $file ]]; then
-    print -Pru2 -- '%F{3}z4h%f: empty element(s) in %F{1}z4h_ssh_retrieve_files%f\n'
+    print -Pru2 -- '%F{3}z4h%f: empty element(s) in %F{1}z4h_ssh_retrieve_files%f'
     return 1
   fi
   if [[ $file == */ ]]; then
@@ -172,7 +181,7 @@ for file in "${(@kv)z4h_ssh_retrieve_files}"; do
 done
 
 if (( $#z4h_ssh_retrieve_files && ! $+commands[base64] )); then
-  print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}base64%f\n'
+  print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}base64%f'
   return 1
 fi
 
@@ -216,7 +225,8 @@ fi
   local dump_marker=${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
 
   local script
-  script="$(<$Z4H/zsh4humans/sc/ssh-bootstrap)" || return
+  script=${"$(<$Z4H/zsh4humans/sc/ssh-bootstrap)"//$'\r'} || return
+  script=${script//'^MIN_VERSION^'/${(q)z4h_min_version}}
   script=${script//'^SSH_HOST^'/${(q)z4h_ssh_host}}
   script=${script//'^SSH_CLIENT^'/${(q)z4h_ssh_client}}
   script=${script//'^SSH_ARGS^'/${(q)${(j: :)@}}}

@@ -5,9 +5,9 @@ eval "$_z4h_opt"
 local min_version=${Z4H_SSH%%:*}
 
 local got_version
-got_version=${$(<$Z4H/version)%$'\r'} &&
-  [[ $got_version == <-> ]]           &&
-  (( got_version >= min_version ))    &&
+got_version=${$(<$Z4H/zsh4humans/version)%$'\r'} &&
+  [[ $got_version == <-> ]]                      &&
+  (( got_version >= min_version ))               &&
   return
 
 print -Pru2 -- "%F{3}z4h%f: cached version too old"

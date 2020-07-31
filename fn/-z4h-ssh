@@ -42,9 +42,9 @@ for ((i = 1; i <= $#; ++i)); do
 done
 
 local z4h_min_version
-z4h_min_version=${$(<$Z4H/version)%$'\r'} || return
+z4h_min_version=${$(<$Z4H/zsh4humans/version)%$'\r'} || return
 if [[ $z4h_min_version != <1-> ]]; then
-  print -Pru2 -- '%F{3}z4h%f: invalid file content: %F{1}%U$Z4H/version%f%u'
+  print -Pru2 -- '%F{3}z4h%f: invalid file content: %F{1}%U$Z4H/zsh4humans/version%f%u'
   return 1
 fi
 local -r z4h_min_version

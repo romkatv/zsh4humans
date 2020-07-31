@@ -9,7 +9,7 @@ if [ -n "${ZSH_VERSION-}" ]; then
 fi
 
 Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v3"
-: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"
+: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"
 
 umask o-w
 

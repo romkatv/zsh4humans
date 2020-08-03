@@ -2,12 +2,10 @@
 function -z4h-set-term-title-preexec() {
   emulate -L zsh
   local _z4h_fmt
-  if ! zstyle -s :z4h term-title-preexec _z4h_fmt; then
-    if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
-      _z4h_fmt='%n@%m: ${1//\%/%%}'
-    else
-      _z4h_fmt='${1//\%/%%}'
-    fi
+  if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+    zstyle -s :z4h:term-title:ssh   preexec _z4h_fmt || _z4h_fmt='%n@%m: ${1//\%/%%}'
+  else
+    zstyle -s :z4h:term-title:local preexec _z4h_fmt || _z4h_fmt='${1//\%/%%}'
   fi
   [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt "$@"
 }
@@ -16,12 +14,10 @@ function -z4h-set-term-title-preexec() {
 function -z4h-set-term-title-precmd() {
   emulate -L zsh
   local _z4h_fmt
-  if ! zstyle -s :z4h term-title-precmd _z4h_fmt; then
-    if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
-      _z4h_fmt='%n@%m: %~'
-    else
-      _z4h_fmt='%~'
-    fi
+  if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+    zstyle -s :z4h:term-title:ssh   precmd _z4h_fmt || _z4h_fmt='%n@%m: %~'
+  else
+    zstyle -s :z4h:term-title:local precmd _z4h_fmt || _z4h_fmt='%~'
   fi
   [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt
 }

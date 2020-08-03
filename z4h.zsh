@@ -108,12 +108,12 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: missing required parameter: \033[31mZ4H\033[0m\n'
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-        >&2 'printf' 'It must be set at the top of \033[4m~/.zshrc\033[0m:\n'
+        >&2 'printf' 'It must be set in \033[4m~/.zshenv\033[0m:\n'
       else
-        >&2 'printf' 'It must be set at the top of \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m:\n'
+        >&2 'printf' 'It must be set in \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"\033[0m\n'
+      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
       'exit' '1'
@@ -123,12 +123,12 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: invalid \033[1mZ4H\033[0m parameter: \033[31m%s\033[0m\n' "$Z4H"
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-        >&2 'printf' 'It comes from \033[4m~/.zshrc\033[0m. Correct value example:\n'
+        >&2 'printf' 'It comes from \033[4m~/.zshenv\033[0m. Correct value example:\n'
       else
-        >&2 'printf' 'It comes from \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m. Correct value example:\n'
+        >&2 'printf' 'It comes from \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m. Correct value example:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"\033[0m\n'
+      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
       'exit' '1'
@@ -138,12 +138,12 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: confusing \033[4mz4h.zsh\033[0m location\n'
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-        >&2 'printf' 'Please fix \033[4m~/.zshrc\033[0m. Correct initialization example:\n'
+        >&2 'printf' 'Please fix \033[4m~/.zshenv\033[0m. Correct initialization example:\n'
       else
-        >&2 'printf' 'Please fix \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m. Correct initialization example:\n'
+        >&2 'printf' 'Please fix \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m. Correct initialization example:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans}"\033[0m\n'
+      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"\033[0m\n'
       >&2 'printf' '  \033[32m.\033[0m \033[4;33m"$Z4H"\033[0;4m/z4h.zsh\033[0m || \033[32mreturn\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) and dot (\033[32m.\033[0m) are necessary.\n'
@@ -154,14 +154,12 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: missing required parameter: \033[31mZ4H_URL\033[0m\n'
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-        >&2 'printf' 'It must be set at the top of \033[4m~/.zshrc\033[0m:\n'
+        >&2 'printf' 'It must be set at the top of \033[4m~/.zshenv\033[0m:\n'
       else
-        >&2 'printf' 'It must be set at the top of \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m:\n'
+        >&2 'printf' 'It must be set at the top of \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v3}"\033[0m\n'
-      >&2 'printf' '\n'
-      >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
+      >&2 'printf' '  Z4H_URL=\033[33m"https://raw.githubusercontent.com/romkatv/zsh4humans/v3"\033[0m\n'
       'exit' '1'
     fi
 
@@ -171,14 +169,12 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: invalid \033[1mZ4H_URL\033[0m: \033[31m%s\033[0m\n' "$Z4H_URL"
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-        >&2 'printf' 'It comes from \033[4m~/.zshrc\033[0m. Correct value example:\n'
+        >&2 'printf' 'It comes from \033[4m~/.zshenv\033[0m. Correct value example:\n'
       else
-        >&2 'printf' 'It comes from \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m. Correct value example:\n'
+        >&2 'printf' 'It comes from \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m. Correct value example:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H_URL:=https://raw.githubusercontent.com/romkatv/zsh4humans/v3}"\033[0m\n'
-      >&2 'printf' '\n'
-      >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
+      >&2 'printf' '  Z4H_URL=\033[33m"https://raw.githubusercontent.com/romkatv/zsh4humans/v3"\033[0m\n'
       'exit' '1'
     fi
 
@@ -243,13 +239,9 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
 
       if '[' '-e' "$Z4H"/.updating ']'; then
         if '[' '-z' "${Z4H_UPDATING-}" ']'; then
-          >&2 'printf' '\033[33mz4h\033[0m: \033[1mZ4H_UPDATING\033[0m does not propagate through \033[4m.zshrc\033[0m\n'
+          >&2 'printf' '\033[33mz4h\033[0m: \033[1mZ4H_UPDATING\033[0m does not propagate through \033[32mzsh\033[0m\n'
           >&2 'printf' '\n'
-          if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-            >&2 'printf' 'Change \033[4m~/.zshrc\033[0m to keep \033[1mZ4H_UPDATING\033[0m intact.\n'
-          else
-            >&2 'printf' 'Change \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m to keep \033[1mZ4H_UPDATING\033[0m intact.\n'
-          fi
+          >&2 'printf' 'Change \033[32mzsh\033[0m startup files to keep \033[1mZ4H_UPDATING\033[0m intact.\n'
           'exit' '1'
         fi
         "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H" '-o' "$Z4H_UPDATING" || 'exit'

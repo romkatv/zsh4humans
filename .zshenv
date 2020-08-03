@@ -1,3 +1,10 @@
+# Documentation: https://github.com/romkatv/zsh4humans/blob/v3/README.md.
+#
+# It's best to keep this file unchanged unless you know exactly what you
+# are doing. Keep all Zsh customization and configuration in ~/.zshrc or
+# in files sourced from ~/.zshrc. This includes exported environment
+# variables such as PATH.
+
 if [ -n "${ZSH_VERSION-}" ]; then
   : ${ZDOTDIR:=~}
   setopt no_global_rcs

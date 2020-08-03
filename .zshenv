@@ -1,9 +1,9 @@
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v3/README.md.
 #
-# It's best to keep this file unchanged unless you know exactly what you
-# are doing. Keep all Zsh customization and configuration in ~/.zshrc or
-# in files sourced from ~/.zshrc. This includes exported environment
-# variables such as PATH.
+# Do not modify this file unless you know exactly what you are doing.
+# Keep all shell customization and configuration (including exported
+# environment variables such as PATH) in ~/.zshrc or in files sourced
+# from ~/.zshrc.
 
 if [ -n "${ZSH_VERSION-}" ]; then
   : ${ZDOTDIR:=~}

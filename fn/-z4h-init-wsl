@@ -1,0 +1,12 @@
+[[ "$(</proc/version)" == *[Mm]icrosoft* ]] || return
+  
+local lines=("${(@f)${$(cd /mnt/c && /mnt/c/Windows/System32/cmd.exe /c set)//$'\r'}}")
+local keys=(${lines%%=*}) vals=(${lines#*=})
+typeset -grA z4h_win_env=(${keys:^vals})
+local home=$z4h_win_env[USERPROFILE]
+[[ -n $home ]] || return
+if [[ $home != [a-zA-Z]':\'* || ! -d ${home::=/mnt/${(L)home[1]}/${${home:3}//\\//}} ]]; then
+  home=$(command wslpath -- $z4h_win_env[USERPROFILE] 2>/dev/null) || return
+  [[ -d $home ]] || return
+fi
+typeset -gr z4h_win_home=$home

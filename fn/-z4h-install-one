@@ -15,6 +15,7 @@ else
         fzf)                     url=https://github.com/junegunn/$1/archive/master.tar.gz;;
         fzf-tab)                 url=https://github.com/Aloxaf/$1/archive/master.tar.gz;;
         powerlevel10k)           url=https://github.com/romkatv/$1/archive/master.tar.gz;;
+        systemd)                 url=https://github.com/systemd/$1/archive/master.tar.gz;;
         zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
@@ -40,10 +41,13 @@ else
   (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
 fi
 
+local suf
+[[ $1 == systemd ]] && suf=' completions'
+
 if [[ -e $Z4H/.updating ]]; then
-  print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b"
+  print -Pru2 -- "%F{3}z4h%f: updating %B${1//\%/%%}%b$suf"
 else
-  print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b"
+  print -Pru2 -- "%F{3}z4h%f: installing %B${1//\%/%%}%b$suf"
 fi
 
 local dst=$Z4H/$1

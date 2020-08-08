@@ -54,7 +54,7 @@ typeset -gaU cdpath fpath mailpath path manpath infopath
 
 path=($Z4H/fzf/bin $path)
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-fpath+=($Z4H/zsh4humans/fn $Z4H/zsh-completions/src)
+fpath+=($Z4H/zsh4humans/fn)
 manpath=($manpath $Z4H/fzf/man '')
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
@@ -124,11 +124,14 @@ function z4h() {
       }
     ;|
     1-init)
-      (( ! ${+_z4h_init_called} )) || {
+      if (( $+_z4h_init_called )); then
         print -ru2 ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
         return 1
-      }
+      fi
       typeset -gri _z4h_init_called=1
+      if [[ $+commands[systemd-path] == 1 && -z $^fpath/_systemctl(#qN) ]]; then
+        _z4h_install_queue+=(systemd)
+      fi
       _z4h_install_queue+=(
         fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
       if ! -z4h-install-many; then

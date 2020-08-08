@@ -28,7 +28,8 @@ add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 
 local pkg
 typeset -gA _z4h_use
-for pkg in fzf fzf-tab powerlevel10k zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
+for pkg in fzf fzf-tab powerlevel10k systemd \
+           zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
   zstyle -t :z4h:$pkg channel none || _z4h_use[$pkg]=1
 done
 typeset -grA _z4h_use
@@ -658,6 +659,9 @@ function -z4h-post-init() {
       zf_mkdir -m 0700 -p -- $cache
     fi
   fi
+
+  (( _z4h_use[zsh-completions] )) && fpath+=($Z4H/zsh-completions/src)
+  (( _z4h_use[systemd]         )) && fpath+=($Z4H/systemd/shell-completion/zsh)
 
   unfunction compinit compdef
   autoload -Uz compinit

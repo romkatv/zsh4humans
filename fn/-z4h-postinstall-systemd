@@ -11,15 +11,17 @@ if [[ $lib != /* ]]; then
   return 1
 fi
 
-local systemd=$lib/systemd/systemd
-
-if [[ ! -x $systemd ]]; then
-  print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}'${systemd//\%/%%}'%f'
+if [[ -x /usr/lib/systemd/systemd ]]; then
+  local systemd=/usr/lib/systemd
+elif [[ -x /lib/systemd/systemd ]]; then
+  local systemd=/lib/systemd
+else
+  print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}systemd%f'
   return 1
 fi
 
 local content
 content=$(<$comp.in)
 
-print -r -- ${${content//@rootlibexecdir@/${systemd:h}}//\\@/@} >$comp
+print -r -- ${${content//@rootlibexecdir@/$systemd}//\\@/@} >$comp
 zf_rm -- $comp.in

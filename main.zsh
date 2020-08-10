@@ -129,7 +129,8 @@ function z4h() {
         return 1
       fi
       typeset -gri _z4h_init_called=1
-      if [[ $+commands[systemd-path] == 1 && -z $^fpath/_systemctl(#qN) ]]; then
+      if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
+            -z $^fpath/_systemctl(#qN) ]]; then
         _z4h_install_queue+=(systemd)
       fi
       _z4h_install_queue+=(

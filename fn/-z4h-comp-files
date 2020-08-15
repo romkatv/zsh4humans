@@ -49,6 +49,7 @@
     --delimiter='\000'
     --ansi
     --exact
+    --no-mouse
     --layout=reverse
     --height=$(( ! $#dirs && 100 * ($#words + 2) < 60 * LINES ? $#words + 2 : 60 * LINES / 100 ))
     --tiebreak=length,begin,index

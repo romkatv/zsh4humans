@@ -50,6 +50,7 @@ local -i list_colors=$((!$?))
         --delimiter='\000'
         --ansi
         --exact
+        --no-mouse
         --layout=reverse
         --height=$(( ! $#non_empty && 100 * ($#dirs + 2) < 60 * LINES ? $#dirs + 2 : 60 * LINES / 100 ))
         --tiebreak=length,begin,index

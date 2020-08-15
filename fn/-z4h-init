@@ -188,6 +188,7 @@ if (( _z4h_use[fzf-tab] )); then
     --delimiter='\000'                             \
     --layout=reverse                               \
     --exact                                        \
+    --no-mouse                                     \
     --tiebreak=begin                               \
     --multi                                        \
     --cycle                                        \

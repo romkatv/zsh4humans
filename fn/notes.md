@@ -698,3 +698,7 @@ both are available.
 
 Make `Alt+{Up,Left,Right}` work within `fzf`. See [this comment](
   https://github.com/romkatv/zsh4humans/issues/35#issuecomment-674357739).
+
+---
+
+Colorize files in git completions the same way they are shown in `git status`.

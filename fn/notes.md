@@ -693,3 +693,8 @@ Homebrew and Debian).
 
 `command_not_found_handler` should simultaneously use Homebrew and `/usr/lib/command-not-found` if
 both are available.
+
+---
+
+Make `Alt+{Up,Left,Right}` work within `fzf`. See [this comment](
+  https://github.com/romkatv/zsh4humans/issues/35#issuecomment-674357739).

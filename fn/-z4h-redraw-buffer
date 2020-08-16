@@ -4,7 +4,7 @@ if (( ${+_z4h_redraw_fd} )); then
   unset _z4h_redraw_fd
 fi
 
-if zle; then
+if (( $+region_highlight )); then
   _zsh_highlight
   -z4h-autosuggest-fetch
 fi

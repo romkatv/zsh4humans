@@ -11,6 +11,8 @@ if (( ${+_z4h_redraw_fd} )); then
 fi
 
 unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion
-_zsh_highlight
+if (( $+region_highlight )); then
+  _zsh_highlight
+fi
 
 return ret

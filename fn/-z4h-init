@@ -417,12 +417,13 @@ LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01
 export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
+zstyle ':completion:*'                  completer         "_complete" "_ignored"
 zstyle ':completion:*'                  matcher-list      "m:{[:lower:]}={[:upper:]}" "l:|=* r:|=*"
 zstyle ':completion:*'                  menu              "false"
 zstyle ':completion:*'                  verbose           "true"
 zstyle ':completion:::::'               insert-tab        "pending"
-zstyle ':completion:*'                  completer         "_complete" "_ignored"
 zstyle ':completion:*:*:-subscript-:*'  tag-order         "indexes parameters"
+zstyle ':completion:*:-tilde-:*'        tag-order         "named-directories" "users"
 zstyle ':completion:*'                  squeeze-slashes   "true"
 zstyle ':completion:*'                  single-ignored    "show"
 zstyle ':completion:*:(rm|kill|diff):*' ignore-line       "other"
@@ -431,6 +432,13 @@ zstyle ':completion:*'                  use-cache         "true"
 zstyle ':completion:*'                  cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
 zstyle ':completion:*:paths'            accept-exact-dirs "true"
 zstyle ':completion:*'                  single-ignored    "show"
+
+zstyle ':completion:*:git-*:argument-rest:heads'           ignored-patterns '(FETCH_|ORIG_|*/|)HEAD'
+zstyle ':completion:*:git-*:argument-rest:heads-local'     ignored-patterns '(FETCH_|ORIG_|)HEAD'
+zstyle ':completion:*:git-*:argument-rest:heads-remote'    ignored-patterns '*/HEAD'
+zstyle ':completion:*:git-*:argument-rest:commits'         ignored-patterns '*'
+zstyle ':completion:*:git-*:argument-rest:commit-objects'  ignored-patterns '*'
+zstyle ':completion:*:git-*:argument-rest:recent-branches' ignored-patterns '*'
 
 fpath+=(
   ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)

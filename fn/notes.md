@@ -702,3 +702,7 @@ Make `Alt+{Up,Left,Right}` work within `fzf`. See [this comment](
 ---
 
 Colorize files in git completions the same way they are shown in `git status`.
+
+---
+
+Propagate arguments of `zsh -ic "..."` trhough `exec` when switching to a different zsh.

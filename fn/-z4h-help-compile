@@ -1,0 +1,34 @@
+eval "$_z4h_opt"
+
+print -Pr -- "$(<<\END
+Usage: %F{2}z4h%f %Bcompile%b [--] [%Ufile%u]...
+
+Compile the specified Zsh files with %F{2}zcompile%f, skipping over
+inexisting files. It takes less time to %F{2}source%f a file that thas
+previously been compiled.
+
+If you want to source files immediately after compiling them,
+use %F{2}z4h%f %Bsource%b with %B--compile%b instead.
+
+Exit code of %F{2}z4h%f %Bcompile%b is that of the last %F{2}zcompile%f call.
+Inexisting files do not affect exit code.
+
+Note that sourcing compiled files may have a different effect
+than plain sourcing. Namely, aliases defined within a sourced
+file are not expanded in that same file when it's compiled.
+For example:
+
+  %% %F{2}cat%f %Uconfig.zsh%u
+
+    %F{2}alias%f echo=%F{3}'echo hello'%f
+    %F{2}echo%f world
+
+  %% ( %F{2}source%f %Uconfig.zsh%u )
+
+    hello world
+
+  %% ( %F{2}z4h%f compile %Uconfig.zsh%u; %F{2}source%f %Uconfig.zsh%u )
+
+    world
+END
+)"

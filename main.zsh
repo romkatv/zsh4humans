@@ -48,6 +48,13 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm,zf_rmdir,zf_ln}         || return
   typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
 } ${${(%):-%x}:a} || return
 
+function -z4h-check-core-params() {
+  [[ "${(e)_z4h_param_pat}" == "$_z4h_param_sig" ]] || {
+    -z4h-error-param-changed
+    return 1
+  }
+}
+
 export -T MANPATH=${MANPATH:-:} manpath
 export -T INFOPATH=${INFOPATH:-:} infopath
 typeset -gaU cdpath fpath mailpath path manpath infopath
@@ -75,7 +82,8 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
-autoload -Uz -- $Z4H/zsh4humans/fn/[^_]*(:t) || return
+autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h*(:t) || return
+functions -Ms _z4h_err
 
 function compinit() {}
 
@@ -84,114 +92,95 @@ function compdef() {
   _z4h_compdef+=("${(pj:\0:)@}")
 }
 
+function -z4h-cmd-source() {
+  local file compile
+  zparseopts -D -F -- c=compile -compile=compile || return '_z4h_err()'
+  emulate zsh -o extended_glob -c 'local files=(${^@}(N))'
+  builtin set --
+  for file in "${files[@]}"; do
+    if (( ${#compile} )); then
+      -z4h-compile "$file" || true
+    else
+      [[ ! -e "$file".zwc ]] || zf_rm -f -- "$file".zwc || true
+    fi
+    builtin source -- "$file"
+  done
+}
+
+function -z4h-cmd-init() {
+  if (( ARGC )); then
+    print -ru2 -- ${(%):-"%F{3}z4h%f: unexpected %F{1}init%f argument"}
+    return '_z4h_err()'
+  fi
+  if (( ${+_z4h_init_called} )); then
+    print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
+    return '_z4h_err()'
+  fi
+  -z4h-check-core-params || return
+  typeset -gri _z4h_init_called=1
+
+  () {
+    eval "$_z4h_opt"
+    if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
+          -z ${^fpath}/_systemctl(#qN) ]]; then
+      _z4h_install_queue+=(systemd)
+    fi
+    _z4h_install_queue+=(
+      fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
+    if ! -z4h-install-many; then
+      [[ -e $Z4H/.updating ]] || -z4h-error-command init
+      return 1
+    fi
+    if (( _z4h_installed_something )); then
+      print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
+    fi
+  } || return
+
+  # Enable Powerlevel10k instant prompt.
+  zstyle -t :z4h:powerlevel10k channel none || () {
+    local user=${(%):-%n}
+    local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
+    [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
+    builtin source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
+  }
+
+  () {
+    eval "$_z4h_opt"
+    -z4h-init && return
+    [[ -e $Z4H/.updating ]] || -z4h-error-command init
+    return 1
+  }
+}
+
+function -z4h-cmd-install() {
+  eval "$_z4h_opt"
+  -z4h-check-core-params || return
+
+  local -a flush
+  zparseopts -D -F -- f=flush -flush=flush || return '_z4h_err()'
+
+  local invalid=("${@:#([^/]##/)##[^/]##}")
+  if (( $#invalid )); then
+    print -Pru2 -- '%F{3}z4h%f: %Binstall%b: invalid project name(s)'
+    print -Pru2 -- ''
+    print -Prlu2 -- '  %F{1}'${(q)^invalid//\%/%%}'%f'
+    return 1
+  fi
+  _z4h_install_queue+=("$@")
+  (( $#flush && $#_z4h_install_queue )) || return 0
+  -z4h-install-many && return
+  -z4h-error-command install
+  return 1
+}
+
 # Main zsh4humans function. Type `z4h help` for usage.
 function z4h() {
-  case "$ARGC-$1" in
-    <2->-source)
-      local -i compile
-      [[ "$2" != -c ]] || {
-        compile=1
-        shift
-      }
-      [[ "$2" != -- ]] || shift
-      (( ARGC != 2 )) || {
-        [[ -e "$2" ]] || return
-        (( compile )) && {
-          -z4h-compile "$2" || true
-        } || {
-          [[ ! -e "$2".zwc ]] || zf_rm -f -- "$2".zwc || true
-        }
-        local file="$2"
-        builtin set --
-        builtin source -- "$file"
-        return
-      }
-    ;|
-    <2->-compile)
-      local -i ret
-      local file
-      [[ "$2" == -- ]] && shift
-      for file in "${@:2}"; do
-        [[ -e "$file" ]] && -z4h-compile "$file" || ret=$?
-      done
-      return ret
-    ;;
-    *)
-      [[ "${(e)_z4h_param_pat}" == "$_z4h_param_sig" ]] || {
-        eval "$_z4h_opt"
-        -z4h-error-param-changed
-        return 1
-      }
-    ;|
-    1-init)
-      if (( $+_z4h_init_called )); then
-        print -ru2 ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
-        return 1
-      fi
-      typeset -gri _z4h_init_called=1
-      if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
-            -z $^fpath/_systemctl(#qN) ]]; then
-        _z4h_install_queue+=(systemd)
-      fi
-      _z4h_install_queue+=(
-        fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
-      if ! -z4h-install-many; then
-        [[ -e $Z4H/.updating ]] || -z4h-error-command init
-        return 1
-      fi
-      if (( _z4h_installed_something )); then
-        print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
-      fi
-      # Enable Powerlevel10k instant prompt.
-      () {
-        zstyle -t :z4h:powerlevel10k channel none && return
-        local user=${(%):-%n}
-        local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
-        [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0
-        builtin source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
-      }
-      () {
-        eval "$_z4h_opt"
-        -z4h-init && return
-        [[ -e $Z4H/.updating ]] || -z4h-error-command init
-        return 1
-      }
-      return
-    ;;
-    *)
-      eval "$_z4h_opt"
-    ;|
-    <->-install)
-      local -i flush OPTIND
-      local opt OPTARG
-      shift
-      while getopts ':f' opt "$@"; do
-        case $opt in
-          f)  flush=1;;
-          +f) flush=0;;
-          *) -z4h-error-bad-opt '%Binstall%b'; return 1;;
-        esac
-      done
-      shift $((OPTIND-1))
-      local invalid=("${@:#([^/]##/)##[^/]##}")
-      if (( $#invalid )); then
-        print -Pru2 -- '%F{3}z4h%f: %Binstall%b: invalid project name(s)'
-        print -Pru2 -- ''
-        print -Prlu2 -- '  %F{1}'${(q)^invalid//\%/%%}'%f'
-        return 1
-      fi
-      _z4h_install_queue+=("$@")
-      (( flush && $#_z4h_install_queue )) || return 0
-      -z4h-install-many && return
-      -z4h-error-command install
-      return 1
-    ;;
-
-    1-chsh)   -z4h-chsh;;
-    <2->-ssh) -z4h-ssh "${@:2}";;
-    1-update) -z4h-update;;
-    *)        -z4h-help "$@";;
-  esac
+  if (( ${+functions[-z4h-cmd-${1-}]} )); then
+    -z4h-cmd-"$1" "${@:2}"
+  else
+    -z4h-cmd-help >&2
+    return 1
+  fi
 }
 
 [[ ${Z4H_SSH-} != <1->:* ]] || -z4h-ssh-maybe-update || return

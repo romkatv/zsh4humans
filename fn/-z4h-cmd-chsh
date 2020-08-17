@@ -1,5 +1,13 @@
 # Check whether the current shell is the login shell. If not, offer to change login shell.
 
+eval "$_z4h_opt"
+-z4h-check-core-params || return
+
+if (( ARGC )); then
+  print -Pru2 -- '%F{3}z4h%f: unexpected %F{1}chsh%f argument'
+  return '_z4h_err()'
+fi
+
 [[ $SHELL == $_z4h_exe || ${SHELL:A} == ${_z4h_exe:A} || -e $Z4H/stickycache/no-chsh ]] && return 0
 
 local user=${(%):-%n}

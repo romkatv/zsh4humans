@@ -1,0 +1,32 @@
+eval "$_z4h_opt"
+
+print -Pr -- "$(<<\END
+Usage: %F{2}z4h%f %Bsource%b [-c|--compile] [--] [%Ufile%u]...
+
+Source the specified Zsh files, skipping over inexisting ones.
+If %B-c%b or %B--compile%b is specified, files are automatically
+compiled with %F{2}zcompile%f to speed up subsequent sourcing. This
+gives you faster Zsh startup.
+
+Exit code of %F{2}z4h%f %Bsource%b is that of the last sourced file.
+Inexisting files do not affect exit code.
+
+Compilation isn't enabled by default because it has one
+negative side effect. Namely, aliases defined within a
+sourced file are not expanded in that same file. For
+example:
+
+  %% %F{2}cat%f %Uconfig.zsh%u
+
+    %F{2}alias%f echo=%F{3}'echo hello'%f
+    %F{2}echo%f world
+
+  %% ( %F{2}z4h%f source %Uconfig.zsh%u )
+
+    hello world
+
+  %% ( %F{2}z4h%f source -c %Uconfig.zsh%u )
+
+    world
+END
+)"

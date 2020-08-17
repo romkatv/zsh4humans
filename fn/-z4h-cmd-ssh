@@ -30,6 +30,9 @@
 #   )
 # }
 
+eval "$_z4h_opt"
+-z4h-check-core-params || return
+
 local -i must_passthrough i
 local -a pos
 for ((i = 1; i <= $#; ++i)); do

@@ -1,5 +1,5 @@
 print -Pr -- "$(<<\END
-usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u
+Usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u
 
 Connect to the remote host over SSH and start Zsh with local configs.
 The remote host must have login shell compatible with the Bourne shell

@@ -1,0 +1,6 @@
+local -i ret=$?
+eval "$_z4h_opt"
+print -Pru2 -- '%F{3}--- stack trace (most recent call first) ---%f'
+print -lru2 -- "${funcfiletrace[@]}"
+print -Pru2 -- '%F{3}--- end of stack trace ---%f'
+return $(( ret ? ret : 1 ))

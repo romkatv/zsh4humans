@@ -1,4 +1,4 @@
-if '[' '-z' "${ZSH_VERSION-}" ']' || ! 'eval' '[[ "$ZSH_VERSION" == (5.<4->*|<6->.*) ]]'; then
+if '[' '-z' "${ZSH_VERSION-}" ']' || ! 'eval' '[[ "$ZSH_VERSION" == (5.<8->*|<6->.*) ]]'; then
   '.' "$Z4H"/zsh4humans/sc/exec-zsh-i || 'return'
 fi
 

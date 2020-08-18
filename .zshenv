@@ -13,6 +13,11 @@ if [ -n "${ZSH_VERSION-}" ]; then
   fi
   setopt no_rcs
   unset Z4H_BOOTSTRAPPING
+
+  # If you are certain that you must export some environment variables
+  # in .zshenv (see comments at the top!), do it here:
+  #
+  #   export GOPATH=$HOME/go
 fi
 
 Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v3"

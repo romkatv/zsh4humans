@@ -750,7 +750,6 @@ precmd_functions=(-z4h-post-init $precmd_functions)
 [[ $OSTYPE == linux-* && -r /proc/version ]] && -z4h-init-wsl
 
 [[ -e $Z4H/z4h.zsh.zwc ]] || -z4h-compile-all
-() { for 1; do -z4h-compile $1; done } $ZDOTDIR/{.zshenv,.zprofile,.zshrc,.zlogin,.zlogout}(N)
 
 # Aliases.
 if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD

@@ -477,28 +477,25 @@ if (( _z4h_use[zsh-autosuggestions] )); then
   # Tell zsh-autosuggestions how to handle different widgets.
   typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
   typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
-    z4h-up-local-history
-    z4h-down-local-history
-    z4h-up-global-history
     z4h-down-global-history
+    z4h-down-local-history
     z4h-fzf-history
+    z4h-up-global-history
+    z4h-up-local-history
   )
   typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
-    z4h-forward-word
-    z4h-forward-zword
-    forward-word
     emacs-forward-word
-    vi-forward-word
-    vi-forward-word-end
-    vi-forward-blank-word
-    vi-forward-blank-word-end
+    forward-word
     vi-find-next-char
     vi-find-next-char-skip
+    vi-forward-blank-word
+    vi-forward-blank-word-end
+    vi-forward-word
+    vi-forward-word-end
+    z4h-forward-word
+    z4h-forward-zword
   )
   typeset -g ZSH_AUTOSUGGEST_ACCEPT_WIDGETS=(
-    end-of-line
-    vi-end-of-line
-    vi-add-eol
     z4h-end-of-buffer
   )
 
@@ -506,6 +503,12 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
   else
     ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(forward-char vi-forward-char)
+  fi
+
+  if zstyle -T :z4h:autosuggestions end-of-line accept; then
+    ZSH_AUTOSUGGEST_ACCEPT_WIDGETS+=(end-of-line vi-add-eol vi-end-of-line)
+  else
+    ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS+=(end-of-line vi-add-eol vi-end-of-line)
   fi
 
   builtin source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh

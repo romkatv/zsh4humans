@@ -10,6 +10,9 @@ zstyle ':z4h:'                cd-key           alt
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     accept
+# End key accepts to the end of the line ('partial-accept') from
+# command autosuggestions or the whole thing ('accept')?
+zstyle ':z4h:autosuggestions' end-of-line      accept
 
 # Clone additional Git repositories from GitHub. This doesn't do anything
 # apart from cloning the repository and keeping it up-to-date. Cloned
@@ -19,9 +22,9 @@ zstyle ':z4h:autosuggestions' forward-char     accept
 z4h install ohmyzsh/ohmyzsh || return
 
 # Install or update core components (fzf, zsh-autosuggestions, etc.) and
-# initialize Zsh. After this point console I/O is unavailable. Everything
-# that requires user interaction or can perform network I/O must be done
-# above. Everything else is best done below.
+# initialize Zsh. After this point console I/O is unavailable until Zsh
+# is fully initialized. Everything that requires user interaction or can
+# perform network I/O must be done above. Everything else is best done below.
 z4h init || return
 
 # Export environment variables.

@@ -710,3 +710,17 @@ Propagate arguments of `zsh -ic "..."` trhough `exec` when switching to a differ
 ---
 
 Make `run-help z4h source` work.
+
+---
+
+Add `function ssh` to `.zshrc`. To avoid too many issues with it, `ssh-bootstrap` should check
+whether the target machine is compatible with zsh-bin (the same check as in `zsh-bin/install`)
+and revert to `$SHELL` if it isn't.
+
+---
+
+`z4h ssh` should start login shell.
+
+---
+
+When doing `exec $_z4h_exe`, preserve `-l`.

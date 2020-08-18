@@ -82,7 +82,7 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
-autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h*(:t) || return
+autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h[^.]#(:t) || return
 functions -Ms _z4h_err
 
 function compinit() {}

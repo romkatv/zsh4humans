@@ -44,10 +44,9 @@ fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)
 # Source additional local files if they exist.
 z4h source ~/.iterm2_shell_integration.zsh
 
-# Ctrl+H and Ctrl+Backspace => Delete previous word.
-bindkey '^H'                   z4h-backward-kill-word
-# Ctrl+Alt+Backspace        => Delete previous shell word.
-bindkey '^[^H'                 z4h-backward-kill-zword
+# Define key bindings.
+z4h bindkey z4h-backward-kill-word  Ctrl+Backspace
+z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
 
 # Sort completion candidates when pressing Tab?
 zstyle ':completion:*'                           sort               false

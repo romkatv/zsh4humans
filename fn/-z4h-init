@@ -463,7 +463,7 @@ if (( _z4h_use[powerlevel10k] )); then
   -z4h-set-term-title-precmd || return
 fi
 
-local dirs=({~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin}(/N))
+local dirs=({~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin}(-/N))
 path=(${dirs:|path} $path)
 
 if (( _z4h_use[zsh-autosuggestions] )); then

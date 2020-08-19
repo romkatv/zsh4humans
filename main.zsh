@@ -71,7 +71,7 @@ manpath=($manpath $Z4H/fzf/man '')
 
 if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   () {
-    local -aU dir=(/home/linuxbrew/.linuxbrew(/N) ~/.linuxbrew(/N))
+    local -aU dir=(/home/linuxbrew/.linuxbrew(-/N) ~/.linuxbrew(-/N))
     (( $#dir == 1 )) || return
     export HOMEBREW_PREFIX=$dir
     export HOMEBREW_CELLAR=$dir/Cellar

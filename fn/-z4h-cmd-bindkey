@@ -105,6 +105,64 @@ if (( ! $+_z4h_key )); then
     Ctrl+Alt+Shift+PageDown  '^[[6;8~'
     Ctrl+Alt+Shift+Backspace '^?'
   )
+
+  typeset -grA _z4h_macos_opt_key=(
+    q  'œ'
+    w  '∑'
+    r  '®'
+    t  '†'
+    o  'ø'
+    p  'π'
+    [ '“'
+    ] '‘'
+    a  'å'
+    s  'ß'
+    d  '∂'
+    f  'ƒ'
+    g  '©'
+    h  '˙'
+    j  '∆'
+    k  '˚'
+    l  '¬'
+    z  'Ω'
+    x  '≈'
+    c  'ç'
+    v  '√'
+    b  '∫'
+    m  'µ'
+    ,  '≤'
+    .  '≥'
+    /  '÷'
+    \\ '«'
+    # Option+y is just '\'.
+    # Dead key functionality: e, u, i, n.
+    Q  'Œ'
+    W  '„'
+    E  '´'
+    R  '‰'
+    T  'ˇ'
+    Y  'Á'
+    U  '¨'
+    I  'ˆ'
+    O  'Ø'
+    P  '∏'
+    A  'Å'
+    S  'Í'
+    D  'Î'
+    F  'Ï'
+    G  '˝'
+    H  'Ó'
+    J  'Ô'
+    K  '\uF8FF'
+    L  'Ò'
+    Z  '¸'
+    X  '˛'
+    C  'Ç'
+    V  '◊'
+    B  'ı'
+    N  '˜'
+    M  'Â'
+  )
 fi
 
 local kb seq
@@ -119,6 +177,13 @@ for kb in "${@:2}"; do
       Alt+[A-Z'[]\/.,'])
         builtin bindkey -- '^['$kb[-1]      $1
         builtin bindkey -- '^['${(L)kb[-1]} $1
+        if zstyle -T :z4h:bindkey macos-option-as-alt &&
+           [[ -n ${seq::=$_z4h_macos_opt_key[$kb[-1]]} ]]; then
+          builtin bindkey -- $seq $1 || return
+          if [[ -n ${seq::=$_z4h_macos_opt_key[${(L)kb[-1]}]} ]]; then
+            builtin bindkey -- $seq $1 || return
+          fi
+        fi
       ;;
       Ctrl+Alt+[A-Z'[]\'])
         builtin bindkey -- '^[^'$kb[-1] $1

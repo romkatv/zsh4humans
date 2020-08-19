@@ -4,9 +4,6 @@
 zstyle ':z4h:'                auto-update      ask
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
 zstyle ':z4h:'                auto-update-days 28
-# Bind alt-arrows or ctrl-arrows to change current directory?
-# The other key modifier will be bound to cursor movement by words.
-zstyle ':z4h:'                cd-key           alt
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     accept
@@ -49,12 +46,13 @@ z4h bindkey z4h-backward-kill-word  Ctrl+Backspace
 z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
 
 # Sort completion candidates when pressing Tab?
-zstyle ':completion:*'                           sort               false
+zstyle ':completion:*'                      sort               false
 # Keep cursor position unchanged when Up/Down fetches a command from history?
-zstyle ':zle:(up|down)-line-or-beginning-search' leave-cursor       true
+zstyle ':zle:up-line-or-beginning-search'   leave-cursor       true
+zstyle ':zle:down-line-or-beginning-search' leave-cursor       true
 # When presented with the list of choices upon hitting Tab, accept selection
 # and trigger another completion with this key binding.
-zstyle ':fzf-tab:*'                              continuous-trigger tab
+zstyle ':fzf-tab:*'                         continuous-trigger tab
 
 # Autoload functions.
 autoload -Uz zmv

@@ -278,7 +278,12 @@ fi
 
 local -i bypass=0
 
-{ "${z4h_ssh_command[@]}" "${args[@]}" "/bin/sh $remote_script" || return 1 } | {
+{
+  setopt no_multi_os
+  "${z4h_ssh_command[@]}" "${args[@]}" "/bin/sh $remote_script" 2>&1 1>&3 |
+     LC_ALL=C command grep -vxE 'Shared connection to .* closed\.(.)?' >&2
+   return $pipestatus[1]
+} 3>&1 | {
   if (( $+commands[mktemp] )); then
     tmpdir=$(command mktemp -d -- $Z4H/tmp/ssh.XXXXXXXXXX) || return
   else
@@ -391,7 +396,12 @@ local -i bypass=0
 }
 
 if (( bypass )); then
-  "${z4h_ssh_command[@]}" "${args[@]}"
+  setopt no_multi_os
+  {
+    "${z4h_ssh_command[@]}" "${args[@]}" 2>&1 1>&3 |
+      LC_ALL=C command grep -vxE 'Shared connection to .* closed\.(.)?' >&2
+    return $pipestatus[1]
+  } 3>&1
 fi
 
 )  # subshell

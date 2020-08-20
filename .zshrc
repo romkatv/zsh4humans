@@ -13,11 +13,11 @@ zstyle ':z4h:autosuggestions' end-of-line      'accept'
 # Send these files over to the remote host when using `z4h ssh`.
 zstyle ':z4h:ssh:*'           send-extra-files '~/.iterm2_shell_integration.zsh'
 
-# Clone additional Git repositories from GitHub. This doesn't do anything
-# apart from cloning the repository and keeping it up-to-date. Cloned
-# files can be used after `z4h init`.
+# Clone additional Git repositories from GitHub.
 #
-# This is just an example. If you don't plan to use Oh My Zsh, delete this.
+# This doesn't do anything apart from cloning the repository and keeping it
+# up-to-date. Cloned files can be used after `z4h init`. This is just an
+# example. If you don't plan to use Oh My Zsh, delete this line.
 z4h install ohmyzsh/ohmyzsh || return
 
 # Install or update core components (fzf, zsh-autosuggestions, etc.) and

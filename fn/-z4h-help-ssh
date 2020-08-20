@@ -1,26 +1,20 @@
 print -Pr -- "$(<<\END
-Usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u
+Usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u]... [--] [%Uuser@%u]%Uhostname%u
 
 Connect to the remote host over SSH and start Zsh with local configs.
-The remote host must have login shell compatible with the Bourne shell
-(sh, bash, zsh, ash, dash, etc.) and internet connection. Nothing else
-is required.
+The remote host must have internet access, standard POSIX utilities
+and directories, and a login shell compatible with the Bourne shell
+(sh, bash, zsh, ash, dash, etc.) or csh/tcsh. Nothing else is required.
 
 Here's what %F{2}z4h%f %Bssh%b does in more detail:
 
   1. Archives Zsh config files on the local host and sends them to the
      remote host.
   2. Extracts Zsh config files on the remote host.
-  3. Sources %U.zshrc%u, which starts the usual %Bzsh4humans%b bootstrap
-     process.
+  3. Sources %U.zshenv%u with Z4H_BOOTSRAPING=%F{3}'1'%f, which starts the usual
+     %Bzsh4humans%b bootstrap process.
 
-%BZDOTDIR%b and %BZ4H%b on the remote host both point to
-%F{3}"${XDG_CACHE_HOME:-$HOME/.cache}/z4h-ssh"%f. This prevents clashes
-with regular Zsh configs if they exist.
-
-%BZ4H_SSH%b on the remote host is set to %B1%b.
-
-The first login to a remote host may take some time. After that it's as
-fast as normal %F{2}ssh%f.
+The first login to a remote host may take some time. After that it's
+as fast as normal %F{2}ssh%f.
 END
 )"

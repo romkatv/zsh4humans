@@ -6,13 +6,53 @@ else
   'set' '-f'
 fi
 
+_z4h_bypass=''
+
 for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp' 'ln' 'wc' 'cat' 'uname' 'tr'; do
   if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then
-    >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_ssh_cmd"'\033[0m\n'
-    command -v 'rm' >'/dev/null' 2>&1 && 'command' 'rm' '-f' '--' "$0"
-    'exit' '1'
+    _z4h_bypass='1'
+    'break'
   fi
 done
+
+if '[' '-z' "$_z4h_bypass" ']'; then
+  {
+    _z4h_ssh_platform="$('command' 'uname' '-sm')" &&
+      _z4h_ssh_platform="$('printf' '%s' "$_z4h_ssh_platform" | 'command' 'tr' '[A-Z]' '[a-z]')" ||
+      _z4h_ssh_platform=''
+  } 2>'/dev/null'
+
+  case "$_z4h_ssh_platform" in
+    'darwin x86_64');;
+    'freebsd amd64');;
+    'linux aarch64');;
+    'linux armv6l');;
+    'linux armv7l');;
+    'linux armv8l');;
+    'linux i686');;
+    'linux x86_64');;
+    *) _z4h_bypass='1';;
+  esac
+fi
+
+if '[' '-n' "$_z4h_bypass" ']'; then
+  command -v 'rm' >'/dev/null' 2>&1 && 'command' 'rm' '-f' '--' "$0"
+
+  if '[' '-x' "${SHELL-}" ']'; then
+    case "$SHELL" in
+      */'ksh93') 'exec' "$SHELL" '-l'; 'exit';;
+      */'dash')  'exec' "$SHELL" '-l'; 'exit';;
+      */'vbash') 'exec' "$SHELL" '-l'; 'exit';;
+      */'bash')  'exec' "$SHELL" '-l'; 'exit';;
+      */'tcsh')  'exec' "$SHELL" '-l'; 'exit';;
+      */'csh')   'exec' "$SHELL" '-l'; 'exit';;
+      */'zsh')   'exec' "$SHELL" '-l'; 'exit';;
+    esac
+  fi
+
+  'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ 'bypass          '
+  'exit'
+fi
 
 'set' '--' "$0"
 

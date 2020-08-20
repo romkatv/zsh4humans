@@ -276,6 +276,8 @@ fi
 
 (  # subshell to avoid TTOU
 
+local -i bypass=0
+
 { "${z4h_ssh_command[@]}" "${args[@]}" "/bin/sh $remote_script" || return 1 } | {
   if (( $+commands[mktemp] )); then
     tmpdir=$(command mktemp -d -- $Z4H/tmp/ssh.XXXXXXXXXX) || return
@@ -339,6 +341,10 @@ fi
         sysread -s $((16 - $#buf)) 'buf[$#buf+1]' && continue
         return $(( $? != 5 ))
       done
+      if [[ $buf[1,16] == bypass[' ']## ]]; then
+        bypass=1
+        break
+      fi
       [[ $buf[1,16] == <->' '## ]] || return
       local -i len=buf[1,16]
       buf=${buf:16}
@@ -383,5 +389,9 @@ fi
     zf_rm -rf -- $tmpdir $local_hist_tmp
   }
 }
+
+if (( bypass )); then
+  "${z4h_ssh_command[@]}" "${args[@]}"
+fi
 
 )  # subshell

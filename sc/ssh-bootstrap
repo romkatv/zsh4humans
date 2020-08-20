@@ -6,6 +6,14 @@ else
   'set' '-f'
 fi
 
+for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp' 'ln' 'wc' 'cat' 'uname' 'tr'; do
+  if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then
+    >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_ssh_cmd"'\033[0m\n'
+    command -v 'rm' >'/dev/null' 2>&1 && 'command' 'rm' '-f' '--' "$0"
+    'exit' '1'
+  fi
+done
+
 'set' '--' "$0"
 
 _z4h_ssh_error() {
@@ -44,6 +52,39 @@ _z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--
 'trap' "$_z4h_ssh_cleanup; 'exit' '143'"   'TERM'
 'trap' "$_z4h_ssh_cleanup; _z4h_ssh_error" 'EXIT'
 
+_z4h_ssh_platform="$('command' 'uname' '-sm')" || 'exit'
+_z4h_ssh_platform="$('printf' '%s' "$_z4h_ssh_platform" | 'command' 'tr' '[A-Z]' '[a-z]')" || 'exit'
+
+case "$_z4h_ssh_platform" in
+  'darwin x86_64');;
+  'freebsd amd64');;
+  'linux aarch64');;
+  'linux armv6l');;
+  'linux armv7l');;
+  'linux armv8l');;
+  'linux i686');;
+  'linux x86_64');;
+  *)
+    'command' 'rm' '-f' '--' "$@" || 'exit'
+    'set' '--'
+
+    if '[' '-x' "${SHELL-}" ']'; then
+      case "$SHELL" in
+        */'ksh93') 'exec' "$SHELL" '-l'; 'exit';;
+        */'dash')  'exec' "$SHELL" '-l'; 'exit';;
+        */'vbash') 'exec' "$SHELL" '-l'; 'exit';;
+        */'bash')  'exec' "$SHELL" '-l'; 'exit';;
+        */'tcsh')  'exec' "$SHELL" '-l'; 'exit';;
+        */'csh')   'exec' "$SHELL" '-l'; 'exit';;
+        */'zsh')   'exec' "$SHELL" '-l'; 'exit';;
+      esac
+    fi
+
+    'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ 'bypass          '
+    'exit'
+  ;;
+esac
+
 z4h_min_version=^MIN_VERSION^
 z4h_ssh_client=^SSH_CLIENT^
 z4h_ssh_host=^SSH_HOST^
@@ -51,13 +92,6 @@ z4h_ssh_host=^SSH_HOST^
 'export' Z4H_SSH="$z4h_min_version":"$z4h_ssh_client":"$z4h_ssh_host"
 'export' P9K_TTY="old"
 ^PRELUDE^
-
-for _z4h_ssh_cmd in 'tar' 'tail' 'rm' 'mkdir' 'mv' 'cp' 'ln' 'wc' 'cat'; do
-  if ! command -v "$_z4h_ssh_cmd" >'/dev/null' 2>&1; then
-    >&2 'printf' '\033[33mz4h\033[0m: command not found: \033[4;31m'"$_z4h_ssh_cmd"'\033[0m\n'
-    'exit' '1'
-  fi
-done
 
 _z4h_ssh_tar_c_opt=
 _z4h_ssh_tar_x_opt=
@@ -124,7 +158,7 @@ done
   'unset' '-f' '_z4h_ssh_error' '_z4h_ssh_mktemp'
   'unset' '_z4h_ssh_cleanup' '_z4h_ssh_tar_v' '_z4h_ssh_tar_c_opt' '_z4h_ssh_tar_x_opt'
   'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst' 'z4h_min_version'
-  'unset' 'z4h_ssh_client' 'z4h_ssh_host'
+  'unset' 'z4h_ssh_client' 'z4h_ssh_host' '_z4h_ssh_platform'
   'set' '+f'
   'set' '--'
   export _z4h_ssh_feedback="$0"
@@ -195,7 +229,7 @@ while '[' "${#_z4h_dump_size}" '-lt' '16' ']'; do
 done
 
 {
-  'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ "$_z4h_dump_size" || exit
+  'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ "$_z4h_dump_size" || 'exit'
   if '[' "$_z4h_dump_size" '!=' '0               ' ']'; then
     'command' 'cat' '--' "$_z4h_ssh_tmp"/dump.base64-sl || 'exit'
   fi

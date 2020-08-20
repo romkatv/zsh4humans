@@ -15,6 +15,7 @@ case "$platform" in
   'linux aarch64');;
   'linux armv6l');;
   'linux armv7l');;
+  'linux armv8l');;
   'linux i686');;
   'linux x86_64');;
   *)

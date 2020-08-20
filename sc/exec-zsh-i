@@ -26,7 +26,7 @@ _z4h_exec_zsh_i() {
 
   # There is no suitable Zsh. Need to install.
   >&2 'printf' '\033[33mz4h\033[0m: cannot find usable \033[32mzsh\033[0m\n'
-  >&2 'printf' '\033[33mz4h\033[0m: fetching \033[32mZsh 5.8\033[0m installer\n'
+  >&2 'printf' '\033[33mz4h\033[0m: fetching \033[1mzsh 5.8\033[0m installer\n'
 
   'local' 'install'
   if command -v 'mktemp' >'/dev/null' 2>&1; then
@@ -46,50 +46,55 @@ _z4h_exec_zsh_i() {
       err="$(command wget -O-   -- "$zsh_url" 2>&1 >"$install")"
     else
       >&2 'printf' '\033[33mz4h\033[0m: please install \033[32mcurl\033[0m or \033[32mwget\033[0m\n'
-      'return' '1'
+      'exit' '1'
     fi
     if '[' "$?" '!=' '0' ']'; then
       >&2 'printf' "%s\n" "$err"
       >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$zsh_url"
       'command' 'rm' '-f' '--' "$install"
-      'return' '1'
+      'exit' '1'
     fi
-  )
+  ) || 'return'
 
-  'local' 'zshdir'
-  if command -v 'mktemp' >'/dev/null' 2>&1; then
-    zshdir="$('command' 'mktemp' "$Z4H"/tmp/zshdir.XXXXXXXXXX)"
+  if '[' '-n' "$Z4H_SSH" ']'; then
+    >&2 'printf' '\033[33mz4h\033[0m: installing \033[1mzsh 5.8\033[0m to \033[4m~/.local\033[0m\n'
+    'command' 'sh' '--' "$install" '-d' ~/'.local' '-q' || 'return'
+    'local' 'dir'="$HOME"/.local
   else
-    zshdir="$Z4H"/tmp/zshdir.tmp."$$"
-    '[' '!' '-e' "$zshdir" ']' || 'command' 'rm' '-rf' '--' "$zshdir" || 'return'
-  fi
-  while 'true'; do
-    
-    >&2 'echo'
-    if 'command' 'sh' '--' "$install" '-s' '3' 3>"$zshdir"; then
-      'local' dir=''
-      IFS='' 'read' '-r' 'dir' <"$zshdir"                          || 'return'
-      'command' 'rm' '-f' '--' "$Z4H"/stickycache/zshdir           || 'return'
-      'command' 'mv' '-f' '--' "$zshdir" "$Z4H"/stickycache/zshdir || 'return'
-      if ! '_z4h_try_exec_zsh_i' "$dir"/bin/zsh; then
-        >&2 'printf' '\033[33mz4h\033[0m: \033[31minternal error\033[0m\n'
-        'return' '1'
-      fi
+    'local' 'zshdir' 'dir'
+    if command -v 'mktemp' >'/dev/null' 2>&1; then
+      zshdir="$('command' 'mktemp' "$Z4H"/tmp/zshdir.XXXXXXXXXX)"
+    else
+      zshdir="$Z4H"/tmp/zshdir.tmp."$$"
+      '[' '!' '-e' "$zshdir" ']' || 'command' 'rm' '-rf' '--' "$zshdir" || 'return'
     fi
-
-    >&2 'echo'
-    >&2 'printf' '\033[33mz4h\033[0m: \033[32mZsh 5.8\033[0m installation \033[31mfailed\033[0m\n'
-    >&2 'echo'
     while 'true'; do
-      >&2 'printf' 'Try again? [y/N] '
-      'local' yn=''
-      IFS='' 'read' '-r' 'yn' || yn='n'
-      case "$yn" in
-        'y'|'Y'|'yes'|'YES'|'Yes') 'break';;
-        'n'|'N'|'no'|'NO'|'No')    'return' '1';;
-      esac
+      >&2 'echo'
+      if 'command' 'sh' '--' "$install" '-s' '3' 3>"$zshdir"; then
+        IFS='' 'read' '-r' 'dir' <"$zshdir"                          || 'return'
+        'command' 'rm' '-f' '--' "$Z4H"/stickycache/zshdir           || 'return'
+        'command' 'mv' '-f' '--' "$zshdir" "$Z4H"/stickycache/zshdir || 'return'
+        'break'
+      fi
+      >&2 'echo'
+      >&2 'printf' '\033[33mz4h\033[0m: \033[32mZsh 5.8\033[0m installation \033[31mfailed\033[0m\n'
+      >&2 'echo'
+      while 'true'; do
+        >&2 'printf' 'Try again? [y/N] '
+        'local' yn=''
+        IFS='' 'read' '-r' 'yn' || yn='n'
+        case "$yn" in
+          'y'|'Y'|'yes'|'YES'|'Yes') 'break';;
+          'n'|'N'|'no'|'NO'|'No')    'return' '1';;
+        esac
+      done
     done
-  done
+  fi
+
+  if ! '_z4h_try_exec_zsh_i' "$dir"/bin/zsh; then
+    >&2 'printf' '\033[33mz4h\033[0m: \033[31minternal error\033[0m\n'
+    'return' '1'
+  fi
 }
 
 '_z4h_exec_zsh_i'

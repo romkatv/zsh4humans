@@ -1,15 +1,17 @@
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v3/README.md.
 
 # Periodic auto-update on Zsh startup: 'ask' or 'no'.
-zstyle ':z4h:'                auto-update      ask
+zstyle ':z4h:'                auto-update      'ask'
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
-zstyle ':z4h:'                auto-update-days 28
+zstyle ':z4h:'                auto-update-days '28'
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
-zstyle ':z4h:autosuggestions' forward-char     accept
+zstyle ':z4h:autosuggestions' forward-char     'accept'
 # End key accepts to the end of the line ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
-zstyle ':z4h:autosuggestions' end-of-line      accept
+zstyle ':z4h:autosuggestions' end-of-line      'accept'
+# Send these files over to the remote host when using `z4h ssh`.
+zstyle ':z4h:ssh:*'           send-extra-files '~/.iterm2_shell_integration.zsh'
 
 # Clone additional Git repositories from GitHub. This doesn't do anything
 # apart from cloning the repository and keeping it up-to-date. Cloned
@@ -60,6 +62,9 @@ autoload -Uz zmv
 # Define functions and completions.
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 compdef _directories md
+
+# Replace `ssh` with `z4h ssh` to automatically teleport z4h to remote hosts.
+function ssh() { z4h ssh "$@" }
 
 # Define named directories: ~w <=> Windows home directory on WSL.
 [[ -n $z4h_win_home ]] && hash -d w=$z4h_win_home

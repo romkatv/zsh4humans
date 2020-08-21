@@ -165,33 +165,44 @@ if (( ! $+_z4h_key )); then
   )
 fi
 
-local kb seq
-for kb in "${@:2}"; do
-  if [[ -n ${seq::=$_z4h_key[$kb]} ]]; then
-    builtin bindkey -- $seq $1 || return
-  else
-    case $kb in
-      Ctrl+[A-Z'[]\'])
-        builtin bindkey -- '^'$kb[-1] $1
-      ;;
-      Alt+[A-Z'[]\/.,'])
-        builtin bindkey -- '^['$kb[-1]      $1
-        builtin bindkey -- '^['${(L)kb[-1]} $1
-        if zstyle -T :z4h:bindkey macos-option-as-alt &&
-           [[ -n ${seq::=$_z4h_macos_opt_key[$kb[-1]]} ]]; then
-          builtin bindkey -- $seq $1 || return
-          if [[ -n ${seq::=$_z4h_macos_opt_key[${(L)kb[-1]}]} ]]; then
-            builtin bindkey -- $seq $1 || return
+local kb seq seqs new_seqs
+
+for kb in ${@:2}; do
+  seqs=('')
+  for kb in ${(@s: :)kb}; do
+    if [[ -n ${seq::=$_z4h_key[$kb]} ]]; then
+      seqs=(${^seqs}$seq)
+    else
+      case $kb in
+        ?)
+          seqs=(${^seqs}$kb ${^seqs}${(L)kb})
+        ;;
+        Ctrl+[A-Z'[]\'])
+          seqs=(${^seqs}'^'$kb[-1])
+        ;;
+        Alt+[A-Z'[]\/.,'])
+          new_seqs=(${^seqs}'^['$kb[-1] ${^seqs}'^['${(L)kb[-1]})
+          if zstyle -T :z4h:bindkey macos-option-as-alt &&
+            [[ -n ${seq::=$_z4h_macos_opt_key[$kb[-1]]} ]]; then
+            new_seqs+=(${^seqs}$seq)
+            if [[ -n ${seq::=$_z4h_macos_opt_key[${(L)kb[-1]}]} ]]; then
+              new_seqs+=(${^seqs}$seq)
+            fi
           fi
-        fi
-      ;;
-      Ctrl+Alt+[A-Z'[]\'])
-        builtin bindkey -- '^[^'$kb[-1] $1
-      ;;
-      *)
-        print -Pru2 -- '%F{3}z4h%f: invalid key binding: %F{1}'${kb//\%/%%}'%f'
-        return '_z4h_err()'
-      ;;
-    esac
-  fi
+          seqs=($new_seqs)
+        ;;
+        Ctrl+Alt+[A-Z'[]\'])
+          seqs=(${^seqs}'^[^'$kb[-1])
+        ;;
+        *)
+          print -Pru2 -- '%F{3}z4h%f: invalid key binding: %F{1}'${kb//\%/%%}'%f'
+          return '_z4h_err()'
+        ;;
+      esac
+    fi
+  done
+done
+
+for seq in ${(u)seqs}; do
+  builtin bindkey -- $seq $1
 done

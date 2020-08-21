@@ -174,7 +174,7 @@ for kb in ${@:2}; do
       seqs=(${^seqs}$seq)
     else
       case $kb in
-        ?)
+        ?~[a-z])
           seqs=(${^seqs}$kb ${^seqs}${(L)kb})
         ;;
         Ctrl+[A-Z'[]\'])

@@ -724,3 +724,7 @@ and revert to `$SHELL` if it isn't.
 ---
 
 When doing `exec $_z4h_exe`, preserve `-l`.
+
+---
+
+Document binding syntax in `z4h help bindkey`.

@@ -156,7 +156,7 @@ PROMPT_EOL_MARK='%K{red} %k'   # mark the missing \n at the end of a comand outp
 READNULLCMD=less               # use `less` instead of the default `more`
 WORDCHARS=''                   # only alphanums make up words in word-based zle widgets
 ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab completion
-KEYTIMEOUT=1                   # wait for 10ms for the continuation of a key sequence
+KEYTIMEOUT=20                  # wait for 200ms for the continuation of a key sequence
 zle_highlight=('paste:none')   # disable highlighting of text pasted into the command line
 
 TIMEFMT='user=%U system=%S cpu=%P total=%*E'  # output format of `time` reserved word

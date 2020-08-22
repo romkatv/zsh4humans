@@ -15,7 +15,16 @@ local cmd
 
   () {
     emulate -L zsh
-    builtin source -- "$comp"
+    if (( ${+functions[_bash_comp]} )); then
+      builtin source -- "$comp"
+    else
+      {
+        function _bash_comp() {}
+        builtin source -- "$comp"
+      } always {
+        unfunction _bash_comp
+      }
+    fi
     unset LWORD RWORD
   } || true
 

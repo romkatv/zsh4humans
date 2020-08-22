@@ -13,4 +13,4 @@ got_version=${$(<$Z4H/zsh4humans/version)%$'\r'} &&
 print -Pru2 -- "%F{3}z4h%f: %Binitiating update%b (cached version too old)"
 
 Z4H_SSH=0:${Z4H_SSH#*:}
--z4h-update
+-z4h-cmd-update

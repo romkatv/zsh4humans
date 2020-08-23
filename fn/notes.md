@@ -728,3 +728,18 @@ When doing `exec $_z4h_exe`, preserve `-l`.
 ---
 
 Document binding syntax in `z4h help bindkey`.
+
+---
+
+Add an option to insert common prefix when completing (without starting `fzf`). This can be done
+only after migrating off fzf-tab.
+
+---
+
+Add an option to open `fzf` only after a second <kbd>Tab</kbd>. This can be done
+only after migrating off fzf-tab.
+
+---
+
+Is it possible to open `fzf` when pressing <kbd>Tab</kbd> on `*`? That would be nice. The old
+behavior (simply expand) can be achieved with <kbd>Ctrl+Space</kbd>.

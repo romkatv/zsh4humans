@@ -421,21 +421,23 @@ LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01
 export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
-zstyle ':completion:*'                  completer         "_complete" "_ignored"
-zstyle ':completion:*'                  matcher-list      "m:{a-z-_}={A-Z_-}" "l:|=* r:|=*"
-zstyle ':completion:*'                  menu              "false"
-zstyle ':completion:*'                  verbose           "true"
-zstyle ':completion:::::'               insert-tab        "pending"
-zstyle ':completion:*:*:-subscript-:*'  tag-order         "indexes parameters"
-zstyle ':completion:*:-tilde-:*'        tag-order         "directory-stack" "named-directories" "users"
-zstyle ':completion:*'                  squeeze-slashes   "true"
-zstyle ':completion:*'                  single-ignored    "show"
-zstyle ':completion:*:(rm|kill|diff):*' ignore-line       "other"
-zstyle ':completion:*:rm:*'             file-patterns     "*:all-files"
-zstyle ':completion:*'                  use-cache         "true"
-zstyle ':completion:*'                  cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
-zstyle ':completion:*:paths'            accept-exact-dirs "true"
-zstyle ':completion:*'                  single-ignored    "show"
+zstyle ':completion:*'               completer         "_complete" "_ignored"
+zstyle ':completion:*'               matcher-list      "m:{a-z-_}={A-Z_-}" "l:|=* r:|=*"
+zstyle ':completion:*'               menu              "false"
+zstyle ':completion:*'               verbose           "true"
+zstyle ':completion:::::'            insert-tab        "pending"
+zstyle ':completion:*:-subscript-:*' tag-order         "indexes parameters"
+zstyle ':completion:*:-tilde-:*'     tag-order         "directory-stack" "named-directories" "users"
+zstyle ':completion:*'               squeeze-slashes   "true"
+zstyle ':completion:*'               single-ignored    "show"
+zstyle ':completion:*:rm:*'          ignore-line       "other"
+zstyle ':completion:*:kill:*'        ignore-line       "other"
+zstyle ':completion:*:diff:*'        ignore-line       "other"
+zstyle ':completion:*:rm:*'          file-patterns     "*:all-files"
+zstyle ':completion:*'               use-cache         "true"
+zstyle ':completion:*'               cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
+zstyle ':completion:*:paths'         accept-exact-dirs "true"
+zstyle ':completion:*'               single-ignored    "show"
 
 zstyle ':completion:*:git-*:argument-rest:heads'           ignored-patterns '(FETCH_|ORIG_|*/|)HEAD'
 zstyle ':completion:*:git-*:argument-rest:heads-local'     ignored-patterns '(FETCH_|ORIG_|)HEAD'

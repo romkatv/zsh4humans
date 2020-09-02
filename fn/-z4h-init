@@ -152,8 +152,15 @@ zle -N z4h-fzf-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
 
+if (( $+commands[less] )); then
+  READNULLCMD=less
+elif (( $+commands[more] )); then
+  READNULLCMD=more
+elif (( $+commands[cat] )); then
+  READNULLCMD=cat
+fi
+
 PROMPT_EOL_MARK='%K{red} %k'   # mark the missing \n at the end of a comand output with a red block
-READNULLCMD=less               # use `less` instead of the default `more`
 WORDCHARS=''                   # only alphanums make up words in word-based zle widgets
 ZLE_REMOVE_SUFFIX_CHARS=''     # don't eat space when typing '|' after a tab completion
 KEYTIMEOUT=20                  # wait for 200ms for the continuation of a key sequence
@@ -413,7 +420,7 @@ fi
 #   -x4  tabs are 4 instead of 8
 export LESS='-iRFXMx4'
 
-export PAGER=less
+(( $+commands[less] )) && export PAGER=less
 
 # LS_COLORS is used by GNU ls and Zsh completions. LSCOLORS is used by BSD ls.
 export LS_COLORS='fi=00:mi=00:mh=00:ln=01;36:or=01;31:di=01;34:ow=04;01;34:st=34:tw=04;34:'

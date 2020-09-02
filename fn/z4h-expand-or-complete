@@ -122,7 +122,7 @@ fi
         [[ ! -e "$_z4h_fzf_called" ]] || zf_rm -f -- "$_z4h_fzf_called" || return
         local _z4h_word_prefix=
         local _z4h_path_prefix=
-        local -a _z4h_words=()
+        local -aU _z4h_words=()
         local -i _z4h_recursive=0
         local -i _z4h_zle_call_num=0
         local -i _z4h_in_path_files=0

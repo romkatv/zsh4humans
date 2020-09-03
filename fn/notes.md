@@ -743,3 +743,13 @@ only after migrating off fzf-tab.
 
 Is it possible to open `fzf` when pressing <kbd>Tab</kbd> on `*`? That would be nice. The old
 behavior (simply expand) can be achieved with <kbd>Ctrl+Space</kbd>.
+
+---
+
+Bug: when pre-populating query in fzf when doing file completion, it needs to be unquoted.
+
+```zsh
+md /tmp/test
+touch 'a b '{1,2}
+ls <TAB>
+```

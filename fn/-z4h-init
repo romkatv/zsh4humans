@@ -445,6 +445,9 @@ zstyle ':completion:*'               use-cache         "true"
 zstyle ':completion:*'               cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
 zstyle ':completion:*:paths'         accept-exact-dirs "true"
 zstyle ':completion:*'               single-ignored    "show"
+zstyle ':completion:*:functions'     ignored-patterns  "-z4h*|_*"
+zstyle ':completion:*:parameters'    ignored-patterns  \
+  "_(z4h|p9k|_p9k|POWERLEVEL9K|gitstatus|GITSTATUS|zsh_highlight|zsh_autosuggest|ZSH_HIGHLIGHT|ZSH_AUTOSUGGEST)*"
 
 zstyle ':completion:*:git-*:argument-rest:heads'           ignored-patterns '(FETCH_|ORIG_|*/|)HEAD'
 zstyle ':completion:*:git-*:argument-rest:heads-local'     ignored-patterns '(FETCH_|ORIG_|)HEAD'

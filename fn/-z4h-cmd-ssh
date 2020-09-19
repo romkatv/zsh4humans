@@ -261,11 +261,35 @@ fi
 
   local args=("$@")
   args[pos[1],pos[1]-1]=('-T')
-  local remote_script=/tmp/z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
-  "${z4h_ssh_command[@]}" "${args[@]}" "/bin/cat >$remote_script" <$tmpdir/script || return
+  local remote_script=.z4h-ssh.${(%):-%n}.$sysparams[pid].$EPOCHSECONDS.$RANDOM
+
+  # Tricky corner cases where this command must work:
+  #
+  #   1. The remote shell is csh (default on FreeBSD).
+  #   2. There is no /tmp on the remote host (e.g., Termux).
+  #   3. TMPDIR is not set.
+  #   4. TMPDIR has spaces in it.
+  #
+  # The next command (the one that invokes /bin/sh) must also work in these
+  # cases. It should also propagate the exit status of /bin/sh.
+  local cmd="test -w /tmp && cat >/tmp/$remote_script && echo 1 && exit"
+  cmd+=" || "
+  cmd+="test ! -e /tmp/$remote_script && cat >~/$remote_script && echo 2"
+  local loc
+  loc=$("${z4h_ssh_command[@]}" "${args[@]}" $cmd <$tmpdir/script) || return
 } always {
   zf_rm -rf -- $tmpdir
 }
+
+case ${loc//[[:space:]]} in
+  1) remote_script="/tmp/$remote_script";;
+  2) remote_script="~/$remote_script";;
+  *)
+    print -Pru2 -- "%F{3}z4h%f: failed to upload bootstrap script"
+    typeset -p loc
+    return 1
+  ;;
+esac
 
 args[pos[1]]='-t'
 

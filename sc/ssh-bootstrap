@@ -199,10 +199,13 @@ done
   'unset' '_z4h_ssh_cleanup' '_z4h_ssh_tar_v' '_z4h_ssh_tar_c_opt' '_z4h_ssh_tar_x_opt'
   'unset' '_z4h_ssh_cmd' '_z4h_ssh_tmp' '_z4h_ssh_src' '_z4h_ssh_dst' 'z4h_min_version'
   'unset' 'z4h_ssh_client' 'z4h_ssh_host' '_z4h_ssh_platform'
-  'set' '+f'
-  'set' '--'
   export _z4h_ssh_feedback="$0"
   Z4H_BOOTSTRAPPING='1'
+  'set' '+f'
+  'set' '--'
+  if '[' '-n' "${ZSH_VERSION-}" ']'; then
+    'setopt' 'aliases'
+  fi
   ^RUN^
   _z4h_ssh_ret="$?"
   'set' '-f'

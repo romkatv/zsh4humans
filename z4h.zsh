@@ -90,7 +90,8 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   'bindkey' '^[[1;5C' 'forward-word'
 fi
 
-if '[' '-n' "${Z4H-}" '-a' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v3' ']' &&
+if '[' '-n' "${Z4H-}" ']' &&
+   '[' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v3' ']' &&
    '[' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/zsh4humans/main.zsh ']'; then
   if '.' "$Z4H"/zsh4humans/main.zsh; then
     'setopt' 'aliases'
@@ -165,7 +166,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
 
     v="${Z4H_URL#https://raw.githubusercontent.com/romkatv/zsh4humans/v}"
 
-    if '[' '-z' "$v" '-o' "$v" '=' "$Z4H_URL" ']'; then
+    if '[' '-z' "$v" ']' || '[' "$v" '=' "$Z4H_URL" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: invalid \033[1mZ4H_URL\033[0m: \033[31m%s\033[0m\n' "$Z4H_URL"
       >&2 'printf' '\n'
       if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then

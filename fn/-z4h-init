@@ -730,7 +730,7 @@ function -z4h-post-init() {
   unset _z4h_compdef
 
   local cmd
-  for cmd in kubectl helm rustup cargo; do
+  for cmd in cargo helm kitty kubectl rustup; do
     # Homebrew ships broken completions for kubectl, so we use our own even
     # if _comps[kubectl] is set.
     (( $+commands[$cmd] )) && compdef -- -z4h-complete-$cmd $cmd

@@ -1,0 +1,30 @@
+local kitty="${commands[kitty]-}"
+local orig_cmd="${_comps[kitty]-}"
+local comp="$Z4H"/cache/kitty-completion.zsh
+local src="${kitty:h}"/../lib/kitty/kitty/complete.py
+local cmd
+
+() {
+  [[ -n "$kitty" ]] || return
+
+  [[ "$comp" -nt "$kitty" && (! -e "$src" || "$comp" -nt "$src" ) ]] || {
+    local tmp="$comp".tmp."${sysparams[pid]}"
+    "$kitty" + complete setup zsh >"$tmp" || return
+    zf_mv -f -- "$tmp" "$comp" || return
+    -z4h-compile "$comp" || return
+  }
+
+  () {
+    emulate -L zsh
+    builtin source -- "$comp"
+  } || true
+
+  cmd="${_comps[kitty]-}"
+  [[ "$cmd" != "$orig_cmd" ]] || return
+} || {
+  builtin unset '_comps[kitty]'
+  _default "$@"
+  return
+}
+
+builtin eval "$cmd"

@@ -731,7 +731,9 @@ function -z4h-post-init() {
 
   local cmd
   for cmd in kubectl helm rustup cargo; do
-    (( $+_comps[$cmd] || ! $+commands[$cmd] )) || compdef -- -z4h-complete-$cmd $cmd
+    # Homebrew ships broken completions for kubectl, so we use our own even
+    # if _comps[kubectl] is set.
+    (( $+commands[$cmd] )) && compdef -- -z4h-complete-$cmd $cmd
   done
 
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then

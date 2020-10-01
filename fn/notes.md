@@ -753,3 +753,7 @@ md /tmp/test
 touch 'a b '{1,2}
 ls <TAB>
 ```
+
+---
+
+Use `[[ file1 -ef file2 ]]` in `z4h chsh`.

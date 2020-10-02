@@ -286,7 +286,6 @@ case ${loc//[[:space:]]} in
   2) remote_script="~/$remote_script";;
   *)
     print -Pru2 -- "%F{3}z4h%f: failed to upload bootstrap script"
-    typeset -p loc
     return 1
   ;;
 esac

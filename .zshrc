@@ -10,8 +10,16 @@ zstyle ':z4h:autosuggestions' forward-char     'accept'
 # End key accepts to the end of the line ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' end-of-line      'accept'
-# Send these files over to the remote host when using `z4h ssh`.
+# Send these files over to the remote host when connecting over ssh.
+# Multiple files can be listed here.
 zstyle ':z4h:ssh:*'           send-extra-files '~/.iterm2_shell_integration.zsh'
+# Disable automatic teleportation of z4h over ssh when connecting to some-host.
+# This makes `ssh some-host` equivalent to `command ssh some-host`.
+zstyle ':z4h:ssh:some-host'   passthrough      'yes'
+
+# Keep cursor position unchanged when Up/Down fetches a command from history?
+zstyle ':zle:up-line-or-beginning-search'   leave-cursor 'yes'
+zstyle ':zle:down-line-or-beginning-search' leave-cursor 'yes'
 
 # Clone additional Git repositories from GitHub.
 #
@@ -27,7 +35,6 @@ z4h install ohmyzsh/ohmyzsh || return
 z4h init || return
 
 # Export environment variables.
-export EDITOR=nano
 export GPG_TTY=$TTY
 
 # Extend PATH.
@@ -46,15 +53,6 @@ z4h source ~/.iterm2_shell_integration.zsh
 # Define key bindings.
 z4h bindkey z4h-backward-kill-word  Ctrl+Backspace
 z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
-
-# Sort completion candidates when pressing Tab?
-zstyle ':completion:*'                      sort               false
-# Keep cursor position unchanged when Up/Down fetches a command from history?
-zstyle ':zle:up-line-or-beginning-search'   leave-cursor       true
-zstyle ':zle:down-line-or-beginning-search' leave-cursor       true
-# When presented with the list of choices upon hitting Tab, accept selection
-# and trigger another completion with this key binding.
-zstyle ':fzf-tab:*'                         continuous-trigger tab
 
 # Autoload functions.
 autoload -Uz zmv

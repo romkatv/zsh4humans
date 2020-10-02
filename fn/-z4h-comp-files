@@ -98,7 +98,7 @@
   builtin compadd -QUf -p "$word_prefix" -W "$path_prefix" -- ${(@q)choice}
   if (( $#choice == 1 )); then
     compstate[insert]=2
-    [[ $RBUFFER == ' '* ]] || compstate[insert]+=' '
+    [[ ${BUFFER:$((SUFFIX_START + $#SUFFIX))} == ' '* ]] || compstate[insert]+=' '
   else
     compstate[insert]=all
   fi

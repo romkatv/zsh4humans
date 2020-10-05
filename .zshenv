@@ -6,7 +6,7 @@
 # from ~/.zshrc.
 
 if [ -n "${ZSH_VERSION-}" ]; then
-  : ${ZDOTDIR:=~} ${TMPPREFIX:=${TMPDIR:-/tmp}/zsh}
+  : ${ZDOTDIR:=~}
   setopt no_global_rcs
   if [[ -o no_interactive && -z "${Z4H_BOOTSTRAPPING-}" ]]; then
     return

@@ -245,9 +245,9 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
           >&2 'printf' 'Change \033[32mzsh\033[0m startup files to keep \033[1mZ4H_UPDATING\033[0m intact.\n'
           'exit' '1'
         fi
-        "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H" '-o' "$Z4H_UPDATING" || 'exit'
+        "sh" "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H" '-o' "$Z4H_UPDATING" || 'exit'
       else
-        "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H"                      || 'exit'
+        "sh" "$tmpdir"/zsh4humans-"$v"/sc/setup '-n' "$Z4H"                      || 'exit'
       fi
       'command' 'rm' '-rf' '--' "$dir"                          || 'exit'
       'command' 'mv' '-f' '--' "$tmpdir"/zsh4humans-"$v" "$dir" || 'exit'

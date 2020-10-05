@@ -46,6 +46,8 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'unset' '_z4h_ssh_feedback'
   fi
 
+  ':' "${TMPPREFIX:=${TMPDIR:-/tmp}/zsh}"
+
   'bindkey' '-d'
   'bindkey' '-e'
 

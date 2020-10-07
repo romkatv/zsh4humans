@@ -459,10 +459,7 @@ zstyle ':completion:*:git-*:argument-rest:recent-branches' ignored-patterns '*'
 fpath+=(
   ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
   ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(FN)
-  /usr/local/share/zsh/site-functions(FN)
-  /usr/share/zsh/site-functions(FN)
-  /usr/share/zsh/vendor-completions(FN)
-)
+  /usr{/local,}/share/zsh/{site-functions,vendor-completions}(FN))
 
 # Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit

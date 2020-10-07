@@ -29,7 +29,6 @@ if '[' '-z' "$_z4h_bypass" ']'; then
     'linux armv6l');;
     'linux armv7l');;
     'linux armv8l');;
-    'linux i686');;
     'linux x86_64');;
     *) _z4h_bypass='1';;
   esac
@@ -102,7 +101,6 @@ case "$_z4h_ssh_platform" in
   'linux armv6l');;
   'linux armv7l');;
   'linux armv8l');;
-  'linux i686');;
   'linux x86_64');;
   *)
     'command' 'rm' '-f' '--' "$@" || 'exit'

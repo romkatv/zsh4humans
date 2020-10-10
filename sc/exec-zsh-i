@@ -13,10 +13,11 @@ _z4h_try_exec_zsh_i() {
 }
 
 _z4h_exec_zsh_i() {
-  '_z4h_try_exec_zsh_i' 'zsh'                || 'return'
-  '_z4h_try_exec_zsh_i' '/usr/local/bin/zsh' || 'return'
-  '_z4h_try_exec_zsh_i' ~/'.local/bin/zsh'   || 'return'
-  '_z4h_try_exec_zsh_i' ~/'.zsh-bin/bin/zsh' || 'return'
+  '_z4h_try_exec_zsh_i' 'zsh'                      || 'return'
+  '_z4h_try_exec_zsh_i' '/usr/local/bin/zsh'       || 'return'
+  '_z4h_try_exec_zsh_i' ~/'.local/bin/zsh'         || 'return'
+  '_z4h_try_exec_zsh_i' ~/'.zsh-bin/bin/zsh'       || 'return'
+  '_z4h_try_exec_zsh_i' "${PREFIX-}"/local/bin/zsh || 'return'
 
   if '[' '-r' "$Z4H"/stickycache/zshdir ]; then
     'local' 'dir'
@@ -58,7 +59,7 @@ _z4h_exec_zsh_i() {
 
   if '[' '-n' "${Z4H_SSH-}" ']'; then
     >&2 'printf' '\033[33mz4h\033[0m: installing \033[1mzsh 5.8\033[0m to \033[4m~/.local\033[0m\n'
-    'command' 'sh' '--' "$install" '-d' ~/'.local' '-q' || 'return'
+    'command' 'sh' '--' "$install" '-d' ~/'.local' '-e' 'no' '-q' || 'return'
     'local' 'dir'="$HOME"/.local
   else
     'local' 'zshdir' 'dir'

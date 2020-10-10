@@ -29,7 +29,6 @@ if '[' '-z' "$_z4h_bypass" ']'; then
     'linux armv6l');;
     'linux armv7l');;
     'linux armv8l');;
-    'linux i686');;
     'linux x86_64');;
     *) _z4h_bypass='1';;
   esac
@@ -39,7 +38,7 @@ if '[' '-n' "$_z4h_bypass" ']'; then
   command -v 'rm' >'/dev/null' 2>&1 && 'command' 'rm' '-f' '--' "$0"
 
   if '[' '-x' "${SHELL-}" ']'; then
-    case "$SHELL" in
+    case "/$SHELL" in
       */'ksh93') 'exec' "$SHELL" '-l'; 'exit';;
       */'dash')  'exec' "$SHELL" '-l'; 'exit';;
       */'vbash') 'exec' "$SHELL" '-l'; 'exit';;
@@ -91,39 +90,6 @@ _z4h_ssh_cleanup='"trap" "-" "HUP" "INT" "TERM" "EXIT"; "command" "rm" "-rf" "--
 'trap' "$_z4h_ssh_cleanup; 'exit' '130'"   'INT'
 'trap' "$_z4h_ssh_cleanup; 'exit' '143'"   'TERM'
 'trap' "$_z4h_ssh_cleanup; _z4h_ssh_error" 'EXIT'
-
-_z4h_ssh_platform="$('command' 'uname' '-sm')" || 'exit'
-_z4h_ssh_platform="$('printf' '%s' "$_z4h_ssh_platform" | 'command' 'tr' '[A-Z]' '[a-z]')" || 'exit'
-
-case "$_z4h_ssh_platform" in
-  'darwin x86_64');;
-  'freebsd amd64');;
-  'linux aarch64');;
-  'linux armv6l');;
-  'linux armv7l');;
-  'linux armv8l');;
-  'linux i686');;
-  'linux x86_64');;
-  *)
-    'command' 'rm' '-f' '--' "$@" || 'exit'
-    'set' '--'
-
-    if '[' '-x' "${SHELL-}" ']'; then
-      case "$SHELL" in
-        */'ksh93') 'exec' "$SHELL" '-l'; 'exit';;
-        */'dash')  'exec' "$SHELL" '-l'; 'exit';;
-        */'vbash') 'exec' "$SHELL" '-l'; 'exit';;
-        */'bash')  'exec' "$SHELL" '-l'; 'exit';;
-        */'tcsh')  'exec' "$SHELL" '-l'; 'exit';;
-        */'csh')   'exec' "$SHELL" '-l'; 'exit';;
-        */'zsh')   'exec' "$SHELL" '-l'; 'exit';;
-      esac
-    fi
-
-    'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ 'bypass          '
-    'exit'
-  ;;
-esac
 
 z4h_min_version=^MIN_VERSION^
 z4h_ssh_client=^SSH_CLIENT^

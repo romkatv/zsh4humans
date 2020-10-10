@@ -16,7 +16,6 @@ case "$platform" in
   'linux armv6l');;
   'linux armv7l');;
   'linux armv8l');;
-  'linux i686');;
   'linux x86_64');;
   *)
     >&2 'printf' '\033[33mz4h\033[0m: sorry, unsupported platform: \033[31m%s\033[0m\n' "$platform"

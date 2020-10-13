@@ -1,17 +1,27 @@
 [[ -w $TTY && -r $TTY ]] || return
 
-autoload +X -Uz -- -z4h-fzf
+local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files compadd zstyle)
 
-local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files)
-
-() {
-  local f
-  for f in $_z4h_shadow_funcs; do
-    (( ${+functions[-z4h-orig$f]} )) || builtin functions -c -- $f -z4h-orig$f || return
-  done
-}
+local f
+for f in $_z4h_shadow_funcs; do
+  if (( ${+functions[$f]} )); then
+    builtin functions -c -- $f -z4h-orig-$f
+    local _z4h_orig_${f#_}=-z4h-orig-$f
+  else
+    eval "local -a _z4h_orig_${f#_}=(builtin $f)"
+  fi
+done
 
 {
+  function zstyle() {
+    # zstyle -T ":completion:${curcontext}:$_type" list-grouped
+    if [[ $# == 3 && $3 == list-grouped && $1 == -(t|T) ]]; then
+      return 1
+    else
+      $_z4h_orig_zstyle "$@"
+    fi
+  }
+
   function _multi_parts() {
     local _z4h_sep=${@[-2]}
     local _z4h_array=${@[-1]}
@@ -37,109 +47,113 @@ local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files)
       (( ${#f} || ! ${#dirs} )) && typeset -gi _z4h_only_dirs=0
     } "$@"
     local -ir _z4h_in_path_files=1
-    -z4h-orig_path_files "$@"
+    $_z4h_orig_path_files "$@"
   }
 
   function compadd() {
-    if (( _z4h_recursive != -1 )); then
+    local -a _z4h_{opts,nDOA,Q,f,s,S,I,W,U,i,P,p,d}
+    zparseopts -E -a _z4h_opts {D,O,A}+:=_z4h_nDOA n+=_z4h_nDOA       \
+      Q+=_z4h_Q f+=_z4h_f s+:=_z4h_s S+:=_z4h_S I+:=_z4h_I W+:=_z4h_W \
+      U+:=_z4h_U i+:=_z4h_i P+:=_z4h_P p+:=_z4h_p d+:=_z4h_d          \
+      {a,k,q,e,l,1,2,C}+ {F,J,X,x,V,r,R,E,M}+: o+::
+    (( ! ${#_z4h_nDOA} )) || return 0
+    local -a _z4h_A _z4h_D
+    if (( $#_z4h_d )); then
       () {
-        local -a _z4h_{opts,nDOA,Q,f,s,S,I,W,U,i,P,p,d}
-        zparseopts -E -a _z4h_opts {D,O,A}+:=_z4h_nDOA n+=_z4h_nDOA       \
-          Q+=_z4h_Q f+=_z4h_f s+:=_z4h_s S+:=_z4h_S I+:=_z4h_I W+:=_z4h_W \
-          U+:=_z4h_U i+:=_z4h_i P+:=_z4h_P p+:=_z4h_p d+:=_z4h_d          \
-          {a,k,q,e,l,1,2,C}+ {F,J,X,x,V,r,R,E,M}+: o+::
-        (( ! ${#_z4h_nDOA} )) || return 0
-        local -a _z4h_A _z4h_D
-        if (( $#_z4h_d )); then
-          () {
-            emulate -L zsh
-            if [[ $_z4h_d[2] == '('* ]]; then
-              _z4h_D=(${=_z4h_d[2,-2]})
-            else
-              _z4h_D=("${(@P)_z4h_d}") 
-            fi
-          }
-        fi
-        builtin compadd -A _z4h_A -D _z4h_D "$@"
-        (( ${#_z4h_A} )) || return 0
         emulate -L zsh
-        if (( $#_z4h_D < $#_z4h_A )); then
-          _z4h_D+=(${_z4h_A:$#_z4h_D})
-        elif (( $#_z4h_D > $#_z4h_A )); then
-          _z4h_D[$#_z4h_A+1,-1]=()
+        if [[ $_z4h_d[2] == '('* ]]; then
+          _z4h_D=(${=_z4h_d[2,-2]})
+        else
+          _z4h_D=("${(@P)_z4h_d}") 
         fi
-        _z4h_words+=("${_z4h_A[@]}")
-        _z4h_descrs+=("${_z4h_D[@]}")
-        local scaffold=(
-          "$_z4h_in_path_files" "$_z4h_f" "$_z4h_W[2]"
-          "$_z4h_i[2]" "$_z4h_P[2]" "$_z4h_p[2]" "$_z4h_s[2]" "$_z4h_S[2]" "$_z4h_I[2]"
-          "$IPREFIX" "$PREFIX" "$ISUFFIX" "$SUFFIX")
-        scaffold=${(pj:\1:)scaffold}
-        if (( !$#_z4h_scaffolds )); then
-          _z4h_scaffolds=($scaffold)
-        elif (( $#_z4h_scaffolds > 1 )) || [[ $_z4h_scaffolds[1] != $scaffold ]]; then
-          (( $#_z4h_scaffolds + $#_z4h_A != $#_z4h_words )) _z4h_scaffolds+=($_z4h_scaffolds[1])
-          repeat $#_z4h_A _z4h_scaffolds+=($scaffold)
-        fi
-      } "$@"
+      }
     fi
-    builtin compadd "$@"
+    $_z4h_orig_compadd -A _z4h_A -D _z4h_D "$@"
+    (( ${#_z4h_A} )) || return 0
+
+    emulate -L zsh
+    if (( $#_z4h_D < $#_z4h_A )); then
+      _z4h_D+=(${_z4h_A:$#_z4h_D})
+    elif (( $#_z4h_D > $#_z4h_A )); then
+      _z4h_D[$#_z4h_A+1,-1]=()
+    fi
+    _z4h_words+=("${_z4h_A[@]}")
+    _z4h_descrs+=("${_z4h_D[@]}")
+    local scaffold=(
+      "$_z4h_in_path_files" "$_z4h_f" "$_z4h_W[2]"
+      "$_z4h_i[2]" "$_z4h_P[2]" "$_z4h_p[2]" "$_z4h_s[2]" "$_z4h_S[2]" "$_z4h_I[2]"
+      "$IPREFIX" "$PREFIX" "$ISUFFIX" "$SUFFIX")
+    scaffold=${(pj:\1:)scaffold}
+    if (( ! $#_z4h_scaffolds )); then
+      _z4h_scaffolds=($scaffold)
+    elif (( $#_z4h_scaffolds > 1 )) || [[ $_z4h_scaffolds[1] != $scaffold ]]; then
+      repeat $(( $#_z4h_words - $#_z4h_scaffolds - $#_z4h_A )) _z4h_scaffolds+=($_z4h_scaffolds[1])
+      repeat $#_z4h_A _z4h_scaffolds+=($scaffold)
+    fi
+
+    #$_z4h_orig_compadd -P pre -qS ' ' -o nosort -- bfoo bar baz
+    #typeset -p compstate >>/tmp/log
+    #if [[ -n $compstate[unambiguous] ]]; then
+    #  compstate[insert]='unambiguous'
+    #else
+    #  compstate[insert]='all'
+    #fi
   }
 
   function _main_complete() {
+    $_z4h_orig_main_complete "$@"
 
+    # eval "$_z4h_opt"
+    #$_z4h_orig_compadd -Un -- ''
+    #$_z4h_orig_compadd -U -- foo bar
+    #compstate[insert]=all
   }
 
-  function _fzf_tab__main_complete() {
-    -z4h-orig-fzf-tab-main-complete
-    if (( _z4h_recursive == 1 )); then
-      typeset -gi _fzf_tab_ignored=1
-      -z4h-comp-files "$_z4h_word_prefix" "$_z4h_path_prefix" "$_z4h_only_dirs" "${_z4h_words[@]}"
-    fi
-  }
+  #function _fzf_tab__main_complete() {
+  #  -z4h-orig-fzf-tab-main-complete
+  #  if (( _z4h_recursive == 1 )); then
+  #    typeset -gi _fzf_tab_ignored=1
+  #    -z4h-comp-files "$_z4h_word_prefix" "$_z4h_path_prefix" "$_z4h_only_dirs" "${_z4h_words[@]}"
+  #  fi
+  #}
  
-  function zle() {
-    if [[ "${1-}" != .fzf-tab-orig-* ]]; then
-      -z4h-orig-zle "$@"
-      return
-    fi
-    (( _z4h_zle_call_num++ && _z4h_recursive == 1 )) && return
-    -z4h-orig-zle "$@"
-  }
+  #function zle() {
+  #  if [[ "${1-}" != .fzf-tab-orig-* ]]; then
+  #    -z4h-orig-zle "$@"
+  #    return
+  #  fi
+  #  (( _z4h_zle_call_num++ && _z4h_recursive == 1 )) && return
+  #  -z4h-orig-zle "$@"
+  #
 
   -z4h-cursor-hide
+
+  # local ZLE_REMOVE_SUFFIX_CHARS=' '
 
   local esc line col
   while true; do
     {
       -z4h-show-dots
-      IFS='[;' read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
+      IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
       local lbuf=$LBUFFER
 
       {
-        local _z4h_fzf_called="$Z4H"/tmp/fzf-called."${sysparams[pid]}"
-        [[ ! -e "$_z4h_fzf_called" ]] || zf_rm -f -- "$_z4h_fzf_called" || return
-        local _z4h_word_prefix=
-        local _z4h_path_prefix=
         local -a _z4h_words=()
         local -a _z4h_descrs=()
         local -a _z4h_scaffolds=()
-        local -i _z4h_recursive=0
-        local -i _z4h_zle_call_num=0
-        local -i _z4h_in_path_files=0
         local -i _z4h_only_dirs=1
-        fzf-tab-complete
+        local -i _z4h_in_path_files=0
+        local _z4h_fzf_result=
+        builtin zle expand-or-complete
       } always {
         local -i err=$?
-        local -a stat=()
-        if [[ -e "$_z4h_fzf_called" ]] && zstat +size -A stat -- "$_z4h_fzf_called"; then
-          zf_rm -f -- "$_z4h_fzf_called" || err=$?
-          echoti cuu 1
-          (( col > 1 )) && echoti cuf $((col-1))
+        if [[ -n $_z4h_fzf_result ]]; then
+          builtin echoti cuu 1
+          (( col > 1 )) && builtin echoti cuf $((col-1))
         fi
         (( err )) && return err
-        [[ $stat != 1 || $LBUFFER == ($lbuf|*' ') ]] && return
-        zle .split-undo || return
+        [[ $_z4h_fzf_result != again || $LBUFFER == ($lbuf|*' ') ]] && return
+        builtin zle .split-undo || return
       }
     } always {
       if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
@@ -148,13 +162,15 @@ local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files)
     }
   done
 } always {
-  () {
-    local f
-    for f in $_z4h_shadow_funcs; do
-      (( ! ${+functions[-z4h-orig$f]} )) || builtin functions -c -- -z4h-orig$f $f
-    done
-  }
-  (( ! $+functions[compadd] )) || builtin unfunction compadd
-  zle -R
+  local f=
+  for f in $_z4h_shadow_funcs; do
+    if (( ${+functions[-z4h-orig-$f]} )); then
+      builtin functions -c -- -z4h-orig-$f $f
+      builtin unfunction -- -z4h-orig-$f
+    elif (( ${+functions[$f]} )); then
+      builtin unfunction -- $f
+    fi
+  done
+  builtin zle -R
   -z4h-cursor-show
 }

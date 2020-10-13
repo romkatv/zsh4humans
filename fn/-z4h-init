@@ -388,21 +388,21 @@ if (( _z4h_use[fzf] )); then
 fi
 
 if zstyle -T :z4h:bindkey macos-option-as-alt; then
-  bindkey '∂'       z4h-kill-word                  # opt+d
-  bindkey 'Î'       z4h-kill-word                  # opt+D
-  bindkey '˚'       backward-kill-line             # opt+k
-  bindkey '\uF8FF'  backward-kill-line             # opt+K
-  bindkey '∆'       kill-buffer                    # opt+j
-  bindkey 'Ô'       kill-buffer                    # opt+J
-  bindkey 'ø'       z4h-stash-buffer               # opt+o
-  bindkey 'Ø'       z4h-stash-buffer               # opt+O
-  bindkey 'µ'       z4h-autosuggest-accept         # opt+m
-  bindkey 'Â'       z4h-autosuggest-accept         # opt+M
-  bindkey '÷'       redo                           # opt+/
-  bindkey '˙'       run-help                       # opt+h
-  bindkey 'Ó'       run-help                       # opt+H
-  bindkey '∫'       z4h-backward-word              # opt+b
-  bindkey 'ı'       z4h-backward-word              # opt+B
+  bindkey '∂'            z4h-kill-word                  # opt+d
+  bindkey 'Î'            z4h-kill-word                  # opt+D
+  bindkey '˚'            backward-kill-line             # opt+k
+  bindkey '\357\243\277' backward-kill-line             # opt+K (U+F8FF)
+  bindkey '∆'            kill-buffer                    # opt+j
+  bindkey 'Ô'            kill-buffer                    # opt+J
+  bindkey 'ø'            z4h-stash-buffer               # opt+o
+  bindkey 'Ø'            z4h-stash-buffer               # opt+O
+  bindkey 'µ'            z4h-autosuggest-accept         # opt+m
+  bindkey 'Â'            z4h-autosuggest-accept         # opt+M
+  bindkey '÷'            redo                           # opt+/
+  bindkey '˙'            run-help                       # opt+h
+  bindkey 'Ó'            run-help                       # opt+H
+  bindkey '∫'            z4h-backward-word              # opt+b
+  bindkey 'ı'            z4h-backward-word              # opt+B
 fi
 
 # Use lesspipe if available. It allows you to use less on binary files (*.tar.gz, *.jpg, etc.).
@@ -436,7 +436,6 @@ zstyle ':completion:::::'            insert-tab        "pending"
 zstyle ':completion:*:-subscript-:*' tag-order         "indexes parameters"
 zstyle ':completion:*:-tilde-:*'     tag-order         "directory-stack" "named-directories" "users"
 zstyle ':completion:*'               squeeze-slashes   "true"
-zstyle ':completion:*'               single-ignored    "show"
 zstyle ':completion:*:rm:*'          ignore-line       "other"
 zstyle ':completion:*:kill:*'        ignore-line       "other"
 zstyle ':completion:*:diff:*'        ignore-line       "other"

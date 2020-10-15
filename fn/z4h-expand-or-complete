@@ -1,5 +1,9 @@
 [[ -w $TTY && -r $TTY ]] || return
 
+setopt local_options always_to_end no_auto_list no_auto_menu no_auto_param_keys     \
+       no_auto_remove_slash no_bash_auto_list no_complete_in_word no_list_ambiguous \
+       no_list_beep no_list_packed no_list_rows_first no_menu_complete no_rec_exact
+
 local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files compadd zstyle)
 
 local f
@@ -51,62 +55,53 @@ done
   }
 
   function compadd() {
-    local -a _z4h_{opts,nDOA,Q,f,s,S,I,W,U,i,P,p,d}
-    zparseopts -E -a _z4h_opts {D,O,A}+:=_z4h_nDOA n+=_z4h_nDOA       \
-      Q+=_z4h_Q f+=_z4h_f s+:=_z4h_s S+:=_z4h_S I+:=_z4h_I W+:=_z4h_W \
-      U+:=_z4h_U i+:=_z4h_i P+:=_z4h_P p+:=_z4h_p d+:=_z4h_d          \
-      {a,k,q,e,l,1,2,C}+ {F,J,X,x,V,r,R,E,M}+: o+::
-    (( ! ${#_z4h_nDOA} )) || return 0
-    local -a _z4h_A _z4h_D
-    if (( $#_z4h_d )); then
-      () {
+    local -a _z4h_{nDOA,q,f,s,S,I,W,i,P,p,d,r,R,e}
+    zparseopts -E {D,O,A}+:=_z4h_nDOA n+=_z4h_nDOA          \
+      f+=_z4h_f s+:=_z4h_s S+:=_z4h_S I+:=_z4h_I W+:=_z4h_W \
+      i+:=_z4h_i P+:=_z4h_P p+:=_z4h_p d+:=_z4h_d q+=_z4h_q \
+      r+:=_z4h_r R+:=_z4h_R e+=_z4h_e                       \
+      {a,k,l,1,2,C,Q}+ {F,J,X,x,V,E,M,U}+: o+::
+    if (( ! ${#_z4h_nDOA} )); then
+      local -a _z4h_A _z4h_D
+      if (( $#_z4h_d )); then
+        () {
+          emulate -L zsh
+          if [[ $_z4h_d[2] == '('* ]]; then
+            _z4h_D=(${=_z4h_d[2,-2]})
+          else
+            _z4h_D=("${(@P)_z4h_d}") 
+          fi
+        }
+      fi
+      $_z4h_orig_compadd -A _z4h_A -D _z4h_D "$@"
+      if (( ${#_z4h_A} )); then
         emulate -L zsh
-        if [[ $_z4h_d[2] == '('* ]]; then
-          _z4h_D=(${=_z4h_d[2,-2]})
-        else
-          _z4h_D=("${(@P)_z4h_d}") 
+        if (( $#_z4h_D < $#_z4h_A )); then
+          _z4h_D+=(${_z4h_A:$#_z4h_D})
+        elif (( $#_z4h_D > $#_z4h_A )); then
+          _z4h_D[$#_z4h_A+1,-1]=()
         fi
-      }
-    fi
-    $_z4h_orig_compadd -A _z4h_A -D _z4h_D "$@"
-    (( ${#_z4h_A} )) || return 0
-
-    emulate -L zsh
-    if (( $#_z4h_D < $#_z4h_A )); then
-      _z4h_D+=(${_z4h_A:$#_z4h_D})
-    elif (( $#_z4h_D > $#_z4h_A )); then
-      _z4h_D[$#_z4h_A+1,-1]=()
-    fi
-    _z4h_words+=("${_z4h_A[@]}")
-    _z4h_descrs+=("${_z4h_D[@]}")
-    local scaffold=(
-      "$_z4h_in_path_files" "$_z4h_f" "$_z4h_W[2]"
-      "$_z4h_i[2]" "$_z4h_P[2]" "$_z4h_p[2]" "$_z4h_s[2]" "$_z4h_S[2]" "$_z4h_I[2]"
-      "$IPREFIX" "$PREFIX" "$ISUFFIX" "$SUFFIX")
-    scaffold=${(pj:\1:)scaffold}
-    if (( ! $#_z4h_scaffolds )); then
-      _z4h_scaffolds=($scaffold)
-    elif (( $#_z4h_scaffolds > 1 )) || [[ $_z4h_scaffolds[1] != $scaffold ]]; then
-      repeat $(( $#_z4h_words - $#_z4h_scaffolds - $#_z4h_A )) _z4h_scaffolds+=($_z4h_scaffolds[1])
-      repeat $#_z4h_A _z4h_scaffolds+=($scaffold)
+        _z4h_words+=("${_z4h_A[@]}")
+        _z4h_descrs+=("${_z4h_D[@]}")
+        local scaffold=(
+          "$_z4h_in_path_files"
+          "$_z4h_P[2]" "$_z4h_S[2]" "$_z4h_p[2]" "$_z4h_s[2]" "$_z4h_i[2]" "$_z4h_I[2]"
+          "$_z4h_q[1]" "$_z4h_r[2]" "$_z4h_R[2]" "$_z4h_f[1]" "$_z4h_e[1]" "$_z4h_W[2]"
+          "$IPREFIX" "$PREFIX" "$ISUFFIX" "$SUFFIX")
+        scaffold=${(pj:\1:)scaffold}
+        if (( ! $#_z4h_scaffolds )); then
+          _z4h_scaffolds=($scaffold)
+        elif (( $#_z4h_scaffolds > 1 )) || [[ $_z4h_scaffolds[1] != $scaffold ]]; then
+          repeat $(( $#_z4h_words - $#_z4h_scaffolds - $#_z4h_A )); do
+            _z4h_scaffolds+=($_z4h_scaffolds[1])
+          done
+          repeat $#_z4h_A _z4h_scaffolds+=($scaffold)
+        fi
+      fi
     fi
 
-    #$_z4h_orig_compadd -P pre -qS ' ' -o nosort -- bfoo bar baz
-    #typeset -p compstate >>/tmp/log
-    #if [[ -n $compstate[unambiguous] ]]; then
-    #  compstate[insert]='unambiguous'
-    #else
-    #  compstate[insert]='all'
-    #fi
-  }
-
-  function _main_complete() {
-    $_z4h_orig_main_complete "$@"
-
-    # eval "$_z4h_opt"
-    #$_z4h_orig_compadd -Un -- ''
-    #$_z4h_orig_compadd -U -- foo bar
-    #compstate[insert]=all
+    $_z4h_orig_compadd $_z4h_P $_z4h_S $_z4h_p $_z4h_s $_z4h_i $_z4h_I $_z4h_q \
+                       $_z4h_r $_z4h_R $_z4h_f $_z4h_e $_z4h_W -Q -U -a _z4h_A
   }
 
   #function _fzf_tab__main_complete() {
@@ -128,22 +123,53 @@ done
 
   -z4h-cursor-hide
 
-  # local ZLE_REMOVE_SUFFIX_CHARS=' '
+  local ZLE_REMOVE_SUFFIX_CHARS ZLE_SPACE_SUFFIX_CHARS
+  unset ZLE_REMOVE_SUFFIX_CHARS ZLE_SPACE_SUFFIX_CHARS
 
   local esc line col
   while true; do
     {
       -z4h-show-dots
       IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <"$TTY" || return
-      local lbuf=$LBUFFER
+
+      local buf=$LBUFFER
+      
+      local -a _z4h_words=()
+      local -a _z4h_descrs=()
+      local -a _z4h_scaffolds=()
+      local -i _z4h_only_dirs=1
+      local -i _z4h_in_path_files=0
+
+      functions -c -- z4h-main-complete _main_complete
+      builtin zle expand-or-complete
+      if [[ $buf == $BUFFER ]]; then
+        (( ${#_z4h_words} )) || return 0
+        local path_prefix=
+        if () {
+                emulate -L zsh
+                (( $#_z4h_scaffolds == 1 )) || return
+                local -a s=("${(@ps:\1:)_z4h_scaffolds}")
+                [[ $s[1] == 1 && -z $s[3] && -z $s[5] && -z $s[7] && -n $s[11] &&
+                  $s[13] == (|/*) && -z $s[16] && -z $s[17] ]] || return
+                typeset -g path_prefix=$s[13]
+              }; then
+          # TODO: -z4h-comp-files "$path_prefix" $_z4h_only_dirs "${(@ou)_z4h_words}"
+        else
+          local -A seen=()
+          local word= descr= words=() descrs=()
+          for word descr in "${(@)_z4h_words:^_z4h_descrs}"; do
+            if (( ! ${+seen[$word]} )); then
+              seen[$word]=1
+              words+=("$word")
+              descrs+=("$descr")
+            fi
+          done
+        fi
+        
+      else
+      fi
 
       {
-        local -a _z4h_words=()
-        local -a _z4h_descrs=()
-        local -a _z4h_scaffolds=()
-        local -i _z4h_only_dirs=1
-        local -i _z4h_in_path_files=0
-        local _z4h_fzf_result=
         builtin zle expand-or-complete
       } always {
         local -i err=$?

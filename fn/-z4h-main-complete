@@ -1,0 +1,115 @@
+# Based on _main_complete from Zsh 5.8.
+
+local IFS=$' \t\n\0'
+eval "$_comp_setup"
+
+local func funcs ret=1 tmp _compskip format nm call match min max i num  \
+      _completers _completer _completer_num curtag _comp_force_list      \
+      _matchers _matcher _c_matcher _matcher_num _comp_tags _comp_mesg   \
+      mesg str context state state_descr line opt_args val_args          \
+      curcontext="$curcontext"                                           \
+      _last_nmatches=-1 _last_menu_style _def_menu_style _menu_style sel \
+      _tags_level=0                                                      \
+      _saved_exact="${compstate[exact]}"                                 \
+      _saved_lastprompt="${compstate[last_prompt]}"                      \
+      _saved_list="${compstate[list]}"                                   \
+      _saved_insert="${compstate[insert]}"                               \
+      _saved_colors="$ZLS_COLORS"                                        \
+      _saved_colors_set=${+ZLS_COLORS}                                   \
+      _ambiguous_color=
+
+local _comp_priv_prefix ZLS_COLORS ZLS_COLOURS
+unset _comp_priv_prefix ZLS_COLORS ZLS_COLOURS
+
+local -a precommands
+local -ar builtin_precommands=(- builtin eval exec nocorrect noglob time)
+typeset -U _lastdescr _comp_ignore _comp_colors
+
+[[ -z "$curcontext" ]] && curcontext=:::
+
+if [[ -z "$compstate[quote]" ]]; then
+  if [[ -o equals ]] && compset -P 1 '='; then
+    compstate[context]=equal
+  elif [[ "$PREFIX" != */* && "$PREFIX[1]" = '~' ]]; then
+    compset -p 1
+    compstate[context]=tilde
+  fi
+fi
+
+compstate[exact]=
+
+zstyle -a ":completion:${curcontext}:" completer _completers || _completers=(_complete _ignored)
+_completer_num=1
+
+integer SECONDS=0
+TRAPINT () {
+  zle -M "Killed by signal in ${funcstack[2]} after ${SECONDS}s"
+  zle -R
+  return 130
+}
+TRAPQUIT () {
+  zle -M "Killed by signal in ${funcstack[2]} after ${SECONDS}s"
+  zle -R
+  return 131
+}
+
+funcs=("$compprefuncs[@]")
+compprefuncs=()
+for func in "$funcs[@]"; do
+  "$func"
+done
+
+for tmp in "$_completers[@]"; do
+  if [[ -n "$call" ]]; then
+    _completer="${tmp}"
+  elif [[ "$tmp" = *:-* ]]; then
+    _completer="${${tmp%:*}[2,-1]//_/-}${tmp#*:}"
+    tmp="${tmp%:*}"
+  elif [[ $tmp = *:* ]]; then
+    _completer="${tmp#*:}"
+    tmp="${tmp%:*}"
+  else
+    _completer="${tmp[2,-1]//_/-}"
+  fi
+  curcontext="${curcontext/:[^:]#:/:${_completer}:}"
+  zstyle -a ":completion:${curcontext}:" matcher-list _matchers || _matchers=('')
+  _matcher_num=1
+  _matcher=
+  for _c_matcher in "$_matchers[@]"; do
+    if [[ "$_c_matcher" == +* ]]; then
+      _matcher="$_matcher $_c_matcher[2,-1]"
+    else
+      _matcher="$_c_matcher"
+    fi
+    _comp_mesg=
+    if [[ -n "$call" ]]; then
+      if "${(@)argv[3,-1]}"; then
+        ret=0
+        break 2
+      fi
+    elif "$tmp"; then
+      ret=0
+      break 2
+    fi
+    (( _matcher_num++ ))
+  done
+  [[ -n "$_comp_mesg" ]] && break
+  (( _completer_num++ ))
+done
+
+curcontext="${curcontext/:[^:]#:/::}"
+nm=$compstate[nmatches]
+
+if (( nm == 1 )); then
+  compstate[insert]=all
+else
+  compstate[insert]=unambiguous
+fi
+
+funcs=("$comppostfuncs[@]")
+comppostfuncs=()
+for func in "$funcs[@]"; do
+  "$func"
+done
+
+return ret

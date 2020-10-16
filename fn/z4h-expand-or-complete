@@ -4,7 +4,7 @@ setopt local_options always_to_end no_auto_list no_auto_menu no_auto_param_keys 
        no_auto_remove_slash no_bash_auto_list no_complete_in_word no_list_ambiguous \
        no_list_beep no_list_packed no_list_rows_first no_menu_complete no_rec_exact
 
-local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files compadd zstyle)
+local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files _setup compadd zstyle)
 
 local f
 for f in $_z4h_shadow_funcs; do
@@ -29,6 +29,8 @@ done
       $_z4h_orig_zstyle "$@"
     fi
   }
+
+  function _setup () {}
 
   function _multi_parts() {
     local _z4h_sep=${@[-2]}
@@ -83,7 +85,11 @@ done
     fi
     $_z4h_orig_compadd -A _z4h_A -D _z4h_D "$@" || true
     (( ${#_z4h_A} )) || return
-    $_z4h_orig_compadd "$@" || return
+    # Many completers read $compstate[nmatches], which can be super slow if there are
+    # many matches that require deduplication. We drop everything in an unsorted
+    # group without deduplication to avoid this cost. We deduplicate everything manually
+    # at a later stage.
+    $_z4h_orig_compadd -V- -2 -o nosort -J- "$@" || return
 
     emulate -L zsh
     typeset -g _z4h_curcontext=$curcontext
@@ -119,6 +125,9 @@ done
   local ZLE_REMOVE_SUFFIX_CHARS ZLE_SPACE_SUFFIX_CHARS
   unset ZLE_REMOVE_SUFFIX_CHARS ZLE_SPACE_SUFFIX_CHARS
 
+  # typeset -gi my_call_num
+  # (( ++my_call_num == 2 )) && zmodload zsh/zprof
+
   local -i again=1
   while (( again )); do
     {
@@ -136,6 +145,8 @@ done
 
       functions -c -- -z4h-main-complete _main_complete
       builtin zle expand-or-complete
+      # (( my_call_num == 2 )) && zprof &>/tmp/log
+      # return 0
       if [[ $buf == $BUFFER && $cursor == $CURSOR ]]; then
         (( ${#_z4h_words} )) || return 0
         local path_prefix=

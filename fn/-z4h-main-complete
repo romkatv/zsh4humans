@@ -36,9 +36,25 @@ if [[ -z "$compstate[quote]" ]]; then
   fi
 fi
 
+compstate[list]=
 compstate[exact]=
+compstate[insert]=unambiguous
 
-zstyle -a ":completion:${curcontext}:" completer _completers || _completers=(_complete _ignored)
+if (( $# )); then
+  if [[ "$1" = - ]]; then
+    if [[ $# -lt 3 ]]; then
+      _completers=()
+    else
+      _completers=( "$2" )
+      call=yes
+    fi
+  else
+    _completers=( "$@" )
+  fi
+else
+  zstyle -a ":completion:${curcontext}:" completer _completers || _completers=(_complete _ignored)
+fi
+
 _completer_num=1
 
 integer SECONDS=0
@@ -100,11 +116,7 @@ done
 curcontext="${curcontext/:[^:]#:/::}"
 nm=$compstate[nmatches]
 
-if (( nm == 1 )); then
-  compstate[insert]=all
-else
-  compstate[insert]=unambiguous
-fi
+# typeset -pm '_z4h_words|_z4h_descrs|_z4h_scaffolds|compstate' >&2
 
 funcs=("$comppostfuncs[@]")
 comppostfuncs=()

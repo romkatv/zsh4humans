@@ -28,7 +28,7 @@ add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 
 local pkg
 typeset -gA _z4h_use
-for pkg in fzf fzf-tab powerlevel10k systemd \
+for pkg in fzf powerlevel10k systemd \
            zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
   zstyle -t :z4h:$pkg channel none || _z4h_use[$pkg]=1
 done
@@ -152,6 +152,8 @@ zle -N z4h-fzf-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
 
+zle -C -- -z4h-comp-insert-all complete-word -z4h-comp-insert-all
+
 if (( $+commands[less] )); then
   READNULLCMD=less
 elif (( $+commands[more] )); then
@@ -173,42 +175,6 @@ if (( ! _z4h_custom_histfile )); then
 fi
 HISTSIZE=1000000000  # infinite command history
 SAVEHIST=1000000000  # infinite command history
-
-if (( _z4h_use[fzf-tab] )); then
-  local bind=(
-    ctrl-h:backward-kill-word
-    alt-j:clear-query
-    ctrl-u:clear-query
-    ctrl-k:kill-line
-    alt-k:unix-line-discard
-    tab:down
-    btab:up
-    ctrl-space:toggle
-    ctrl-a:select-all)
-  bindkey '^I' expand-or-complete          # fzf-tab reads it during initialization
-  zstyle ':fzf-tab:*' prefix       ''      # remove '·'
-  zstyle ':fzf-tab:*' query-string prefix  # pre-populate fzf query with the longest common prefix
-  zstyle ':fzf-tab:*' command      -z4h-fzf        \
-    --ansi                                         \
-    --expect='$continuous_trigger'                 \
-    --color='hl:$(( $#headers == 0 ? 108 : 255 ))' \
-    --nth=2,3                                      \
-    --delimiter='\000'                             \
-    --layout=reverse                               \
-    --exact                                        \
-    --no-mouse                                     \
-    --tiebreak=begin                               \
-    --multi                                        \
-    --cycle                                        \
-    --query='$query'                               \
-    --bind=${(j:,:)bind}                           \
-    --header-lines='$#headers'                     \
-    --height='$(( 100 * ($#candidates + 2) < 60 * LINES ? $#candidates + 2 : 60 * LINES / 100 ))'
-  builtin source $Z4H/fzf-tab/fzf-tab.zsh
-  eval "function fzf-tab-complete() {
-    ${functions[fzf-tab-complete]//zle (.reset-prompt|redisplay|-R)/}
-  }"
-fi
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
@@ -349,10 +315,8 @@ bindkey   '^[M'     z4h-autosuggest-accept         # alt+M
 bindkey   '^[/'     redo                           # alt+/
 # Expand alias/glob/parameter.
 bindkey   '^ '      z4h-expand                     # ctrl+space
-if (( _z4h_use[fzf-tab] )); then
-  # Generic command completion.
-  bindkey '^I'      z4h-expand-or-complete         # tab
-fi
+# Generic command completion.
+bindkey   '^I'      z4h-expand-or-complete         # tab
 if (( _z4h_use[fzf] )); then
   # Command history.
   bindkey '^R'      z4h-fzf-history                # ctrl+r
@@ -429,7 +393,7 @@ export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
 zstyle ':completion:*'               completer         "_complete" "_ignored"
-zstyle ':completion:*'               matcher-list      "m:{a-z-_}={A-Z_-}" "l:|=* r:|=*"
+zstyle ':completion:*'               matcher-list      "m:{a-z-_}={A-Z_-}" # "l:|=* r:|=*"
 zstyle ':completion:*'               menu              "false"
 zstyle ':completion:*'               verbose           "true"
 zstyle ':completion:::::'            insert-tab        "pending"

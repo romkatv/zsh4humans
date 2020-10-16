@@ -59,7 +59,7 @@ local -i list_colors=$((!$?))
         --query=${query:2}
         --bind=${(j:,:)bind})
       local cont
-      if _fzf_tab_get -s continuous-trigger cont && [[ -n $cont ]]; then
+      if zstyle :fzf-tab: -s continuous-trigger cont && [[ -n $cont ]]; then
         opt+=(--expect=$cont)
       fi
 

@@ -4,13 +4,10 @@
   local -i dot_glob list_types
   [[ $1 == on ]] && dot_glob=1
   [[ $2 == on ]] && list_types=1
-  local word_prefix=$3
+  local curcontext=$3
   local path_prefix=$4
   local -i only_dirs=$5
   local words=("${@:6}")
-
-  compstate[list]=
-  compstate[insert]=
 
   if (( only_dirs )); then
     if (( dot_glob )); then
@@ -26,12 +23,6 @@
     fi
   fi
 
-  local query char
-  for char in ${(s::)words[1]}; do
-    [[ -z ${words:#$query$char*} ]] || break
-    query+=$char
-  done
-
   local bind=(
     ctrl-h:backward-kill-word
     alt-j:clear-query
@@ -43,8 +34,8 @@
     ctrl-space:toggle
     ctrl-a:select-all)
   local opt=(
-    --print-query
-    --expect=alt-enter
+    --color=hl:201,hl+:201
+    --expect=enter
     --with-nth=2
     --delimiter='\000'
     --ansi
@@ -55,21 +46,23 @@
     --tiebreak=length,begin,index
     --multi
     --cycle
-    --query=$query
     --bind=${(j:,:)bind})
   local cont
-  if _fzf_tab_get -s continuous-trigger cont && [[ -n $cont ]]; then
+  if zstyle -s :fzf-tab:$curcontext: continuous-trigger cont && [[ -n $cont ]]; then
     opt+=(--expect=$cont)
   fi
 
-  -z4h-set-list-colors "$_fzf_tab_curcontext" "$list_types"
+  -z4h-set-list-colors "$curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
   autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find
 
-  print >$TTY
+  local esc line col
+  IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
+  print >$TTY || return
+
   {
-    local choice again
+    local choice
     choice="$(
       unsetopt pipe_fail
       exec 2>/dev/null
@@ -83,23 +76,17 @@
         -z4h-cursor-show
         $Z4H/fzf/bin/fzf $opt 2>$TTY
       }
-    )" && [[ -n $choice ]] || return
-    choice=("${(@f)choice}")
-    case $choice[2] in
-      $cont) again=1;&  # fallthrough
-      '') choice=(${${choice:2}%$'\0'*});;
-      alt-enter) choice=${(Q)choice[1]};;
-    esac
+    )"
   } always {
-    print -n "$again" >$_z4h_fzf_called
     -z4h-cursor-hide
+    builtin echoti cuu 1
+    (( col > 1 )) && builtin echoti cuf $((col-1))
   }
 
-  builtin compadd -QUf -p "$word_prefix" -W "$path_prefix" -- ${(@q)choice}
-  if (( $#choice == 1 )); then
-    compstate[insert]=2
-    [[ ${BUFFER:$((SUFFIX_START + $#SUFFIX))} == ' '* ]] || compstate[insert]+=' '
-  else
-    compstate[insert]=all
+  [[ -n $choice ]] || return
+  choice=("${(@f)choice}")
+  typeset -g _z4h_reply=(0 ${${choice:1}%$'\0'*})
+  if [[ -n $cont && $choice[1] == $cont ]]; then
+    _z4h_reply[1]=1
   fi
 } "${options[dot_glob]}" "${options[list_types]}" "$@"

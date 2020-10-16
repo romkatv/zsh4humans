@@ -1,0 +1,87 @@
+()  {
+  eval "$_z4h_opt"
+
+  local -i list_types
+  [[ $1 == on ]] && list_types=1
+
+  typeset -ga _z4h_naturals
+  if (( $#_z4h_naturals < $#_z4h_words )); then
+    _z4h_naturals+=({$(($#_z4h_naturals+1))..$#_z4h_words})
+  fi
+
+  local -A seen
+  local -a indices
+  local word idx
+  for word idx in "${(@)_z4h_words:^_z4h_naturals}"; do
+    if (( ! ${+seen[$word]} )); then
+      seen[$word]=1
+      indices+=($idx)
+    fi
+  done
+
+  local bind=(
+    ctrl-h:backward-kill-word
+    alt-j:clear-query
+    ctrl-u:clear-query
+    ctrl-k:kill-line
+    alt-k:unix-line-discard
+    tab:down
+    btab:up
+    ctrl-space:toggle
+    ctrl-a:select-all)
+  local opt=(
+    --color=hl:201,hl+:201
+    --expect=enter
+    --with-nth=2
+    --delimiter='\000'
+    --ansi
+    --exact
+    --no-mouse
+    --layout=reverse
+    --height=$(( 100 * ($#indices + 2) < 60 * LINES ? $#indices + 2 : 60 * LINES / 100 ))
+    --tiebreak=begin
+    --multi
+    --cycle
+    --bind=${(j:,:)bind})
+  local cont
+  if zstyle -s :fzf-tab:$_z4h_curcontext: continuous-trigger cont && [[ -n $cont ]]; then
+    opt+=(--expect=$cont)
+  fi
+
+  -z4h-set-list-colors "$_z4h_curcontext" "$list_types"
+  local -i list_colors=$((!$?))
+
+  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
+
+  local esc line col
+  IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
+  print >$TTY || return
+
+  {
+    local choice
+    choice="$(
+      unsetopt pipe_fail
+      exec 2>/dev/null
+      {
+        for idx in $indices; do
+          # TODO: colorize files.
+          printf '%s\0%s\n' $idx "$_z4h_descrs[idx]"
+        done
+      } | {
+        -z4h-cursor-show
+        $Z4H/fzf/bin/fzf $opt 2>$TTY
+      }
+    )"
+  } always {
+    -z4h-cursor-hide
+    builtin echoti cuu 1
+    (( col > 1 )) && builtin echoti cuf $((col-1))
+  }
+
+  [[ -n $choice ]] || return
+  choice=("${(@f)choice}")
+  typeset -g _z4h_reply=(0 ${${choice:1}%$'\0'*})
+  if [[ -n $cont && $choice[1] == $cont ]]; then
+    _z4h_reply[1]=1
+  fi
+} "${options[list_types]}"

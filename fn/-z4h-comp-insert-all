@@ -1,0 +1,42 @@
+emulate -L zsh
+
+if (( $#_z4h_scaffolds == 1 )); then
+  local -a s=("${(@ps:\1:)_z4h_scaffolds}")
+  local PREFIX=$s[14] SUFFIX=$s[15]
+  $_z4h_orig_compadd   \
+    ${s[2]:+-P$s[2]}   \
+    ${s[3]:+-S$s[3]}   \
+    ${s[4]:+-p$s[4]}   \
+    ${s[5]:+-s$s[5]}   \
+    ${s[6]:+-i$s[6]}   \
+    ${s[7]:+-I$s[7]}   \
+    $s[8]              \
+    ${s[9]:+-r$s[9]}   \
+    ${s[10]:+-R$s[10]} \
+    $s[11]             \
+    $s[12]             \
+    ${s[13]:+-W$s[13]} \
+    -U -a _z4h_words
+else
+  local word scaffold
+  for word scaffold in "${(@)_z4h_words:^_z4h_scaffolds}"; do
+    local -a s=("${(@ps:\1:)scaffold}")
+    local PREFIX=$s[14] SUFFIX=$s[15]
+    $_z4h_orig_compadd   \
+      ${s[2]:+-P$s[2]}   \
+      ${s[3]:+-S$s[3]}   \
+      ${s[4]:+-p$s[4]}   \
+      ${s[5]:+-s$s[5]}   \
+      ${s[6]:+-i$s[6]}   \
+      ${s[7]:+-I$s[7]}   \
+      $s[8]              \
+      ${s[9]:+-r$s[9]}   \
+      ${s[10]:+-R$s[10]} \
+      $s[11]             \
+      $s[12]             \
+      ${s[13]:+-W$s[13]} \
+      -U - $word
+  done
+fi
+
+compstate[insert]=all

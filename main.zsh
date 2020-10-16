@@ -126,7 +126,7 @@ function -z4h-cmd-init() {
       _z4h_install_queue+=(systemd)
     fi
     _z4h_install_queue+=(
-      fzf-tab zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
+      zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
     if ! -z4h-install-many; then
       [[ -e $Z4H/.updating ]] || -z4h-error-command init
       return 1

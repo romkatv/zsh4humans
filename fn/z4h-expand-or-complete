@@ -16,7 +16,7 @@ for f in $_z4h_shadow_funcs; do
   fi
 done
 
-exec 3>&2 2>/tmp/log
+# exec 3>&2 2>/tmp/log
 
 {
   # setopt xtrace
@@ -197,7 +197,7 @@ exec 3>&2 2>/tmp/log
   done
 } always {
   # unsetopt xtrace
-  exec 2>&3 3>&-
+  # exec 2>&3 3>&-
   local f=
   for f in $_z4h_shadow_funcs; do
     if (( ${+functions[-z4h-orig-$f]} )); then

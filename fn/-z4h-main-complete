@@ -40,20 +40,7 @@ compstate[list]=
 compstate[exact]=
 compstate[insert]=unambiguous
 
-if (( $# )); then
-  if [[ "$1" = - ]]; then
-    if [[ $# -lt 3 ]]; then
-      _completers=()
-    else
-      _completers=( "$2" )
-      call=yes
-    fi
-  else
-    _completers=( "$@" )
-  fi
-else
-  zstyle -a ":completion:${curcontext}:" completer _completers || _completers=(_complete _ignored)
-fi
+_completers=(_complete)
 
 _completer_num=1
 

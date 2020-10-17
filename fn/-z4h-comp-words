@@ -51,6 +51,9 @@
   -z4h-set-list-colors "$_z4h_curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
+  zstyle -t :completion:${_z4h_curcontext}: sort
+  local -i sort=$((!$?))
+
   autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
 
   local esc line col
@@ -63,10 +66,18 @@
       unsetopt pipe_fail
       exec 2>/dev/null
       {
-        for idx in $indices; do
-          # TODO: colorize files.
-          printf '%s\0%s\n' $idx "$_z4h_descrs[idx]"
-        done
+        # TODO: colorize files.
+        if (( sort )); then
+          local rows=()
+          for idx in $indices; do
+            rows+=($_z4h_descrs[idx]$'\0'$idx)
+          done
+          printf '%2$s\0%1$s\n' "${(@0)${(@o)rows}}"
+        else
+          for idx in $indices; do
+            printf '%s\0%s\n' $idx "$_z4h_descrs[idx]"
+          done
+        fi
       } | {
         -z4h-cursor-show
         $Z4H/fzf/bin/fzf $opt 2>$TTY

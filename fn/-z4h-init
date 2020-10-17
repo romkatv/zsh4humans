@@ -392,8 +392,7 @@ LS_COLORS+='pi=01;33:so=01;33:do=01;33:bd=01;33:cd=01;33:su=01;35:sg=01;35:ca=01
 export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 
 # Configure completions.
-zstyle ':completion:*'               completer         "_complete" "_ignored"
-zstyle ':completion:*'               matcher-list      "m:{a-z-_}={A-Z_-}"
+zstyle ':completion:*'               matcher-list      "m:{a-z}={A-Z}"
 zstyle ':completion:*'               menu              "false"
 zstyle ':completion:*'               verbose           "true"
 zstyle ':completion:::::'            insert-tab        "pending"

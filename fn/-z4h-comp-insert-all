@@ -16,7 +16,7 @@ if (( $#_z4h_scaffolds == 1 )); then
     $s[11]             \
     $s[12]             \
     ${s[13]:+-W$s[13]} \
-    -U -a _z4h_words
+    -V- -2 -o nosort -J- -U -a _z4h_words
 else
   local word scaffold
   for word scaffold in "${(@)_z4h_words:^_z4h_scaffolds}"; do
@@ -35,7 +35,7 @@ else
       $s[11]             \
       $s[12]             \
       ${s[13]:+-W$s[13]} \
-      -U - $word
+      -V- -2 -o nosort -J- -U - $word
   done
 fi
 

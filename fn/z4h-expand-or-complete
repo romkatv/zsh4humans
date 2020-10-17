@@ -1,5 +1,7 @@
 [[ -w $TTY && -r $TTY ]] || return
 
+[[ -o auto_menu ]] && local -i auto_menu=1 || local -i auto_menu=0
+
 setopt local_options always_to_end no_auto_list no_auto_menu no_auto_param_keys     \
        no_auto_remove_slash no_bash_auto_list no_complete_in_word no_list_ambiguous \
        no_list_beep no_list_packed no_list_rows_first no_menu_complete no_rec_exact
@@ -159,7 +161,12 @@ done
                 typeset -g path_prefix=$s[13]
               }; then
           local -a _z4h_reply=()
-          -z4h-comp-files "$_z4h_curcontext" "$path_prefix" $_z4h_only_dirs "${(@ou)_z4h_words}" || return
+          if builtin zstyle -t ":completion:${_z4h_curcontext}:" sort; then
+            _z4h_words=("${(@ou)_z4h_words}")
+          else
+            _z4h_words=("${(@u)_z4h_words}")
+          fi
+          -z4h-comp-files "$_z4h_curcontext" "$path_prefix" $_z4h_only_dirs "${_z4h_words[@]}" || return
           again=${_z4h_reply[1]}
           _z4h_words=("${(@)_z4h_reply:1}")
           -z4h-insert-all || return
@@ -185,9 +192,12 @@ done
           -z4h-insert-all || return
         fi
       else
-        # TODO: make this configurable.
-        _z4h_words=("${(@ou)_z4h_words}")
-        again=$((${#_z4h_words} > 1))
+        if (( auto_menu )); then
+          _z4h_words=("${(@ou)_z4h_words}")
+          again=$((${#_z4h_words} > 1))
+        else
+          again=0
+        fi
       fi
 
       if [[ $LBUFFER == *' ' && $RBUFFER == ' '* ]]; then

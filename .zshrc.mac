@@ -53,10 +53,10 @@ fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)
 z4h source ~/.iterm2_shell_integration.zsh
 
 # Define key bindings.
-z4h bindkey z4h-cd-back    Shift+Left
-z4h bindkey z4h-cd-forward Shift+Right
-z4h bindkey z4h-cd-up      Shift+Up
-z4h bindkey z4h-cd-down    Shift+Down
+z4h bindkey z4h-cd-back    Shift+Left   # cd into the previous directory
+z4h bindkey z4h-cd-forward Shift+Right  # cd into the next directory
+z4h bindkey z4h-cd-up      Shift+Up     # cd into the parent directory
+z4h bindkey z4h-cd-down    Shift+Down   # cd into a child directory
 
 # Autoload functions.
 autoload -Uz zmv

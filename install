@@ -104,7 +104,7 @@ else
   zshrc="$HOME"/.zshrc.tmp."$$"
 fi
 
-url='https://raw.githubusercontent.com/romkatv/zsh4humans/v3'
+url='https://raw.githubusercontent.com/romkatv/zsh4humans/v4'
 
 >&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshenv\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
 if ! err="$($fetch "$zshenv" '--' "$url"/.zshenv 2>&1)"; then

@@ -95,7 +95,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
 fi
 
 if '[' '-n' "${Z4H-}" ']' &&
-   '[' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v3' ']' &&
+   '[' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v4' ']' &&
    '[' '-z' "${Z4H##/*}" '-a' '-r' "$Z4H"/zsh4humans/main.zsh ']'; then
   if '.' "$Z4H"/zsh4humans/main.zsh; then
     'setopt' 'aliases'
@@ -118,7 +118,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
         >&2 'printf' 'It must be set in \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"\033[0m\n'
+      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4}"\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
       'exit' '1'
@@ -133,7 +133,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
         >&2 'printf' 'It comes from \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m. Correct value example:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"\033[0m\n'
+      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4}"\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) is necessary.\n'
       'exit' '1'
@@ -148,7 +148,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
         >&2 'printf' 'Please fix \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m. Correct initialization example:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"\033[0m\n'
+      >&2 'printf' '  \033[32m:\033[0m \033[33m"${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4}"\033[0m\n'
       >&2 'printf' '  \033[32m.\033[0m \033[4;33m"$Z4H"\033[0;4m/z4h.zsh\033[0m || \033[32mreturn\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Note: The leading colon (\033[32m:\033[0m) and dot (\033[32m.\033[0m) are necessary.\n'
@@ -164,7 +164,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
         >&2 'printf' 'It must be set at the top of \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  Z4H_URL=\033[33m"https://raw.githubusercontent.com/romkatv/zsh4humans/v3"\033[0m\n'
+      >&2 'printf' '  Z4H_URL=\033[33m"https://raw.githubusercontent.com/romkatv/zsh4humans/v4"\033[0m\n'
       'exit' '1'
     fi
 
@@ -179,7 +179,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
         >&2 'printf' 'It comes from \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m. Correct value example:\n'
       fi
       >&2 'printf' '\n'
-      >&2 'printf' '  Z4H_URL=\033[33m"https://raw.githubusercontent.com/romkatv/zsh4humans/v3"\033[0m\n'
+      >&2 'printf' '  Z4H_URL=\033[33m"https://raw.githubusercontent.com/romkatv/zsh4humans/v4"\033[0m\n'
       'exit' '1'
     fi
 
@@ -188,7 +188,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\n'
       >&2 'printf' 'Expected:\n'
       >&2 'printf' '\n'
-      >&2 'printf' '  Z4H_URL=\033[33m"%s"\033[0m\n' "https://raw.githubusercontent.com/romkatv/zsh4humans/v3"
+      >&2 'printf' '  Z4H_URL=\033[33m"%s"\033[0m\n' "https://raw.githubusercontent.com/romkatv/zsh4humans/v4"
       >&2 'printf' '\n'
       >&2 'printf' 'Found:\n'
       >&2 'printf' '\n'
@@ -304,12 +304,12 @@ if command -v 'curl' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'Give up and start over:\n'
   >&2 'printf' '\n'
-  >&2 'printf' '  \033[32msh\033[0m -c \033[33m"\033[0m$(\033[32mcurl\033[0m -fsSL \033[4mhttps://raw.githubusercontent.com/romkatv/zsh4humans/v3/install\033[0m)\033[33m"\033[0m\n'
+  >&2 'printf' '  \033[32msh\033[0m -c \033[33m"\033[0m$(\033[32mcurl\033[0m -fsSL \033[4mhttps://raw.githubusercontent.com/romkatv/zsh4humans/v4/install\033[0m)\033[33m"\033[0m\n'
 elif command -v 'wget' >'/dev/null' 2>&1; then
   >&2 'printf' '\n'
   >&2 'printf' 'Give up and start over:\n'
   >&2 'printf' '\n'
-  >&2 'printf' '  \033[32msh\033[0m -c \033[33m"\033[0m$(\033[32mwget\033[0m -O- \033[4mhttps://raw.githubusercontent.com/romkatv/zsh4humans/v3/install\033[0m)\033[33m"\033[0m\n'
+  >&2 'printf' '  \033[32msh\033[0m -c \033[33m"\033[0m$(\033[32mwget\033[0m -O- \033[4mhttps://raw.githubusercontent.com/romkatv/zsh4humans/v4/install\033[0m)\033[33m"\033[0m\n'
 fi
 
 >&2 'printf' '\n'

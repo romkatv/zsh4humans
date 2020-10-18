@@ -1,4 +1,4 @@
-# Documentation: https://github.com/romkatv/zsh4humans/blob/v3/README.md.
+# Documentation: https://github.com/romkatv/zsh4humans/blob/v4/README.md.
 #
 # Do not modify this file unless you know exactly what you are doing.
 # Keep all shell customization and configuration (including exported
@@ -20,8 +20,8 @@ if [ -n "${ZSH_VERSION-}" ]; then
   #   export GOPATH=$HOME/go
 fi
 
-Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v3"
-: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v3}"
+Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v4"
+: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4}"
 
 umask o-w
 

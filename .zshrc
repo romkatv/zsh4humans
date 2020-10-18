@@ -1,4 +1,4 @@
-# Documentation: https://github.com/romkatv/zsh4humans/blob/v3/README.md.
+# Documentation: https://github.com/romkatv/zsh4humans/blob/v4/README.md.
 
 # Periodic auto-update on Zsh startup: 'ask' or 'no'.
 zstyle ':z4h:'                auto-update      'ask'

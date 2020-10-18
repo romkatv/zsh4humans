@@ -33,9 +33,9 @@ If you want a great shell that just works, this project is for you.
 2. Run this command:
   ```shell
   if command -v curl >/dev/null 2>&1; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v3/install)"
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
   else
-    sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v3/install)"
+    sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
   fi
   ```
 

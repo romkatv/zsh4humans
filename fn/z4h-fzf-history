@@ -41,11 +41,12 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
           $Z4H/fzf/bin/fzf --read0 --no-multi --tiebreak=index --cycle       \
               --delimiter='\001' --with-nth=2 --exact --no-mouse             \
               --height=80% --preview-window=down:40%:wrap --preview=$preview \
-              --tabstop 1 --bind=${(j:,:)bind} --query=$LBUFFER 2>$TTY
+              --tabstop 1 --bind=${(j:,:)bind} --query=$LBUFFER --color=hl:201,hl+:201 2>$TTY
         } always {
           -z4h-cursor-hide
         }
-      }) && [[ -n $choice ]] || return
+      })
+    [[ -n $choice ]] || return
     zle .vi-fetch-history -n $(($#history - ${choice%%$'\1'*} + 1))
     if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
       CURSOR=$(($#BUFFER - 1))

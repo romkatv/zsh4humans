@@ -4,6 +4,8 @@
 zstyle ':z4h:'                auto-update      'ask'
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
 zstyle ':z4h:'                auto-update-days '28'
+# Keyboard type: 'mac' or 'pc'.
+zstyle ':z4h:bindkey'         keyboard         'pc'
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     'accept'

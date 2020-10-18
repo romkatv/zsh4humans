@@ -9,8 +9,10 @@ fi
 platform="$('command' 'uname' '-sm')"
 platform="$('printf' '%s' "$platform" | 'command' 'tr' '[A-Z]' '[a-z]')"
 
+zshrc_suffix=
+
 case "$platform" in
-  'darwin x86_64');;
+  'darwin x86_64') zshrc_suffix=.mac;;
   'freebsd amd64');;
   'linux aarch64');;
   'linux armv6l');;
@@ -112,9 +114,9 @@ if ! err="$($fetch "$zshenv" '--' "$url"/.zshenv 2>&1)"; then
 fi
 
 >&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
-if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc 2>&1)"; then
+if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
-  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/.zshrc
+  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/.zshrc"$zshrc_suffix"
   'exit' '1'
 fi
 

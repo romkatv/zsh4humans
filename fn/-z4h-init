@@ -139,7 +139,7 @@ zle -N z4h-backward-kill-zword
 zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer
-zle -N z4h-expand-or-complete
+zle -N z4h-fzf-complete
 zle -N z4h-up-local-history
 zle -N z4h-down-local-history
 zle -N z4h-up-global-history
@@ -316,7 +316,7 @@ bindkey   '^[/'     redo                           # alt+/
 # Expand alias/glob/parameter.
 bindkey   '^ '      z4h-expand                     # ctrl+space
 # Generic command completion.
-bindkey   '^I'      z4h-expand-or-complete         # tab
+bindkey   '^I'      z4h-fzf-complete               # tab
 if (( _z4h_use[fzf] )); then
   # Command history.
   bindkey '^R'      z4h-fzf-history                # ctrl+r

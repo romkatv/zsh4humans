@@ -178,6 +178,8 @@ done
           -z4h-insert-all || return
         else
           local -a _z4h_reply=()
+          local nl=$'\n'
+          _z4h_descrs=("${(@)_z4h_descrs//$nl/\\n}")
           -z4h-comp-words || return
           again=${_z4h_reply[1]}
           local -i idx=0

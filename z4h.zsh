@@ -183,7 +183,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       'exit' '1'
     fi
 
-    if '[' "$v" '!=' '3' ']'; then
+    if '[' "$v" '!=' '4' ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: unexpected major version in \033[1mZ4H_URL\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Expected:\n'

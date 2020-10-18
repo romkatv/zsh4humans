@@ -19,43 +19,13 @@
     fi
   done
 
-  local bind=(
-    ctrl-h:backward-kill-word
-    alt-j:clear-query
-    ctrl-u:clear-query
-    ctrl-k:kill-line
-    alt-k:unix-line-discard
-    tab:down
-    btab:up
-    ctrl-space:toggle
-    ctrl-a:select-all)
-  local opt=(
-    --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"}
-    --color=hl:201,hl+:201
-    --expect=enter
-    --with-nth=2
-    --delimiter='\000'
-    --ansi
-    --exact
-    --no-mouse
-    --layout=reverse
-    --height=$(( 100 * ($#indices + 2) < 60 * LINES ? $#indices + 2 : 60 * LINES / 100 ))
-    --tiebreak=begin
-    --multi
-    --cycle
-    --bind=${(j:,:)bind})
-  local cont
-  if zstyle -s :fzf-tab:$_z4h_curcontext:default continuous-trigger cont && [[ -n $cont ]]; then
-    opt+=(--expect=$cont)
-  fi
-
   -z4h-set-list-colors "$_z4h_curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
   zstyle -t :completion:${_z4h_curcontext}:default sort
   local -i sort=$((!$?))
 
-  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show
+  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-fzf
 
   local esc line col
   IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
@@ -81,7 +51,19 @@
         fi
       } | {
         -z4h-cursor-show
-        $Z4H/fzf/bin/fzf $opt 2>$TTY
+        2>$TTY -z4h-fzf                                     \
+          --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"} \
+          --color=hl:201,hl+:201                            \
+          --with-nth=2                                      \
+          --delimiter='\000'                                \
+          --ansi                                            \
+          --exact                                           \
+          --no-mouse                                        \
+          --layout=reverse                                  \
+          --tiebreak=length,begin,index                     \
+          --multi                                           \
+          --cycle                                           \
+          --height=$(( 100 * ($#indices + 2) < 60 * LINES ? $#indices + 2 : 60 * LINES / 100 ))
       }
     )"
   } always {
@@ -93,7 +75,5 @@
   [[ -n $choice ]] || return
   choice=("${(@f)choice}")
   typeset -g _z4h_reply=(0 ${${choice:1}%$'\0'*})
-  if [[ -n $cont && $choice[1] == $cont ]]; then
-    _z4h_reply[1]=1
-  fi
+  [[ -z $choice[1] ]] || _z4h_reply[1]=1
 } "${options[list_types]}"

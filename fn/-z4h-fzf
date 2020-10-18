@@ -1,15 +1,50 @@
 eval "$_z4h_opt"
-print >$TTY
-{
-  local choice again
-  choice="$(-z4h-cursor-show; $Z4H/fzf/bin/fzf "$@" 2>$TTY)" || return
-  if [[ $choice != $'\n'* ]]; then
-    again=1
-    print -r -- $'\n'${choice#*$'\n'}
-  else
-    print -r -- $choice
+
+local widget=${WIDGET#z4h-}
+
+local -a cmd flags bindings
+zstyle -a :z4h:$widget fzf-command cmd       || cmd=($Z4H/fzf/bin/fzf)
+zstyle -a :z4h:$widget fzf-flags flags       || flags=()
+zstyle -a :z4h:$widget fzf-bindings bindings || bindings=()
+
+local -A keys=(
+  ctrl-h     backward-kill-word
+  alt-j      clear-query
+  ctrl-u     clear-query
+  ctrl-k     kill-line
+  alt-k      unix-line-discard
+  tab        down
+  ctrl-s     down
+  btab       up
+  ctrl-r     up
+  ctrl-space toggle+down
+  ctrl-a     toggle-all
+)
+
+local kv
+for kv in $bindings; do
+  kv=(${(s.:.)kv})
+  (( $#kv == 2 )) || continue
+  keys[$kv[1]]=$kv[2]
+done
+
+local k v
+local -i expect
+for k v in ${(kv)keys}; do
+  if [[ +$v+ == *+repeat+* ]]; then
+    flags=(--expect=$k "${flags[@]}")
+    expect=1
+    if [[ $v == repeat(|+*) ]]; then
+      keys[$k]=ignore
+    else
+      keys[$k]=${v%%+repeat(|+*)}
+    fi
   fi
-} always {
-  print -n "$again" >$_z4h_fzf_called
-  -z4h-cursor-hide
-}
+done
+
+local keymap
+printf -v keymap '%s:%s,' ${(kv)keys}
+local out=$("${cmd[@]}" "$@" --bind=${keymap%,} "${flags[@]}")
+[[ -n $out ]] || return
+(( expect )) || print
+print -r -- $out

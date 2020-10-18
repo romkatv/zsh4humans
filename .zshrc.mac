@@ -4,14 +4,19 @@
 zstyle ':z4h:'                auto-update      'ask'
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
 zstyle ':z4h:'                auto-update-days '28'
+
 # Keyboard type: 'mac' or 'pc'.
 zstyle ':z4h:bindkey'         keyboard         'mac'
+# When fzf menu opens on TAB, another TAB moves the cursor down ('tab:down')
+# or accepts the selection and triggers another completion ('tab:repeat')?
+zstyle ':z4h:fzf-complete'    fzf-bindings     'tab:down'
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     'accept'
 # End key accepts to the end of the line ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' end-of-line      'accept'
+
 # Send these files over to the remote host when connecting over ssh.
 # Multiple files can be listed here.
 zstyle ':z4h:ssh:*'           send-extra-files '~/.iterm2_shell_integration.zsh'

@@ -15,7 +15,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   'emulate' 'zsh'
   'setopt'                                                                     \
     'always_to_end'          'auto_cd'                'auto_param_slash'       \
-    'auto_pushd'             'c_bases'                                         \
+    'auto_pushd'             'c_bases'                'auto_menu'              \
     'extended_glob'          'extended_history'       'hist_expire_dups_first' \
     'hist_find_no_dups'      'hist_ignore_dups'       'hist_ignore_space'      \
     'hist_verify'            'interactive_comments'   'multios'                \

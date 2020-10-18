@@ -30,6 +30,7 @@
     ctrl-space:toggle
     ctrl-a:select-all)
   local opt=(
+    --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"}
     --color=hl:201,hl+:201
     --expect=enter
     --with-nth=2
@@ -44,14 +45,14 @@
     --cycle
     --bind=${(j:,:)bind})
   local cont
-  if zstyle -s :fzf-tab:$_z4h_curcontext: continuous-trigger cont && [[ -n $cont ]]; then
+  if zstyle -s :fzf-tab:$_z4h_curcontext:default continuous-trigger cont && [[ -n $cont ]]; then
     opt+=(--expect=$cont)
   fi
 
   -z4h-set-list-colors "$_z4h_curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
-  zstyle -t :completion:${_z4h_curcontext}: sort
+  zstyle -t :completion:${_z4h_curcontext}:default sort
   local -i sort=$((!$?))
 
   autoload +X -Uz -- -z4h-present-files -z4h-cursor-show

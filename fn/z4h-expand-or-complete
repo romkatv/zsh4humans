@@ -25,7 +25,7 @@ done
 
   function zstyle() {
     # zstyle -T ":completion:${curcontext}:$_type" list-grouped
-    if [[ $# == 3 && $3 == list-grouped && $1 == -(t|T) ]]; then
+    if [[ $# == 3 && $3 == list-grouped && $1 == -(t|T) && $2 == :completion:* ]]; then
       return 1
     else
       $_z4h_orig_zstyle "$@"
@@ -114,6 +114,9 @@ done
     scaffold=${(pj:\1:)scaffold}
     if (( ! $#_z4h_scaffolds )); then
       _z4h_scaffolds=($scaffold)
+      if [[ $IPREFIX$PREFIX == $_z4h_i[2]$_z4h_P[2]$_z4h_p[2]* ]]; then
+        _z4h_word_prefix=${${:-$IPREFIX$PREFIX}#$_z4h_i[2]$_z4h_P[2]$_z4h_p[2]}
+      fi
     elif (( $#_z4h_scaffolds > 1 )) || [[ $_z4h_scaffolds[1] != $scaffold ]]; then
       repeat $(( $#_z4h_words - $#_z4h_scaffolds - $#_z4h_A )); do
         _z4h_scaffolds+=($_z4h_scaffolds[1])
@@ -126,9 +129,6 @@ done
 
   local ZLE_REMOVE_SUFFIX_CHARS ZLE_SPACE_SUFFIX_CHARS
   unset ZLE_REMOVE_SUFFIX_CHARS ZLE_SPACE_SUFFIX_CHARS
-
-  # typeset -gi my_call_num
-  # (( ++my_call_num == 2 )) && zmodload zsh/zprof
 
   local -i again=1
   while (( again )); do
@@ -144,35 +144,40 @@ done
       local -i _z4h_only_dirs=1
       local -i _z4h_in_path_files=0
       local _z4h_curcontext=
+      local _z4h_word_prefix=
 
       functions -c -- -z4h-main-complete _main_complete
       builtin zle expand-or-complete
-      # (( my_call_num == 2 )) && zprof &>/tmp/log
-      # return 0
       if [[ $buf == $BUFFER && $cursor == $CURSOR ]]; then
         (( ${#_z4h_words} )) || return 0
-        local path_prefix=
+        if [[ $_z4h_word_prefix == *'$' ||
+              $_z4h_word_prefix == *[A-Z]* && -n ${(@)_z4h_words:#$_z4h_word_prefix*} ]]; then
+          _z4h_word_prefix=
+        else
+          _z4h_word_prefix=${_z4h_word_prefix// /\\ }
+        fi
+        local _z4h_path_prefix=
         if () {
                 emulate -L zsh
                 (( $#_z4h_scaffolds == 1 )) || return
                 local -a s=("${(@ps:\1:)_z4h_scaffolds}")
                 [[ $s[1] == 1 && -z $s[3] && -z $s[5] && -z $s[7] && -n $s[11] &&
                   $s[13] == (|*/) && -z $s[15] ]] || return
-                typeset -g path_prefix=$s[13]
+                typeset -g _z4h_path_prefix=$s[13]
               }; then
           local -a _z4h_reply=()
-          if builtin zstyle -t ":completion:${_z4h_curcontext}:" sort; then
+          if builtin zstyle -t ":completion:${_z4h_curcontext}:default" sort; then
             _z4h_words=("${(@ou)_z4h_words}")
           else
             _z4h_words=("${(@u)_z4h_words}")
           fi
-          -z4h-comp-files "$_z4h_curcontext" "$path_prefix" $_z4h_only_dirs "${_z4h_words[@]}" || return
+          -z4h-comp-files || return
           again=${_z4h_reply[1]}
           _z4h_words=("${(@)_z4h_reply:1}")
           -z4h-insert-all || return
         else
           local -a _z4h_reply=()
-          -z4h-comp-words "$_z4h_curcontext" || return
+          -z4h-comp-words || return
           again=${_z4h_reply[1]}
           local -i idx=0
           local words=()

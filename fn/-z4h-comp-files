@@ -4,22 +4,18 @@
   local -i dot_glob list_types
   [[ $1 == on ]] && dot_glob=1
   [[ $2 == on ]] && list_types=1
-  local curcontext=$3
-  local path_prefix=$4
-  local -i only_dirs=$5
-  local words=("${@:6}")
 
-  if (( only_dirs )); then
+  if (( _z4h_only_dirs )); then
     if (( dot_glob )); then
-      local dirs=($path_prefix${^${(Q)words:#.*}}/*(D-/Y1N:h:t))
+      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(D-/Y1N:h:t))
     else
-      local dirs=($path_prefix${^${(Q)words:#.*}}/*(-/Y1N:h:t))
+      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(-/Y1N:h:t))
     fi
   else
     if (( dot_glob )); then
-      local dirs=($path_prefix${^${(Q)words:#.*}}/*(DY1N:h:t))
+      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(DY1N:h:t))
     else
-      local dirs=($path_prefix${^${(Q)words:#.*}}/*(Y1N:h:t))
+      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(Y1N:h:t))
     fi
   fi
 
@@ -34,6 +30,7 @@
     ctrl-space:toggle
     ctrl-a:select-all)
   local opt=(
+    --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"}
     --color=hl:201,hl+:201
     --expect=enter
     --with-nth=2
@@ -42,17 +39,17 @@
     --exact
     --no-mouse
     --layout=reverse
-    --height=$(( ! $#dirs && 100 * ($#words + 2) < 60 * LINES ? $#words + 2 : 60 * LINES / 100 ))
+    --height=$(( ! $#dirs && 100 * ($#_z4h_words + 2) < 60 * LINES ? $#_z4h_words + 2 : 60 * LINES / 100 ))
     --tiebreak=length,begin,index
     --multi
     --cycle
     --bind=${(j:,:)bind})
   local cont
-  if zstyle -s :fzf-tab:$curcontext: continuous-trigger cont && [[ -n $cont ]]; then
+  if zstyle -s :fzf-tab:$_z4h_curcontext:default continuous-trigger cont && [[ -n $cont ]]; then
     opt+=(--expect=$cont)
   fi
 
-  -z4h-set-list-colors "$curcontext" "$list_types"
+  -z4h-set-list-colors "$_z4h_curcontext" "$list_types"
   local -i list_colors=$((!$?))
 
   autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find
@@ -66,10 +63,10 @@
     choice="$(
       unsetopt pipe_fail
       exec 2>/dev/null
-      [[ -n $path_prefix ]] && builtin cd -q -- $path_prefix
+      [[ -n $_z4h_path_prefix ]] && builtin cd -q -- $_z4h_path_prefix
       {
-        print -lr -- ${(Q)words}
-        -z4h-find $dot_glob $only_dirs $dirs | command cut -b3-
+        print -lr -- ${(Q)_z4h_words}
+        -z4h-find $dot_glob $_z4h_only_dirs $dirs | command cut -b3-
       } | {
         -z4h-present-files $list_colors $list_types
       } | {
@@ -89,4 +86,4 @@
   if [[ -n $cont && $choice[1] == $cont ]]; then
     _z4h_reply[1]=1
   fi
-} "${options[dot_glob]}" "${options[list_types]}" "$@"
+} "${options[dot_glob]}" "${options[list_types]}"

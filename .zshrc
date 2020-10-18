@@ -55,6 +55,10 @@ z4h source ~/.iterm2_shell_integration.zsh
 # Define key bindings.
 z4h bindkey z4h-backward-kill-word  Ctrl+Backspace
 z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
+z4h bindkey z4h-cd-back             Alt+Left
+z4h bindkey z4h-cd-forward          Alt+Right
+z4h bindkey z4h-cd-up               Alt+Up
+z4h bindkey z4h-cd-down             Alt+Down
 
 # Autoload functions.
 autoload -Uz zmv

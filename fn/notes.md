@@ -682,10 +682,6 @@ See https://github.com/romkatv/zsh4humans/issues/35#issuecomment-660477146.
 
 ---
 
-When p10k wizard sees z4h, set instant prompt to `quiet` without asking.
-
----
-
 Define `command_not_found_handler` for more operating systems (similarly to how it's done for
 Homebrew and Debian).
 
@@ -713,12 +709,6 @@ Make `run-help z4h source` work.
 
 ---
 
-Add `function ssh` to `.zshrc`. To avoid too many issues with it, `ssh-bootstrap` should check
-whether the target machine is compatible with zsh-bin (the same check as in `zsh-bin/install`)
-and revert to `$SHELL` if it isn't.
-
----
-
 `z4h ssh` should start login shell.
 
 ---
@@ -728,31 +718,6 @@ When doing `exec $_z4h_exe`, preserve `-l`.
 ---
 
 Document binding syntax in `z4h help bindkey`.
-
----
-
-Add an option to insert common prefix when completing (without starting `fzf`). This can be done
-only after migrating off fzf-tab.
-
----
-
-Add an option to open `fzf` only after a second <kbd>Tab</kbd>. This can be done
-only after migrating off fzf-tab.
-
----
-
-Is it possible to open `fzf` when pressing <kbd>Tab</kbd> on `*`? That would be nice. The old
-behavior (simply expand) can be achieved with <kbd>Ctrl+Space</kbd>.
-
----
-
-Bug: when pre-populating query in fzf when doing file completion, it needs to be unquoted.
-
-```zsh
-md /tmp/test
-touch 'a b '{1,2}
-ls <TAB>
-```
 
 ---
 

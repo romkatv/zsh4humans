@@ -103,6 +103,10 @@ done
 curcontext="${curcontext/:[^:]#:/::}"
 nm=$compstate[nmatches]
 
+if [[ -n $compstate[quote] ]]; then
+  typeset -g _z4h_in_quotes=1
+fi
+
 # typeset -pm '_z4h_words|_z4h_descrs|_z4h_scaffolds|compstate' >&2
 
 funcs=("$comppostfuncs[@]")

@@ -143,6 +143,7 @@ done
       local -a _z4h_scaffolds=()
       local -i _z4h_only_dirs=1
       local -i _z4h_in_path_files=0
+      local -i _z4h_in_quotes=0
       local _z4h_curcontext=
       local _z4h_word_prefix=
 
@@ -159,7 +160,7 @@ done
         local _z4h_path_prefix=
         if () {
                 emulate -L zsh
-                (( $#_z4h_scaffolds == 1 )) || return
+                (( $#_z4h_scaffolds == 1 && !_z4h_in_quotes )) || return
                 local -a s=("${(@ps:\1:)_z4h_scaffolds}")
                 [[ $s[1] == 1 && -z $s[3] && -z $s[5] && -z $s[7] && -n $s[11] &&
                   $s[13] == (|*/) && -z $s[15] ]] || return

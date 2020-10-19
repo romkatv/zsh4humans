@@ -133,6 +133,7 @@ if (( !must_passthrough )); then
   if zstyle -s :z4h:ssh:$z4h_ssh_host retrieve-history local_hist; then
     local_hist_tmp=$Z4H/tmp/ssh-history.tmp.$sysparams[pid]
     z4h_ssh_retrieve_files[\$HISTFILE]=$local_hist_tmp
+    zf_rm -f -- $local_hist_tmp || return
   fi
 fi
 
@@ -382,6 +383,11 @@ local -i bypass=0
       local -i len=buf[1,16]
       buf=${buf:16}
       (( len )) || continue
+      if [[ -d $tmpdir ]]; then
+        local dump_file=$tmpdir/dump.base64
+      else
+        local dump_file=/dev/null
+      fi
       {
         local -i n=$((len < $#buf ? len : $#buf))
         print -rn -- $buf[1,n] || return
@@ -391,31 +397,33 @@ local -i bypass=0
           sysread -s $((len > 65636 ? 65636 : len)) -o 1 -c n || return $(( $? != 5 ))
           (( len -= n, 1 ))
         done
-      } >$tmpdir/dump.base64 || return
-      if base64 -d <<<'Cg==' 2>/dev/null; then
-        local base64_opt=-d
-      else
-        local base64_opt=-D
-      fi
-      <$tmpdir/dump.base64 command base64 $base64_opt |
-        command tar -C $tmpdir $tar_x_opt -xzf - || return
-      local -i i
-      for i in {1..$#retrieve_to}; do
-        local src=$tmpdir/$i
-        local dst=$retrieve_to[i]
-        [[ -e $src ]] || continue
-        if [[ -e $dst ]]; then
-          zf_rm -rf -- $dst || return
+      } >$dump_file || return
+      if [[ $dump_file != /dev/null ]]; then
+        if base64 -d <<<'Cg==' 2>/dev/null; then
+          local base64_opt=-d
+        else
+          local base64_opt=-D
         fi
-        if ! command mv -f -- $src $dst 2>/dev/null; then
-          command cp -rf -- $src $dst || return
+        <$tmpdir/dump.base64 command base64 $base64_opt |
+          command tar -C $tmpdir $tar_x_opt -xzf - || return
+        local -i i
+        for i in {1..$#retrieve_to}; do
+          local src=$tmpdir/$i
+          local dst=$retrieve_to[i]
+          [[ -e $src ]] || continue
+          if [[ -e $dst ]]; then
+            zf_rm -rf -- $dst || return
+          fi
+          if ! command mv -f -- $src $dst 2>/dev/null; then
+            command cp -rf -- $src $dst || return
+          fi
+        done
+        if [[ -s $local_hist_tmp ]]; then
+          local TMPPREFIX=$local_hist
+          () {
+            () { fc -pa -- $1 $HISTSIZE $SAVEHIST } $1 && zf_mv -f -- $1 $local_hist
+          } =(command cat -- $local_hist(N) $local_hist_tmp) || return
         fi
-      done
-      if [[ -s $local_hist_tmp ]]; then
-        local TMPPREFIX=$local_hist
-        () {
-          () { fc -pa -- $1 $HISTSIZE $SAVEHIST } $1 && zf_mv -f -- $1 $local_hist
-        } =(command cat -- $local_hist(N) $local_hist_tmp) || return
       fi
     done
   } always {

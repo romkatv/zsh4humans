@@ -185,12 +185,14 @@ everywhere.
 ### Additional Zsh startup files
 
 When you start Zsh, it automatically sources `~/.zshenv` and `~/.zshrc`. The former bootstraps Zsh
-for Humans; the latter is your personal config.
+for Humans, the latter is your personal config. It is strongly recommended to keep all shell
+customization and configuration (including exported environment variables such as `PATH`) in
+`~/.zshrc` or in files sourced from `~/.zshrc`. If you are certain that you must export some
+environment variables in `~/.zshenv`, do it where indicated by comments.
 
 Zsh supports several additional startup files with complex rules governing when each file is
-sourced. The additional startup files are `~/.zprofile`, `~/.zlogin` and `~/.zlogout`.
-**It is not recommended to create these files or to edit `~/.zshenv`.** Keep all shell customization
-and configuration in `~/.zshrc` or in files sourced from it.
+sourced. The additional startup files are `~/.zprofile`, `~/.zlogin` and `~/.zlogout`. **Do not
+create these files.**
 
 ## Updating
 

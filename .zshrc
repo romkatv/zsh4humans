@@ -1,3 +1,7 @@
+# Personal Zsh configuration file. It is strongly recommended to keep all
+# shell customization and configuration (including exported environment
+# variables such as PATH) in this file or in files source by it.
+#
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v4/README.md.
 
 # Periodic auto-update on Zsh startup: 'ask' or 'no'.

@@ -1,9 +1,10 @@
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v4/README.md.
 #
 # Do not modify this file unless you know exactly what you are doing.
-# Keep all shell customization and configuration (including exported
-# environment variables such as PATH) in ~/.zshrc or in files sourced
-# from ~/.zshrc.
+# It is strongly recommended to keep all shell customization and configuration
+# (including exported environment variables such as PATH) in ~/.zshrc or in
+# files sourced from ~/.zshrc. If you are certain that you must export some
+# environment variables in ~/.zshenv, do it where indicated by comments below.
 
 if [ -n "${ZSH_VERSION-}" ]; then
   : ${ZDOTDIR:=~}
@@ -15,9 +16,11 @@ if [ -n "${ZSH_VERSION-}" ]; then
   unset Z4H_BOOTSTRAPPING
 
   # If you are certain that you must export some environment variables
-  # in .zshenv (see comments at the top!), do it here:
+  # in ~/.zshenv (see comments at the top!), do it here:
   #
   #   export GOPATH=$HOME/go
+  #
+  # Do not change anything else in this file.
 fi
 
 Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v4"

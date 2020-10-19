@@ -152,6 +152,23 @@ fi
 'trap' '-' 'INT' 'TERM' 'EXIT'
 
 >&2 'printf' '\033[33mz4h\033[0m: bootstrapping \033[32mzsh\033[0m environment\n'
+
+Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v4"
+Z4H="${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4"
+
+umask o-w
+
+'command' 'rm' '-rf' '--' "$Z4H"
+'command' 'mkdir' '-p' -- "$Z4H"
+
+>&2 printf '\033[33mz4h\033[0m: fetching \033[4mz4h.zsh\033[0m\n'
+if ! err="$($fetch "$Z4H"/z4h.zsh.$$ '--' "$Z4H_URL" 2>&1)"; then
+  >&2 'printf' "%s\n" "$err"
+  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$Z4H_URL"
+  'command' 'rm' '-rf' '--' "$Z4H" 2>'/dev/null'
+  'exit' '1'
+fi
+
 'export' ZDOTDIR="$HOME"
 Z4H_BOOTSTRAPPING='1'
 'set' '+ue'

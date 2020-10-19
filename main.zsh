@@ -87,7 +87,7 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
-if [[ $EUID == 0 && -z ~(#qU) && $Z4H == ~/* ]]; then
+if [[ $EUID == 0 && -z ~(#qNU) && $Z4H == ~/* ]]; then
   typeset -gri _z4h_dangerous_root=1
 else
   typeset -gri _z4h_dangerous_root=0

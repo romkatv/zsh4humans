@@ -9,20 +9,21 @@ If you want a great shell that just works, this project is for you.
 ## Table of contents
 
 * 1. [Installation](#installation)
-* 2. [Caveats](#caveats)
-* 3. [Usage](#usage)
-  * 3.1. [Accepting autosuggestions](#accepting-autosuggestions)
-  * 3.2. [Completing commands](#completing-commands)
-  * 3.3. [Searching command history](#searching-command-history)
-  * 3.4. [Interactive search with `fzf`](#interactive-search-with-fzf)
-  * 3.5. [SSH](#SSH)
-* 4. [Customization](#customization)
-  * 4.1. [Customizing prompt](#customizing-prompt)
-  * 4.2. [Customizing key bindings](#customizing-key-bindings)
-  * 4.3. [Customizing appearance](#customizing-appearance)
-  * 4.4. [Additional Zsh startup files](#additional-zsh-startup-files)
-* 5. [Updating](#updating)
-* 6. [Uninstalling](#uninstalling)
+* 2. [Try it in Docker](#try-it-in-docker)
+* 3. [Caveats](#caveats)
+* 4. [Usage](#usage)
+  * 4.1. [Accepting autosuggestions](#accepting-autosuggestions)
+  * 4.2. [Completing commands](#completing-commands)
+  * 4.3. [Searching command history](#searching-command-history)
+  * 4.4. [Interactive search with `fzf`](#interactive-search-with-fzf)
+  * 4.5. [SSH](#SSH)
+* 5. [Customization](#customization)
+  * 5.1. [Customizing prompt](#customizing-prompt)
+  * 5.2. [Customizing key bindings](#customizing-key-bindings)
+  * 5.3. [Customizing appearance](#customizing-appearance)
+  * 5.4. [Additional Zsh startup files](#additional-zsh-startup-files)
+* 6. [Updating](#updating)
+* 7. [Uninstalling](#uninstalling)
 
 ## Installation
 
@@ -42,6 +43,16 @@ The installer backs up the existing Zsh startup files, creates new ones, install
 necessary for Zsh for Humans, starts a new shell, and configures it as login shell. It asks for
 confirmation on every step so that you are always in control. Installation requires `curl` or
 `wget`. It does not require `git`, `zsh`, `sudo` or anything else.
+
+## Try it in Docker
+
+Try Zsh for Humans in a Docker container. You can safely make any changes to the file system. Once
+you exit Zsh, the image is deleted.
+
+```zsh
+sudo docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"'
+```
 
 ## Caveats
 

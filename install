@@ -47,6 +47,21 @@ if '[' "$euid" '=' '0' ']'; then
   fi
 fi
 
+if '[' '!' '-t' '0' ']'; then
+  >&2 'printf' '\033[33mz4h\033[0m: standard input is not a \033[1mTTY\033[0m\n'
+  'exit' '1'
+fi
+
+if '[' '!' '-t' '1' ']'; then
+  >&2 'printf' '\033[33mz4h\033[0m: standard output is not a \033[1mTTY\033[0m\n'
+  'exit' '1'
+fi
+
+if '[' '!' '-t' '2' ']'; then
+  >&2 'printf' '\033[33mz4h\033[0m: standard error is not a \033[1mTTY\033[0m\n'
+  'exit' '1'
+fi
+
 >&2 'printf' '\033[H\033[2J'
 >&2 'printf' 'Greetings, Human!\n'
 >&2 'printf' '\n'
@@ -134,6 +149,7 @@ if '[' '-n' "$rcs" ']'; then
       ;;
     esac
   done
+  >&2 'printf' '\n'
 fi
 
 zshenv=
@@ -155,14 +171,18 @@ fi
 
 url='https://raw.githubusercontent.com/romkatv/zsh4humans/v4'
 
->&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshenv\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
+>&2 'printf' '\033[H\033[2J'
+>&2 'printf' 'Settings up \033[33mZsh For Humans\033[0m...\n'
+>&2 'printf' '\n'
+
+>&2 'printf' '\033[33mz4h\033[0m: generating \033[4m~/.zshenv\033[0m\n'
 if ! err="$($fetch "$zshenv" '--' "$url"/.zshenv 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
   >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/.zshenv
   'exit' '1'
 fi
 
->&2 'printf' '\033[33mz4h\033[0m: fetching \033[4m~/.zshrc\033[0m from \033[1mromkatv/zsh4humans\033[0m\n'
+>&2 'printf' '\033[33mz4h\033[0m: generating \033[4m~/.zshrc\033[0m\n'
 if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
   >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/.zshrc"$zshrc_suffix"
@@ -176,13 +196,15 @@ umask o-w
 'command' 'rm' '-rf' '--' "$Z4H"
 'command' 'mkdir' '-p' -- "$Z4H"
 
->&2 printf '\033[33mz4h\033[0m: fetching \033[4mz4h.zsh\033[0m\n'
+>&2 printf '\033[33mz4h\033[0m: fetching \033[4mz4h.zsh\033[0m from \033[1mgithub.com/romkatv/zsh4humans\033[0m\n'
 if ! err="$($fetch "$z4h" '--' "$url"/z4h.zsh 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
   >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/z4h.zsh
   'command' 'rm' '-rf' '--' "$Z4H" 2>'/dev/null'
   'exit' '1'
 fi
+
+'true' >"$Z4H"/welcome
 
 if '[' '-n' "$backup_dir" ']'; then
   'command' 'mkdir' '-p' '--' "$backup_dir"

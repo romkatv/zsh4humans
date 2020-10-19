@@ -966,6 +966,7 @@ function -z4h-post-init() {
 }
 
 precmd_functions=(-z4h-post-init $precmd_functions)
+[[ -e $Z4H/welcome ]] && precmd_functions+=(-z4h-welcome)
 
 [[ $OSTYPE == linux-* && -r /proc/version ]] && -z4h-init-wsl
 

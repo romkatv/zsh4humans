@@ -20,8 +20,7 @@ If you want a great shell that just works, this project is for you.
   * 4.1. [Customizing prompt](#customizing-prompt)
   * 4.2. [Customizing key bindings](#customizing-key-bindings)
   * 4.3. [Customizing appearance](#customizing-appearance)
-  * 4.4. [Using external commands or files](#using-external-commands-or-files)
-  * 4.5. [Additional Zsh startup files](#additional-zsh-startup-files)
+  * 4.4. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 5. [Updating](#updating)
 * 6. [Uninstalling](#uninstalling)
 
@@ -40,13 +39,13 @@ If you want a great shell that just works, this project is for you.
   ```
 
 The installer backs up the existing Zsh startup files, creates new ones, installs everything
-necessary for Zsh For Humans and opens a new shell. It asks for confirmation on every step so that
-you are always in control. Installation requires `curl` or `wget`. It does not require `git`, `zsh`,
-`sudo` or anything else.
+necessary for Zsh for Humans, starts a new shell, and configures it as login shell. It asks for
+confirmation on every step so that you are always in control. Installation requires `curl` or
+`wget`. It does not require `git`, `zsh`, `sudo` or anything else.
 
 ## Caveats
 
-Zsh For Humans is not a good choice for users who prefer vi bindings in their shell. It's also not
+Zsh for Humans is not a good choice for users who prefer vi bindings in their shell. It's also not
 recommended for users without a reliable connection to github.com.
 
 ## Usage
@@ -60,7 +59,7 @@ All key bindings that move the cursor can accept *command autosuggestions*. For 
 cursor one word to the right will accept that word from the autosuggestion. The whole autosuggestion
 can be accepted without moving the cursor with <kbd>Alt+M</kbd>/<kbd>Option+M</kbd>.
 
-Autosuggestions in Zsh For Humans are provided by [zsh-autosuggestions](
+Autosuggestions in Zsh for Humans are provided by [zsh-autosuggestions](
   https://github.com/zsh-users/zsh-autosuggestions). See its homepage for more information.
 
 ### Completing commands
@@ -85,7 +84,7 @@ fetch the last executed command that starts with `echo hello`.
 
 ### Interactive search with `fzf`
 
-Several UI elements in Zsh For Humans use [fzf](https://github.com/junegunn/fzf) to quickly select
+Several UI elements in Zsh for Humans use [fzf](https://github.com/junegunn/fzf) to quickly select
 an item from a potentially large list of candidates. You can type multiple search terms delimited by
 spaces. For example:
 
@@ -113,7 +112,7 @@ See [fzf](https://github.com/junegunn/fzf) homepage for more information.
 
 ### SSH
 
-When you connect to a remote host over SSH, your local Zsh For Humans environment gets teleported
+When you connect to a remote host over SSH, your local Zsh for Humans environment gets teleported
 over to it. The first login to a remote host may take some time. After that it's as fast as normal
 `ssh`.
 
@@ -140,20 +139,20 @@ default `~/.zshrc` contains the following types of customizations that should se
 
 ### Customizing prompt
 
-Prompt in Zsh For Humans is provided by [Powerlevel10k](https://github.com/romkatv/powerlevel10k).
+Prompt in Zsh for Humans is provided by [Powerlevel10k](https://github.com/romkatv/powerlevel10k).
 Run `p10k configure` to access its interactive configuration wizard. Further customization can be
 done by editing `~/.p10k*.zsh` files. There can be more than one configuration file to account for
 terminals with limited capabilities. Most users will ever only see `~/.p10k.zsh`. When in doubt,
-consult `$POWERLEVEL9K_CONFIG_FILE`. This parameter is set by Zsh For Humans and it always points
+consult `$POWERLEVEL9K_CONFIG_FILE`. This parameter is set by Zsh for Humans and it always points
 to the Powerlevel10k config file currently in use.
 
 See [Powerlevel10k](https://github.com/romkatv/powerlevel10k) homepage for more information.
 
 ### Customizing appearance
 
-Different parts of Zsh For Humans UI are rendered by different projects.
+Different parts of Zsh for Humans UI are rendered by different projects.
 
-![Zsh For Humans](https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/prompt-highlight.png)
+![Zsh for Humans](https://raw.githubusercontent.com/romkatv/powerlevel10k-media/master/prompt-highlight.png)
 
 Everything within the highlighted areas on the screenshot is *prompt*. It is produced by
 [Powerlevel10k](https://github.com/romkatv/powerlevel10k). See
@@ -161,7 +160,7 @@ Everything within the highlighted areas on the screenshot is *prompt*. It is pro
 
 The listing of files produced by `ls` command is colored by `ls` itself. Different commands have
 different ways of customizing their output, and even different version of `ls` have different flags
-and environment variables related to colors. Zsh For Humans enables colored output from common
+and environment variables related to colors. Zsh for Humans enables colored output from common
 commands (such as `ls`). For further customization consult documentation of the respective command.
 
 `echo hello` is the current command being typed. Syntax highlighting for it is provided by
@@ -183,40 +182,10 @@ terminal look unpleasant, try a different theme. Note that colors with codes abo
 colors specified as RGB triplets, don't get affected by terminal themes. They look the same
 everywhere.
 
-### Using external commands or files
-
-When using external commands or files in `~/.zshrc`, prefer conditional evaluation. If your
-`~/.zshrc` uses only things that exist, it'll be easier to [replicate shell on another machine](
-  #replicating-zsh-for-humans-on-another-machine-or-restoring-it-from-a-backup).
-
-Here are a few examples to demonstrate this:
-
-```zsh
-# Load pyenv if ~/.pyenv exists.
-if [[ -e ~/.pyenv ]]; then
-  export PYENV_ROOT=~/.pyenv
-  path=($PYENV_ROOT/bin $path)
-  eval "$(pyenv init -)"
-fi
-
-# Enable direnv hooks if direnv is installed.
-if (( $+commands[direnv] )); then
-  eval "$(direnv hook zsh)"
-fi
-```
-
-When sourcing a file, prefer `z4h source` over plain `source`. The former will check that the file
-exists before attempting to source it.
-
-```zsh
-# Enable iTerm2 shell integration if the corresponding file exists.
-z4h source ~/.iterm2_shell_integration.zsh
-```
-
 ### Additional Zsh startup files
 
 When you start Zsh, it automatically sources `~/.zshenv` and `~/.zshrc`. The former bootstraps Zsh
-For Humans; the latter is your personal config.
+for Humans; the latter is your personal config.
 
 Zsh supports several additional startup files with complex rules governing when each file is
 sourced. The additional startup files are `~/.zprofile`, `~/.zlogin` and `~/.zlogout`.
@@ -233,7 +202,7 @@ There is no update mechanism for `~/.zshrc` itself.
 
 ## Uninstalling
 
-To uninstall Zsh For Humans, remove `~/.zshenv` and `~/.zshrc` or replace them with a different
-version. If you had these files prior to the installation of Zsh For Humans and have replied in the
+To uninstall Zsh for Humans, remove `~/.zshenv` and `~/.zshrc` or replace them with a different
+version. If you had these files prior to the installation of Zsh for Humans and have replied in the
 affirmative when asked by the installer whether you want them backed up, you can find them in
 `~/zsh-backup`.

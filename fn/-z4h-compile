@@ -29,7 +29,8 @@ local tmp="$1".tmp."${sysparams[pid]}".zwc
   # The last command produces this error:
   #
   #   zf_mv: a: permission denied
-  zcompile -R -- "$tmp" "$1"       &&
+  (( !_z4h_dangerous_root ))       &&
+    zcompile -R -- "$tmp" "$1"     &&
     command touch -ct $t -- "$tmp" &&
     zf_rm -f -- "$1".zwc           &&
     zf_mv -f -- "$tmp" "$1".zwc

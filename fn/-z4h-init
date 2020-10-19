@@ -399,7 +399,7 @@ if zstyle -T :z4h:bindkey macos-option-as-alt; then
     G  '˝'
     H  'Ó'
     J  'Ô'
-    K  '\uF8FF'
+    K  '\357\243\277'
     L  'Ò'
     Z  '¸'
     X  '˛'
@@ -430,114 +430,177 @@ else
 fi
 
 if zstyle -t :z4h:bindkey keyboard mac; then
-  local alt=Option
   local del=Fn+Delete
-  local bs=Delete
 else
-  local alt=Alt
   local del=Delete
-  local bs=Backspace
 fi
 
-typeset -gr _z4h_key_alt=$alt
+typeset -gA _z4h_key=(
+  Up                          '^[[A'
+  Down                        '^[[B'
+  Right                       '^[[C'
+  Left                        '^[[D'
+  Home                        '^[[H'
+  End                         '^[[F'
+  Insert                      '^[[2~'
+  $del                        '^[[3~'
+  PageUp                      '^[[5~'
+  PageDown                    '^[[6~'
+  Backspace                   '^?'
 
-typeset -grA _z4h_key=(
-  Up                       '^[[A'
-  Down                     '^[[B'
-  Right                    '^[[C'
-  Left                     '^[[D'
-  Home                     '^[[H'
-  End                      '^[[F'
-  Insert                   '^[[2~'
-  $del                     '^[[3~'
-  PageUp                   '^[[5~'
-  PageDown                 '^[[6~'
-  $bs                      '^?'
+  Shift+Up                    '^[[1;2A'
+  Shift+Down                  '^[[1;2B'
+  Shift+Right                 '^[[1;2C'
+  Shift+Left                  '^[[1;2D'
+  Shift+Home                  '^[[1;2H'
+  Shift+End                   '^[[1;2F'
+  Shift+Insert                '^[[2;2~'
+  Shift+$del                  '^[[3;2~'
+  Shift+PageUp                '^[[5;2~'
+  Shift+PageDown              '^[[6;2~'
+  Shift+Backspace             '^?'
 
-  Shift+Up                 '^[[1;2A'
-  Shift+Down               '^[[1;2B'
-  Shift+Right              '^[[1;2C'
-  Shift+Left               '^[[1;2D'
-  Shift+Home               '^[[1;2H'
-  Shift+End                '^[[1;2F'
-  Shift+Insert             '^[[2;2~'
-  Shift+$del               '^[[3;2~'
-  Shift+PageUp             '^[[5;2~'
-  Shift+PageDown           '^[[6;2~'
-  Shift+$bs                '^?'
+  Alt+Up                      '^[[1;3A'
+  Alt+Down                    '^[[1;3B'
+  Alt+Right                   '^[[1;3C'
+  Alt+Left                    '^[[1;3D'
+  Alt+Home                    '^[[1;3H'
+  Alt+End                     '^[[1;3F'
+  Alt+Insert                  '^[[2;3~'
+  Alt+$del                    '^[[3;3~'
+  Alt+PageUp                  '^[[5;3~'
+  Alt+PageDown                '^[[6;3~'
+  Alt+Backspace               '^[^?'
 
-  $alt+Up                  '^[[1;3A'
-  $alt+Down                '^[[1;3B'
-  $alt+Right               '^[[1;3C'
-  $alt+Left                '^[[1;3D'
-  $alt+Home                '^[[1;3H'
-  $alt+End                 '^[[1;3F'
-  $alt+Insert              '^[[2;3~'
-  $alt+$del                '^[[3;3~'
-  $alt+PageUp              '^[[5;3~'
-  $alt+PageDown            '^[[6;3~'
-  $alt+$bs                 '^[^?'
+  Alt+Shift+Up                '^[[1;4A'
+  Alt+Shift+Down              '^[[1;4B'
+  Alt+Shift+Right             '^[[1;4C'
+  Alt+Shift+Left              '^[[1;4D'
+  Alt+Shift+Home              '^[[1;4H'
+  Alt+Shift+End               '^[[1;4F'
+  Alt+Shift+Insert            '^[[2;4~'
+  Alt+Shift+$del              '^[[3;4~'
+  Alt+Shift+PageUp            '^[[5;4~'
+  Alt+Shift+PageDown          '^[[6;4~'
+  Alt+Shift+Backspace         '^[^H'
 
-  $alt+Shift+Up            '^[[1;4A'
-  $alt+Shift+Down          '^[[1;4B'
-  $alt+Shift+Right         '^[[1;4C'
-  $alt+Shift+Left          '^[[1;4D'
-  $alt+Shift+Home          '^[[1;4H'
-  $alt+Shift+End           '^[[1;4F'
-  $alt+Shift+Insert        '^[[2;4~'
-  $alt+Shift+$del          '^[[3;4~'
-  $alt+Shift+PageUp        '^[[5;4~'
-  $alt+Shift+PageDown      '^[[6;4~'
-  $alt+Shift+$bs           '^[^H'
+  Ctrl+Up                     '^[[1;5A'
+  Ctrl+Down                   '^[[1;5B'
+  Ctrl+Right                  '^[[1;5C'
+  Ctrl+Left                   '^[[1;5D'
+  Ctrl+Home                   '^[[1;5H'
+  Ctrl+End                    '^[[1;5F'
+  Ctrl+Insert                 '^[[2;5~'
+  Ctrl+$del                   '^[[3;5~'
+  Ctrl+PageUp                 '^[[5;5~'
+  Ctrl+PageDown               '^[[6;5~'
+  Ctrl+Backspace              '^H'
 
-  Ctrl+Up                  '^[[1;5A'
-  Ctrl+Down                '^[[1;5B'
-  Ctrl+Right               '^[[1;5C'
-  Ctrl+Left                '^[[1;5D'
-  Ctrl+Home                '^[[1;5H'
-  Ctrl+End                 '^[[1;5F'
-  Ctrl+Insert              '^[[2;5~'
-  Ctrl+$del                '^[[3;5~'
-  Ctrl+PageUp              '^[[5;5~'
-  Ctrl+PageDown            '^[[6;5~'
-  Ctrl+$bs                 '^H'
+  Ctrl+Shift+Up               '^[[1;6A'
+  Ctrl+Shift+Down             '^[[1;6B'
+  Ctrl+Shift+Right            '^[[1;6C'
+  Ctrl+Shift+Left             '^[[1;6D'
+  Ctrl+Shift+Home             '^[[1;6H'
+  Ctrl+Shift+End              '^[[1;6F'
+  Ctrl+Shift+Insert           '^[[2;6~'
+  Ctrl+Shift+$del             '^[[3;6~'
+  Ctrl+Shift+PageUp           '^[[5;6~'
+  Ctrl+Shift+PageDown         '^[[6;6~'
+  Ctrl+Shift+Backspace        '^?'
 
-  Ctrl+Shift+Up            '^[[1;6A'
-  Ctrl+Shift+Down          '^[[1;6B'
-  Ctrl+Shift+Right         '^[[1;6C'
-  Ctrl+Shift+Left          '^[[1;6D'
-  Ctrl+Shift+Home          '^[[1;6H'
-  Ctrl+Shift+End           '^[[1;6F'
-  Ctrl+Shift+Insert        '^[[2;6~'
-  Ctrl+Shift+$del          '^[[3;6~'
-  Ctrl+Shift+PageUp        '^[[5;6~'
-  Ctrl+Shift+PageDown      '^[[6;6~'
-  Ctrl+Shift+$bs           '^?'
+  Ctrl+Alt+Up                 '^[[1;7A'
+  Ctrl+Alt+Down               '^[[1;7B'
+  Ctrl+Alt+Right              '^[[1;7C'
+  Ctrl+Alt+Left               '^[[1;7D'
+  Ctrl+Alt+Home               '^[[1;7H'
+  Ctrl+Alt+End                '^[[1;7F'
+  Ctrl+Alt+Insert             '^[[2;7~'
+  Ctrl+Alt+$del               '^[[3;7~'
+  Ctrl+Alt+PageUp             '^[[5;7~'
+  Ctrl+Alt+PageDown           '^[[6;7~'
+  Ctrl+Alt+Backspace          '^[^H'
 
-  Ctrl+$alt+Up             '^[[1;7A'
-  Ctrl+$alt+Down           '^[[1;7B'
-  Ctrl+$alt+Right          '^[[1;7C'
-  Ctrl+$alt+Left           '^[[1;7D'
-  Ctrl+$alt+Home           '^[[1;7H'
-  Ctrl+$alt+End            '^[[1;7F'
-  Ctrl+$alt+Insert         '^[[2;7~'
-  Ctrl+$alt+$del           '^[[3;7~'
-  Ctrl+$alt+PageUp         '^[[5;7~'
-  Ctrl+$alt+PageDown       '^[[6;7~'
-  Ctrl+$alt+$bs            '^[^H'
+  Ctrl+Alt+Shift+Up           '^[[1;8A'
+  Ctrl+Alt+Shift+Down         '^[[1;8B'
+  Ctrl+Alt+Shift+Right        '^[[1;8C'
+  Ctrl+Alt+Shift+Left         '^[[1;8D'
+  Ctrl+Alt+Shift+Home         '^[[1;8H'
+  Ctrl+Alt+Shift+End          '^[[1;8F'
+  Ctrl+Alt+Shift+Insert       '^[[2;8~'
+  Ctrl+Alt+Shift+$del         '^[[3;8~'
+  Ctrl+Alt+Shift+PageUp       '^[[5;8~'
+  Ctrl+Alt+Shift+PageDown     '^[[6;8~'
+  Ctrl+Alt+Shift+Backspace    '^?'
 
-  Ctrl+$alt+Shift+Up       '^[[1;8A'
-  Ctrl+$alt+Shift+Down     '^[[1;8B'
-  Ctrl+$alt+Shift+Right    '^[[1;8C'
-  Ctrl+$alt+Shift+Left     '^[[1;8D'
-  Ctrl+$alt+Shift+Home     '^[[1;8H'
-  Ctrl+$alt+Shift+End      '^[[1;8F'
-  Ctrl+$alt+Shift+Insert   '^[[2;8~'
-  Ctrl+$alt+Shift+$del     '^[[3;8~'
-  Ctrl+$alt+Shift+PageUp   '^[[5;8~'
-  Ctrl+$alt+Shift+PageDown '^[[6;8~'
-  Ctrl+$alt+Shift+$bs      '^?'
+  # Duplicate all Alt bindings with s/Alt/Option/.
+  Option+Up                   '^[[1;3A'
+  Option+Down                 '^[[1;3B'
+  Option+Right                '^[[1;3C'
+  Option+Left                 '^[[1;3D'
+  Option+Home                 '^[[1;3H'
+  Option+End                  '^[[1;3F'
+  Option+Insert               '^[[2;3~'
+  Option+$del                 '^[[3;3~'
+  Option+PageUp               '^[[5;3~'
+  Option+PageDown             '^[[6;3~'
+  Option+Backspace            '^[^?'
+
+  Option+Shift+Up             '^[[1;4A'
+  Option+Shift+Down           '^[[1;4B'
+  Option+Shift+Right          '^[[1;4C'
+  Option+Shift+Left           '^[[1;4D'
+  Option+Shift+Home           '^[[1;4H'
+  Option+Shift+End            '^[[1;4F'
+  Option+Shift+Insert         '^[[2;4~'
+  Option+Shift+$del           '^[[3;4~'
+  Option+Shift+PageUp         '^[[5;4~'
+  Option+Shift+PageDown       '^[[6;4~'
+  Option+Shift+Backspace      '^[^H'
+
+  Ctrl+Option+Up              '^[[1;7A'
+  Ctrl+Option+Down            '^[[1;7B'
+  Ctrl+Option+Right           '^[[1;7C'
+  Ctrl+Option+Left            '^[[1;7D'
+  Ctrl+Option+Home            '^[[1;7H'
+  Ctrl+Option+End             '^[[1;7F'
+  Ctrl+Option+Insert          '^[[2;7~'
+  Ctrl+Option+$del            '^[[3;7~'
+  Ctrl+Option+PageUp          '^[[5;7~'
+  Ctrl+Option+PageDown        '^[[6;7~'
+  Ctrl+Option+Backspace       '^[^H'
+
+  Ctrl+Option+Shift+Up        '^[[1;8A'
+  Ctrl+Option+Shift+Down      '^[[1;8B'
+  Ctrl+Option+Shift+Right     '^[[1;8C'
+  Ctrl+Option+Shift+Left      '^[[1;8D'
+  Ctrl+Option+Shift+Home      '^[[1;8H'
+  Ctrl+Option+Shift+End       '^[[1;8F'
+  Ctrl+Option+Shift+Insert    '^[[2;8~'
+  Ctrl+Option+Shift+$del      '^[[3;8~'
+  Ctrl+Option+Shift+PageUp    '^[[5;8~'
+  Ctrl+Option+Shift+PageDown  '^[[6;8~'
+  Ctrl+Option+Shift+Backspace '^?'
 )
+
+if zstyle -t :z4h:bindkey keyboard mac; then
+  # Duplicate all Backspace bindings with s/Backspace/Delete/.
+  _z4h_key+=(
+    Delete                    '^?'
+    Shift+Delete              '^?'
+    Alt+Delete                '^[^?'
+    Alt+Shift+Delete          '^[^H'
+    Ctrl+Delete               '^H'
+    Ctrl+Shift+Delete         '^?'
+    Ctrl+Alt+Delete           '^[^H'
+    Ctrl+Alt+Shift+Delete     '^?'
+    Option+Delete             '^[^?'
+    Option+Shift+Delete       '^[^H'
+    Ctrl+Option+Delete        '^[^H'
+    Ctrl+Option+Shift+Delete  '^?'
+  )
+fi
+
+typeset -grA _z4h_key
 
 # Use lesspipe if available. It allows you to use less on binary files (*.tar.gz, *.jpg, etc.).
 if (( $+commands[lesspipe] || $+commands[lesspipe.sh] )); then
@@ -573,13 +636,16 @@ zstyle ':completion:*:rm:*'          ignore-line       "other"
 zstyle ':completion:*:kill:*'        ignore-line       "other"
 zstyle ':completion:*:diff:*'        ignore-line       "other"
 zstyle ':completion:*:rm:*'          file-patterns     "*:all-files"
-zstyle ':completion:*'               use-cache         "true"
-zstyle ':completion:*'               cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
 zstyle ':completion:*:paths'         accept-exact-dirs "true"
 zstyle ':completion:*'               single-ignored    "show"
 zstyle ':completion:*:functions'     ignored-patterns  "-z4h*|_*"
 zstyle ':completion:*:parameters'    ignored-patterns  \
   "_(z4h|p9k|_p9k|POWERLEVEL9K|gitstatus|GITSTATUS|zsh_highlight|zsh_autosuggest|ZSH_HIGHLIGHT|ZSH_AUTOSUGGEST)*"
+
+if (( ! _z4h_dangerous_root )); then
+  zstyle ':completion:*'             use-cache         "true"
+  zstyle ':completion:*'             cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
+fi
 
 zstyle ':completion:*:git-*:argument-rest:heads'           ignored-patterns '(FETCH_|ORIG_|*/|)HEAD'
 zstyle ':completion:*:git-*:argument-rest:heads-local'     ignored-patterns '(FETCH_|ORIG_|)HEAD'
@@ -812,7 +878,7 @@ function -z4h-post-init() {
   zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"
 
   # Initialize completions.
-  if zstyle -t ':completion::complete:' use-cache; then
+  if (( !_z4h_dangerous_root )) && zstyle -t ':completion::complete:' use-cache; then
     local cache
     zstyle -s ':completion::complete:' cache-path cache
     : ${cache:=${ZDOTDIR:-~}/.zcompcache}
@@ -829,7 +895,7 @@ function -z4h-post-init() {
 
   local dump
   zstyle -s ':z4h:compinit' dump-path dump
-  : ${dump:=$Z4H/cache/zcompdump-$ZSH_VERSION}
+  : ${dump:=$Z4H/cache/zcompdump-$EUID-$ZSH_VERSION}
 
   local -a stat files=(${^fpath}/^([^_]*|*~|*.zwc)(.N))
   (( ! $#files )) || zstat -A stat +mtime -- $files
@@ -837,10 +903,9 @@ function -z4h-post-init() {
   real_sig='# '${(V)${(pj:\0:)real_sig}}$'\n'
 
   local sig
-  if [[ -e $dump ]] &&
-     sysread -s $#real_sig sig <$dump &&
-     [[ $sig == $real_sig ]] &&
-     [[ -e $dump.zwc ]] &&
+  if [[ -r $dump ]] &&
+     sysread -s $#real_sig sig <$dump        &&
+     [[ $sig == $real_sig && -r $dump.zwc ]] &&
      zstat -A stat +mtime -- $dump $dump.zwc &&
      (( stat[2] == stat[1] + 1 )); then
     compinit -C -d $dump

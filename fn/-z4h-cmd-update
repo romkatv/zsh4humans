@@ -6,6 +6,11 @@ if (( ARGC )); then
   return '_z4h_err()'
 fi
 
+if (( _z4h_dangerous_root )); then
+  print -Pru2 -- "%F{3}z4h%f: refusing to %Bupdate%b as %F{1}root%f"
+  return 1
+fi
+
 local old=$Z4H.old.$$
 local new=$Z4H.new.$$
 

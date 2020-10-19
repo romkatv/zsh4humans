@@ -183,7 +183,7 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       'exit' '1'
     fi
 
-    if '[' "$v" '!=' '4' ']'; then
+    if '[' "v$v" '!=' 'v4' ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: unexpected major version in \033[1mZ4H_URL\033[0m\n'
       >&2 'printf' '\n'
       >&2 'printf' 'Expected:\n'
@@ -202,6 +202,22 @@ if '[' '-n' "${_z4h_bootstrap-}" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: updating \033[1m%s\033[0m\n' "zsh4humans"
     else
       >&2 'printf' '\033[33mz4h\033[0m: installing \033[1m%s\033[0m\n' "zsh4humans"
+    fi
+
+    if '[' '-n' "${HOME-}" ']'                       &&
+       '[' "$Z4H" = "$HOME"/.cache/zsh4humans/v4 ']' &&
+       command -v 'id' >'/dev/null' 2>&1; then
+      euid="$('command' 'id' '-u')" || 'exit'
+      if '[' "$euid" '=' '0' ']'; then
+        home_ls="$('command' 'ls' '-ld' '--' "$HOME")" || 'exit'
+        home_owner="$('printf' '%s\n' "$home_ls" | 'command' 'awk' 'NR==1 {print $3}')" || 'exit'
+        if '[' "$home_owner" '!=' 'root' ']'; then
+          >&2 'printf' '\033[33mz4h\033[0m: refusing to \033[1minstall\033[0m as \033[31mroot\033[0m\n'
+          'command' 'rm' '-rf' '--' "$HOME"/.cache/zsh4humans/v4 2>'/dev/null' &&
+            'command' 'rmdir' '--' "$HOME"/.cache/zsh4humans "$HOME"/.cache 2>'/dev/null'
+          'exit' '1'
+        fi
+      fi
     fi
 
     dir="$Z4H"/zsh4humans

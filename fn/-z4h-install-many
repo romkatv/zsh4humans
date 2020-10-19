@@ -1,7 +1,7 @@
 local success
 
 {
-  if (( ! $+_z4h_no_autoupdate )) && zstyle -t :z4h: auto-update ask; then
+  if (( ! $+_z4h_no_autoupdate && !_z4h_dangerous_root )) && zstyle -t :z4h: auto-update ask; then
     typeset -gri _z4h_no_autoupdate=1
     local days
     if zstyle -s :z4h: auto-update-days days && [[ $days == <-> ]]; then
@@ -35,10 +35,18 @@ local success
   have=(${have#$Z4H/})
   _z4h_install_queue=(${_z4h_install_queue:|have})
 
-  (( $#_z4h_install_queue )) && typeset -gi _z4h_installed_something=1
+  if (( $#_z4h_install_queue )); then
+    if (( _z4h_dangerous_root )); then
+      for repo in $_z4h_install_queue; do
+        print -Pru2 -- "%F{3}z4h%f: refusing to %Binstall%b as %F{1}root%f: %B${repo//\%/%%}%b"
+      done
+      return 1
+    fi
+    typeset -gi _z4h_installed_something=1
+  fi
 
   if (( $#_z4h_install_queue <= 1 )) || [[ -o interactive && $ZSH_SUBSHELL != 0 ]]; then
-    for repo in ${_z4h_install_queue:|have}; do
+    for repo in $_z4h_install_queue; do
       -z4h-install-one $repo || return
     done
     return

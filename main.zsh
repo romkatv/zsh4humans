@@ -82,6 +82,12 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
+if [[ $EUID == 0 && -z ~(#qU) && $Z4H == ~/* ]]; then
+  typeset -gri _z4h_dangerous_root=1
+else
+  typeset -gri _z4h_dangerous_root=0
+fi
+
 autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h[^.]#(:t) || return
 functions -Ms _z4h_err
 

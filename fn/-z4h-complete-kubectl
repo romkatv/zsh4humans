@@ -1,6 +1,6 @@
 local kubectl="${commands[kubectl]-}"
 local orig_cmd="${_comps[kubectl]-}"
-local comp="$Z4H"/cache/kubectl-completion.zsh
+local comp="$Z4H"/cache/kubectl-completion-$EUID.zsh
 local cmd
 
 () {

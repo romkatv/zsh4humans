@@ -34,6 +34,21 @@ else
   'exit' '1'
 fi
 
+if '[' '!' '-d' "${HOME-}" ']'; then
+  >&2 'printf' '\033[33mz4h\033[0m: \033[1m$HOME\033[0m is not a directory\n'
+  'exit' '1'
+fi
+
+euid="$('command' 'id' '-u')"
+if '[' "$euid" '=' '0' ']'; then
+  home_ls="$('command' 'ls' '-ld' '--' "$HOME")"
+  home_owner="$('printf' '%s\n' "$home_ls" | 'command' 'awk' 'NR==1 {print $3}')"
+  if '[' "$home_owner" '!=' 'root' ']'; then
+    >&2 'printf' '\033[33mz4h\033[0m: please retry without \033[4;32msudo\033[0m\n'
+    'exit' '1'
+  fi
+fi
+
 >&2 'printf' '\033[33mz4h\033[0m: platform \033[32m%s\033[0m is supported\n' "$platform"
 
 rcs=''

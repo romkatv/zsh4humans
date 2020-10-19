@@ -1,6 +1,6 @@
 local kitty="${commands[kitty]-}"
 local orig_cmd="${_comps[kitty]-}"
-local comp="$Z4H"/cache/kitty-completion.zsh
+local comp="$Z4H"/cache/kitty-completion-$EUID.zsh
 local src="${kitty:h}"/../lib/kitty/kitty/complete.py
 local cmd
 

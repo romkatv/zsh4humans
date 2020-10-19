@@ -1,6 +1,6 @@
 local helm="${commands[helm]-}"
 local orig_cmd="${_comps[helm]-}"
-local comp="$Z4H"/cache/helm-completion.zsh
+local comp="$Z4H"/cache/helm-completion-$EUID.zsh
 local cmd
 
 () {

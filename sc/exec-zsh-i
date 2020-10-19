@@ -31,7 +31,7 @@ _z4h_exec_zsh_i() {
 
   'local' 'install'
   if command -v 'mktemp' >'/dev/null' 2>&1; then
-    install="$('command' 'mktemp' "$Z4H"/tmp/install-zsh.XXXXXXXXXX)"
+    install="$('command' 'mktemp' "$Z4H"/tmp/install-zsh.XXXXXXXXXX)" || 'return'
   else
     install="$Z4H"/tmp/install-zsh.tmp."$$"
     '[' '!' '-e' "$install" ']' || 'command' 'rm' '-rf' '--' "$install" || 'return'
@@ -64,7 +64,7 @@ _z4h_exec_zsh_i() {
   else
     'local' 'zshdir' 'dir'
     if command -v 'mktemp' >'/dev/null' 2>&1; then
-      zshdir="$('command' 'mktemp' "$Z4H"/tmp/zshdir.XXXXXXXXXX)"
+      zshdir="$('command' 'mktemp' "$Z4H"/tmp/zshdir.XXXXXXXXXX)" || 'return'
     else
       zshdir="$Z4H"/tmp/zshdir.tmp."$$"
       '[' '!' '-e' "$zshdir" ']' || 'command' 'rm' '-rf' '--' "$zshdir" || 'return'

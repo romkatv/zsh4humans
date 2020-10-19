@@ -174,7 +174,7 @@ done
           fi
           -z4h-comp-files || return
           again=${_z4h_reply[1]}
-          _z4h_words=("${(@)_z4h_reply:1}")
+          _z4h_words=("${(@q)_z4h_reply:1}")
           -z4h-insert-all || return
         else
           local -a _z4h_reply=()

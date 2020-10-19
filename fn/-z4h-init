@@ -436,6 +436,8 @@ else
 fi
 
 typeset -gA _z4h_key=(
+  Tab                         '^I'
+
   Up                          '^[[A'
   Down                        '^[[B'
   Right                       '^[[C'

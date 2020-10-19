@@ -45,8 +45,7 @@ confirmation on every step so that you are always in control. Installation requi
 
 ## Caveats
 
-Zsh for Humans is not a good choice for users who prefer vi bindings in their shell. It's also not
-recommended for users without a reliable connection to github.com.
+Zsh for Humans is not a good choice for users who prefer vi bindings in their shell.
 
 ## Usage
 

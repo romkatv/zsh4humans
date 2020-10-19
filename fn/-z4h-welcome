@@ -9,12 +9,13 @@ zf_rm -f -- $Z4H/welcome
 
 zf_rm -f -- $Z4H/welcome
 
-print -Pru2 -- "%F{3}z4h%f: installation successful\!"
+print -Pru2 -- ""
+print -Pru2 -- "%F{3}Zsh For Humans%f installed successfully!"
 print -Pru2 -- ""
 print -Pru2 -- "Next steps:"
 print -Pru2 -- ""
 print -Pru2 -- "  - Take a look %U~/.zshrc%u. You can edit this file to customize Zsh."
 print -Pru2 -- "  - Prompt config is in %U~/${${POWERLEVEL9K_CONFIG_FILE:t}//\%/%%}%u. Update it with %F{2}p10k%f %Bconfigure%b."
 print -Pru2 -- ""
-print -Pru2 -- "Enjoy %F{3}Zsh For Humans%f\!"
+print -Pru2 -- "Enjoy %F{3}Zsh For Humans%f!"
 print -Pru2 -- ""

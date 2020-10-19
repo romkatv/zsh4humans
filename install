@@ -175,6 +175,14 @@ url='https://raw.githubusercontent.com/romkatv/zsh4humans/v4'
 >&2 'printf' 'Settings up \033[33mZsh For Humans\033[0m...\n'
 >&2 'printf' '\n'
 
+>&2 printf '\033[33mz4h\033[0m: fetching \033[4mz4h.zsh\033[0m from \033[1mgithub.com/romkatv/zsh4humans\033[0m\n'
+if ! err="$($fetch "$z4h" '--' "$url"/z4h.zsh 2>&1)"; then
+  >&2 'printf' "%s\n" "$err"
+  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/z4h.zsh
+  'command' 'rm' '-rf' '--' "$Z4H" 2>'/dev/null'
+  'exit' '1'
+fi
+
 >&2 'printf' '\033[33mz4h\033[0m: generating \033[4m~/.zshenv\033[0m\n'
 if ! err="$($fetch "$zshenv" '--' "$url"/.zshenv 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
@@ -196,16 +204,6 @@ umask o-w
 'command' 'rm' '-rf' '--' "$Z4H"
 'command' 'mkdir' '-p' -- "$Z4H"
 
->&2 printf '\033[33mz4h\033[0m: fetching \033[4mz4h.zsh\033[0m from \033[1mgithub.com/romkatv/zsh4humans\033[0m\n'
-if ! err="$($fetch "$z4h" '--' "$url"/z4h.zsh 2>&1)"; then
-  >&2 'printf' "%s\n" "$err"
-  >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/z4h.zsh
-  'command' 'rm' '-rf' '--' "$Z4H" 2>'/dev/null'
-  'exit' '1'
-fi
-
-'true' >"$Z4H"/welcome
-
 if '[' '-n' "$backup_dir" ']'; then
   'command' 'mkdir' '-p' '--' "$backup_dir"
   for f in $rcs; do
@@ -220,6 +218,8 @@ fi
 'command' 'mv' '--' "$zshenv" ~/'.zshenv'
 'command' 'mv' '--' "$zshrc" ~/'.zshrc'
 'command' 'mv' '--' "$z4h" "$Z4H"/z4h.zsh
+
+'true' >"$Z4H"/welcome
 
 'trap' '-' 'INT' 'TERM' 'EXIT'
 

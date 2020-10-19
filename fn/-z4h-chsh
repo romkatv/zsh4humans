@@ -1,19 +1,32 @@
 eval "$_z4h_opt"
 
 local user=${(%):-%n}
-[[ -n $user && -r /etc/passwd && -r /etc/shells && $_z4h_exe == /* && -x $_z4h_exe &&
+[[ -n $user && -r /etc/shells && $_z4h_exe == /* && -x $_z4h_exe &&
    -t 0 && -t 1 && -t 2 ]] || return 0
 
-if (( ! $+commands[chsh] )); then
-  [[ $+commands[sudo] == 1 || -w /etc ]] || return 0
+if [[ $OSTYPE == linux* ]]; then
+  [[ -r /etc/passwd ]] || return 0
+
+  if (( ! $+commands[chsh] )); then
+    [[ $+commands[sudo] == 1 || -w /etc ]] || return 0
+  fi
+
+  local passwd
+  passwd="$(</etc/passwd)" || return '_z4h_err()'
+
+  local -a match mbegin mend
+  [[ $passwd == (#b)*((#s)|$'\n')$user:[^$'\n']#:([^:]##)((#e)|$'\n')* ]] || return 0
+  local login_shell=$match[2]
+elif [[ $OSTYPE == darwin* ]]; then
+  (( $+commands[dscl] && $+commands[chsh] )) || return 0
+  local login_shell
+  login_shell=$(dscl . -read ~/ UserShell) || return '_z4h_err()'
+  [[ $login_shell == 'UserShell: /'* ]] || return '_z4h_err()'
+  login_shell=${login_shell#UserShell: }
+else
+  return 0
 fi
 
-local passwd
-passwd="$(</etc/passwd)" || return '_z4h_err()'
-
-local -a match mbegin mend
-[[ $passwd == (#b)*((#s)|$'\n')$user:[^$'\n']#:([^:]##)((#e)|$'\n')* ]] || return 0
-local login_shell=$match[2]
 [[ -x $login_shell && ! $login_shell -ef $_z4h_exe ]] || return 0
 
 local -a shells

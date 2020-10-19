@@ -1,6 +1,6 @@
 [[ -w $TTY && -r $TTY ]] || return
 
-autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find
+autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find -z4h-fzf
 
 local -i dot_glob list_types
 [[ -o dot_glob   ]] && dot_glob=1
@@ -31,38 +31,6 @@ local -i list_colors=$((!$?))
         return 0
       fi
 
-      local query char
-      for char in ${(s::)dirs[1]}; do
-        [[ -z ${dirs:#$query$char*} ]] || break
-        query+=$char
-      done
-
-      local bind=(
-        ctrl-h:backward-kill-word
-        alt-j:clear-query
-        ctrl-u:clear-query
-        ctrl-k:kill-line
-        alt-k:unix-line-discard
-        tab:down
-        btab:up)
-      local opt=(
-        --with-nth=2
-        --delimiter='\000'
-        --ansi
-        --exact
-        --no-mouse
-        --layout=reverse
-        --height=$(( ! $#non_empty && 100 * ($#dirs + 2) < 60 * LINES ? $#dirs + 2 : 60 * LINES / 100 ))
-        --tiebreak=length,begin,index
-        --no-multi
-        --cycle
-        --query=${query:2}
-        --bind=${(j:,:)bind})
-      local cont
-      if zstyle :fzf-tab: -s continuous-trigger cont && [[ -n $cont ]]; then
-        opt+=(--expect=$cont)
-      fi
-
       {
         -z4h-show-dots
         local esc line col
@@ -79,16 +47,25 @@ local -i list_colors=$((!$?))
               -z4h-find $dot_glob 1 $non_empty
             } | command cut -b3- | -z4h-present-files $list_colors $list_types | {
               -z4h-cursor-show
-              $Z4H/fzf/bin/fzf $opt 2>$TTY
+              2>$TTY -z4h-fzf                                     \
+                --color=hl:201,hl+:201                            \
+                --with-nth=2                                      \
+                --delimiter='\000'                                \
+                --ansi                                            \
+                --exact                                           \
+                --no-mouse                                        \
+                --layout=reverse                                  \
+                --tiebreak=length,begin,index                     \
+                --no-multi                                        \
+                --cycle                                           \
+                --height=$(( ! $#non_empty && 100 * ($#dirs + 2) < 60 * LINES ? $#dirs + 2 : 60 * LINES / 100 ))
             } always {
               -z4h-cursor-hide
-            }) && [[ -n $choice ]] || return
-          if [[ -n $cont ]]; then
-            [[ $choice == $'\n'* ]] || again=1
-            choice=${choice#*$'\n'}
-            [[ -n $choice ]] || return
-          fi
-          cd -- ${choice%%$'\0'*} || return
+            })
+          [[ -n $choice ]] || return
+          choice=("${(@f)choice}")
+          [[ -n $choice[1] ]] && again=1
+          cd -- ${choice[2]%%$'\0'*} || return
           redraw=1
         } always {
           echoti cuu 1

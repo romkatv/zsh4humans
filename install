@@ -9,10 +9,8 @@ fi
 platform="$('command' 'uname' '-sm')"
 platform="$('printf' '%s' "$platform" | 'command' 'tr' '[A-Z]' '[a-z]')"
 
-zshrc_suffix=
-
 case "$platform" in
-  'darwin x86_64') zshrc_suffix=.mac;;
+  'darwin x86_64');;
   'freebsd amd64');;
   'linux aarch64');;
   'linux armv6l');;
@@ -50,6 +48,34 @@ if '[' "$euid" '=' '0' ']'; then
 fi
 
 >&2 'printf' '\033[33mz4h\033[0m: platform \033[32m%s\033[0m is supported\n' "$platform"
+
+>&2 'printf' '\n'
+>&2 'printf' '\033[33mz4h\033[0m: what kind of \033[1mkeyboard\033[0m are you using?\n'
+>&2 'printf' '\n'
+>&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[31mBackspace\033[0m.\n'
+>&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mBackspace\033[0m key(s) and does not have \033[31mOption\033[0m.\n'
+>&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
+>&2 'printf' '\n'
+while 'true'; do
+  >&2 'printf' '\033[1mChoice [12q]:\033[0m '
+  IFS='' 'read' '-r' 'choice'
+  case "$choice" in
+    '1')
+      zshrc_suffix='.mac'
+      'break'
+    ;;
+    '2')
+      zshrc_suffix=''
+      'break'
+    ;;
+    'q')
+      'exit' '1'
+    ;;
+    *)
+      >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
+    ;;
+  esac
+done
 
 rcs=''
 

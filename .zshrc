@@ -58,8 +58,11 @@ fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)
 z4h source ~/.iterm2_shell_integration.zsh
 
 # Define key bindings.
-z4h bindkey z4h-backward-kill-word  Ctrl+Backspace
+z4h bindkey z4h-backward-kill-word  Ctrl+Backspace Ctrl+H
 z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
+
+z4h bindkey undo Ctrl+/  # undo the last command line change
+z4h bindkey redo Alt+/   # redo the last undone command line change
 
 z4h bindkey z4h-cd-back    Alt+Left   # cd into the previous directory
 z4h bindkey z4h-cd-forward Alt+Right  # cd into the next directory
@@ -87,4 +90,4 @@ alias ls="${aliases[ls]:-ls} -A"
 
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots     # no special treatment for file names with a leading dot
-setopt no_auto_menu  # require an extra TAB press to open completion menu
+setopt no_auto_menu  # require an extra TAB press to open the completion menu

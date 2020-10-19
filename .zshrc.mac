@@ -63,6 +63,9 @@ z4h bindkey z4h-cd-forward Shift+Right  # cd into the next directory
 z4h bindkey z4h-cd-up      Shift+Up     # cd into the parent directory
 z4h bindkey z4h-cd-down    Shift+Down   # cd into a child directory
 
+z4h bindkey undo Ctrl+/  # undo the last command line change
+z4h bindkey redo Alt+/   # redo the last undone command line change
+
 # Autoload functions.
 autoload -Uz zmv
 
@@ -84,4 +87,4 @@ alias ls="${aliases[ls]:-ls} -A"
 
 # Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots     # no special treatment for file names with a leading dot
-setopt no_auto_menu  # require an extra TAB press to open completion menu
+setopt no_auto_menu  # require an extra TAB press to open the completion menu

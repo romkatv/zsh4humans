@@ -28,7 +28,7 @@ zstyle ':z4h:ssh:*'           send-extra-files '~/.iterm2_shell_integration.zsh'
 # This makes `ssh some-host` equivalent to `command ssh some-host`.
 zstyle ':z4h:ssh:some-host'   passthrough      'yes'
 
-# Keep cursor position unchanged when Up/Down fetches a command from history?
+# Move the cursor to the end when Up/Down fetches a command from history?
 zstyle ':zle:up-line-or-beginning-search'   leave-cursor 'yes'
 zstyle ':zle:down-line-or-beginning-search' leave-cursor 'yes'
 

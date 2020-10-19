@@ -1,45 +1,39 @@
-# Check whether the current shell is the login shell. If not, offer to change login shell.
-
 eval "$_z4h_opt"
--z4h-check-core-params || return
-
-if (( ARGC )); then
-  print -Pru2 -- '%F{3}z4h%f: unexpected %F{1}chsh%f argument'
-  return '_z4h_err()'
-fi
-
-[[ $SHELL == $_z4h_exe || ${SHELL:A} == ${_z4h_exe:A} || -e $Z4H/stickycache/no-chsh ]] && return 0
 
 local user=${(%):-%n}
-[[ -n $user && -r /etc/passwd && -r /etc/shells && -t 0 && -t 1 && -t 2 ]] || return 0
+[[ -n $user && -r /etc/passwd && -r /etc/shells && $_z4h_exe == /* && -x $_z4h_exe &&
+   -t 0 && -t 1 && -t 2 ]] || return 0
+
 if (( ! $+commands[chsh] )); then
   [[ $+commands[sudo] == 1 || -w /etc ]] || return 0
-  (( $+commands[sed] )) || return 0
-fi
-if [[ $+commands[sudo] == 0 && ! -w /etc/shells ]] && ; then
-  [[ "$(</etc/shells)" == *((#s)|$'\n')($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] || return 0
 fi
 
 local passwd
-passwd="$(</etc/passwd)" || return
-[[ $passwd == *((#s)|$'\n')$user:[^$'\n']#:($_z4h_exe|${_z4h_exe:A})((#e)|$'\n')* ]] && return 0
+passwd="$(</etc/passwd)" || return '_z4h_err()'
 
 local -a match mbegin mend
 [[ $passwd == (#b)*((#s)|$'\n')$user:[^$'\n']#:([^:]##)((#e)|$'\n')* ]] || return 0
 local login_shell=$match[2]
-[[ -n $login_shell && -x $login_shell && ${login_shell:A} != ${_z4h_exe:A} ]] || return 0
+[[ -x $login_shell && ! $login_shell -ef $_z4h_exe ]] || return 0
 
 local -a shells
-shells=(${(f)"$(</etc/shells)"}) || return
+shells=(${(f)"$(</etc/shells)"}) || return '_z4h_err()'
 local my_shell=$shells[(re)$_z4h_exe]
 if [[ -z $my_shell ]]; then
-  local real_shells=(${shells:A})
-  my_shell=$shells[$real_shells[(ie)${_z4h_exe:A}]]
+  local shell
+  for shell in $shells; do
+    if [[ $shell -ef $_z4h_exe ]]; then
+      my_shell=$shell
+      break
+    fi
+  done
 fi
+
+[[ -n $my_shell || $+commands[sudo] == 1 || -w /etc/shells ]] || return 0
 
 print -Pr -- "%F{3}z4h%f: login shell isn't the same as this shell"
 print -Pr -- ""
-print -Pr -- "  user         %B${user//\%/%%}%b"
+print -Pr -- "  user         %F{3}${user//\%/%%}%f"
 print -Pr -- "  login shell  %F{2}${login_shell//\%/%%}%f"
 print -Pr -- "  this shell   %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
 
@@ -56,11 +50,10 @@ print -Pr -- "  this shell   %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
         print -l -- '' ''
       }
       if [[ $REPLY != y ]]; then
-        print -rn >$Z4H/stickycache/no-chsh || return
+        print -rn >$Z4H/stickycache/no-chsh || return '_z4h_err()'
         local home=~
         local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
         print -Pr -- "Won't ask again unless %U\$Z4H/stickycache/no-chsh%u is deleted."
-        print -Pr -- "Consider removing %F{2}z4h%f %Bchsh%b call from %U$zdotdir/.zshrc%u."
         return 1
       fi
       query="Try again?"
@@ -80,7 +73,7 @@ print -Pr -- "  this shell   %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
         local p=("${(@)${(@f)passwd}/#%(#m)$user:*/${MATCH%:*}:$my_shell}")
         if [[ ${(F)p} == $passwd ]]; then
           print -Pru2 -- '%F{3}z4h%f: %F{1}internal error%f'
-          return 1
+          return '_z4h_err()'
         fi
         local precmd=(command)
         [[ -w /etc ]] || precmd+=(sudo)

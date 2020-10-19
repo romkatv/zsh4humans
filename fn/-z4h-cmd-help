@@ -17,12 +17,6 @@ if (( ARGC == 1 )); then
       print -Pr -- ""
       print -Pr -- "Initialize Zsh. Should be called just once from %U.zshrc%u."
     ;;
-    chsh)
-      print -Pr -- "Usage: %F{2}z4h%f %Bchsh%b"
-      print -Pr -- ""
-      print -Pr -- "Check whether current user's login shell is %F{2}zsh%f. If not, offer to"
-      print -Pr -- "change login shell."
-    ;;
     help)
       print -Pr -- "Usage: %F{2}z4h%f %Bhelp%b [%Ucommand%u]"
       print -Pr -- ""
@@ -53,6 +47,5 @@ print -Pru$fd -- "           %Bsource%b [-c|--compile] [--] [%Ufile%u]..."
 print -Pru$fd -- "           %Bcompile%b [--] [%Ufile%u]..."
 print -Pru$fd -- "           %Bbindkey%b [--] zle-widget [key-binding] [key-binding]..."
 print -Pru$fd -- "           %Bssh%b [%Ussh-options%u] [%Uuser@%u]%Uhostname%u"
-print -Pru$fd -- "           %Bchsh%b"
 print -Pru$fd -- "           %Bhelp%b [%Ucommand%u]"
 return ret

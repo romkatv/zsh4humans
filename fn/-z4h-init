@@ -654,12 +654,6 @@ zstyle ':completion:*:git-*:argument-rest:commits'         ignored-patterns '*'
 zstyle ':completion:*:git-*:argument-rest:commit-objects'  ignored-patterns '*'
 zstyle ':completion:*:git-*:argument-rest:recent-branches' ignored-patterns '*'
 
-fpath=(
-  ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
-  ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(FN)
-  /usr{/local,}/share/zsh/{site-functions,vendor-completions}(FN)
-  $fpath)
-
 # Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit
 bashcompinit
@@ -887,8 +881,12 @@ function -z4h-post-init() {
     fi
   fi
 
-  (( _z4h_use[zsh-completions] )) && fpath+=($Z4H/zsh-completions/src)
-  (( _z4h_use[systemd]         )) && fpath+=($Z4H/systemd/shell-completion/zsh)
+  (( _z4h_use[zsh-completions]              )) &&
+    [[ -d $Z4H/zsh-completions/src          ]] &&
+    fpath+=($Z4H/zsh-completions/src)
+  (( _z4h_use[systemd]                      )) &&
+    [[ -d $Z4H/systemd/shell-completion/zsh ]] &&
+    fpath+=($Z4H/systemd/shell-completion/zsh)
 
   unfunction compinit compdef
   autoload -Uz compinit

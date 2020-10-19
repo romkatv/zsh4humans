@@ -61,8 +61,13 @@ typeset -gaU cdpath fpath mailpath path manpath infopath
 
 path=($Z4H/fzf/bin $path)
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-fpath+=($Z4H/zsh4humans/fn)
 manpath=($manpath $Z4H/fzf/man '')
+fpath=(
+  ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
+  ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(FN)
+  /usr{/local,}/share/zsh/{site-functions,vendor-completions}(FN)
+  $fpath
+  $Z4H/zsh4humans/fn)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 : ${ZSH=$Z4H/ohmyzsh/ohmyzsh}

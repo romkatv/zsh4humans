@@ -67,8 +67,8 @@ fi
 >&2 'printf' '\n'
 >&2 'printf' 'What kind of \033[1mkeyboard\033[0m are you using?\n'
 >&2 'printf' '\n'
->&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[31mBackspace\033[0m.\n'
->&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mBackspace\033[0m key(s) and does not have \033[31mOption\033[0m.\n'
+>&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[33mBackspace\033[0m.\n'
+>&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mBackspace\033[0m key(s) and does not have \033[33mOption\033[0m.\n'
 >&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
 >&2 'printf' '\n'
 while 'true'; do
@@ -76,10 +76,12 @@ while 'true'; do
   IFS='' 'read' '-r' 'choice'
   case "$choice" in
     '1')
+      bs_key='Delete'
       zshrc_suffix='.mac'
       'break'
     ;;
     '2')
+      bs_key='Backspace'
       zshrc_suffix=''
       'break'
     ;;
@@ -92,7 +94,34 @@ while 'true'; do
   esac
 done
 
+>&2 'printf' '\033[H\033[2J'
+>&2 'printf' 'What \033[1mkeybindings\033[0m do you prefer?\n'
 >&2 'printf' '\n'
+>&2 'printf' '  \033[1m(1)\033[0m  Standard. I delete characters with \033[33m%s\033[0m key.\n' "$bs_key"
+>&2 'printf' '  \033[1m(2)\033[0m  Like in \033[32mvi\033[0m. I delete characters with \033[33mX\033[0m key in \033[33mcommand mode\033[0m.\n'
+>&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
+>&2 'printf' '\n'
+while 'true'; do
+  >&2 'printf' '\033[1mChoice [12q]:\033[0m '
+  IFS='' 'read' '-r' 'choice'
+  case "$choice" in
+    '1')
+      'break'
+    ;;
+    '2')
+      >&2 'printf' '\n'
+      >&2 'printf' 'Sorry, \033[32mvi\033[0m keybindings are \033[31mnot supported\033[0m yet.\n'
+      'exit' '1'
+      'break'
+    ;;
+    'q')
+      'exit' '1'
+    ;;
+    *)
+      >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
+    ;;
+  esac
+done
 
 rcs=''
 

@@ -437,6 +437,8 @@ fi
 
 typeset -gA _z4h_key=(
   Tab                         '^I'
+  Ctrl+/                      '^_'
+  Ctrl+_                      '^_'
 
   Up                          '^[[A'
   Down                        '^[[B'

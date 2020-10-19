@@ -2,8 +2,6 @@ eval "$_z4h_opt"
 
 add-zsh-hook -d -- precmd -z4h-welcome
 
-zf_rm -f -- $Z4H/welcome
-
 (( _z4h_use[powerlevel10k] )) && [[ -t 0 && -t 1 && -t 2 && -e $POWERLEVEL9K_CONFIG_FILE ]] ||
   return 0
 
@@ -14,7 +12,7 @@ print -Pru2 -- "%F{3}Zsh For Humans%f installed successfully!"
 print -Pru2 -- ""
 print -Pru2 -- "Next steps:"
 print -Pru2 -- ""
-print -Pru2 -- "  - Take a look %U~/.zshrc%u. You can edit this file to customize Zsh."
+print -Pru2 -- "  - Take a look at %U~/.zshrc%u. You can edit this file to customize Zsh."
 print -Pru2 -- "  - Prompt config is in %U~/${${POWERLEVEL9K_CONFIG_FILE:t}//\%/%%}%u. Update it with %F{2}p10k%f %Bconfigure%b."
 print -Pru2 -- ""
 print -Pru2 -- "Enjoy %F{3}Zsh For Humans%f!"

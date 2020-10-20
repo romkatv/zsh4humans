@@ -30,7 +30,7 @@ If you want a great shell that just works, this project is for you.
 1. *Optional*: Install [MesloLGS NF](
    https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)
    terminal font.
-2. Run this command:
+2. Run this command in bash, zsh, or sh:
   ```shell
   if command -v curl >/dev/null 2>&1; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"

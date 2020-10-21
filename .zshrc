@@ -12,7 +12,7 @@ zstyle ':z4h:'                auto-update-days '28'
 # Keyboard type: 'mac' or 'pc'.
 zstyle ':z4h:bindkey'         keyboard         'pc'
 # When fzf menu opens on TAB, another TAB moves the cursor down ('tab:down')
-# or accepts the selection and triggers another completion ('tab:repeat')?
+# or accepts the selection and triggers another TAB-completion ('tab:repeat')?
 zstyle ':z4h:fzf-complete'    fzf-bindings     'tab:down'
 # When fzf menu opens on Alt+Down, TAB moves the cursor down ('tab:down')
 # or accepts the selection and triggers another Alt+Down ('tab:repeat')?

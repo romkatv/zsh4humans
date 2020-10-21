@@ -26,12 +26,13 @@ if [[ ! -t 2 ]]; then
 fi
 
 {
+  print
   -z4h-flowing -i0 -- %F{3}Zsh For Humans%f installed successfully!
   print
   -z4h-flowing -i0 -- Next steps:
   print
   -z4h-flowing -i4 -- '  - Your' new personal Zsh config is in %U~/.zshrc%u. Edit this file to \
-                      export environemnt variables, define aliases, etc. There are plenty of   \
+                      export environment variables, define aliases, etc. There are plenty of   \
                       examples and comments to get you started.
   print
   if [[ -e $backup_dir && $backup_dir == ~/zsh-backup/[0-9.-]## ]]; then

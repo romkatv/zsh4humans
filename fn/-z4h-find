@@ -13,12 +13,7 @@ local -a flags
   local widget=${WIDGET#z4h-}
   zstyle -a :z4h:${WIDGET#z4h-} find-flags flags
   if (( ! $#flags )); then
-    # This condition is an optimization. If dot_glob is unset, `-name '.*'` is always false.
-    if (( dot_glob )); then
-      flags=(-name '.*' -prune -print -o -print)
-    else
-      flags=(-print)
-    fi
+    flags=(-name '.*' -prune -print -o -print)
   fi
 }
 
@@ -36,17 +31,17 @@ if (( $#fss )) && [[ -z ${(M)fss:#unknown} ]]; then
   cmd[-1]=(')' -prune '(' "${flags[@]}" ')')
   (( dot_glob )) || cmd+=(-o -name '.*' -prune)
   cmd+=(-o "${flags[@]}")
-  "${cmd[@]}" | command grep '/.*/'
 else
-  cmd+=(command find -L . -xdev -mindepth 2)
+  cmd+=(command find -L . -xdev -mindepth 1)
   (( only_dirs )) && cmd+=('!' -type d -prune -o)
-  cmd+=('!' '(')
+  cmd+=('!' -path './*/*' '!' '(')
   local dir
   for dir in $dirs; do
-    cmd+=(-path ./${(b)dir}/'*' -o)
+    cmd+=(-name ${(b)dir} -o)
   done
   cmd[-1]=(')' -prune)
   (( dot_glob )) || cmd+=(-o -name '.*' -prune)
   cmd+=(-o "${flags[@]}")
-  "${cmd[@]}"
 fi
+
+"${cmd[@]}" | command grep '/.*/'

@@ -6,17 +6,9 @@
   [[ $2 == on ]] && list_types=1
 
   if (( _z4h_only_dirs )); then
-    if (( dot_glob )); then
-      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(D-/Y1N:h:t))
-    else
-      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(-/Y1N:h:t))
-    fi
+    local dirs=($_z4h_path_prefix${^${(Q)_z4h_words}}/*(D-/Y1N:h:t))
   else
-    if (( dot_glob )); then
-      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(DY1N:h:t))
-    else
-      local dirs=($_z4h_path_prefix${^${(Q)_z4h_words:#.*}}/*(Y1N:h:t))
-    fi
+    local dirs=($_z4h_path_prefix${^${(Q)_z4h_words}}/*(DY1N:h:t))
   fi
 
   -z4h-set-list-colors "$_z4h_curcontext" "$list_types"

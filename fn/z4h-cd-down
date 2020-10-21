@@ -19,11 +19,10 @@ local -i list_colors=$((!$?))
       eval "$_z4h_opt"
       if (( dot_glob )); then
         local dirs=(./*(-/DN))
-        local non_empty=(${^${dirs:#./.*}}/*(D-/Y1N:h:t))
       else
         local dirs=(./*(-/N))
-        local non_empty=(${^dirs}/*(-/Y1N:h:t))
       fi
+      local non_empty=(${^${dirs}}/*(D-/Y1N:h:t))
 
       if (( first )); then
         first=0

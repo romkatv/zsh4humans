@@ -36,6 +36,16 @@
       [[ -n $_z4h_path_prefix ]] && builtin cd -q -- $_z4h_path_prefix
       {
         print -lr -- ${(Q)_z4h_words}
+        # Set curcontext to support this:
+        #
+        #   zstyle -e :z4h:fzf-complete find-flags my-find-flags
+        #
+        #   function my-find-flags() {
+        #     if [[ $curcontext == :complete:cd:* ]]; then
+        #       reply=(...)
+        #     fi
+        #   }
+        local curcontext=$_z4h_curcontext
         -z4h-find $dot_glob $_z4h_only_dirs $dirs | command cut -b3-
       } | {
         -z4h-present-files $list_colors $list_types

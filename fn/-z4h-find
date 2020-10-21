@@ -4,25 +4,39 @@ local dirs=("${@:3}")
 
 (( $#dirs )) || return 0
 
+local -a flags
+() {
+  emulate -L zsh
+  # Set dot_glob in case the value of find-flags depends on it (via `zstyle -e`).
+  # Ideally we should run this with user options.
+  (( dot_glob )) && setopt dot_glob
+  local widget=${WIDGET#z4h-}
+  zstyle -a :z4h:${WIDGET#z4h-} find-flags flags
+  if (( ! $#flags )); then
+    # This condition is an optimization. If dot_glob is unset, `-name '.*'` is always false.
+    if (( dot_glob )); then
+      flags=(-name '.*' -prune -print -o -print)
+    else
+      flags=(-print)
+    fi
+  fi
+}
+
 local -a cmd
 local -aU fss
 fss=(${(f)"$(command find / . -maxdepth 0 -printf '%F\n' 2>/dev/null)"}) || fss=()
 if (( $#fss )) && [[ -z ${(M)fss:#unknown} ]]; then
   cmd+=(command find -L ./$^dirs)
   (( only_dirs )) && cmd+=('!' -type d -prune -o)
-  cmd+=(-name '.*')
-  if (( dot_glob )); then
-    cmd+=('(' -path './*/*' -prune -print -o -prune ')')
-  else
-    cmd+=(-prune)
-  fi
-  cmd+=(-o '!' '(')
+  cmd+=('!' '(')
   local fs
   for fs in $fss; do
     cmd+=(-fstype $fs -o)
   done
-  cmd[-1]=(')' '(' -path './*/*' -prune -print -o -prune ')')
-  cmd+=(-o -path './*/*' -print)
+  cmd[-1]=(')' -prune '(' "${flags[@]}" ')')
+  (( dot_glob )) || cmd+=(-o -name '.*' -prune)
+  cmd+=(-o "${flags[@]}")
+  "${cmd[@]}" | command grep '/.*/'
 else
   cmd+=(command find -L . -xdev -mindepth 2)
   (( only_dirs )) && cmd+=('!' -type d -prune -o)
@@ -32,9 +46,7 @@ else
     cmd+=(-path ./${(b)dir}/'*' -o)
   done
   cmd[-1]=(')' -prune)
-  cmd+=(-o -name '.*' -prune)
-  (( dot_glob )) && cmd+=(-print)
-  cmd+=(-o -print)
+  (( dot_glob )) || cmd+=(-o -name '.*' -prune)
+  cmd+=(-o "${flags[@]}")
+  "${cmd[@]}"
 fi
-
-"${cmd[@]}"

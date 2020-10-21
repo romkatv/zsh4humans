@@ -30,7 +30,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     choice=$(
       unsetopt pipe_fail
       {
-        printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
+        (( $#history )) && printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
       } | {
         {
           -z4h-cursor-show

@@ -8,22 +8,39 @@ If you want a great shell that just works, this project is for you.
 
 ## Table of contents
 
-* 1. [Installation](#installation)
-* 2. [Try it in Docker](#try-it-in-docker)
-* 3. [Caveats](#caveats)
-* 4. [Usage](#usage)
-  * 4.1. [Accepting autosuggestions](#accepting-autosuggestions)
-  * 4.2. [Completing commands](#completing-commands)
-  * 4.3. [Searching command history](#searching-command-history)
-  * 4.4. [Interactive search with `fzf`](#interactive-search-with-fzf)
-  * 4.5. [SSH](#SSH)
-* 5. [Customization](#customization)
-  * 5.1. [Customizing prompt](#customizing-prompt)
-  * 5.2. [Customizing key bindings](#customizing-key-bindings)
-  * 5.3. [Customizing appearance](#customizing-appearance)
-  * 5.4. [Additional Zsh startup files](#additional-zsh-startup-files)
-* 6. [Updating](#updating)
-* 7. [Uninstalling](#uninstalling)
+* 1. [Features](#features)
+* 2. [Installation](#installation)
+* 3. [Try it in Docker](#try-it-in-docker)
+* 4. [Caveats](#caveats)
+* 5. [Usage](#usage)
+  * 5.1. [Accepting autosuggestions](#accepting-autosuggestions)
+  * 5.2. [Completing commands](#completing-commands)
+  * 5.3. [Searching command history](#searching-command-history)
+  * 5.4. [Interactive search with `fzf`](#interactive-search-with-fzf)
+  * 5.5. [SSH](#SSH)
+* 6. [Customization](#customization)
+  * 6.1. [Customizing prompt](#customizing-prompt)
+  * 6.2. [Customizing key bindings](#customizing-key-bindings)
+  * 6.3. [Customizing appearance](#customizing-appearance)
+  * 6.4. [Additional Zsh startup files](#additional-zsh-startup-files)
+* 7. [Updating](#updating)
+* 8. [Uninstalling](#uninstalling)
+
+## Features
+
+- Powerfull POSIX-based shell preconfigured to work great out of the box.
+- Easy-to-use installation wizard. Does not require `git`, `zsh` or `sudo`.
+- [Syntax highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) for the command line.
+- [Autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) for commands based on command
+  history.
+- [Command prompt](https://github.com/romkatv/powerlevel10k) configurable through a builtin
+  configuration wizard.
+- Super fast. No lag when you open a new tab in the terminal or run a command.
+- The complete shell environment gets teleported to the remote host automatically on `ssh`.
+  This does not require `git`, `zsh` or `sudo` on the remote host.
+- Command history can be shared across different hosts. For example, history from `ssh foo`
+  can be made available within `ssh bar` and/or on the local machine.
+- Command completions and history can be searched with [fzf](https://github.com/junegunn/fzf).
 
 ## Installation
 

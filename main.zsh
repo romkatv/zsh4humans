@@ -196,6 +196,8 @@ function z4h() {
 
 [[ ${Z4H_SSH-} != <1->:* ]] || -z4h-ssh-maybe-update || return
 
+typeset -gr _z4h_orig_shell=${SHELL-}
+
 (( !EUID || $+Z4H_SSH ))                                                                 ||
   ! zstyle -T :z4h: chsh                                                                 ||
   [[ ${SHELL-} == $_z4h_exe || ${SHELL-} -ef $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] ||

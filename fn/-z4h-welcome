@@ -2,18 +2,80 @@ eval "$_z4h_opt"
 
 add-zsh-hook -d -- precmd -z4h-welcome
 
-(( _z4h_use[powerlevel10k] )) && [[ -t 0 && -t 1 && -t 2 && -e $POWERLEVEL9K_CONFIG_FILE ]] ||
-  return 0
+[[ -e $Z4H/welcome && -e $POWERLEVEL9K_CONFIG_FILE ]] || return 0
 
+local backup_dir
+backup_dir=$(<$Z4H/welcome) || return
 zf_rm -f -- $Z4H/welcome
 
-print -Pru2 -- ""
-print -Pru2 -- "%F{3}Zsh For Humans%f installed successfully!"
-print -Pru2 -- ""
-print -Pru2 -- "Next steps:"
-print -Pru2 -- ""
-print -Pru2 -- "  - Take a look at %U~/.zshrc%u. You can edit this file to customize Zsh."
-print -Pru2 -- "  - Prompt config is in %U~/${${POWERLEVEL9K_CONFIG_FILE:t}//\%/%%}%u. Update it with %F{2}p10k%f %Bconfigure%b."
-print -Pru2 -- ""
-print -Pru2 -- "Enjoy %F{3}Zsh For Humans%f!"
-print -Pru2 -- ""
+() {
+  [[ $POWERLEVEL9K_CONFIG_FILE != ~/.p10k.zsh ]] && return
+  [[ $POWERLEVEL9K_ICON_PADDING == none ]] || return
+  [[ $POWERLEVEL9K_MODE == nerdfont-complete ]] && return
+  [[ $POWERLEVEL9K_MODE == ascii ]] || return
+  local cfg
+  cfg=$(<~/.p10k.zsh) || return
+  [[ $cfg == *'nerdfont-complete + powerline'* ]] || return
+}
+local -i suggest_font=$?
+
+local bash_rcs=(~/.profile(N) ~/.bash_profile(N) ~/.bashrc(N))
+
+if [[ ! -t 2 ]]; then
+  (( $+functions[p10k] )) && p10k clear-instant-prompt
+fi
+
+{
+  -z4h-flowing -i0 -- %F{3}Zsh For Humans%f installed successfully!
+  print
+  -z4h-flowing -i0 -- Next steps:
+  print
+  -z4h-flowing -i4 -- '  - Your' new personal Zsh config is in %U~/.zshrc%u. Edit this file to \
+                      export environemnt variables, define aliases, etc. There are plenty of   \
+                      examples and comments to get you started.
+  print
+  if [[ -e $backup_dir && $backup_dir == ~/zsh-backup/[0-9.-]## ]]; then
+    -z4h-flowing -i4 -- '  - Your' previous Zsh config files are in                              \
+                        %U~/zsh-backup/${backup_dir:t}%u. They are no longer read when you start \
+                        %2Fzsh%f. You might want to copy bits and pieces from them to the new    \
+                        %U~/.zshrc%u.
+    print
+  fi
+  if [[ /$_z4h_orig_shell == */bash ]] && (( $+commands[bash] && $#bash_rcs )); then
+    -z4h-flowing -i4 -- '  - 'Zsh does not read startup files used by Bash. You might want to copy \
+                        bits and pieces from them to %U~/.zshrc%u. Here are the files:
+    print
+    local rc
+    for rc in $bash_rcs; do
+      -z4h-flowing -i4 -- '      '%U~/${${rc:t}//\%/%%}%u
+    done
+    print
+  fi
+  if (( suggest_font )); then
+    -z4h-flowing -i4 -- '  - Install' the recommended font from %3FPowerlevel10k%f to enable \
+                        additional glyphs in the terminal:
+    print
+    local url=https://github.com/romkatv/powerlevel10k/blob/master/font.md
+    url=${${url//\%/%%}//\\/\\\\}
+    if (( _p9k_term_has_href )); then
+      url='%{\e]8;;'$url'\a%}'$url'%{\e]8;;\a%}'
+    fi
+    -z4h-flowing -i4 -- '      '$url
+    print
+    -z4h-flowing -i4 -- '    Then' choose a new prompt style through the %3FPowerlevel10k%f wizard:
+    print
+    -z4h-flowing -i4 -- '      '%2Fp10k%f %Bconfigure%b
+    print
+  else
+    -z4h-flowing -i4 -- '  - Prompt' config from %3FPowerlevel10k%f is in                        \
+                        %U~/${${POWERLEVEL9K_CONFIG_FILE:t}//\%/%%}%u. To customize prompt, you  \
+                        can either manually edit this file or generate a new version through the \
+                        wizard:
+    print
+    -z4h-flowing -i4 -- '      '%2Fp10k%f %Bconfigure%b
+    print
+  fi
+
+  -z4h-flowing -i0 -- Enjoy %F{3}Zsh For Humans%f!
+  print
+} >&2

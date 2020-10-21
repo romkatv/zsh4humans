@@ -248,7 +248,7 @@ fi
 'command' 'mv' '--' "$zshrc" ~/'.zshrc'
 'command' 'mv' '--' "$z4h" "$Z4H"/z4h.zsh
 
-'true' >"$Z4H"/welcome
+printf '%s\n' "$backup_dir" >"$Z4H"/welcome
 
 'trap' '-' 'INT' 'TERM' 'EXIT'
 

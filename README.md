@@ -59,6 +59,9 @@ necessary for Zsh for Humans, starts a new shell, and configures it as login she
 confirmation on every step so that you are always in control. Installation requires `curl` or
 `wget`. It does not require `git`, `zsh`, `sudo` or anything else.
 
+![Zsh for Humans installation](
+  https://github.com/romkatv/powerlevel10k-media/raw/32c7d40239c93507277f14522be90b5750f442c9/z4h-install.gif)
+
 ## Try it in Docker
 
 Try Zsh for Humans in a Docker container. You can safely make any changes to the file system. Once

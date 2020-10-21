@@ -94,6 +94,7 @@ print -Pr -- "  this shell   %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
         $precmd mv -f -- /etc/passwd.bak.$$ /etc/passwd || continue
       fi
       print -Pr -- "Changed login shell of %F{3}${user//\%/%%}%f to %F{2}${my_shell//\%/%%}%f."
+      print
       return 0
     done
   )

@@ -44,17 +44,15 @@ If you want a great shell that just works, this project is for you.
 
 ## Installation
 
-1. *Optional*: Install [MesloLGS NF](
-   https://github.com/romkatv/powerlevel10k/blob/master/README.md#meslo-nerd-font-patched-for-powerlevel10k)
-   terminal font.
-2. Run this command in bash, zsh, or sh:
-  ```shell
-  if command -v curl >/dev/null 2>&1; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
-  else
-    sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
-  fi
-  ```
+Run this command in bash, zsh, or sh:
+
+```shell
+if command -v curl >/dev/null 2>&1; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
+else
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
+fi
+```
 
 The installer backs up the existing Zsh startup files, creates new ones, installs everything
 necessary for Zsh for Humans, starts a new shell, and configures it as login shell. It asks for

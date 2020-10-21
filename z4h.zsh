@@ -3,9 +3,9 @@
 if '[' '-n' "${ZSH_VERSION-}" ']'; then
   if '[' '-n' "${_z4h_source_called+x}" ']'; then
     if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
-      >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4m~/.zshrc\033[0m\n'
+      >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4m~/.zshenv\033[0m\n'
     else
-      >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m\n'
+      >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4;33m"$ZDOTDIR"\033[0;4m/.zshenv\033[0m\n'
     fi
     'return' '1'
   fi

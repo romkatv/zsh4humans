@@ -124,6 +124,14 @@ function -z4h-cmd-init() {
     return '_z4h_err()'
   fi
   if (( ${+_z4h_init_called} )); then
+    if [[ ${funcfiletrace[-1]} != zsh:0 ]]; then
+      if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
+        >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4m~/.zshrc\033[0m\n'
+      else
+        >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4;33m"$ZDOTDIR"\033[0;4m/.zshrc\033[0m\n'
+      fi
+      'return' '1'
+    fi
     print -ru2 -- ${(%):-"%F{3}z4h%f: %F{1}init%f cannot be called more than once"}
     return '_z4h_err()'
   fi

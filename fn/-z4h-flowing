@@ -4,7 +4,7 @@ local -a centered indentation
 zparseopts -D -F -- c=centered i:=indentation || return '_z4h_err()'
 local -i centered=$#centered
 local -i indentation=$(( indentation[2] ))
-local -i columns='COLUMNS > 0 && COLUMNS <= 80 ? COLUMNS - 1: 79'
+local -i columns='COLUMNS > 0 && COLUMNS <= 80 ? COLUMNS: 80'
 
 local REPLY line word lines=()
 for word in "$@"; do

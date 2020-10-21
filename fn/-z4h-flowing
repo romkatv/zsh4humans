@@ -1,0 +1,28 @@
+eval "$_z4h_opt"
+
+local -a centered indentation
+zparseopts -D -F -- c=centered i:=indentation || return '_z4h_err()'
+local -i centered=$#centered
+local -i indentation=$(( indentation[2] ))
+local -i columns='COLUMNS > 0 && COLUMNS <= 80 ? COLUMNS : 80'
+
+local REPLY line word lines=()
+for word in "$@"; do
+  -z4h-prompt-length ${(g::):-"$line $word"}
+  if (( REPLY > columns )); then
+    [[ -z $line ]] || lines+=$line
+    line=
+  fi
+  if [[ -n $line ]]; then
+    line+=' '
+  elif (( $#lines )); then
+    line=${(pl:$indentation:: :)}
+  fi
+  line+=$word
+done
+[[ -z $line ]] || lines+=$line
+for line in $lines; do
+  -z4h-prompt-length ${(g::)line}
+  (( centered && REPLY < columns )) && print -n -- ${(pl:$(((columns - REPLY) / 2)):: :)}
+  print -P -- $line
+done

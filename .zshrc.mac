@@ -20,9 +20,6 @@ zstyle ':z4h:cd-down'         fzf-bindings     'tab:down'
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     'accept'
-# End key accepts to the end of the line ('partial-accept') from
-# command autosuggestions or the whole thing ('accept')?
-zstyle ':z4h:autosuggestions' end-of-line      'accept'
 
 # Send these files over to the remote host when connecting over ssh.
 # Multiple files can be listed here.

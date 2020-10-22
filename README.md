@@ -35,12 +35,12 @@ If you want a great shell that just works, this project is for you.
   history.
 - [Command prompt](https://github.com/romkatv/powerlevel10k) configurable through a builtin
   configuration wizard.
+- Command completions and history searchable with [fzf](https://github.com/junegunn/fzf).
 - Super fast. No lag when you open a new tab in the terminal or run a command.
 - The complete shell environment gets teleported to the remote host automatically on `ssh`.
   This does not require `git`, `zsh` or `sudo` on the remote host.
 - Command history can be shared across different hosts. For example, history from `ssh foo`
   can be made available within `ssh bar` and/or on the local machine.
-- Command completions and history can be searched with [fzf](https://github.com/junegunn/fzf).
 
 ## Installation
 

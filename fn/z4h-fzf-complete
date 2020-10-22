@@ -151,12 +151,16 @@ done
       builtin zle expand-or-complete
       if [[ $buf == $BUFFER && $cursor == $CURSOR ]]; then
         (( ${#_z4h_words} )) || return 0
-        if [[ $_z4h_word_prefix == *'$' ||
-              $_z4h_word_prefix == *[A-Z]* && -n ${(@)_z4h_words:#$_z4h_word_prefix*} ]]; then
-          _z4h_word_prefix=
-        else
-          _z4h_word_prefix=${_z4h_word_prefix// /\\ }
-        fi
+        () {
+          emulate -L zsh -o extended_glob
+          [[ $_z4h_word_prefix != *('$'|'\') ]] || return
+          if [[ $_z4h_word_prefix == *[A-Z]* ]]; then
+            [[ -z ${(@)_z4h_words:#$_z4h_word_prefix*} ]]
+          else
+            [[ -z ${(@)_z4h_words:#(#i)$_z4h_word_prefix*} ]]
+          fi
+        } || _z4h_word_prefix=
+        _z4h_word_prefix=${_z4h_word_prefix// /\\ }
         local _z4h_path_prefix=
         if () {
                 emulate -L zsh

@@ -47,7 +47,7 @@ done
         _z4h_array=("${(@P)_z4h_array}")
       fi
     }
-    compadd -M "r:|${_z4h_sep}=* r:|=*" "$@" - $_z4h_array
+    compadd -M "r:|${_z4h_sep}=* r:|=*" "$@" - "${_z4h_array[@]}"
   }
 
   function _path_files() {
@@ -74,7 +74,7 @@ done
       return
     fi
     local -a _z4h_A _z4h_D
-    if (( $#_z4h_d )); then
+    if (( ${#_z4h_d} )); then
       () {
         emulate -L zsh
         local _z4h_arr=$_z4h_d[2]
@@ -177,30 +177,36 @@ done
             _z4h_words=("${(@u)_z4h_words}")
           fi
           -z4h-comp-files || return
-          again=${_z4h_reply[1]}
-          _z4h_words=("${(@q)_z4h_reply:1}")
+          () {
+            emulate -L zsh
+            again=${_z4h_reply[1]}
+            _z4h_words=("${(@q)_z4h_reply:1}")
+          }
           -z4h-insert-all || return
         else
           local -a _z4h_reply=()
           local nl=$'\n'
           _z4h_descrs=("${(@)_z4h_descrs//$nl/\\n}")
           -z4h-comp-words || return
-          again=${_z4h_reply[1]}
-          local -i idx=0
-          local words=()
-          if (( ${#_z4h_scaffolds} == 1 )); then
-            for idx in "${(@)_z4h_reply:1}"; do
-              words+=(${_z4h_words[idx]})
-            done
-          else
-           local scaffolds=()
-            for idx in "${(@)_z4h_reply:1}"; do
-              words+=(${_z4h_words[idx]})
-              scaffolds+=(${_z4h_scaffolds[idx]})
-            done
-            _z4h_scaffolds=("${scaffolds[@]}")
-          fi
-          _z4h_words=("${words[@]}")
+          () {
+            emulate -L zsh
+            again=${_z4h_reply[1]}
+            local -i idx=0
+            local words=()
+            if (( ${#_z4h_scaffolds} == 1 )); then
+              for idx in "${(@)_z4h_reply:1}"; do
+                words+=("${_z4h_words[idx]}")
+              done
+            else
+            local scaffolds=()
+              for idx in "${(@)_z4h_reply:1}"; do
+                words+=("${_z4h_words[idx]}")
+                scaffolds+=("${_z4h_scaffolds[idx]}")
+              done
+              _z4h_scaffolds=("${scaffolds[@]}")
+            fi
+            _z4h_words=("${words[@]}")
+          }
           -z4h-insert-all || return
         fi
       else
@@ -221,7 +227,6 @@ done
       [[ $BUFFER == $buf && $CURSOR == $cursor ]] && return
       builtin zle .split-undo || return
       [[ $LBUFFER == *' ' ]] && return
-
     } always {
       if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
         -z4h-redraw-buffer

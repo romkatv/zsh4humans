@@ -1,7 +1,8 @@
 local success
 
 {
-  if (( ! $+_z4h_no_autoupdate && !_z4h_dangerous_root )) && zstyle -t :z4h: auto-update ask; then
+  if (( ! $+_z4h_no_autoupdate && ! $+Z4H_SSH && !_z4h_dangerous_root )) &&
+     zstyle -t :z4h: auto-update ask; then
     typeset -gri _z4h_no_autoupdate=1
     local days
     if zstyle -s :z4h: auto-update-days days && [[ $days == <-> ]]; then

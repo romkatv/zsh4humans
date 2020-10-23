@@ -235,9 +235,7 @@ umask o-w
 
 if '[' '-n' "$backup_dir" ']'; then
   'command' 'mkdir' '-p' '--' "$backup_dir"
-  for f in $rcs; do
-    'command' 'cp' '--' "$f" "$backup_dir"/
-  done
+  ('cd' && 'command' 'cp' '--' $rcs "$backup_dir"/) || 'exit'
 fi
 
 if '[' '-n' "$rcs" ']'; then

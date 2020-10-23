@@ -6,7 +6,7 @@ local -i dot_glob list_types
 [[ -o dot_glob   ]] && dot_glob=1
 [[ -o list_types ]] && list_types=1
 
--z4h-set-list-colors complete:cd:: $list_types
+-z4h-set-list-colors :complete:cd:: $list_types
 local -i list_colors=$((!$?))
 
 {

@@ -748,3 +748,24 @@ this would make matters much worse than currently thanks to `main.zsh` thinking 
 are unused and deleting them. Special code is required in this case.
 
 ---
+
+Make this:
+
+```zsh
+% ls foo/..<TAB>
+```
+
+Complete to this:
+
+```zsh
+% ls foo/../
+```
+
+However, `..` should never appear in the listing. In addition, this should work as before:
+
+```zsh
+touch ..x
+ls ..<TAB>
+```
+
+It should complete to `ls ..x `.

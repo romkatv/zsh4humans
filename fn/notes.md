@@ -158,11 +158,6 @@ that aren't already set in `z4h.zsh`.)
 
 ---
 
-Add locking around writes (only writes). Make sure there is nothing interactive while the lock is
-held. Store locks in /var/run. Their names should be derived from `$Z4H`.
-
----
-
 Check what happens when running `sudo zsh`. Consider adding `$USER` to `$Z4H`.
 
 ---
@@ -721,4 +716,35 @@ Document binding syntax in `z4h help bindkey`.
 
 ---
 
-Use `[[ file1 -ef file2 ]]` in `z4h chsh`.
+Make it safe to continue using an old shell after z4h has been updated in another shell.
+
+Assuming that flock works, it can be done as follows. Rename `Z4H` to `Z4H_CACHE_DIR` in
+`~/.zshenv`. Within `$Z4H_CACHE_DIR` store:
+
+- `z4h.zsh`
+- `last-update-ts`
+- `no-chsh`
+- `snapshot-00000000` through `snapshot-ffffffff`
+
+`z4h.zsh` should point `Z4H` to the latest snapshot. If there are none, it should create a unique
+temporary snapshot which would later be transformed into a regular snapshot by `main.zsh`.
+Preferably this should be the same code path as in `z4h update`.
+
+`Z4H_CACHE_DIR` should not propagate through `zsh` the way `Z4H` currently propagates. `Z4H` should
+still propagate. It seems like there shouldn't be a requirement that `Z4H_CACHE_DIR` gets set to
+the same value in the child shell created by `z4h update` as in the parent.
+
+`main.zsh` should reader-flock its snapshot. If that fails due to the directory being deleted (see
+below), it should `exec zsh`.
+
+Whenever `main.zsh` creates a new snapshot, it should do this while holding a writer-flock on
+`$Z4H_CACHE_DIR`.
+
+`main.zsh` should scan the existing snapshots while holding a writer-flock on `$Z4H_CACHE_DIR` and
+delete all that can be writer-flocked.
+
+On a system where flock always succeeds (WSL1, see https://github.com/Microsoft/WSL/issues/1927),
+this would make matters much worse than currently thanks to `main.zsh` thinking that all snapshots
+are unused and deleting them. Special code is required in this case.
+
+---

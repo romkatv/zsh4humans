@@ -87,6 +87,16 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
+if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
+      -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
+  if [[ $#terminfo != 0 && -n $TERM && -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
+    export TERMINFO=${_z4h_exe:h:h}/share/terminfo
+  fi
+  if [[ -e ${_z4h_exe:h:h}/share/man ]]; then
+    manpath=(${_z4h_exe:h:h}/share/man $manpath '')
+  fi
+fi
+
 if [[ $EUID == 0 && -z ~(#qNU) && $Z4H == ~/* ]]; then
   typeset -gri _z4h_dangerous_root=1
 else
@@ -140,12 +150,16 @@ function -z4h-cmd-init() {
 
   () {
     eval "$_z4h_opt"
-    local tmux=/tmp/tmux/bin/tmux
-    if [[ -n $TMUX && -n ${TMUX%,(|<->),(|<->)}(#qNu$UID) ]]; then
-      if [[ $TMUX == /tmp/z4h-tmux-$UID,* ]]; then
+    local tmux=~/tmux-screen/bin/tmux
+    local -a match mbegin mend
+    if [[ -n $TMUX && $TMUX == (#b)(/*),(|<->),(|<->) && -n ${match[1]}(#qNu$UID) ]]; then
+      if [[ $TMUX == /tmp/z4h-tmux-* ]]; then
         export _Z4H_TMUX=$TMUX
         export _Z4H_TMUX_CMD=$tmux
         unset TMUX TMUX_PANE
+      elif [[ -x /proc/$match[2]/exe ]]; then
+        export _Z4H_TMUX=$TMUX
+        export _Z4H_TMUX_CMD=/proc/$match[2]/exe
       elif (( $+commands[tmux] )); then
         export _Z4H_TMUX=$TMUX
         export _Z4H_TMUX_CMD=$commands[tmux]
@@ -154,7 +168,10 @@ function -z4h-cmd-init() {
       fi
     elif [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) && -x $tmux && -x $_z4h_exe ]]; then
       unset TMUX TMUX_PANE _Z4H_TMUX _Z4H_TMUX_CMD
-      exec $tmux -S /tmp/z4h-tmux-$UID new-session -- $_z4h_exe
+      local cfg=tmux-16color.conf
+      (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
+      # TODO: point TERMINFO to the database bundled with tmux.
+      exec $tmux -S /tmp/z4h-tmux-$UID -f $Z4H/zsh4humans/$cfg new-session -- $_z4h_exe || return
     fi
     if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
           -z ${^fpath}/_systemctl(#qN) ]]; then

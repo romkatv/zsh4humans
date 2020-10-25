@@ -437,8 +437,11 @@ fi
 
 typeset -gA _z4h_key=(
   Tab                         '^I'
+  Space                       ' '
   Ctrl+/                      '^_'
   Ctrl+_                      '^_'
+  Ctrl+Space                  '^ '
+  Alt+Space                   '^[ '
 
   Up                          '^[[A'
   Down                        '^[[B'
@@ -537,6 +540,8 @@ typeset -gA _z4h_key=(
   Ctrl+Alt+Shift+Backspace    '^?'
 
   # Duplicate all Alt bindings with s/Alt/Option/.
+  Option+Space                '^[ '
+
   Option+Up                   '^[[1;3A'
   Option+Down                 '^[[1;3B'
   Option+Right                '^[[1;3C'

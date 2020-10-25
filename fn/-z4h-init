@@ -740,6 +740,8 @@ if (( _z4h_use[zsh-syntax-highlighting] )); then
   fi
   ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
   ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
+  # Work around bugs in history-substring-search: https://github.com/romkatv/zsh4humans/issues/58.
+  function _zsh_highlight() {}
 fi
 
 if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
@@ -972,6 +974,10 @@ function -z4h-post-init() {
     typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${${(k)widgets}:|suggest_special})
     unset ZSH_AUTOSUGGEST_USE_ASYNC
     _zsh_autosuggest_start
+    if (( $+functions[_history-substring-search-end] )); then
+      # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
+      _history-substring-search-end() { _history_substring_search_result=$BUFFER }
+    fi
   elif (( _z4h_use[zsh-syntax-highlighting] )); then
     builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
   fi

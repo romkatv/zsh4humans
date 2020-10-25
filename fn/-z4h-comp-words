@@ -27,7 +27,10 @@
 
   autoload +X -Uz -- -z4h-cursor-show -z4h-fzf
 
-  local -i height=$(( 100 * ($#indices + 4) < 60 * LINES ? $#indices + 4 : 60 * LINES / 100 ))
+  local -i pct=60
+  [[ -n $_Z4H_TMUX ]] && pct=100
+
+  local -i height=$(( 100 * ($#indices + 4) < pct * LINES ? $#indices + 4 : pct * LINES / 100 ))
 
   local opts=(
     --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"}
@@ -40,7 +43,6 @@
     --tiebreak=length,begin,index
     --multi
     --cycle
-    --height=$height
     --border=horizontal
   )
 
@@ -48,11 +50,13 @@
   IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
   if [[ -n $_Z4H_TMUX ]]; then
     opts+=(--no-clear)
-    if (( height <= LINES - line )); then
+    if (( height > LINES - line && line - 1 > LINES - line && line - 1 > 4 )); then
+      (( height <= line - 1 )) || (( height = line - 1 ))
+      local move=$'\e[0m\e['$((line-height))';1H'
+    elif (( LINES - line > 4 )); then
+      (( height <= LINES - line )) || (( height = LINES - line ))
       local move=$'\e[0m\n\r'
       opts+=(--layout=reverse)
-    elif (( height <= line - 1 )); then
-      local move=$'\e[0m\e['$((line-height))';1H'
     else
       local -i extra=$((height - LINES + line))
       print -rn -- ${(pl:$height::\n:)} >$TTY || return
@@ -67,6 +71,8 @@
     local move=
     opts+=(--layout=reverse)
   fi
+
+  opts+=(--height=$height)
 
   {
     local choice

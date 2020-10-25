@@ -24,12 +24,12 @@ if (( $+commands[curl] )); then
   print -Pru2 -- ''
   print -Pru2 -- 'Give up and start over:'
   print -Pru2 -- ''
-  print -Pru2 -- '  %F{2}sh%f -c %F{3}"%f$(%F{2}curl%f -fsSL %Uhttps://raw.githubusercontent.com/romkatv/zsh4humans/v4/install%u)%F{3}"%f'
+  print -Pru2 -- '  %F{2}sh%f -c %F{3}"%f$(%F{2}curl%f -fsSL %Uhttps://raw.githubusercontent.com/romkatv/zsh4humans/v5/install%u)%F{3}"%f'
   print -Pru2 -- ''
 elif (( $+commands[wget] )); then
   print -Pru2 -- ''
   print -Pru2 -- 'Give up and start over:'
   print -Pru2 -- ''
-  print -Pru2 -- '  %F{2}sh%f -c %F{3}"%f$(%F{2}wget%f -O- %Uhttps://raw.githubusercontent.com/romkatv/zsh4humans/v4/install%u)%F{3}"%f'
+  print -Pru2 -- '  %F{2}sh%f -c %F{3}"%f$(%F{2}wget%f -O- %Uhttps://raw.githubusercontent.com/romkatv/zsh4humans/v5/install%u)%F{3}"%f'
   print -Pru2 -- ''
 fi

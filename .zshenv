@@ -1,4 +1,4 @@
-# Documentation: https://github.com/romkatv/zsh4humans/blob/v4/README.md.
+# Documentation: https://github.com/romkatv/zsh4humans/blob/v5/README.md.
 #
 # Do not modify this file unless you know exactly what you are doing.
 # It is strongly recommended to keep all shell customization and configuration
@@ -23,8 +23,8 @@ if [ -n "${ZSH_VERSION-}" ]; then
   # Do not change anything else in this file.
 fi
 
-Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v4"
-: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4}"
+Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v5"
+: "${Z4H:=${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5}"
 
 umask o-w
 

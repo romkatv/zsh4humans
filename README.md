@@ -48,9 +48,9 @@ Run this command in bash, zsh, or sh:
 
 ```shell
 if command -v curl >/dev/null 2>&1; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
 else
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
 fi
 ```
 
@@ -69,7 +69,7 @@ you exit Zsh, the image is deleted.
 
 ```zsh
 sudo docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"'
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
 ```
 
 ## Caveats

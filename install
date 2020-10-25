@@ -198,7 +198,7 @@ else
   z4h="$HOME"/.z4h.tmp."$$"
 fi
 
-url='https://raw.githubusercontent.com/romkatv/zsh4humans/v4'
+url='https://raw.githubusercontent.com/romkatv/zsh4humans/v5'
 
 >&2 'printf' '\033[H\033[2J'
 >&2 'printf' 'Settings up \033[33mZsh For Humans\033[0m...\n'
@@ -226,7 +226,7 @@ if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
   'exit' '1'
 fi
 
-Z4H="${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v4"
+Z4H="${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
 
 umask o-w
 

@@ -1,0 +1,41 @@
+eval "$_z4h_opt"
+
+local pane
+pane="$(TMUX=$_Z4H_TMUX TMUX_PANE= $_Z4H_TMUX_CMD capture-pane -p -e && print -n x)" || return
+typeset -g _z4h_saved_screen=$'\e[0m\e[H'${${pane//$'\n'/$'\e[K\n'}%$'\nx'}
+return
+
+# alternative implementation
+
+local s=$'\e[0m\e[H'
+
+local -a pane
+pane=("${(@f)$(/tmp/tmux/bin/tmux capture-pane -p -J)}") || return
+
+local line
+local -i len height=$#pane
+for line in "${(@)pane%% #}"; do
+  len=${(m)#line}
+  while (( len > COLUMNS )); do
+    s+=$'\n'
+    (( len -= COLUMNS, ++height ))
+  done
+  if (( len == COLUMNS )); then
+    s+=$'\n'
+  else
+    (( len )) && s+=$'\e['$len'C'
+    s+=$'\e[K\n'
+  fi
+done
+
+repeat $((LINES - height)); do
+  s+=$'\e[K\n'
+done
+
+s[-1]=
+
+s+=$'\e[H'
+s+=$(/tmp/tmux/bin/tmux capture-pane -p -e) || return
+s+=$'\e[0m'
+
+typeset -g _z4h_saved_screen=$s

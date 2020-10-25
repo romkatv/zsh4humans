@@ -25,11 +25,48 @@
   zstyle -t :completion:${_z4h_curcontext}:default sort
   local -i sort=$((!$?))
 
-  autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-fzf
+  autoload +X -Uz -- -z4h-cursor-show -z4h-fzf
+
+  local -i height=$(( 100 * ($#indices + 4) < 60 * LINES ? $#indices + 4 : 60 * LINES / 100 ))
+
+  local opts=(
+    --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"}
+    --color=hl:201,hl+:201
+    --with-nth=2
+    --delimiter='\000'
+    --ansi
+    --exact
+    --no-mouse
+    --tiebreak=length,begin,index
+    --multi
+    --cycle
+    --height=$height
+    --border=horizontal
+  )
 
   local esc line col
   IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
-  print >$TTY || return
+  if [[ -n $_Z4H_TMUX ]]; then
+    opts+=(--no-clear)
+    if (( height <= LINES - line )); then
+      local move=$'\e[0m\n\r'
+      opts+=(--layout=reverse)
+    elif (( height <= line - 1 )); then
+      local move=$'\e[0m\e['$((line-height))';1H'
+    else
+      local -i extra=$((height - LINES + line))
+      print -rn -- ${(pl:$height::\n:)} >$TTY || return
+      (( line += LINES - line - height ))
+      local move=$'\e[0m\e['$((line+1))';1H'
+      opts+=(--layout=reverse)
+    fi
+    local _z4h_saved_screen
+    -z4h-save-screen || return
+  else
+    print >$TTY || return
+    local move=
+    opts+=(--layout=reverse)
+  fi
 
   {
     local choice
@@ -50,26 +87,20 @@
           done
         fi
       } | {
+        print -rn -- $move >$TTY
         -z4h-cursor-show
-        2>$TTY -z4h-fzf                                     \
-          --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"} \
-          --color=hl:201,hl+:201                            \
-          --with-nth=2                                      \
-          --delimiter='\000'                                \
-          --ansi                                            \
-          --exact                                           \
-          --no-mouse                                        \
-          --layout=reverse                                  \
-          --tiebreak=length,begin,index                     \
-          --multi                                           \
-          --cycle                                           \
-          --height=$(( 100 * ($#indices + 2) < 60 * LINES ? $#indices + 2 : 60 * LINES / 100 ))
+        2>$TTY -z4h-fzf $opts
       }
     )"
   } always {
     -z4h-cursor-hide
-    builtin echoti cuu 1
-    (( col > 1 )) && builtin echoti cuf $((col-1))
+    if [[ -n $_Z4H_TMUX ]]; then
+      print -rn -- $_z4h_saved_screen
+      print -rn -- $'\e[0m\e['$line';'$col'H'
+    else
+      builtin echoti cuu 1
+      (( col > 1 )) && builtin echoti cuf $((col-1))
+    fi
   }
 
   [[ -n $choice ]] || return

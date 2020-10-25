@@ -140,6 +140,22 @@ function -z4h-cmd-init() {
 
   () {
     eval "$_z4h_opt"
+    local tmux=/tmp/tmux/bin/tmux
+    if [[ -n $TMUX && -n ${TMUX%,(|<->),(|<->)}(#qNu$UID) ]]; then
+      if [[ $TMUX == /tmp/z4h-tmux-$UID,* ]]; then
+        export _Z4H_TMUX=$TMUX
+        export _Z4H_TMUX_CMD=$tmux
+        unset TMUX TMUX_PANE
+      elif (( $+commands[tmux] )); then
+        export _Z4H_TMUX=$TMUX
+        export _Z4H_TMUX_CMD=$commands[tmux]
+      else
+        unset _Z4H_TMUX _Z4H_TMUX_CMD
+      fi
+    elif [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) && -x $tmux && -x $_z4h_exe ]]; then
+      unset TMUX TMUX_PANE _Z4H_TMUX _Z4H_TMUX_CMD
+      exec $tmux -S /tmp/z4h-tmux-$UID new-session -- $_z4h_exe
+    fi
     if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
           -z ${^fpath}/_systemctl(#qN) ]]; then
       _z4h_install_queue+=(systemd)

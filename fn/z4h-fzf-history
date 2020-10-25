@@ -14,16 +14,89 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 {
   -z4h-show-dots
 
-  local esc line col
-  IFS='[;' read -s -d R esc\?$'\e[6n' line col <$TTY || return
-  print >$TTY || return
-
   typeset -ga _z4h_naturals
   if (( $#_z4h_naturals < $#history )); then
     _z4h_naturals+=({$(($#_z4h_naturals+1))..$#history})
   fi
 
   autoload +X -Uz -- -z4h-cursor-show
+
+  local esc line col
+  IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
+
+  local -i pct=80
+  [[ -n $_Z4H_TMUX ]] && pct=100
+
+  local -i space
+  if [[ -n $_Z4H_TMUX ]]; then
+    (( space = LINES - line < line - 1 ? line - 1 : LINES - line ))
+  else
+    (( space = LINES - 1 ))
+  fi
+  (( space <= 100 * LINES / pct )) || (( space = 100 * LINES / pct ))
+
+  local opts=(
+    --read0
+    --no-multi
+    --tiebreak=index
+    --cycle
+    --delimiter='\001'
+    --with-nth=2
+    --exact
+    --no-mouse
+    --tabstop 1
+    --query=$LBUFFER
+    --color=hl:201,hl+:201
+  )
+
+  local -i preview_lines=6
+  local -i height=$(($#history + 2))
+  local preview_window=wrap:$((preview_lines - 2))
+  if (( height + preview_lines <= space || space > preview_lines + 5 )); then
+    (( height += preview_lines ))
+  else
+    preview_lines=0
+  fi
+
+  (( height <= 100 * LINES / pct )) || (( height = 100 * LINES / pct ))
+  (( height <= LINES - 1 )) || (( height = LINES - 1 ))
+
+  if [[ -n $_Z4H_TMUX ]]; then
+    opts+=(--no-clear)
+    if (( height > LINES - line && line - 1 > LINES - line && line - 1 > 5 + preview_lines )); then
+      preview_window+=':up'
+      (( preview_lines )) || opts+=(--border=horizontal)
+      (( height <= line - 1 )) || (( height = line - 1 ))
+      local move=$'\e[0m\e['$((line-height))';1H'
+    elif (( LINES - line > 5 + preview_lines )); then
+      preview_window+=':down'
+      (( height <= LINES - line )) || (( height = LINES - line ))
+      local move=$'\e[0m\n\r'
+      opts+=(--layout=reverse)
+    else
+      preview_window+=':down'
+      local -i extra=$((height - LINES + line))
+      print -rn -- ${(pl:$height::\n:)} >$TTY || return
+      (( line += LINES - line - height ))
+      local move=$'\e[0m\e['$((line+1))';1H'
+      opts+=(--layout=reverse)
+    fi
+    local _z4h_saved_screen
+    -z4h-save-screen || return
+  else
+    print >$TTY || return
+    preview_window+=':down'
+    local move=
+    opts+=(--layout=reverse)
+  fi
+
+  opts+=(--height=$height)
+  if (( preview_lines )); then
+    opts+=(
+      --preview-window=$preview_window
+      --preview=$preview
+    )
+  fi
 
   {
     local choice
@@ -33,11 +106,9 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
         (( $#history )) && printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
       } | {
         {
+          print -rn -- $move >$TTY
           -z4h-cursor-show
-          2>$TTY -z4h-fzf --read0 --no-multi --tiebreak=index --cycle        \
-              --delimiter='\001' --with-nth=2 --exact --no-mouse             \
-              --height=80% --preview-window=down:40%:wrap --preview=$preview \
-              --tabstop 1 --query=$LBUFFER --color=hl:201,hl+:201
+          2>$TTY -z4h-fzf $opts
         } always {
           -z4h-cursor-hide
         }
@@ -56,8 +127,13 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     fi
     return 0
   } always {
-    echoti cuu 1
-    (( col > 1 )) && echoti cuf $((col-1))
+    if [[ -n $_Z4H_TMUX ]]; then
+      print -rn -- $_z4h_saved_screen
+      print -rn -- $'\e[0m\e['$line';'$col'H'
+    else
+      builtin echoti cuu 1
+      (( col > 1 )) && builtin echoti cuf $((col-1))
+    fi
   }
 } always {
   zle -R

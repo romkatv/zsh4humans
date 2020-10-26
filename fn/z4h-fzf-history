@@ -33,7 +33,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
   else
     (( space = LINES - 1 ))
   fi
-  (( space <= 100 * LINES / pct )) || (( space = 100 * LINES / pct ))
+  (( space <= pct * LINES / 100 )) || (( space = pct * LINES / 100 ))
 
   local opts=(
     --read0
@@ -58,7 +58,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     preview_lines=0
   fi
 
-  (( height <= 100 * LINES / pct )) || (( height = 100 * LINES / pct ))
+  (( height <= pct * LINES / 100 )) || (( height = pct * LINES / 100 ))
   (( height <= LINES - 1 )) || (( height = LINES - 1 ))
 
   if [[ -n $_Z4H_TMUX ]]; then

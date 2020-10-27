@@ -63,7 +63,9 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 
   if [[ -n $_Z4H_TMUX ]]; then
     opts+=(--no-clear)
-    if (( height > LINES - line && line - 1 > LINES - line && line - 1 > 5 + preview_lines )); then
+    if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
+       (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
+       { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
       preview_window+=':up'
       (( preview_lines )) || opts+=(--border=horizontal)
       (( height <= line - 1 )) || (( height = line - 1 ))

@@ -57,7 +57,9 @@ local -i list_colors=$((!$?))
         IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
         if [[ -n $_Z4H_TMUX ]]; then
           opts+=(--no-clear)
-          if (( height > LINES - line && line - 1 > LINES - line && line - 1 > 5 )); then
+          if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
+             (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
+             { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
             (( height <= line - 1 )) || (( height = line - 1 ))
             local move=$'\e[0m\e['$((line-height))';1H'
             opts+=(--layout=default)

@@ -17,7 +17,7 @@ local -A keys=(
   ctrl-s     down
   btab       up
   ctrl-r     up
-  ctrl-space toggle+down
+  ctrl-space toggle-out
   ctrl-a     toggle-all
 )
 

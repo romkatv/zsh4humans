@@ -141,6 +141,7 @@ zle -N z4h-cd-down
 zle -N z4h-fzf-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
+zle -N z4h-clear-screen-and-move-to-bottom
 
 zle -C -- -z4h-comp-insert-all complete-word -z4h-comp-insert-all
 

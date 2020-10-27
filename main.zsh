@@ -166,6 +166,9 @@ function -z4h-cmd-init() {
       else
         unset _Z4H_TMUX _Z4H_TMUX_CMD
       fi
+      if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -t :z4h:tmux start-at-bottom; then
+        print -rn -- ${(pl:$((LINES-1))::\n:)}
+      fi
     elif [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) && -x $tmux && -x $_z4h_exe ]]; then
       unset TMUX TMUX_PANE _Z4H_TMUX _Z4H_TMUX_CMD
       local cfg=tmux-16color.conf

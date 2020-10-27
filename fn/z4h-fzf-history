@@ -68,6 +68,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       (( preview_lines )) || opts+=(--border=horizontal)
       (( height <= line - 1 )) || (( height = line - 1 ))
       local move=$'\e[0m\e['$((line-height))';1H'
+      opts+=(--layout=default)
     elif (( LINES - line > 5 + preview_lines )); then
       preview_window+=':down'
       (( height <= LINES - line )) || (( height = LINES - line ))

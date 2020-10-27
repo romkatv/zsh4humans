@@ -44,6 +44,7 @@
     if (( height > LINES - line && line - 1 > LINES - line && line - 1 > 5 )); then
       (( height <= line - 1 )) || (( height = line - 1 ))
       local move=$'\e[0m\e['$((line-height))';1H'
+      opts+=(--layout=default)
     elif (( LINES - line > 5 )); then
       (( height <= LINES - line )) || (( height = LINES - line ))
       local move=$'\e[0m\n\r'

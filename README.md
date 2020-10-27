@@ -20,9 +20,8 @@ If you want a great shell that just works, this project is for you.
   * 5.5. [SSH](#SSH)
 * 6. [Customization](#customization)
   * 6.1. [Customizing prompt](#customizing-prompt)
-  * 6.2. [Customizing key bindings](#customizing-key-bindings)
-  * 6.3. [Customizing appearance](#customizing-appearance)
-  * 6.4. [Additional Zsh startup files](#additional-zsh-startup-files)
+  * 6.2. [Customizing appearance](#customizing-appearance)
+  * 6.3. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 7. [Updating](#updating)
 * 8. [Uninstalling](#uninstalling)
 

@@ -663,6 +663,7 @@ zstyle ':completion:*:git-*:argument-rest:recent-branches' ignored-patterns '*'
 # Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit
 bashcompinit
+function bashcompinit() {}
 
 if (( _z4h_use[powerlevel10k] )); then
   # Initialize prompt. Type `p10k configure` or edit $POWERLEVEL9K_CONFIG_FILE to customize it.
@@ -924,6 +925,8 @@ function -z4h-post-init() {
     zf_mv -- $tmp.2 $dump
     -z4h-compile $dump
   fi
+
+  function compinit() {}
 
   # Replay compdef calls.
   local args

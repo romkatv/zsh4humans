@@ -13,13 +13,25 @@ local -A keys=(
   ctrl-u     clear-query
   ctrl-k     kill-line
   alt-k      unix-line-discard
-  tab        down
-  ctrl-s     down
-  btab       up
-  ctrl-r     up
   ctrl-space toggle-out
   ctrl-a     toggle-all
 )
+
+if (( ${@[(I)--layout=default]} )); then
+  keys+=(
+    tab      up
+    btab     down
+    ctrl-r   up
+    ctrl-s   down
+  )
+else
+  keys+=(
+    tab      down
+    btab     up
+    ctrl-r   down
+    ctrl-s   up
+  )
+fi
 
 local kv
 for kv in $bindings; do

@@ -175,8 +175,7 @@ function -z4h-cmd-init() {
       local cfg=tmux-16color.conf
       (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
       # TODO: point TERMINFO to the database bundled with tmux.
-      exec $tmux -u -S /tmp/z4h-tmux-$UID-$TERM -f $Z4H/zsh4humans/$cfg \
-        new-session -- $_z4h_exe || return
+      SHELL=$_z4h_exe exec $tmux -u -S /tmp/z4h-tmux-$UID-$TERM -f $Z4H/zsh4humans/$cfg || return
     fi
     if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
           -z ${^fpath}/_systemctl(#qN) ]]; then

@@ -9,7 +9,7 @@ _z4h_try_exec_zsh_i() {
       [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $exe == */bin/zsh &&
          -e ${exe:h:h}/share/zsh/5.8/scripts/relocate ]]' || 'return' '0'
   # >&2 'printf' '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
-  'exec' "$1" '-i' "$@" || 'return'
+  'exec' "$@" || 'return'
 }
 
 _z4h_exec_zsh_i() {
@@ -101,13 +101,13 @@ _z4h_exec_zsh_i() {
 if '[' '-n' "${ZSH_VERSION-}" ']'; then
   # TODO: propagate original options here. Will need to save them similarly
   # to _z4h_script_argv.
-  if (( ${+ZSH_EXECUTION_STRING} )); then
-    '_z4h_exec_zsh_i' '-c' "$ZSH_EXECUTION_STRING"
-  elif (( ${+ZSH_SCRIPT} )); then
-    '_z4h_exec_zsh_i' '--' "$ZSH_SCRIPT" "${_z4h_script_argv[@]}"
-  else
-    '_z4h_exec_zsh_i'
+  if '[' "${+ZSH_EXECUTION_STRING}" '=' '1' ']'; then
+    '_z4h_exec_zsh_i' '-i' '-c' "$ZSH_EXECUTION_STRING"
+  elif '[' "${+ZSH_SCRIPT}" '=' '1' ']'; then
+    '_z4h_exec_zsh_i' '-i' '--' "$ZSH_SCRIPT" "${_z4h_script_argv[@]}"
   fi
+else
+  '_z4h_exec_zsh_i' '-i'
 fi
 
 'unset' '-f' '_z4h_try_exec_zsh_i' '_z4h_exec_zsh_i'

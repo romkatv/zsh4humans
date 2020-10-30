@@ -133,7 +133,7 @@ done
   local -i again=1
   while (( again )); do
     {
-      -z4h-show-dots
+      -z4h-show-dots $LBUFFER
 
       local buf=$BUFFER
       local -i cursor=CURSOR

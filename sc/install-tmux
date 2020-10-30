@@ -1,0 +1,526 @@
+#!/bin/sh
+#
+# Type `install -h` for usage and see https://github.com/romkatv/tmux-bin
+# for documentation.
+
+{
+
+set -ue
+
+if [ -n "${ZSH_VERSION:-}" ]; then
+  emulate sh -o err_exit -o no_unset
+fi
+
+readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v1.0.0
+
+readonly archives='
+file:tmux-darwin-x86_64.tar.gz; md5:d37560f8f299b8fcc37642fe57274f9d; sha256:49b3bdc7e480c693dfe57933daf1ab46ba6dcdd0306a68a4aa941bc202e93d12;
+file:tmux-linux-x86_64.tar.gz;  md5:c67f8aaa4d211fa45b37006b75b902e3; sha256:f09e84e2300af7c2b235301984b7302708f38adb2f271b87be98ca4e46796353;'
+
+readonly lf="
+"
+
+if [ -t 1 ]; then
+  readonly _0="$(printf '\033[0m')"
+  readonly _B="$(printf '\033[1m')"
+  readonly _U="$(printf '\033[4m')"
+  readonly _R="$(printf '\033[31m')"
+  readonly _G="$(printf '\033[32m')"
+  readonly _Y="$(printf '\033[33m')"
+else
+  readonly _0=
+  readonly _B=
+  readonly _U=
+  readonly _R=
+  readonly _G=
+  readonly _Y=
+fi
+
+usage="$(cat <<END
+Usage: install [OPTIONS] [-a <sha256|md5>]...
+               [OPTIONS] -f FILE
+               [OPTIONS] -u URL
+
+If '-f FILE' is specified, install tmux from the specified *.tar.gz
+file produced by the build script.
+
+If '-u URL' is specified, download the file and install as if with
+'-f FILE'.
+
+If neither '-f' nor '-u' is specified, download the appopriate file
+from https://github.com/romkatv/tmux-bin/releases and install as if
+with '-f FILE'. If '-a <sha256|md5>' is specified at least once,
+abort installation if integrity of the downloaded package cannot
+be verified with at least one of the listed hashing algorithms.
+
+Options:
+
+  -q
+
+    Produce no output on success.
+
+  -d DIR
+
+    Install to this directory. If specified more than once, present
+    an interactive dialog to choose the directory. Empty argument
+    means a custom directory (requires manual user input). If '-d'
+    is not specified, the effect is idential to this:
+
+      -d /usr/local -d ~/.local -d ""
+
+    Except on Termux:
+
+      -d "\$PREFIX"/local -d ~/.local -d ""
+
+  -s FD
+
+    On success, write the path to the installation directory to this
+    file descriptor.
+END
+)"
+
+absfile() {
+  if [ ! -e "$1" ]; then
+    >&2 echo "${_R}error${_0}: file not found: ${_U}$1${_0}"
+    return 1
+  fi
+  local dir base
+  dir="$(dirname -- "$1")"
+  base="$(basename -- "$1")"
+  ( cd -- "$dir" && dir="$(pwd)" && printf '%s/%s\n' "${dir%/}" "${base}" )
+}
+
+check_dir() {
+  if [ -z "$1" ]; then
+    >&2 echo "${_R}error${_0}: directory cannot be empty string"
+    exit 1
+  fi
+  if [ -z "${1##~*}" ]; then
+    >&2 echo "${_R}error${_0}: please expand ${_U}~${_0} in directory name: ${_U}$1${_0}"
+    exit 1
+  fi
+  if [ -z "${1##//*}" ]; then
+    >&2 echo "${_R}error${_0}: directory cannot start with ${_U}//${_0}: ${_U}$1${_0}"
+    exit 1
+  fi
+}
+
+add_dir() {
+  num_dirs=$((num_dirs + 1))
+  dirs="$dirs${num_dirs}${1}${lf}"
+  if [ -n "$1" ]; then
+    dirs_c="$dirs_c  ${_B}($num_dirs)${_0} ${_U}${1}${_0}${lf}"
+  else
+    dirs_c="$dirs_c  ${_B}($num_dirs)${_0} custom directory (input required)${lf}"
+  fi
+}
+
+check_sudo() {
+  local dir="$1"
+  sudo=
+  while true; do
+    if [ -e "$dir" ]; then
+      if [ ! -d "$dir" ]; then
+        >&2 echo "${_R}error${_0}: not a directory: ${_U}$dir${_0}"
+        return 1
+      fi
+      if [ ! -w "$dir" ]; then
+        if [ "$euid" = 0 ]; then
+          >&2 echo "${_R}error${_0}: directory not writable: ${_U}$dir${_0}"
+          return 1
+        else
+          if [ -z "$quiet" ]; then
+            echo "${_Y}===>${_0} using ${_U}${_G}sudo${_0} for installation"
+          fi
+          sudo=sudo
+        fi
+      fi
+      break
+    fi
+    if [ "$dir" = / ] || [ "$dir" = . ]; then
+      break
+    fi
+    dir="$(dirname -- "$dir")"
+  done
+}
+
+dirs=
+dirs_c=
+num_dirs=0
+quiet=
+algos=
+url=
+file=
+sudo=
+fd=
+asked=
+
+command -v sudo >/dev/null 2>&1 && euid="$(id -u 2>/dev/null)" || euid=0
+
+while getopts ':hqd:s:a:f:u:' opt "$@"; do
+  case "$opt" in
+    h)
+      printf '%s\n' "$usage"
+      exit
+    ;;
+    q)
+      if [ -n "$quiet" ]; then
+        >&2 echo "${_R}error${_0} duplicate option: ${_B}-${opt}${_0}"
+        exit 1
+      fi
+      quiet=1
+    ;;
+    d)
+      if printf "%s" "$dirs" | cut -b 2- | grep -qxF -- "$OPTARG"; then
+        >&2 echo "${_R}error${_0}: duplicate option: ${_B}-${opt} ${OPTARG}${_0}"
+        exit 1
+      fi
+      if [ "$(printf "%s" "$OPTARG" | wc -l | tr -Cd '0-9')" != 0 ]; then
+        >&2 echo "${_R}error${_0}: incorrect value of ${_B}-${opt}${_0}: ${_B}${OPTARG}${_0}"
+        exit 1
+      fi
+      if [ "$num_dirs" = 9 ]; then
+        >&2 echo "${_R}error${_0}: too many options: ${_B}-${opt}${_0}"
+        exit 1
+      fi
+      if [ -n "$OPTARG" ]; then
+        check_dir "$OPTARG"
+      fi
+      add_dir "$OPTARG"
+    ;;
+    s)
+      if [ -n "$fd" ]; then
+        >&2 echo "${_R}error${_0} duplicate option: ${_B}-${opt}${_0}"
+        exit 1
+      fi
+      if ! printf '%s' "$OPTARG" | tr '\n' x | grep -qxE '[1-9][0-9]*'; then
+        >&2 echo "${_R}error${_0}: incorrect value of ${_B}-${opt}${_0}: ${_B}${OPTARG}${_0}"
+        exit 1
+      fi
+      fd="$OPTARG"
+    ;;
+    a)
+      case "$OPTARG" in
+        sha256|md5)
+          if [ -n "$algos" -a -z "${algos##*<$OPTARG>*}" ]; then
+            >&2 echo "${_R}error${_0}: duplicate option: ${_B}-${opt} ${OPTARG}${_0}"
+            exit 1
+          fi
+          algos="$algos<$OPTARG>"
+        ;;
+        *)
+          >&2 echo "${_R}error${_0}: incorrect value of ${_B}-${opt}${_0}: ${_B}${OPTARG}${_0}"
+          exit 1
+        ;;
+      esac
+    ;;
+    f)
+      if [ -n "$file" ]; then
+        >&2 echo "${_R}error${_0}: duplicate option: ${_B}-${opt}${_0}"
+        exit 1
+      fi
+      if [ -z "$OPTARG" ]; then
+        >&2 echo "${_R}error${_0}: incorrect value of ${_B}-${opt}${_0}: ${_B}${OPTARG}${_0}"
+        exit 1
+      fi
+      file="$(absfile "$OPTARG")"
+    ;;
+    u)
+      if [ -n "$url" ]; then
+        >&2 echo "${_R}error${_0}: duplicate option: ${_B}-${opt}${_0}"
+        exit 1
+      fi
+      if [ -z "$OPTARG" ]; then
+        >&2 echo "${_R}error${_0}: incorrect value of ${_B}-${opt}${_0}: ${_B}${OPTARG}${_0}"
+        exit 1
+      fi
+      url="$OPTARG"
+    ;;
+    \?) >&2 echo "${_R}error${_0}: invalid option: ${_B}-${OPTARG}${_0}"           ; exit 1;;
+    :)  >&2 echo "${_R}error${_0}: missing required argument: ${_B}-${OPTARG}${_0}"; exit 1;;
+    *)  >&2 echo "${_R}internal error${_0}: unhandled option: ${_B}-${opt}${_0}"   ; exit 1;;
+  esac
+done
+
+if [ "$OPTIND" -le $# ]; then
+  >&2 echo "${_R}error${_0}: unexpected positional argument"
+  return 1
+fi
+
+if [ -n "$algos" ]; then
+  if [ -n "$file" ]; then
+    >&2 echo "${_R}error${_0}: incompatible options: ${_B}-f${_0} and ${_B}-a${_0}"
+    exit 1
+  fi
+  if [ -n "$url" ]; then
+    >&2 echo "${_R}error${_0}: incompatible options: ${_B}-u${_0} and ${_B}-a${_0}"
+    exit 1
+  fi
+fi
+
+if [ "$num_dirs" = 0 ]; then
+  if [ "$(uname -s 2>/dev/null)" = Linux ] &&
+     [ "$(uname -o 2>/dev/null)" = Android ] &&
+     [ -d "${PREFIX:-/data/data/com.termux/files/usr}" ]; then
+    usr_local="${PREFIX:-/data/data/com.termux/files/usr}"/local
+    usr_local_d="${_U}\$PREFIX/local${_0}"
+  else
+    usr_local=/usr/local
+    usr_local_d="${_U}/usr/local${_0}   "
+  fi
+
+  add_dir "$usr_local"
+  add_dir ~/.local
+  add_dir ""
+
+  dirs_c="  ${_B}(1)${_0} $usr_local_d     ${_Y}<=${_0}"
+  if check_sudo "$usr_local" >/dev/null 2>/dev/null; then
+    if [ -n "$sudo" ]; then
+      dirs_c="${dirs_c} uses ${_U}${_G}sudo${_0}"
+    else
+      dirs_c="${dirs_c} does not need ${_U}${_G}sudo${_0}"
+    fi
+    if [ -d "$usr_local" ]; then
+      dirs_c="${dirs_c} (${_B}recommended${_0})"
+    fi
+  else
+    dirs_c="${dirs_c} ${_R}not writable${_0}"
+  fi
+
+  dirs_c="${dirs_c}${lf}  ${_B}(2)${_0} ${_U}~/.local${_0}          ${_Y}<=${_0}"
+  if check_sudo ~/.local >/dev/null 2>/dev/null; then
+    if [ -n "$sudo" ]; then
+      dirs_c="${dirs_c} uses ${_U}${_G}sudo${_0}"
+    else
+      dirs_c="${dirs_c} does not need ${_U}${_G}sudo${_0}"
+    fi
+  else
+    dirs_c="${dirs_c} ${_R}not writable${_0}"
+  fi
+
+  dirs_c="${dirs_c}${lf}  ${_B}(3)${_0} custom directory  ${_Y}<=${_0} manual input required${lf}"
+fi
+
+if ! zsh="$(which zsh)"; then
+  >&2 echo "${_R}error${_0}: command not found: ${_B}zsh${_0}"
+  exit 1
+fi
+
+if [ "$num_dirs" = 1 ]; then
+  choice=1
+else
+  while true; do
+    echo "Choose installation directory for ${_G}tmux${_0}:"
+    echo ""
+    printf "%s" "$dirs_c"
+    echo ""
+    printf "Choice: "
+    read -r choice
+    if printf "%s" "$dirs" | cut -b 1 | grep -qxF -- "$choice"; then
+      break
+    fi
+    if [ -n "$choice" ]; then
+      >&2 echo "Invalid choice: ${_R}$choice${_0}. Try again."
+    fi
+    echo
+  done
+  asked=1
+fi
+
+dir="$(printf "%s" "$dirs" | sed "${choice}!d" | cut -b 2-)"
+if [ -z "$dir" ]; then
+  printf "Custom directory: "
+  read -r dir
+  check_dir "$dir"
+  if [ -z "$quiet" ]; then
+    echo
+  fi
+  asked=1
+elif [ -z "$quiet" ] && [ "$num_dirs" != 1 ]; then
+  echo
+fi
+
+if [ -z "$quiet" ]; then
+  printf "%s\n" "${_Y}===>${_0} installing ${_G}tmux${_0} to ${_U}$dir${_0}"
+fi
+
+check_sudo "$dir"
+
+$sudo mkdir -p -- "$dir"
+cd -- "$dir"
+dir="$(pwd)"
+
+if [ -z "$file" -a -z "$url" ]; then
+  kernel="$(uname -s | tr '[A-Z]' '[a-z]')"
+  arch="$(uname -m | tr '[A-Z]' '[a-z]')"
+
+  case "$kernel" in
+    linux-armv8l)    kernel=linux-aarch64;;
+    msys_nt-6.*)     kernel=msys_nt-10.0;;
+    msys_nt-10.*)    kernel=msys_nt-10.0;;
+    mingw32_nt-6.*)  kernel=msys_nt-10.0;;
+    mingw32_nt-10.*) kernel=msys_nt-10.0;;
+    mingw64_nt-6.*)  kernel=msys_nt-10.0;;
+    mingw64_nt-10.*) kernel=msys_nt-10.0;;
+    cygwin_nt-6.*)   kernel=cygwin_nt-10.0;;
+    cygwin_nt-10.*)  kernel=cygwin_nt-10.0;;
+  esac
+
+  filename="tmux-${kernel}-${arch}.tar.gz"
+  url="$url_base/$filename"
+
+  if [ -n "${archives##*file:$filename;*}" ]; then
+    >&2 echo "${_R}error${_0}: there is no prebuilt binary for your architecture"
+    >&2 echo
+    >&2 echo "See ${_U}https://github.com/romkatv/tmux-bin#compiling${_0} for building one."
+    exit 1
+  fi
+
+  check_sig=1
+else
+  check_sig=0
+fi
+
+if [ -n "$url" ]; then
+  file="${TMPDIR:-/tmp}"/tmux-bin.tmp.$$.tar.gz
+  cleanup() { rm -f -- "$file"; }
+  trap cleanup INT QUIT TERM EXIT ILL PIPE
+
+  if [ -z "$quiet" ]; then
+    echo "${_Y}===>${_0} fetching ${_U}${url##*/}${_0}"
+  fi
+
+  (
+    cd -- "${file%/*}"
+    file="${file##*/}"
+
+    set +e
+
+    if command -v curl >/dev/null 2>&1; then
+      err="$(command curl -fsSLo "$file" -- "$url" 2>&1)"
+    elif command -v wget >/dev/null 2>&1; then
+      err="$(command wget -O "$file" -- "$url" 2>&1)"
+    else
+      >&2 echo "${_R}error${_0}: please install ${_G}curl${_0} or ${_G}wget${_0} and retry"
+      exit 1
+    fi
+
+    if [ $? != 0 ]; then
+      >&2 printf "%s\n" "$err"
+      >&2 echo "${_R}error${_0}: failed to download ${_U}$url${_0}"
+      exit 1
+    fi
+  )
+else
+  cleanup() { true; }
+fi
+
+if [ "$check_sig" = 1 ]; then
+  if [ -z "$quiet" ]; then
+    echo "${_Y}===>${_0} verifying archive integrity"
+  fi
+
+  for algo in sha256 md5; do
+    hash=none
+    case "$algo" in
+      sha256)
+        if command -v shasum >/dev/null 2>/dev/null; then
+          hash="$(shasum -b -a 256 -- "$file")"
+          hash="${hash%% *}"
+        elif command -v sha256sum >/dev/null 2>/dev/null; then
+          hash="$(sha256sum -b -- "$file")"
+          hash="${hash%% *}"
+        elif command -v sha256 >/dev/null 2>/dev/null; then
+          # Ignore sha256 output if it's from hashalot. It's incompatible.
+          hash="$(sha256 -- "$file" </dev/null)"
+          if [ ${#hash} -lt 64 ]; then
+            hash=none
+          else
+            hash="${hash##* }"
+          fi
+        fi
+      ;;
+      md5)
+        if command -v md5sum >/dev/null 2>/dev/null; then
+          hash="$(md5sum -b -- "$file")"
+          hash="${hash%% *}"
+        elif command -v md5 >/dev/null 2>/dev/null; then
+          hash="$(md5 -- "$file")"
+          hash="${hash##* }"
+        fi
+      ;;
+      *)
+        >&2 echo "${_R}internal error${_0}: unhandled algorithm: ${_B}$algo${_0}"
+        exit 1
+      ;;
+    esac
+    if [ "$hash" != none ]; then
+      if [ -n "${archives##* $algo:$hash;*}" ]; then
+        >&2 echo "${_R}error${_0}: ${_B}$algo${_0} signature mismatch"
+        >&2 echo ""
+        >&2 echo "Expected:"
+        >&2 echo ""
+        >&2 echo "  ${_G}$(printf "%s" "$archives" | grep -F -- "${url##*/}" | sed 's/  */ /g')${_0}"
+        >&2 echo ""
+        >&2 echo "Found:"
+        >&2 echo ""
+        >&2 echo "  ${_R}$algo:$hash${_0}"
+        exit 1
+      fi
+      if [ -z "$quiet" ]; then
+        echo "${_Y}===>${_0} ${_B}$algo${_0} signature matches"
+      fi
+      algos="${algos##*<$algo>*}"
+    else
+      if [ -z "$quiet" ]; then
+        echo "${_Y}===>${_0} no tools to verify ${_B}$algo${_0} signature"
+      fi
+    fi
+  done
+fi
+
+if [ -n "$algos" ]; then
+  >&2 echo "${_R}error${_0}: no tools available to verify archive integrity"
+  exit 1
+fi
+
+if [ -z "$quiet" ]; then
+  echo "${_Y}===>${_0} extracting files"
+fi
+
+$sudo tar -xzf "$file"
+
+$sudo "$zsh" -fc '
+  setopt extended_glob                                 || exit
+  zmodload -F zsh/files b:{zf_mv,zf_rm,zf_ln,zf_mkdir} || exit
+
+  for pat in "[^[:upper:]]" "[[:upper:]]"; do
+    for hex in ./share/terminfo/[[:xdigit:]][[:xdigit:]].tmux-bin(:t:r); do
+      printf -v char "\\x$hex"
+      [[ $char == $~pat ]] || continue
+      [[ -e ./share/terminfo/$hex ]] || zf_mkdir -- ./share/terminfo/$hex || exit
+      cp -- ./share/terminfo/$hex.tmux-bin/* ./share/terminfo/$hex/ || exit
+      if [[ $char != [[:upper:]] ||
+            ! ./share/terminfo/$char -ef ./share/terminfo/${(L)char} ]]; then
+        [[ -e ./share/terminfo/$char ]] ||
+          zf_ln -s -- $hex ./share/terminfo/$char 2>/dev/null ||
+          zf_mkdir -- ./share/terminfo/$char || exit
+        cp -- ./share/terminfo/$hex.tmux-bin/* ./share/terminfo/$char/ || exit
+      fi
+      zf_rm -rf -- ./share/terminfo/$hex.tmux-bin || exit
+    done
+  done'
+
+cleanup
+
+if [ -z "$quiet" ]; then
+  echo ""
+  echo "Installed ${_G}tmux${_0} to ${_U}$dir${_0}"
+  echo
+fi
+
+if [ -n "$fd" ]; then
+  printf "%s\n" "$dir" >&"$fd"
+fi
+
+}

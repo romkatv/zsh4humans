@@ -90,7 +90,8 @@ fi
 
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
-  if [[ $#terminfo != 0 && -n $TERM && -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
+  if [[ $TERMINFO != $Z4H/tmux/share/terminfo && $#terminfo != 0 && -n $TERM &&
+        -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
     export TERMINFO=${_z4h_exe:h:h}/share/terminfo
   fi
   if [[ -e ${_z4h_exe:h:h}/share/man ]]; then
@@ -151,12 +152,16 @@ function -z4h-cmd-init() {
 
   () {
     eval "$_z4h_opt"
+
+    [[ $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] || ! zstyle -T :z4h start-tmux integrated
+    local -i install_tmux=$? need_restart
+
     if (( ! $+ZSH_SCRIPT && ! $+ZSH_EXECUTION_STRING )) &&
        [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
-      local tmux=~/tmux-screen/bin/tmux
+      local tmux=$Z4H/tmux/bin/tmux
       local -a match mbegin mend
       if [[ -n $TMUX && $TMUX == (#b)(/*),(|<->),(|<->) && -n ${match[1]}(#qNu$UID) ]]; then
-        if [[ $TMUX == /tmp/z4h-tmux-* ]]; then
+        if [[ $TMUX == */z4h-tmux-* ]]; then
           export _Z4H_TMUX=$TMUX
           export _Z4H_TMUX_CMD=$tmux
           unset TMUX TMUX_PANE
@@ -173,26 +178,54 @@ function -z4h-cmd-init() {
           print -rn -- ${(pl:$((LINES-1))::\n:)}
           typeset -gri __p9k_initial_screen_empty=1
         fi
-      elif [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) && -x $tmux && -x $_z4h_exe ]]; then
-        unset TMUX TMUX_PANE _Z4H_TMUX _Z4H_TMUX_CMD
-        local cfg=tmux-16color.conf
-        (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
-        # TODO: point TERMINFO to the database bundled with tmux.
-        SHELL=$_z4h_exe exec $tmux -u -S /tmp/z4h-tmux-$UID-$TERM -f $Z4H/zsh4humans/$cfg || return
+      elif (( install_tmux )) && [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) ]]; then
+        unset _Z4H_TMUX _Z4H_TMUX_CMD
+        if [[ -x $tmux ]]; then
+          unset TMUX TMUX_PANE
+          local sock
+          if [[ -n $TMUX_TMPDIR && -d $TMUX_TMPDIR && -w $TMUX_TMPDIR ]]; then
+            sock=$TMUX_TMPDIR
+          elif [[ -n $TMPDIR && -d $TMPDIR && -w $TMPDIR ]]; then
+            sock=$TMPDIR
+          elif [[ -d /tmp && -w /tmp ]]; then
+            sock=/tmp
+          fi
+          if [[ -n $sock ]]; then
+            sock=${sock%/}/z4h-tmux-$UID-$TERM
+            local cfg=tmux-16color.conf
+            (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
+            if [[ -n $TERM && -e $Z4H/tmux/share/terminfo/$TERM[1]/$TERM ]]; then
+              >&2 TERMINFO=$Z4H/tmux/share/terminfo SHELL=$_z4h_exe \
+                exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
+            else
+              >&2 SHELL=$_z4h_exe \
+                exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
+            fi
+          fi
+        else
+          need_restart=1
+        fi
       fi
     fi
+
     if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
           -z ${^fpath}/_systemctl(#qN) ]]; then
       _z4h_install_queue+=(systemd)
     fi
     _z4h_install_queue+=(
       zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
+    (( install_tmux )) && _z4h_install_queue+=(tmux)
     if ! -z4h-install-many; then
       [[ -e $Z4H/.updating ]] || -z4h-error-command init
       return 1
     fi
     if (( _z4h_installed_something )); then
-      print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
+      if (( need_restart )); then
+        print -ru2 ${(%):-"%F{3}z4h%f: restarting %F{2}zsh%f"}
+        exec -- $_z4h_exe -i
+      else
+        print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
+      fi
     fi
   } || return
 

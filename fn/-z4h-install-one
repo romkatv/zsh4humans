@@ -18,6 +18,7 @@ else
         zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        tmux)                    url=fake;;
         *)
           print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
           return 1
@@ -38,6 +39,10 @@ else
     ;;
   esac
   (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
+  if [[ $1 == tmux && -n $url ]]; then
+    url=
+    command='sh -- '${(q)Z4H}/zsh4humans/sc/install-tmux' -d "${Z4H_PACKAGE_DIR}" -q'
+  fi
 fi
 
 local suf

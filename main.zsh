@@ -29,6 +29,7 @@ fi
 
 if [[ ! -o interactive ]]; then
   # print -Pru2 -- "%F{3}z4h%f: starting interactive %F{2}zsh%f"
+  # This is caused by Z4H_BOOTSTRAPPING, so we don't need to consult ZSH_SCRIPT and the like.
   exec -- $_z4h_exe -i || return
 fi
 
@@ -150,32 +151,35 @@ function -z4h-cmd-init() {
 
   () {
     eval "$_z4h_opt"
-    local tmux=~/tmux-screen/bin/tmux
-    local -a match mbegin mend
-    if [[ -n $TMUX && $TMUX == (#b)(/*),(|<->),(|<->) && -n ${match[1]}(#qNu$UID) ]]; then
-      if [[ $TMUX == /tmp/z4h-tmux-* ]]; then
-        export _Z4H_TMUX=$TMUX
-        export _Z4H_TMUX_CMD=$tmux
-        unset TMUX TMUX_PANE
-      elif [[ -x /proc/$match[2]/exe ]]; then
-        export _Z4H_TMUX=$TMUX
-        export _Z4H_TMUX_CMD=/proc/$match[2]/exe
-      elif (( $+commands[tmux] )); then
-        export _Z4H_TMUX=$TMUX
-        export _Z4H_TMUX_CMD=$commands[tmux]
-      else
-        unset _Z4H_TMUX _Z4H_TMUX_CMD
+    if (( ! $+ZSH_SCRIPT && ! $+ZSH_EXECUTION_STRING )) &&
+       [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
+      local tmux=~/tmux-screen/bin/tmux
+      local -a match mbegin mend
+      if [[ -n $TMUX && $TMUX == (#b)(/*),(|<->),(|<->) && -n ${match[1]}(#qNu$UID) ]]; then
+        if [[ $TMUX == /tmp/z4h-tmux-* ]]; then
+          export _Z4H_TMUX=$TMUX
+          export _Z4H_TMUX_CMD=$tmux
+          unset TMUX TMUX_PANE
+        elif [[ -x /proc/$match[2]/exe ]]; then
+          export _Z4H_TMUX=$TMUX
+          export _Z4H_TMUX_CMD=/proc/$match[2]/exe
+        elif (( $+commands[tmux] )); then
+          export _Z4H_TMUX=$TMUX
+          export _Z4H_TMUX_CMD=$commands[tmux]
+        else
+          unset _Z4H_TMUX _Z4H_TMUX_CMD
+        fi
+        if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -t :z4h:tmux start-at-bottom; then
+          print -rn -- ${(pl:$((LINES-1))::\n:)}
+          typeset -gri __p9k_initial_screen_empty=1
+        fi
+      elif [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) && -x $tmux && -x $_z4h_exe ]]; then
+        unset TMUX TMUX_PANE _Z4H_TMUX _Z4H_TMUX_CMD
+        local cfg=tmux-16color.conf
+        (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
+        # TODO: point TERMINFO to the database bundled with tmux.
+        SHELL=$_z4h_exe exec $tmux -u -S /tmp/z4h-tmux-$UID-$TERM -f $Z4H/zsh4humans/$cfg || return
       fi
-      if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -t :z4h:tmux start-at-bottom; then
-        print -rn -- ${(pl:$((LINES-1))::\n:)}
-        typeset -gri __p9k_initial_screen_empty=1
-      fi
-    elif [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) && -x $tmux && -x $_z4h_exe ]]; then
-      unset TMUX TMUX_PANE _Z4H_TMUX _Z4H_TMUX_CMD
-      local cfg=tmux-16color.conf
-      (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
-      # TODO: point TERMINFO to the database bundled with tmux.
-      SHELL=$_z4h_exe exec $tmux -u -S /tmp/z4h-tmux-$UID-$TERM -f $Z4H/zsh4humans/$cfg || return
     fi
     if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
           -z ${^fpath}/_systemctl(#qN) ]]; then

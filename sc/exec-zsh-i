@@ -9,20 +9,20 @@ _z4h_try_exec_zsh_i() {
       [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $exe == */bin/zsh &&
          -e ${exe:h:h}/share/zsh/5.8/scripts/relocate ]]' || 'return' '0'
   # >&2 'printf' '\033[33mz4h\033[0m: starting \033[32mzsh\033[0m\n'
-  'exec' "$1" '-i' || 'return'
+  'exec' "$1" '-i' "$@" || 'return'
 }
 
 _z4h_exec_zsh_i() {
-  '_z4h_try_exec_zsh_i' 'zsh'                      || 'return'
-  '_z4h_try_exec_zsh_i' '/usr/local/bin/zsh'       || 'return'
-  '_z4h_try_exec_zsh_i' ~/'.local/bin/zsh'         || 'return'
-  '_z4h_try_exec_zsh_i' ~/'.zsh-bin/bin/zsh'       || 'return'
-  '_z4h_try_exec_zsh_i' "${PREFIX-}"/local/bin/zsh || 'return'
+  '_z4h_try_exec_zsh_i' 'zsh'                      "$@" || 'return'
+  '_z4h_try_exec_zsh_i' '/usr/local/bin/zsh'       "$@" || 'return'
+  '_z4h_try_exec_zsh_i' ~/'.local/bin/zsh'         "$@" || 'return'
+  '_z4h_try_exec_zsh_i' ~/'.zsh-bin/bin/zsh'       "$@" || 'return'
+  '_z4h_try_exec_zsh_i' "${PREFIX-}"/local/bin/zsh "$@" || 'return'
 
   if '[' '-r' "$Z4H"/stickycache/zshdir ]; then
     'local' 'dir'
     IFS='' 'read' '-r' 'dir' <"$Z4H"/stickycache/zshdir || 'return'
-    '_z4h_try_exec_zsh_i' "$dir"/bin/zsh                || 'return'
+    '_z4h_try_exec_zsh_i' "$dir"/bin/zsh           "$@" || 'return'
   fi
 
   # There is no suitable Zsh. Need to install.
@@ -92,12 +92,23 @@ _z4h_exec_zsh_i() {
     done
   fi
 
-  if ! '_z4h_try_exec_zsh_i' "$dir"/bin/zsh; then
+  if ! '_z4h_try_exec_zsh_i' "$dir"/bin/zsh "$@"; then
     >&2 'printf' '\033[33mz4h\033[0m: \033[31minternal error\033[0m\n'
     'return' '1'
   fi
 }
 
-'_z4h_exec_zsh_i'
+if '[' '-n' "$ZSH_VERSION" ']'; then
+  # TODO: propagate original options here. Will need to save them similarly
+  # to _z4h_script_argv.
+  if (( ${+ZSH_EXECUTION_STRING} )); then
+    '_z4h_exec_zsh_i' '-c' "$ZSH_EXECUTION_STRING"
+  elif (( ${+ZSH_SCRIPT} )); then
+    '_z4h_exec_zsh_i' '--' "$ZSH_SCRIPT" "${_z4h_script_argv[@]}"
+  else
+    '_z4h_exec_zsh_i'
+  fi
+fi
+
 'unset' '-f' '_z4h_try_exec_zsh_i' '_z4h_exec_zsh_i'
 'return' '1'

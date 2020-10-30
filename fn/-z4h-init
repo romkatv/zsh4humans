@@ -341,6 +341,9 @@ if (( _z4h_use[fzf] )); then
   # cd into a subdirectory (interactive).
   bindkey '^[[1;2B' z4h-cd-down                    # shift+down
 fi
+if zstyle -T :z4h prompt-position bottom; then
+  bindkey '^L' z4h-clear-screen-and-move-to-bottom
+fi
 
 if zstyle -T :z4h:bindkey macos-option-as-alt; then
   typeset -grA _z4h_macos_opt_key=(

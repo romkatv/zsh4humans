@@ -153,7 +153,8 @@ function -z4h-cmd-init() {
   () {
     eval "$_z4h_opt"
 
-    [[ $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] || ! zstyle -T :z4h start-tmux integrated
+    [[ -n $Z4H_SSH || $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] ||
+      ! zstyle -T :z4h start-tmux integrated
     local -i install_tmux=$? need_restart need_scroll
 
     if (( ! $+ZSH_SCRIPT && ! $+ZSH_EXECUTION_STRING )) &&

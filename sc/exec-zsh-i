@@ -98,7 +98,7 @@ _z4h_exec_zsh_i() {
   fi
 }
 
-if '[' '-n' "$ZSH_VERSION" ']'; then
+if '[' '-n' "${ZSH_VERSION-}" ']'; then
   # TODO: propagate original options here. Will need to save them similarly
   # to _z4h_script_argv.
   if (( ${+ZSH_EXECUTION_STRING} )); then

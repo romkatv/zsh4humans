@@ -998,9 +998,3 @@ else
   [[ ${${:-ls}:c:A:t}   == busybox* ]] || alias ls='ls -G'
 fi
 [[ ${${:-grep}:c:A:t}   == busybox* ]] || alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn}'
-
-if [[ -w $TTY && (-n $Z4H_SSH && -n $_Z4H_SSH_MARKER || -n $_Z4H_TMUX) ]]; then
-  typeset -gri _z4h_can_save_restore_screen=1
-else
-  typeset -gri _z4h_can_save_restore_screen=0
-fi

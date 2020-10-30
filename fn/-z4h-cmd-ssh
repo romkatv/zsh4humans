@@ -326,6 +326,8 @@ local -i bypass=0
   unsetopt multibyte
   local LC_ALL=C
 
+  unset _z4h_saved_screen
+
   {
     local buf=
     local mark=$'\004z\0004\000h'$dump_marker

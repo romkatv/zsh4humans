@@ -228,6 +228,12 @@ function -z4h-cmd-init() {
       fi
     fi
 
+    if [[ -w $TTY && (-n $Z4H_SSH && -n $_Z4H_SSH_MARKER || -n $_Z4H_TMUX) ]]; then
+      typeset -gri _z4h_can_save_restore_screen=1
+    else
+      typeset -gri _z4h_can_save_restore_screen=0
+    fi
+
     if (( need_scroll )); then
       local cursor_y cursor_x
       -z4h-get-cursor-pos || return

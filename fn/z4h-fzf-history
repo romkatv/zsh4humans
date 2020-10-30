@@ -14,6 +14,8 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 {
   -z4h-show-dots
 
+  local -ha history=(abc def)
+
   typeset -ga _z4h_naturals
   if (( $#_z4h_naturals < $#history )); then
     _z4h_naturals+=({$(($#_z4h_naturals+1))..$#history})
@@ -51,7 +53,8 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 
   local -i preview_lines=6
   local -i height=$(($#history + 2))
-  local preview_window=wrap:$((preview_lines - 2))
+  (( height >= 4 )) || (( height = 4 ))
+  local preview_window=wrap:$preview_lines
   if (( height + preview_lines <= space || space > preview_lines + 5 )); then
     (( height += preview_lines ))
   else

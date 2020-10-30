@@ -19,8 +19,9 @@
   local -i pct=60
   [[ -n $_Z4H_TMUX ]] && pct=100
 
-  local -i height=$(( ! $#dirs && 100 * ($#_z4h_words + 5) < pct * LINES ? $#_z4h_words + 5 : pct * LINES / 100 ))
+  local -i height=$(( ! $#dirs && 100 * ($#_z4h_words + 4) < pct * LINES ? $#_z4h_words + 4 : pct * LINES / 100 ))
 
+  (( height >= 6 )) || (( height = 6 ))
   (( height <= LINES - 1 )) || (( height = LINES - 1 ))
 
   local opts=(
@@ -42,12 +43,12 @@
   if [[ -n $_Z4H_TMUX ]]; then
     opts+=(--no-clear)
     if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
-       (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
+       (( line - 1 > LINES - line && line - 1 > 6 )) &&
        { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
       (( height <= line - 1 )) || (( height = line - 1 ))
       local move=$'\e[0m\e['$((line-height))';1H'
       opts+=(--layout=default)
-    elif (( LINES - line > 5 )); then
+    elif (( LINES - line > 6 )); then
       (( height <= LINES - line )) || (( height = LINES - line ))
       local move=$'\e[0m\n\r'
       opts+=(--layout=reverse)

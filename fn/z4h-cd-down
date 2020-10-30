@@ -36,8 +36,9 @@ local -i list_colors=$((!$?))
         local -i pct=60
         [[ -n $_Z4H_TMUX ]] && pct=100
 
-        local -i height=$(( ! $#non_empty && 100 * ($#dirs + 5) < pct * LINES ? $#dirs + 5 : pct * LINES / 100 ))
+        local -i height=$(( ! $#non_empty && 100 * ($#dirs + 4) < pct * LINES ? $#dirs + 4 : pct * LINES / 100 ))
 
+        (( height >= 6 )) || (( height = 6 ))
         (( height <= LINES - 1 )) || (( height = LINES - 1 ))
 
         local opts=(
@@ -58,12 +59,12 @@ local -i list_colors=$((!$?))
         if [[ -n $_Z4H_TMUX ]]; then
           opts+=(--no-clear)
           if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
-             (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
+             (( line - 1 > LINES - line && line - 1 > 4 + preview_lines )) &&
              { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
             (( height <= line - 1 )) || (( height = line - 1 ))
             local move=$'\e[0m\e['$((line-height))';1H'
             opts+=(--layout=default)
-          elif (( LINES - line > 5 )); then
+          elif (( LINES - line > 4 )); then
             (( height <= LINES - line )) || (( height = LINES - line ))
             local move=$'\e[0m\n\r'
             opts+=(--layout=reverse)

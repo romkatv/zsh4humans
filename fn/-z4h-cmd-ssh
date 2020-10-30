@@ -251,6 +251,8 @@ fi
   fi
   script=${script//'^RETRIEVE_FROM^'/${(j: :)retrieve_from}}
   script=${script//'^DUMP_MARKER^'/${(q)dump_marker}}
+  script=${script//'^CAN_SAVE_RESTORE_SCREEN^'/${_z4h_can_save_restore_screen}}
+
   script=${script//'^DUMP_POS^'/${(r:8:: :)${#script}}}
 
   print -r -- $script >$tmpdir/script || return
@@ -375,11 +377,29 @@ local -i bypass=0
         sysread -s $((16 - $#buf)) 'buf[$#buf+1]' && continue
         return $(( $? != 5 ))
       done
-      if [[ $buf[1,16] == bypass[' ']## ]]; then
-        bypass=1
-        break
-      fi
-      [[ $buf[1,16] == <->' '## ]] || return
+      case ${buf[1,16]%% #} in
+        bypass)
+          bypass=1
+          break
+        ;;
+        save-screen)
+          (( _z4h_can_save_restore_screen )) || return
+          local _z4h_saved_screen=
+          -z4h-save-screen || return
+          _z4h_saved_screen+=x
+        ;;
+        restore-screen)
+          [[ -n $_z4h_saved_screen ]] || return
+          _z4h_saved_screen[-1]=
+          -z4h-restore-screen || return
+          unset _z4h_saved_screen
+        ;;
+        <->)
+        ;;
+        *)
+          return 1
+        ;;
+      esac
       local -i len=buf[1,16]
       buf=${buf:16}
       (( len )) || continue

@@ -24,7 +24,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
   local cursor_y cursor_x
   -z4h-get-cursor-pos || return
 
-  if [[ -n $_Z4H_TMUX ]]; then
+  if (( _z4h_can_save_restore_screen )); then
     local opts=(
       --read0
       --no-multi
@@ -47,11 +47,13 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     local _z4h_saved_screen
     -z4h-save-screen || return
   else
+    # A big chunk of this branch is dead code because _z4h_can_save_restore_screen is false.
+    # I'm keeping it for a while in case I decide to change this logic.
     local -i pct=80
-    [[ -n $_Z4H_TMUX ]] && pct=100
+    (( _z4h_can_save_restore_screen )) && pct=100
 
     local -i space
-    if [[ -n $_Z4H_TMUX ]]; then
+    if (( _z4h_can_save_restore_screen )); then
       (( space = LINES - cursor_y < cursor_y - 1 ? cursor_y - 1 : LINES - cursor_y ))
     else
       (( space = LINES - 1 ))
@@ -85,7 +87,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     (( height <= pct * LINES / 100 )) || (( height = pct * LINES / 100 ))
     (( height <= LINES - 1 )) || (( height = LINES - 1 ))
 
-    if [[ -n $_Z4H_TMUX ]]; then
+    if (( _z4h_can_save_restore_screen )); then
       opts+=(--no-clear)
       if { (( height <= cursor_y - 1 )) && zstyle -T :z4h prompt-position bottom } ||
         (( cursor_y - 1 > LINES - cursor_y && cursor_y - 1 > 5 + preview_lines )) &&
@@ -155,8 +157,8 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     fi
     return 0
   } always {
-    if [[ -n $_Z4H_TMUX ]]; then
-      print -rn -- $_z4h_saved_screen
+    if (( _z4h_can_save_restore_screen )); then
+      -z4h-restore-screen
       print -rn -- $'\e[0m\e['$cursor_y';'$cursor_x'H'
     else
       builtin echoti cuu 1

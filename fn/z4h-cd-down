@@ -34,7 +34,7 @@ local -i list_colors=$((!$?))
         -z4h-show-dots ''
         
         local -i pct=60
-        [[ -n $_Z4H_TMUX ]] && pct=100
+        (( _z4h_can_save_restore_screen )) && pct=100
 
         local -i height=$(( ! $#non_empty && 100 * ($#dirs + 4) < pct * LINES ? $#dirs + 4 : pct * LINES / 100 ))
 
@@ -57,7 +57,7 @@ local -i list_colors=$((!$?))
         local cursor_y cursor_x
         -z4h-get-cursor-pos || return
 
-        if [[ -n $_Z4H_TMUX ]]; then
+        if (( _z4h_can_save_restore_screen )); then
           opts+=(--no-clear)
           if { (( height <= cursor_y - 1 )) && zstyle -T :z4h prompt-position bottom } ||
              (( cursor_y - 1 > LINES - cursor_y && cursor_y - 1 > 4 + preview_lines )) &&
@@ -107,8 +107,8 @@ local -i list_colors=$((!$?))
           cd -- ${choice[2]%%$'\0'*} || return
           redraw=1
         } always {
-          if [[ -n $_Z4H_TMUX ]]; then
-            print -rn -- $_z4h_saved_screen
+          if (( _z4h_can_save_restore_screen )); then
+            -z4h-restore-screen
             print -rn -- $'\e[0m\e['$cursor_y';'$cursor_x'H'
           else
             builtin echoti cuu 1

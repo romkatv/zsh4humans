@@ -97,6 +97,10 @@ z4h_ssh_host=^SSH_HOST^
 
 'export' Z4H_SSH="$z4h_min_version":"$z4h_ssh_client":"$z4h_ssh_host"
 'export' P9K_TTY="old"
+if '[' ^CAN_SAVE_RESTORE_SCREEN^ '=' '1' ']'; then
+  'export' _Z4H_SSH_MARKER=^DUMP_MARKER^
+fi
+
 ^PRELUDE^
 
 _z4h_ssh_tar_c_opt=

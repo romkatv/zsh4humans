@@ -1,5 +1,11 @@
 eval "$_z4h_opt"
 
-local pane
-pane="$(TMUX=$_Z4H_TMUX TMUX_PANE= $_Z4H_TMUX_CMD capture-pane -p -e && print -n x)" || return
-typeset -g _z4h_saved_screen=$'\e[0m\e[H'${${pane//$'\n'/$'\e[K\n'}%$'\nx'}
+if [[ -n $_Z4H_TMUX ]]; then
+  local pane
+  pane="$(TMUX=$_Z4H_TMUX TMUX_PANE= $_Z4H_TMUX_CMD capture-pane -p -e && print -n x)" || return
+  typeset -g _z4h_saved_screen=$'\e[0m\e[H'${${pane//$'\n'/$'\e[K\r\n'}%$'\r\nx'}
+elif [[ -n $Z4H_SSH && -n $_Z4H_SSH_MARKER && -w $TTY ]]; then
+  printf '\004z\0004\000h%s%s' "$_Z4H_SSH_MARKER" 'save-screen     ' >"$TTY"
+else
+  return 1
+fi

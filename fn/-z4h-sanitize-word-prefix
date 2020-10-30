@@ -1,0 +1,10 @@
+() {
+  emulate -L zsh -o extended_glob
+  [[ $_z4h_word_prefix != *('$'|'\') ]] || return
+  if [[ $_z4h_word_prefix == *[A-Z]* ]]; then
+    [[ -z ${(@)*:#$_z4h_word_prefix*} ]] || return
+  else
+    [[ -z ${(@)*:#(#i)$_z4h_word_prefix*} ]] || return
+  fi
+} "$@" || _z4h_word_prefix=
+_z4h_word_prefix=${_z4h_word_prefix// /\\ }

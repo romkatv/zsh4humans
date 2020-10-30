@@ -42,9 +42,9 @@
   IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
   if [[ -n $_Z4H_TMUX ]]; then
     opts+=(--no-clear)
-    if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
+    if { (( height <= line - 1 )) && zstyle -T :z4h prompt-position bottom } ||
        (( line - 1 > LINES - line && line - 1 > 6 )) &&
-       { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
+       { (( height > LINES - line )) || zstyle -T :z4h prompt-position bottom }; then
       (( height <= line - 1 )) || (( height = line - 1 ))
       local move=$'\e[0m\e['$((line-height))';1H'
       opts+=(--layout=default)

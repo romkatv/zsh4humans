@@ -31,7 +31,7 @@ local -i list_colors=$((!$?))
       fi
 
       {
-        -z4h-show-dots
+        -z4h-show-dots 1
         
         local -i pct=60
         [[ -n $_Z4H_TMUX ]] && pct=100

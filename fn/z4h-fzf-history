@@ -12,7 +12,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp --wrap=character --terminal-width=$((FZF_PREVIEW_COLUMNS-1))'
 
 {
-  -z4h-show-dots
+  -z4h-show-dots 1
 
   local -ha history=(abc def)
 

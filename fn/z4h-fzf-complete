@@ -151,16 +151,6 @@ done
       builtin zle expand-or-complete
       if [[ $buf == $BUFFER && $cursor == $CURSOR ]]; then
         (( ${#_z4h_words} )) || return 0
-        () {
-          emulate -L zsh -o extended_glob
-          [[ $_z4h_word_prefix != *('$'|'\') ]] || return
-          if [[ $_z4h_word_prefix == *[A-Z]* ]]; then
-            [[ -z ${(@)_z4h_words:#$_z4h_word_prefix*} ]]
-          else
-            [[ -z ${(@)_z4h_words:#(#i)$_z4h_word_prefix*} ]]
-          fi
-        } || _z4h_word_prefix=
-        _z4h_word_prefix=${_z4h_word_prefix// /\\ }
         local _z4h_path_prefix=
         if () {
                 emulate -L zsh
@@ -176,6 +166,7 @@ done
           else
             _z4h_words=("${(@u)_z4h_words}")
           fi
+          -z4h-sanitize-word-prefix "${_z4h_words[@]}"
           -z4h-comp-files || return
           () {
             emulate -L zsh
@@ -187,6 +178,7 @@ done
           local -a _z4h_reply=()
           local nl=$'\n'
           _z4h_descrs=("${(@)_z4h_descrs//$nl/\\n}")
+          -z4h-sanitize-word-prefix "${_z4h_descrs[@]}"
           -z4h-comp-words || return
           () {
             emulate -L zsh

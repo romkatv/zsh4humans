@@ -778,3 +778,9 @@ https://github.com/romkatv/zsh4humans/issues/35#issuecomment-719639084 are here:
 ```text
 3a8eb6f08fb26ffdad79dae6f00c9a80ba30ecc0f0ee0a142322005f1d28710a */home/romka/notes/z4h-tmuw-issues.md
 ```
+
+---
+
+See if it's feasible to fix
+https://github.com/romkatv/powerlevel10k#horrific-mess-when-resizing-terminal-window by patching
+tmux.

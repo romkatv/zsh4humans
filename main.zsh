@@ -154,7 +154,7 @@ function -z4h-cmd-init() {
     eval "$_z4h_opt"
 
     [[ $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] || ! zstyle -T :z4h start-tmux integrated
-    local -i install_tmux=$? need_restart
+    local -i install_tmux=$? need_restart need_scroll
 
     if (( ! $+ZSH_SCRIPT && ! $+ZSH_EXECUTION_STRING )) &&
        [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
@@ -175,8 +175,7 @@ function -z4h-cmd-init() {
           unset _Z4H_TMUX _Z4H_TMUX_CMD
         fi
         if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -T :z4h prompt-position bottom; then
-          print -rn -- ${(pl:$((LINES-1))::\n:)}
-          typeset -gri __p9k_initial_screen_empty=1
+          need_scroll=1
         fi
       elif (( install_tmux )) && [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD
@@ -222,10 +221,17 @@ function -z4h-cmd-init() {
     if (( _z4h_installed_something )); then
       if (( need_restart )); then
         print -ru2 ${(%):-"%F{3}z4h%f: restarting %F{2}zsh%f"}
-        exec -- $_z4h_exe -i
+        exec -- $_z4h_exe -i || return
       else
         print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
       fi
+    fi
+
+    if (( need_scroll )); then
+      local cursor_y cursor_x
+      -z4h-get-cursor-pos || return
+      local -i n=$((LINES - cursor_y))
+      print -rn -- ${(pl:$n::\n:)}
     fi
   } || return
 

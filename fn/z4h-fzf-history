@@ -14,8 +14,6 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 {
   -z4h-show-dots 1
 
-  local -ha history=(abc def)
-
   typeset -ga _z4h_naturals
   if (( $#_z4h_naturals < $#history )); then
     _z4h_naturals+=({$(($#_z4h_naturals+1))..$#history})
@@ -26,82 +24,106 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
   local esc line col
   IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
 
-  local -i pct=80
-  [[ -n $_Z4H_TMUX ]] && pct=100
-
-  local -i space
   if [[ -n $_Z4H_TMUX ]]; then
-    (( space = LINES - line < line - 1 ? line - 1 : LINES - line ))
-  else
-    (( space = LINES - 1 ))
-  fi
-  (( space <= pct * LINES / 100 )) || (( space = pct * LINES / 100 ))
-
-  local opts=(
-    --read0
-    --no-multi
-    --tiebreak=index
-    --cycle
-    --delimiter='\001'
-    --with-nth=2
-    --exact
-    --no-mouse
-    --tabstop 1
-    --query=${(j: :)${(@Z:cn:)LBUFFER}}
-    --color=hl:201,hl+:201
-  )
-
-  local -i preview_lines=6
-  local -i height=$(($#history + 2))
-  (( height >= 4 )) || (( height = 4 ))
-  local preview_window=wrap:$preview_lines
-  if (( height + preview_lines <= space || space > preview_lines + 5 )); then
-    (( height += preview_lines ))
-  else
-    preview_lines=0
-  fi
-
-  (( height <= pct * LINES / 100 )) || (( height = pct * LINES / 100 ))
-  (( height <= LINES - 1 )) || (( height = LINES - 1 ))
-
-  if [[ -n $_Z4H_TMUX ]]; then
-    opts+=(--no-clear)
-    if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
-       (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
-       { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
-      preview_window+=':up'
-      (( preview_lines )) || opts+=(--border=horizontal)
-      (( height <= line - 1 )) || (( height = line - 1 ))
-      local move=$'\e[0m\e['$((line-height))';1H'
-      opts+=(--layout=default)
-    elif (( LINES - line > 5 + preview_lines )); then
-      preview_window+=':down'
-      (( height <= LINES - line )) || (( height = LINES - line ))
-      local move=$'\e[0m\n\r'
-      opts+=(--layout=reverse)
-    else
-      preview_window+=':down'
-      local -i extra=$((height - LINES + line))
-      print -rn -- ${(pl:$height::\n:)} >$TTY || return
-      (( line += LINES - line - height ))
-      local move=$'\e[0m\e['$((line+1))';1H'
-      opts+=(--layout=reverse)
-    fi
+    local opts=(
+      --read0
+      --no-multi
+      --tiebreak=index
+      --cycle
+      --delimiter='\001'
+      --with-nth=2
+      --exact
+      --no-mouse
+      --tabstop 1
+      --query=${(j: :)${(@Z:cn:)LBUFFER}}
+      --color=hl:201,hl+:201
+      --no-clear
+      --layout=default
+      --preview-window=wrap:4:down:noborder
+      --preview=$preview
+      --height=$LINES
+    )
+    local move=$'\e[0m\eH'
     local _z4h_saved_screen
     -z4h-save-screen || return
   else
-    print >$TTY || return
-    preview_window+=':down'
-    local move=
-    opts+=(--layout=reverse)
-  fi
+    local -i pct=80
+    [[ -n $_Z4H_TMUX ]] && pct=100
 
-  opts+=(--height=$height)
-  if (( preview_lines )); then
-    opts+=(
-      --preview-window=$preview_window
-      --preview=$preview
+    local -i space
+    if [[ -n $_Z4H_TMUX ]]; then
+      (( space = LINES - line < line - 1 ? line - 1 : LINES - line ))
+    else
+      (( space = LINES - 1 ))
+    fi
+    (( space <= pct * LINES / 100 )) || (( space = pct * LINES / 100 ))
+
+    local opts=(
+      --read0
+      --no-multi
+      --tiebreak=index
+      --cycle
+      --delimiter='\001'
+      --with-nth=2
+      --exact
+      --no-mouse
+      --tabstop 1
+      --query=${(j: :)${(@Z:cn:)LBUFFER}}
+      --color=hl:201,hl+:201
     )
+
+    local -i preview_lines=6
+    local -i height=$(($#history + 2))
+    (( height >= 4 )) || (( height = 4 ))
+    local preview_window=wrap:$preview_lines
+    if (( height + preview_lines <= space || space > preview_lines + 5 )); then
+      (( height += preview_lines ))
+    else
+      preview_lines=0
+    fi
+
+    (( height <= pct * LINES / 100 )) || (( height = pct * LINES / 100 ))
+    (( height <= LINES - 1 )) || (( height = LINES - 1 ))
+
+    if [[ -n $_Z4H_TMUX ]]; then
+      opts+=(--no-clear)
+      if { (( height <= line - 1 )) && zstyle -t :z4h:tmux start-at-bottom } ||
+        (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
+        { (( height > LINES - line )) || zstyle -t :z4h:tmux start-at-bottom }; then
+        preview_window+=':up'
+        (( preview_lines )) || opts+=(--border=horizontal)
+        (( height <= line - 1 )) || (( height = line - 1 ))
+        local move=$'\e[0m\e['$((line-height))';1H'
+        opts+=(--layout=default)
+      elif (( LINES - line > 5 + preview_lines )); then
+        preview_window+=':down'
+        (( height <= LINES - line )) || (( height = LINES - line ))
+        local move=$'\e[0m\n\r'
+        opts+=(--layout=reverse)
+      else
+        preview_window+=':down'
+        local -i extra=$((height - LINES + line))
+        print -rn -- ${(pl:$height::\n:)} >$TTY || return
+        (( line += LINES - line - height ))
+        local move=$'\e[0m\e['$((line+1))';1H'
+        opts+=(--layout=reverse)
+      fi
+      local _z4h_saved_screen
+      -z4h-save-screen || return
+    else
+      print >$TTY || return
+      preview_window+=':down'
+      local move=
+      opts+=(--layout=reverse)
+    fi
+
+    opts+=(--height=$height)
+    if (( preview_lines )); then
+      opts+=(
+        --preview-window=$preview_window
+        --preview=$preview
+      )
+    fi
   fi
 
   {

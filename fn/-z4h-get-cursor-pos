@@ -1,0 +1,2 @@
+local esc
+IFS='[;' builtin read -s -d R esc\?$'\e[6n' cursor_y cursor_x <"$TTY"

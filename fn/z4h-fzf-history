@@ -21,8 +21,8 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 
   autoload +X -Uz -- -z4h-cursor-show
 
-  local esc line col
-  IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
+  local cursor_y cursor_x
+  -z4h-get-cursor-pos || return
 
   if [[ -n $_Z4H_TMUX ]]; then
     local opts=(
@@ -52,7 +52,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 
     local -i space
     if [[ -n $_Z4H_TMUX ]]; then
-      (( space = LINES - line < line - 1 ? line - 1 : LINES - line ))
+      (( space = LINES - cursor_y < cursor_y - 1 ? cursor_y - 1 : LINES - cursor_y ))
     else
       (( space = LINES - 1 ))
     fi
@@ -87,25 +87,25 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 
     if [[ -n $_Z4H_TMUX ]]; then
       opts+=(--no-clear)
-      if { (( height <= line - 1 )) && zstyle -T :z4h prompt-position bottom } ||
-        (( line - 1 > LINES - line && line - 1 > 5 + preview_lines )) &&
-        { (( height > LINES - line )) || zstyle -T :z4h prompt-position bottom }; then
+      if { (( height <= cursor_y - 1 )) && zstyle -T :z4h prompt-position bottom } ||
+        (( cursor_y - 1 > LINES - cursor_y && cursor_y - 1 > 5 + preview_lines )) &&
+        { (( height > LINES - cursor_y )) || zstyle -T :z4h prompt-position bottom }; then
         preview_window+=':up'
         (( preview_lines )) || opts+=(--border=horizontal)
-        (( height <= line - 1 )) || (( height = line - 1 ))
-        local move=$'\e[0m\e['$((line-height))';1H'
+        (( height <= cursor_y - 1 )) || (( height = cursor_y - 1 ))
+        local move=$'\e[0m\e['$((cursor_y-height))';1H'
         opts+=(--layout=default)
-      elif (( LINES - line > 5 + preview_lines )); then
+      elif (( LINES - cursor_y > 5 + preview_lines )); then
         preview_window+=':down'
-        (( height <= LINES - line )) || (( height = LINES - line ))
+        (( height <= LINES - cursor_y )) || (( height = LINES - cursor_y ))
         local move=$'\e[0m\n\r'
         opts+=(--layout=reverse)
       else
         preview_window+=':down'
-        local -i extra=$((height - LINES + line))
+        local -i extra=$((height - LINES + cursor_y))
         print -rn -- ${(pl:$height::\n:)} >$TTY || return
-        (( line += LINES - line - height ))
-        local move=$'\e[0m\e['$((line+1))';1H'
+        (( cursor_y += LINES - cursor_y - height ))
+        local move=$'\e[0m\e['$((cursor_y+1))';1H'
         opts+=(--layout=reverse)
       fi
       local _z4h_saved_screen
@@ -157,10 +157,10 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
   } always {
     if [[ -n $_Z4H_TMUX ]]; then
       print -rn -- $_z4h_saved_screen
-      print -rn -- $'\e[0m\e['$line';'$col'H'
+      print -rn -- $'\e[0m\e['$cursor_y';'$cursor_x'H'
     else
       builtin echoti cuu 1
-      (( col > 1 )) && builtin echoti cuf $((col-1))
+      (( cursor_x > 1 )) && builtin echoti cuf $((cursor_x-1))
     fi
   }
 } always {

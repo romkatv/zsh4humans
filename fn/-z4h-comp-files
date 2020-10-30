@@ -38,25 +38,26 @@
     --border=horizontal
   )
 
-  local esc line col
-  IFS='[;' builtin read -s -d R esc\?$'\e[6n' line col <$TTY || return
+  local cursor_y cursor_x
+  -z4h-get-cursor-pos || return
+
   if [[ -n $_Z4H_TMUX ]]; then
     opts+=(--no-clear)
-    if { (( height <= line - 1 )) && zstyle -T :z4h prompt-position bottom } ||
-       (( line - 1 > LINES - line && line - 1 > 6 )) &&
-       { (( height > LINES - line )) || zstyle -T :z4h prompt-position bottom }; then
-      (( height <= line - 1 )) || (( height = line - 1 ))
-      local move=$'\e[0m\e['$((line-height))';1H'
+    if { (( height <= cursor_y - 1 )) && zstyle -T :z4h prompt-position bottom } ||
+       (( cursor_y - 1 > LINES - cursor_y && cursor_y - 1 > 6 )) &&
+       { (( height > LINES - cursor_y )) || zstyle -T :z4h prompt-position bottom }; then
+      (( height <= cursor_y - 1 )) || (( height = cursor_y - 1 ))
+      local move=$'\e[0m\e['$((cursor_y-height))';1H'
       opts+=(--layout=default)
-    elif (( LINES - line > 6 )); then
-      (( height <= LINES - line )) || (( height = LINES - line ))
+    elif (( LINES - cursor_y > 6 )); then
+      (( height <= LINES - cursor_y )) || (( height = LINES - cursor_y ))
       local move=$'\e[0m\n\r'
       opts+=(--layout=reverse)
     else
-      local -i extra=$((height - LINES + line))
+      local -i extra=$((height - LINES + cursor_y))
       print -rn -- ${(pl:$height::\n:)} >$TTY || return
-      (( line += LINES - line - height ))
-      local move=$'\e[0m\e['$((line+1))';1H'
+      (( cursor_y += LINES - cursor_y - height ))
+      local move=$'\e[0m\e['$((cursor_y+1))';1H'
       opts+=(--layout=reverse)
     fi
     local _z4h_saved_screen
@@ -100,10 +101,10 @@
     -z4h-cursor-hide
     if [[ -n $_Z4H_TMUX ]]; then
       print -rn -- $_z4h_saved_screen
-      print -rn -- $'\e[0m\e['$line';'$col'H'
+      print -rn -- $'\e[0m\e['$cursor_y';'$cursor_x'H'
     else
       builtin echoti cuu 1
-      (( col > 1 )) && builtin echoti cuf $((col-1))
+      (( cursor_x > 1 )) && builtin echoti cuf $((cursor_x-1))
     fi
   }
 

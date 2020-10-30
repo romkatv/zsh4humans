@@ -11,12 +11,6 @@ zstyle ':z4h:'                auto-update-days '28'
 
 # Keyboard type: 'mac' or 'pc'.
 zstyle ':z4h:bindkey'         keyboard         'pc'
-# When fzf menu opens on TAB, another TAB moves the cursor down ('tab:down')
-# or accepts the selection and triggers another TAB-completion ('tab:repeat')?
-zstyle ':z4h:fzf-complete'    fzf-bindings     'tab:down'
-# When fzf menu opens on Alt+Down, TAB moves the cursor down ('tab:down')
-# or accepts the selection and triggers another Alt+Down ('tab:repeat')?
-zstyle ':z4h:cd-down'         fzf-bindings     'tab:down'
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     'accept'

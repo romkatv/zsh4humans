@@ -47,7 +47,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     --exact
     --no-mouse
     --tabstop 1
-    --query=$LBUFFER
+    --query=${(j: :)${(@Z:cn:)LBUFFER}}
     --color=hl:201,hl+:201
   )
 

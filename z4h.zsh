@@ -93,8 +93,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   'bindkey' '^[[1;3C' 'forward-word'
   'bindkey' '^[[1;5C' 'forward-word'
 
-  'typeset' '-ga' '_z4h_script_argv'
-  _z4h_script_argv=("$@")
+  'set' '-A' '_z4h_script_argv' "$@"
 fi
 
 if '[' '-n' "${Z4H-}" ']' &&

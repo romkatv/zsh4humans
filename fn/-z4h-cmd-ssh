@@ -330,7 +330,7 @@ local -i bypass=0
 
   {
     local buf=
-    local mark=$'\004z\0004\000h'$dump_marker
+    local mark=$'\001z4h.'$dump_marker
     while true; do
       sysread 'buf[$#buf+1]' || return $(( $? != 5 ))
       if [[ $buf != *$mark[1]* ]]; then

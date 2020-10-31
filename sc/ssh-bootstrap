@@ -49,7 +49,7 @@ if '[' '-n' "$_z4h_bypass" ']'; then
     esac
   fi
 
-  'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ 'bypass          '
+  'printf' '\001z4h.%s%s' ^DUMP_MARKER^ 'bypass          '
   'exit'
 fi
 
@@ -242,7 +242,7 @@ while '[' "${#_z4h_dump_size}" '-lt' '16' ']'; do
 done
 
 {
-  'printf' '\004z\0004\000h%s%s' ^DUMP_MARKER^ "$_z4h_dump_size" || 'exit'
+  'printf' '\001z4h.%s%s' ^DUMP_MARKER^ "$_z4h_dump_size" || 'exit'
   if '[' "$_z4h_dump_size" '!=' '0               ' ']'; then
     'command' 'cat' '--' "$_z4h_ssh_tmp"/dump.base64-sl || 'exit'
   fi

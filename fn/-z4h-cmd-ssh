@@ -309,6 +309,8 @@ fi
 
 local -i bypass=0
 
+local -i pid=$sysparams[pid]
+
 {
   setopt no_multi_os
   "${z4h_ssh_command[@]}" "${args[@]}" "sh $remote_script" 2>&1 1>&3 |
@@ -332,7 +334,7 @@ local -i bypass=0
     local buf=
     local mark=$'\001z4h.'$dump_marker
     while true; do
-      sysread 'buf[$#buf+1]' || return $(( $? != 5 ))
+      [[ -n $buf ]] || sysread 'buf[$#buf+1]' || return $(( $? != 5 ))
       if [[ $buf != *$mark[1]* ]]; then
         print -rn -- $buf
         buf=
@@ -342,16 +344,12 @@ local -i bypass=0
         print -rn -- ${buf%%$mark[1]*}
         buf=$mark[1]${buf#*$mark[1]}
         local -i prefix=$(($#buf < $#mark ? $#buf : $#mark))
+        (( prefix )) || continue
         [[ ${buf:0:$prefix} == ${mark:0:$prefix} ]] && break
         print -rn -- $buf[1]
         buf[1]=""
-        if [[ $buf != *$mark[1]* ]]; then
-          print -rn -- $buf
-          buf=
-          break
-        fi
+        continue 2
       done
-      [[ -n $buf ]] || continue
       while (( $#buf < $#mark )) && [[ $mark == $buf* ]]; do
         # What should we do if the output ends with a proper prefix of mark?
         # Print it or not? Return an error or not? We choose to not print and return
@@ -360,18 +358,8 @@ local -i bypass=0
         return $(( $? != 5 ))
       done
       if [[ $buf != $mark* ]]; then
-        while true; do
-          print -rn -- $buf[1]
-          buf[1]=""
-          if [[ $buf != *$mark[1]* ]]; then
-            print -rn -- $buf
-            buf=
-            break
-          fi
-          print -rn -- ${buf%%$mark[1]*}
-          buf=$mark[1]${buf#*$mark[1]}
-          [[ $mark == $buf* ]] && break
-        done
+        print -rn -- $buf[1]
+        buf[1]=""
         continue
       fi
       buf[1,$#mark]=""
@@ -379,31 +367,38 @@ local -i bypass=0
         sysread -s $((16 - $#buf)) 'buf[$#buf+1]' && continue
         return $(( $? != 5 ))
       done
-      case ${buf[1,16]%% #} in
-        bypass)
-          bypass=1
-          break
-        ;;
-        save-screen)
-          (( _z4h_can_save_restore_screen )) || return
-          local _z4h_saved_screen=
-          -z4h-save-screen || return
-          _z4h_saved_screen+=x
-        ;;
-        restore-screen)
-          [[ -n $_z4h_saved_screen ]] || return
-          _z4h_saved_screen[-1]=
-          -z4h-restore-screen || return
-          unset _z4h_saved_screen
-        ;;
-        <->)
-        ;;
-        *)
-          return 1
-        ;;
-      esac
-      local -i len=buf[1,16]
-      buf=${buf:16}
+
+      {
+        case ${buf[1,16]%% #} in
+          bypass)
+            bypass=1
+            break
+          ;;
+          save-screen)
+            (( _z4h_can_save_restore_screen )) || return
+            local _z4h_saved_screen=
+            -z4h-save-screen || return
+            _z4h_saved_screen+=x
+            continue
+          ;;
+          restore-screen)
+            [[ -n $_z4h_saved_screen ]] || return
+            _z4h_saved_screen[-1]=
+            -z4h-restore-screen || return
+            unset _z4h_saved_screen
+            continue
+          ;;
+          <->)
+            local -i len=buf[1,16]
+          ;;
+          *)
+            return 1
+          ;;
+        esac
+      } always {
+        buf=${buf:16}
+      }
+
       (( len )) || continue
       if [[ -d $tmpdir ]]; then
         local dump_file=$tmpdir/dump.base64
@@ -449,7 +444,12 @@ local -i bypass=0
       fi
     done
   } always {
+    local -i err=$?
     zf_rm -rf -- $tmpdir $local_hist_tmp
+    if (( err )); then
+      kill -- -$pid 2>/dev/null
+      (( $+commands[stty] )) && stty sane <$TTY 2>/dev/null
+    fi
   }
 }
 

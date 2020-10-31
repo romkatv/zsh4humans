@@ -161,7 +161,7 @@ function -z4h-cmd-init() {
        [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
       local tmux=$Z4H/tmux/bin/tmux
       local -a match mbegin mend
-      if [[ -n $TMUX && $TMUX == (#b)(/*),(|<->),(|<->) && -n ${match[1]}(#qNu$UID) ]]; then
+      if [[ -n $TMUX && $TMUX == (#b)(/*),(|<->),(|<->) && -w $match[1] ]]; then
         if [[ $TMUX == */z4h-tmux-* ]]; then
           export _Z4H_TMUX=$TMUX
           export _Z4H_TMUX_CMD=$tmux
@@ -181,7 +181,7 @@ function -z4h-cmd-init() {
           local -i n=$((LINES - cursor_y))
           print -rn -- ${(pl:$n::\n:)}
         fi
-      elif (( install_tmux )) && [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) ]]; then
+      elif (( install_tmux )) && [[ ! -w ${_Z4H_TMUX%,(|<->),(|<->)} ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD
         if [[ -x $tmux ]]; then
           unset TMUX TMUX_PANE

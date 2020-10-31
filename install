@@ -11,7 +11,6 @@ platform="$('printf' '%s' "$platform" | 'command' 'tr' '[A-Z]' '[a-z]')"
 
 case "$platform" in
   'darwin x86_64');;
-  'freebsd amd64');;
   'linux aarch64');;
   'linux armv6l');;
   'linux armv7l');;

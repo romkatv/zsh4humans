@@ -24,7 +24,6 @@ if '[' '-z' "$_z4h_bypass" ']'; then
 
   case "$_z4h_ssh_platform" in
     'darwin x86_64');;
-    'freebsd amd64');;
     'linux aarch64');;
     'linux armv6l');;
     'linux armv7l');;

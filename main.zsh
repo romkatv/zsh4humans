@@ -155,7 +155,7 @@ function -z4h-cmd-init() {
 
     [[ -n $Z4H_SSH || $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] ||
       ! zstyle -T :z4h start-tmux integrated
-    local -i install_tmux=$? need_restart need_scroll
+    local -i install_tmux=$? need_restart
 
     if (( ! $+ZSH_SCRIPT && ! $+ZSH_EXECUTION_STRING )) &&
        [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
@@ -176,7 +176,10 @@ function -z4h-cmd-init() {
           unset _Z4H_TMUX _Z4H_TMUX_CMD
         fi
         if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -T :z4h prompt-position bottom; then
-          need_scroll=1
+          local cursor_y cursor_x
+          -z4h-get-cursor-pos || return
+          local -i n=$((LINES - cursor_y))
+          print -rn -- ${(pl:$n::\n:)}
         fi
       elif (( install_tmux )) && [[ -z ${_Z4H_TMUX%,(|<->),(|<->)}(#qNu$UID) ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD
@@ -225,6 +228,7 @@ function -z4h-cmd-init() {
         exec -- $_z4h_exe -i || return
       else
         print -ru2 ${(%):-"%F{3}z4h%f: initializing %F{2}zsh%f"}
+        export P9K_TTY=old
       fi
     fi
 
@@ -232,13 +236,6 @@ function -z4h-cmd-init() {
       typeset -gri _z4h_can_save_restore_screen=1
     else
       typeset -gri _z4h_can_save_restore_screen=0
-    fi
-
-    if (( need_scroll )); then
-      local cursor_y cursor_x
-      -z4h-get-cursor-pos || return
-      local -i n=$((LINES - cursor_y))
-      print -rn -- ${(pl:$n::\n:)}
     fi
   } || return
 

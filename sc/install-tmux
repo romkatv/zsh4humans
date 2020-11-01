@@ -493,27 +493,6 @@ fi
 
 $sudo tar -xzf "$file"
 
-$sudo "$zsh" -fc '
-  setopt extended_glob                                 || exit
-  zmodload -F zsh/files b:{zf_mv,zf_rm,zf_ln,zf_mkdir} || exit
-
-  for pat in "[^[:upper:]]" "[[:upper:]]"; do
-    for hex in ./share/terminfo/[[:xdigit:]][[:xdigit:]].tmux-bin(:t:r); do
-      printf -v char "\\x$hex"
-      [[ $char == $~pat ]] || continue
-      [[ -e ./share/terminfo/$hex ]] || zf_mkdir -- ./share/terminfo/$hex || exit
-      cp -- ./share/terminfo/$hex.tmux-bin/* ./share/terminfo/$hex/ || exit
-      if [[ $char != [[:upper:]] ||
-            ! ./share/terminfo/$char -ef ./share/terminfo/${(L)char} ]]; then
-        [[ -e ./share/terminfo/$char ]] ||
-          zf_ln -s -- $hex ./share/terminfo/$char 2>/dev/null ||
-          zf_mkdir -- ./share/terminfo/$char || exit
-        cp -- ./share/terminfo/$hex.tmux-bin/* ./share/terminfo/$char/ || exit
-      fi
-      zf_rm -rf -- ./share/terminfo/$hex.tmux-bin || exit
-    done
-  done'
-
 cleanup
 
 if [ -z "$quiet" ]; then

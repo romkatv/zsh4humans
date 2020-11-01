@@ -1,6 +1,9 @@
 [[ "$(</proc/version)" == *[Mm]icrosoft* ]] || return
-  
-local lines=("${(@f)${$(cd /mnt/c && /mnt/c/Windows/System32/cmd.exe /c set)//$'\r'}}")
+
+local cmd=${commands[$cmd]:-/mnt/c/Windows/System32/cmd.exe}
+[[ -x $cmd ]] || return
+
+local lines=("${(@f)${$($cmd /c set 2>/dev/null)//$'\r'}}")
 local keys=(${lines%%=*}) vals=(${lines#*=})
 typeset -grA z4h_win_env=(${keys:^vals})
 local home=$z4h_win_env[USERPROFILE]

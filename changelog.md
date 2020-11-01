@@ -29,3 +29,7 @@
 - When connecting over ssh to a host for which `zstyle ':z4h:ssh:...' enable` is set to 'no', `TERM`
   value of `tmux-256color` gets replaced with `screen-256color`. This can be customized with
   `zstyle ':z4h:ssh:...' term`.
+- New option to disable preview in `z4h-fzf-history`:
+  ```zsh
+  zstyle :z4h:fzf-history fzf-preview no
+  ```

@@ -24,7 +24,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
   local cursor_y cursor_x
   -z4h-get-cursor-pos || return
 
-  if (( _z4h_can_save_restore_screen )); then
+  if (( _z4h_can_save_restore_screen )) && zstyle -T :z4h:fzf-history fzf-preview; then
     local opts=(
       --read0
       --no-multi
@@ -78,7 +78,8 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     local -i height=$(($#history + 2))
     (( height >= 4 )) || (( height = 4 ))
     local preview_window=wrap:$preview_lines
-    if (( height + preview_lines <= space || space > preview_lines + 5 )); then
+    if (( height + preview_lines <= space || space > preview_lines + 5 )) &&
+       zstyle -T :z4h:fzf-history fzf-preview; then
       (( height += preview_lines ))
     else
       preview_lines=0

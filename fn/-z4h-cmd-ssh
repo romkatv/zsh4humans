@@ -1,6 +1,6 @@
 # TODO: write proper docs for these configuration options.
 #
-# zstyle ':z4h:ssh:my_host' passthrough          'yes'
+# zstyle ':z4h:ssh:my_host' enable              'yes'
 # zstyle ':z4h:ssh:*'       send-extra-files     '~/foo' '"$ZDOTDIR"/bar'
 # zstyle ':z4h:ssh:*'       retrieve-extra-files '~/foo' '"$ZDOTDIR"/bar'
 # zstyle ':z4h:ssh:*'       ssh-command          command ssh
@@ -68,8 +68,8 @@ local -r z4h_ssh_host
 
 [[ -n $z4h_ssh_host ]] || must_passthrough=1
 
-local -i z4h_ssh_passthrough=must_passthrough
-zstyle -t :z4h:ssh:$z4h_ssh_host passthrough && z4h_ssh_passthrough=1
+local -i z4h_ssh_enable=$(( !must_passthrough ))
+zstyle -t :z4h:ssh:$z4h_ssh_host enable || z4h_ssh_enable=0
 
 local default_ssh_command=(
   command ssh
@@ -162,7 +162,7 @@ END
   } || return
 fi
 
-if (( must_passthrough || z4h_ssh_passthrough )); then
+if (( must_passthrough || !z4h_ssh_enable )); then
   "${z4h_ssh_command[@]}" "$@"
   return
 fi

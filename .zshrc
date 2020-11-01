@@ -15,12 +15,16 @@ zstyle ':z4h:bindkey'         keyboard         'pc'
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char     'accept'
 
-# Send these files over to the remote host when connecting over ssh.
-# Multiple files can be listed here.
-zstyle ':z4h:ssh:*'           send-extra-files '~/.iterm2_shell_integration.zsh'
-# Disable automatic teleportation of z4h over ssh when connecting to some-host.
-# This makes `ssh some-host` equivalent to `command ssh some-host`.
-zstyle ':z4h:ssh:some-host'   passthrough      'yes'
+# Enable ('yes') or disable ('no') automatic teleportation of z4h over
+# ssh when connecting to these hosts.
+zstyle ':z4h:ssh:example-hostname1'   enable 'yes'
+zstyle ':z4h:ssh:*.example-hostname2' enable 'no'
+# The default value if none of the overrides above match the hostname.
+zstyle ':z4h:ssh:*'                   enable 'no'
+
+# Send these files over to the remote host when connecting over ssh to the
+# enabled hosts. Multiple files can be listed here.
+zstyle ':z4h:ssh:*' send-extra-files '~/.iterm2_shell_integration.zsh'
 
 # Move the cursor to the end when Up/Down fetches a command from history?
 zstyle ':zle:up-line-or-beginning-search'   leave-cursor 'yes'
@@ -73,9 +77,6 @@ autoload -Uz zmv
 # Define functions and completions.
 function md() { [[ $# == 1 ]] && mkdir -p -- "$1" && cd -- "$1" }
 compdef _directories md
-
-# Replace `ssh` with `z4h ssh` to automatically teleport z4h to remote hosts.
-function ssh() { z4h ssh "$@" }
 
 # Define named directories: ~w <=> Windows home directory on WSL.
 [[ -n $z4h_win_home ]] && hash -d w=$z4h_win_home

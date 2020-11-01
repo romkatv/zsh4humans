@@ -70,7 +70,7 @@ _z4h_ssh_error() {
   >&2 'printf' '\n'
   >&2 'printf' 'Configure \033[32mz4h\033[0m \033[1mssh\033[0m to open login shell on \033[1m%s\033[0m (like above):\n' ^SSH_HOST^
   >&2 'printf' '\n'
-  >&2 'printf' '  \033[32mzstyle\033[0m \033[33m\047:z4h:ssh:%s\047\033[0m passthrough yes\n' ^SSH_HOST^
+  >&2 'printf' '  \033[32mzstyle\033[0m \033[33m\047:z4h:ssh:%s\047\033[0m enable no\n' ^SSH_HOST^
   >&2 'printf' '\n'
 }
 

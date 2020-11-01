@@ -5,6 +5,7 @@
 # zstyle ':z4h:ssh:*'       retrieve-extra-files '~/foo' '"$ZDOTDIR"/bar'
 # zstyle ':z4h:ssh:*'       ssh-command          command ssh
 # zstyle ':z4h:ssh:*'       retrieve-history     $ZDOTDIR/.zsh_history.remote
+# zstyle ':z4h:ssh:*'       term                 tmux-256color
 #
 # z4h-ssh-configure() {
 #   z4h_ssh_prelude+=(
@@ -81,6 +82,9 @@ local -a z4h_ssh_command
 if ! zstyle -a :z4h:ssh:$z4h_ssh_host ssh-command z4h_ssh_command; then
   z4h_ssh_command=($default_ssh_command)
 fi
+
+local term
+zstyle -s :z4h:ssh:$z4h_ssh_host term term || term=${TERM:/tmux-256color/screen-256color}
 
 local -A z4h_ssh_send_files z4h_ssh_retrieve_files
 local -a z4h_ssh_prelude z4h_ssh_setup z4h_ssh_run z4h_ssh_teardown 
@@ -163,7 +167,7 @@ END
 fi
 
 if (( must_passthrough || !z4h_ssh_enable )); then
-  "${z4h_ssh_command[@]}" "$@"
+  TERM=$term "${z4h_ssh_command[@]}" "$@"
   return
 fi
 
@@ -455,7 +459,7 @@ local -i pid=$sysparams[pid]
 if (( bypass )); then
   setopt no_multi_os
   {
-    "${z4h_ssh_command[@]}" "${args[@]}" 2>&1 1>&3 |
+    TERM=$term "${z4h_ssh_command[@]}" "${args[@]}" 2>&1 1>&3 |
       LC_ALL=C command grep -vxE '(Shared c|C)onnection to .* closed\.(.)?' >&2
     return $pipestatus[1]
   } 3>&1

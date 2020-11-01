@@ -26,3 +26,6 @@
   ```
 - Function `ssh` has been moved from `.zshrc` to z4h proper. If your `.zshrc` defines it, you need
   to remove it.
+- When connecting over ssh to a host for which `zstyle ':z4h:ssh:...' enable` is set to 'no', `TERM`
+  value of `tmux-256color` gets replaced with `screen-256color`. This can be customized with
+  `zstyle ':z4h:ssh:...' term`.

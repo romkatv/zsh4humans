@@ -6,10 +6,16 @@ if [[ $1 == */* ]]; then
 else
   local -a channel
   zstyle -a :z4h:$1 channel channel || channel=(stable)
+  local tmux_cmd='sh -- '${(q)Z4H}/zsh4humans/sc/install-tmux' -d "${Z4H_PACKAGE_DIR}" -q'
   case $#channel-$channel[1] in
     2-command) command=$channel[2];;
-    1-stable)  url=https://github.com/zsh4humans/$1/archive/z4h-stable.tar.gz;;
-    1-testing) url=https://github.com/zsh4humans/$1/archive/z4h-testing.tar.gz;;
+    1-stable|1-testing)
+      case $1 in
+        terminfo) url=https://github.com/romkatv/terminfo/archive/v1.0.0.tar.gz;;
+        tmux)     command=$tmux_cmd;;
+        *)        url=https://github.com/zsh4humans/$1/archive/z4h-$channel[1].tar.gz;;
+      esac
+    ;;
     1-dev)
       case $1 in
         fzf)                     url=https://github.com/junegunn/$1/archive/master.tar.gz;;
@@ -18,7 +24,8 @@ else
         zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-        tmux)                    url=fake;;
+        terminfo)                url=https://github.com/romkatv/terminfo/archive/v1.0.0.tar.gz;;
+        tmux)                    command=$tmux_cmd;;
         *)
           print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
           return 1
@@ -39,10 +46,6 @@ else
     ;;
   esac
   (( $+functions[-z4h-postinstall-$1] )) && postinstall=-z4h-postinstall-$1
-  if [[ $1 == tmux && -n $url ]]; then
-    url=
-    command='sh -- '${(q)Z4H}/zsh4humans/sc/install-tmux' -d "${Z4H_PACKAGE_DIR}" -q'
-  fi
 fi
 
 local suf

@@ -88,10 +88,12 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
+[[ -z $TERMINFO || -e $TERMINFO ]] || unset TERMINFO
+[[ $TERMINFO != $Z4H/terminfo && -d $Z4H/terminfo ]] && export TERMINFO=$Z4H/terminfo
+
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
-  if [[ $TERMINFO != $Z4H/tmux/share/terminfo && $#terminfo != 0 && -n $TERM &&
-        -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
+  if [[ $TERMINFO != ($Z4H/terminfo|${_z4h_exe:h:h}/share/terminfo) ]]; then
     export TERMINFO=${_z4h_exe:h:h}/share/terminfo
   fi
   if [[ -e ${_z4h_exe:h:h}/share/man ]]; then
@@ -183,7 +185,7 @@ function -z4h-cmd-init() {
         fi
       elif (( install_tmux )) && [[ ! -w ${_Z4H_TMUX%,(|<->),(|<->)} ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD
-        if [[ -x $tmux ]]; then
+        if [[ -x $tmux && $TERMINFO == $Z4H/terminfo ]]; then
           unset TMUX TMUX_PANE
           local sock
           if [[ -n $TMUX_TMPDIR && -d $TMUX_TMPDIR && -w $TMUX_TMPDIR ]]; then
@@ -197,13 +199,7 @@ function -z4h-cmd-init() {
             sock=${sock%/}/z4h-tmux-$UID-$TERM
             local cfg=tmux-16color.conf
             (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
-            if [[ -n $TERM && -e $Z4H/tmux/share/terminfo/$TERM[1]/$TERM ]]; then
-              >&2 TERMINFO=$Z4H/tmux/share/terminfo SHELL=$_z4h_exe \
-                exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
-            else
-              >&2 SHELL=$_z4h_exe \
-                exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
-            fi
+            >&2 SHELL=$_z4h_exe exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
           fi
         else
           need_restart=1
@@ -216,13 +212,14 @@ function -z4h-cmd-init() {
       _z4h_install_queue+=(systemd)
     fi
     _z4h_install_queue+=(
-      zsh-autosuggestions zsh-completions zsh-syntax-highlighting fzf powerlevel10k)
+      zsh-autosuggestions zsh-completions zsh-syntax-highlighting terminfo fzf powerlevel10k)
     (( install_tmux )) && _z4h_install_queue+=(tmux)
     if ! -z4h-install-many; then
       [[ -e $Z4H/.updating ]] || -z4h-error-command init
       return 1
     fi
     if (( _z4h_installed_something )); then
+      export TERMINFO=$Z4H/share/terminfo
       if (( need_restart )); then
         print -ru2 ${(%):-"%F{3}z4h%f: restarting %F{2}zsh%f"}
         exec -- $_z4h_exe -i || return

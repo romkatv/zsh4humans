@@ -11,7 +11,7 @@ if [ -n "${ZSH_VERSION:-}" ]; then
   emulate sh -o err_exit -o no_unset
 fi
 
-readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v2.0.0
+readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v2.1.0
 
 readonly archives='
 file:tmux-darwin-x86_64.tar.gz; md5:c739019ab4ac1862e438a7a2ab3eb56a; sha256:cfcd6d16e36f274d272bbcbcfc051a946b07cfe378d2b9e80a8d422316b03b5c;

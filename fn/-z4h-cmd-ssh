@@ -300,12 +300,12 @@ esac
 
 args[pos[1]]='-t'
 
-if (( ! $#retrieve_from )); then
-  "${z4h_ssh_command[@]}" "${args[@]}" "sh $remote_script"
-  return
+local stty
+if (( $+commands[stty] )); then
+  stty=$(command stty -g <$TTY 2>/dev/null) || stty=
 fi
 
-(  # subshell to avoid TTOU
+{ (  # subshell to avoid TTOU
 
 local -i bypass=0
 
@@ -314,7 +314,7 @@ local -i pid=$sysparams[pid]
 {
   setopt no_multi_os
   "${z4h_ssh_command[@]}" "${args[@]}" "sh $remote_script" 2>&1 1>&3 |
-     LC_ALL=C command grep -vxE 'Shared connection to .* closed\.(.)?' >&2
+     LC_ALL=C command grep -vxE '(Shared c|C)onnection to .* closed\.(.)?' >&2
    return $pipestatus[1]
 } 3>&1 | {
   if (( $+commands[mktemp] )); then
@@ -448,7 +448,6 @@ local -i pid=$sysparams[pid]
     zf_rm -rf -- $tmpdir $local_hist_tmp
     if (( err )); then
       kill -- -$pid 2>/dev/null
-      (( $+commands[stty] )) && stty sane <$TTY 2>/dev/null
     fi
   }
 }
@@ -457,9 +456,11 @@ if (( bypass )); then
   setopt no_multi_os
   {
     "${z4h_ssh_command[@]}" "${args[@]}" 2>&1 1>&3 |
-      LC_ALL=C command grep -vxE 'Shared connection to .* closed\.(.)?' >&2
+      LC_ALL=C command grep -vxE '(Shared c|C)onnection to .* closed\.(.)?' >&2
     return $pipestatus[1]
   } 3>&1
 fi
 
-)  # subshell
+ ) } always {
+  [[ -n $stty ]] && command stty $stty <$TTY 2>/dev/null
+}

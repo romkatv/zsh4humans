@@ -1,0 +1,5 @@
+builtin echoti civis >"$TTY"
+builtin print -r -- $'\e[H\e[2J\e[3J' >"$TTY"
+builtin zle .reset-prompt
+builtin zle -R
+builtin echoti cnorm >"$TTY"

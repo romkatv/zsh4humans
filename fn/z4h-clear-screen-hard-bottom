@@ -1,5 +1,5 @@
 builtin echoti civis >"$TTY"
-builtin printf '\e[H\e[2J%s' "${(pl:$((LINES-1))::\n:)}" >"$TTY"
+builtin print -r -- $'\e[H\e[2J\e[3J'"${(pl:$LINES::\n:)}" >"$TTY"
 builtin zle -I
 builtin zle -R
 builtin echoti cnorm >"$TTY"

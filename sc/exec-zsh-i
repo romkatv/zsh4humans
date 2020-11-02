@@ -107,7 +107,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     '_z4h_exec_zsh_i' '-i' '--' "$ZSH_SCRIPT" "${_z4h_script_argv[@]}"
   fi
 fi
-_z4h_exec_zsh_i' '-i'
+'_z4h_exec_zsh_i' '-i'
 
 'unset' '-f' '_z4h_try_exec_zsh_i' '_z4h_exec_zsh_i'
 'return' '1'

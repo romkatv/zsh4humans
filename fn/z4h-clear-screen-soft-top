@@ -1,7 +1,7 @@
 builtin echoti civis >"$TTY"
 local -i cursor_x cursor_y
 -z4h-get-cursor-pos
-builtin print -r -- "${(pl:$((2 * LINES - cursor_y))::\n:)}"$'\e[H\e[2J' >"$TTY"
+builtin print -rn -- "${(pl:$((2 * LINES - cursor_y))::\n:)}"$'\e[H\e[2J' >"$TTY"
 builtin zle .reset-prompt
 builtin zle -R
 builtin echoti cnorm >"$TTY"

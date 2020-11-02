@@ -59,15 +59,25 @@ export -T MANPATH=${MANPATH:-:} manpath
 export -T INFOPATH=${INFOPATH:-:} infopath
 typeset -gaU cdpath fpath mailpath path manpath infopath
 
-path=($Z4H/fzf/bin $path)
-[[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-manpath=($manpath $Z4H/fzf/man '')
 fpath=(
   ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
   ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(FN)
   /usr{/local,}/share/zsh/{site-functions,vendor-completions}(FN)
   $fpath
   $Z4H/zsh4humans/fn)
+
+autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h[^.]#(:t) || return
+functions -Ms _z4h_err
+
+if [[ $OSTYPE == darwin* ]]; then
+  if [[ ! -e $Z4H/cache/init-darwin-paths ]] || ! source $Z4H/cache/init-darwin-paths; then
+    -z4h-gen-init-darwin-paths && source $Z4H/cache/init-darwin-paths
+  fi
+fi
+
+path=($Z4H/fzf/bin $path)
+manpath=($Z4H/fzf/man $manpath '')
+[[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 : ${ZSH=$Z4H/ohmyzsh/ohmyzsh}
@@ -81,10 +91,28 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
     export HOMEBREW_PREFIX=$dir
     export HOMEBREW_CELLAR=$dir/Cellar
     export HOMEBREW_REPOSITORY=$dir/Homebrew
-    path=($dir/bin $dir/sbin $path)
-    manpath=($dir/share/man $manpath '')
-    infopath=($dir/share/info $infopath '')
+    (( ${path[(Ie)$dir/sbin]}           )) || path=($dir/sbin $path)
+    (( ${path[(Ie)$dir/bin]}            )) || path=($dir/bin $path)
+    (( ${manpath[(Ie)$dir/share/man]}   )) || manpath=($dir/share/man $manpath '')
+    (( ${infopath[(Ie)$dir/share/info]} )) || infopath=($dir/share/info $infopath '')
   }
+fi
+
+() {
+	path=(${@:|path} $path)
+} {~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N)
+
+[[ -z $TERMINFO || -e $TERMINFO ]] || unset TERMINFO
+
+if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
+      -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
+  if [[ $TERMINFO != ${_z4h_exe:h:h}/share/terminfo &&
+        -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
+    export TERMINFO=${_z4h_exe:h:h}/share/terminfo
+  fi
+  if [[ -e ${_z4h_exe:h:h}/share/man ]]; then
+    manpath=(${_z4h_exe:h:h}/share/man $manpath '')
+  fi
 fi
 
 if [[ $EUID == 0 && -z ~(#qNU) && $Z4H == ~/* ]]; then
@@ -92,9 +120,6 @@ if [[ $EUID == 0 && -z ~(#qNU) && $Z4H == ~/* ]]; then
 else
   typeset -gri _z4h_dangerous_root=0
 fi
-
-autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h[^.]#(:t) || return
-functions -Ms _z4h_err
 
 function compinit() {}
 

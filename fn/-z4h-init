@@ -69,16 +69,6 @@ elif (( $+commands[brew] )); then
   -z4h-brew-command-not-found
 fi
 
-if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
-      -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
-  if [[ $#terminfo != 0 && -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
-    export TERMINFO=${_z4h_exe:h:h}/share/terminfo
-  fi
-  if [[ -e ${_z4h_exe:h:h}/share/man ]]; then
-    manpath=(${_z4h_exe:h:h}/share/man $manpath '')
-  fi
-fi
-
 function z4h-up-local-history() {
   -z4h-with-local-history 1 up-line-or-beginning-search "$@"
 }
@@ -679,9 +669,6 @@ if (( _z4h_use[powerlevel10k] )); then
   z4h source -c $POWERLEVEL9K_CONFIG_FILE
   -z4h-set-term-title-precmd || return
 fi
-
-local dirs=({~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N))
-path=(${dirs:|path} $path)
 
 if (( _z4h_use[zsh-autosuggestions] )); then
   if (( terminfo[colors] >= 256 )); then

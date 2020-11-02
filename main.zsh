@@ -230,7 +230,7 @@ function -z4h-cmd-init() {
       return 1
     fi
     if (( _z4h_installed_something )); then
-      export TERMINFO=$Z4H/share/terminfo
+      [[ $TERMINFO != $Z4H/terminfo ]] && export TERMINFO=$Z4H/terminfo
       if (( need_restart )); then
         print -ru2 ${(%):-"%F{3}z4h%f: restarting %F{2}zsh%f"}
         exec -- $_z4h_exe -i || return

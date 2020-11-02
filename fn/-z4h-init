@@ -685,9 +685,6 @@ if (( _z4h_use[powerlevel10k] )); then
   -z4h-set-term-title-precmd || return
 fi
 
-local dirs=({~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N))
-path=(${dirs:|path} $path)
-
 if (( _z4h_use[zsh-autosuggestions] )); then
   if (( terminfo[colors] >= 256 )); then
     LS_COLORS+=':no=38;5;248'

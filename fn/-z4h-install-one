@@ -108,7 +108,7 @@ local old new
     fi
   fi
 
-  eval $postinstall                 || return
+  eval $postinstall || return
 
   [[ ! -e $dst ]] || zf_mv -- $dst $old/ || return
   zf_mv -- $new/${1:t} $dst

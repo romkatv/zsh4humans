@@ -618,6 +618,9 @@ PATH="$(command -p getconf PATH):$PATH"
 
 This can be broken only by function `unset`.
 
+There is a similar but different example at
+https://pubs.opengroup.org/onlinepubs/9699919799/utilities/env.html.
+
 ---
 
 Add `z4h pack` that produces `install-z4h` file. It should be similar to the bootstrap script

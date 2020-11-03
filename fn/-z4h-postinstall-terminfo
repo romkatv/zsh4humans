@@ -1,17 +1,25 @@
 eval "$_z4h_opt"
 
-# z4h compile -- $Z4H_PACKAGE_DIR/{*.zsh-theme,internal/*.zsh,gitstatus/*.zsh,gitstatus/install}(N)
+# Fork to avoid triggering https://www.zsh.org/mla/workers/2020/msg00588.html
+(
+  # ${(L):-I} is ı in Turkish locale.
+  LC_ALL=C
 
-local pat hex char
-for pat in "[^A-Z]" "[A-Z]"; do
-  for hex in $Z4H_PACKAGE_DIR/[[:xdigit:]][[:xdigit:]](:t); do
-    printf -v char "\\x$hex"
-    [[ $char == $~pat ]] || continue
-    if [[ $char != [A-Z] ||
-          ! $Z4H_PACKAGE_DIR/$char -ef $Z4H_PACKAGE_DIR/${${(L)char}//ı/i} ]]; then
-      [[ -e $Z4H_PACKAGE_DIR/$char ]] ||
-        zf_ln -s -- $hex $Z4H_PACKAGE_DIR/$char 2>/dev/null ||
-        command cp -r -- $Z4H_PACKAGE_DIR/$hex $Z4H_PACKAGE_DIR/$char || return
-    fi
+  local pat hex char
+  for pat in "[^A-Z]" "[A-Z]"; do
+    for hex in $Z4H_PACKAGE_DIR/[[:xdigit:]][[:xdigit:]](:t); do
+      printf -v char "\\x$hex"
+      [[ $char == $~pat ]] || continue
+      [[ -e ~/.terminfo/$hex ]] || zf_mkdir -p -- ~/.terminfo/$hex || return
+      cp -- $Z4H_PACKAGE_DIR/$hex/* ~/.terminfo/$hex/ || return
+      if [[ $char == [a-z] || ! ~/.terminfo/$char -ef ~/.terminfo/${(L)char}] ]]; then
+        [[ -e ~/.terminfo/$char ]]                       ||
+          zf_ln -s -- $hex ~/.terminfo/$char 2>/dev/null ||
+          zf_mkdir -p -- ~/.terminfo/$char               ||
+          return
+        cp -- $Z4H_PACKAGE_DIR/$hex/* ~/.terminfo/$char/ || return
+      fi
+      zf_rm -rf -- $Z4H_PACKAGE_DIR/$hex || return
+    done
   done
-done
+)

@@ -46,8 +46,12 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'unset' '_z4h_ssh_feedback'
   fi
 
-  if '[' '!' '-e' "${${TMPPREFIX:-/tmp/zsh}:h}" ']' && '[' '-e' "${TMPDIR:-/tmp}" ']'; then
+  if '[' '!' '-e' "${${TMPPREFIX:-/tmp/zsh}:h}" '-a' '-e' "${TMPDIR:-/tmp}" ']'; then
     'export' TMPPREFIX="${${TMPDIR:-/tmp}%/}/zsh"
+  fi
+
+  if '[' "$TERMINFO" '!=' ~/'.terminfo' ']' && '[' '-e' ~/".terminfo/$TERM[1]/$TERM" ']'; then
+    'export' TERMINFO=~/'.terminfo'
   fi
 
   'bindkey' '-d'

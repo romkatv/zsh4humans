@@ -102,12 +102,10 @@ fi
 local dirs=({~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N))
 path=(${dirs:|path} $path)
 
-[[ -z $TERMINFO || -e $TERMINFO ]] || unset TERMINFO
-[[ $TERMINFO != $Z4H/terminfo && -d $Z4H/terminfo ]] && export TERMINFO=$Z4H/terminfo
-
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
-  if [[ $TERMINFO != ($Z4H/terminfo|${_z4h_exe:h:h}/share/terminfo) ]]; then
+  if [[ $TERMINFO != ~/.terminfo && $TERMINFO != ${_z4h_exe:h:h}/share/terminfo &&
+        -e ${_z4h_exe:h:h}/share/terminfo/$TERM[1]/$TERM ]]; then
     export TERMINFO=${_z4h_exe:h:h}/share/terminfo
   fi
   if [[ -e ${_z4h_exe:h:h}/share/man ]]; then
@@ -196,7 +194,7 @@ function -z4h-cmd-init() {
         fi
       elif (( install_tmux )) && [[ ! -w ${_Z4H_TMUX%,(|<->),(|<->)} ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD
-        if [[ -x $tmux && $TERMINFO == $Z4H/terminfo ]]; then
+        if [[ -x $tmux && -d $Z4H/terminfo ]]; then
           unset TMUX TMUX_PANE
           local sock
           if [[ -n $TMUX_TMPDIR && -d $TMUX_TMPDIR && -w $TMUX_TMPDIR ]]; then
@@ -230,7 +228,9 @@ function -z4h-cmd-init() {
       return 1
     fi
     if (( _z4h_installed_something )); then
-      [[ $TERMINFO != $Z4H/terminfo ]] && export TERMINFO=$Z4H/terminfo
+      if [[ $TERMINFO != ~/.terminfo && -e ~/.terminfo/$TERM[1]/$TERM ]]; then
+        export TERMINFO=~/.terminfo
+      fi
       if (( need_restart )); then
         print -ru2 ${(%):-"%F{3}z4h%f: restarting %F{2}zsh%f"}
         exec -- $_z4h_exe -i || return

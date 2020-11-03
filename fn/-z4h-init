@@ -992,7 +992,8 @@ precmd_functions=(-z4h-post-init $precmd_functions)
 
 [[ $OSTYPE == linux-* && -r /proc/version ]] && -z4h-init-wsl
 
-function ssh() { z4h ssh "$@" }
+function ssh()  { z4h ssh  "$@" }
+function sudo() { z4h sudo "$@" }
 
 if [[ ! -e $Z4H/z4h.zsh.zwc ]]; then
   z4h compile -- $Z4H/zsh4humans/{main.zsh,sc/exec-zsh-i,fn/(|-|_)z4h[^.]#~*.zwc} $Z4H/z4h.zsh

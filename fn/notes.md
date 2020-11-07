@@ -787,3 +787,81 @@ https://github.com/romkatv/zsh4humans/issues/35#issuecomment-719639084 are here:
 See if it's feasible to fix
 https://github.com/romkatv/powerlevel10k#horrific-mess-when-resizing-terminal-window by patching
 tmux.
+
+---
+
+Title doesn't update in iTerm2.
+
+---
+
+Current directory doesn't work in the status bar of iTerm2.
+
+---
+
+`kitty @ launch cat` doesn't work. See
+https://github.com/romkatv/zsh4humans/issues/35#issuecomment-720134760.
+
+---
+
+`new_os_window_with_cwd` doesn't work in Kitty. See
+https://github.com/romkatv/zsh4humans/issues/35#issuecomment-720134760.
+
+---
+
+Make `z4h ssh` work when the target machine doesn't have internet.
+
+Implement `z4h fetch` that on a local machine would be a wrapper around `curl`/`wget` and on a
+remote machine would send a request via the marker to the local. Local machine would fetch the
+file (via `z4h fetch`, naturally) and upload it via `ssh host 'cat >$dst.$$ && mv $dst.$$ $dst`.
+The file should have error code, stderr and finally the file.
+
+There is `curl` in `~/.zshenv`. In order to deal with that, add one more condition to `~/.zshenv`:
+
+```zsh
+if command -v z4h >/dev/null 2>&1; then
+  z4h fetch "$Z4H_URL"/z4h.zsh >"$Z4H"/z4h.zsh.$$
+elif ...
+fi
+```
+
+`z4h` will be a function that can handle nothing but this command.
+
+`z4h fetch` should have a whitelist of URLs it can handle (for security).
+
+---
+
+Add `z4h clipboard-{cut,copy,paste}` and make them work over `ssh` through markers. Enable them
+on the remote only when `zstyle :z4h:ssh:hostname clipboard global`. Another option is `local`,
+which works on just one host.
+
+---
+
+Add `z4h {slurp,barf}` similar to `z4h clipboard-{cut,copy,paste}`.
+
+---
+
+Make <kbd>Ctrl+R</kbd> display the preview right on the command line. Before opening it, set
+`BUFFER` to `$'..\n\n\n'` so that it scrolls a bit.
+
+---
+
+Set `TERM=screen-256color` by default. Make it easy to override it per-app and the default as well.
+
+```zsh
+zstyle :z4h:terminfo:     term screen-256color
+zstyle :z4h:terminfo:ssh  term screen-256color
+zstyle :z4h:terminfo:sudo term screen-256color
+```
+
+These styles should be consulted only when using tmux with 256 colors.
+
+Hm, those styles won't work because we need to define functions for all apps (`ssh`, `sudo`, etc.).
+This, then?
+
+```zsh
+zstyle :z4h:tmux term                  screen-256color
+zstyle :z4h:tmux force-screen-256color ssh sudo
+zstyle :z4h:tmux force-tmux-256color   kak vi
+```
+
+Or maybe hook `TRAPDEBUG` and use the first syntax?

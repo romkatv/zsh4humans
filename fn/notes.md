@@ -790,6 +790,10 @@ tmux.
 
 ---
 
+hack `tty_set_title()` in tmux so that it works on iTerm2.
+
+---
+
 Title doesn't update in iTerm2.
 
 ---

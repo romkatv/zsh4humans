@@ -99,8 +99,9 @@ if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
   }
 fi
 
-local dirs=({~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N))
-path=(${dirs:|path} $path)
+() {
+  path=(${@:|path} $path)
+} {~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N)
 
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then

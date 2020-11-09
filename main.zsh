@@ -165,7 +165,9 @@ function -z4h-cmd-init() {
   () {
     eval "$_z4h_opt"
 
-    local -i install_tmux
+    [[ $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] ||
+      ! zstyle -T :z4h start-tmux integrated
+    local -i install_tmux=$? need_restart
 
     if (( $+ZSH_SCRIPT || $+ZSH_EXECUTION_STRING )) || ! [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
       unset _Z4H_TMUX _Z4H_TMUX_CMD
@@ -192,8 +194,8 @@ function -z4h-cmd-init() {
           local -i n=$((LINES - cursor_y))
           print -rn -- ${(pl:$n::\n:)}
         fi
-      elif [[ -z $TMUX && ! -w ${_Z4H_TMUX%,(|<->),(|<->)} && -z $Z4H_SSH && $MACHTYPE == x86_64 &&
-              $OSTYPE == (linux|darwin)* ]] && zstyle -T :z4h start-tmux integrated; then
+      elif (( install_tmux )) &&
+           [[ -z $TMUX && ! -w ${_Z4H_TMUX%,(|<->),(|<->)} && -z $Z4H_SSH ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD TMUX TMUX_PANE
         if [[ -x $tmux && -d $Z4H/terminfo ]]; then
           local sock
@@ -211,7 +213,7 @@ function -z4h-cmd-init() {
             SHELL=$_z4h_exe exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
           fi
         else
-          install_tmux=1
+          need_restart=1
         fi
       fi
     fi
@@ -231,7 +233,7 @@ function -z4h-cmd-init() {
       if [[ $TERMINFO != ~/.terminfo && -e ~/.terminfo/$TERM[1]/$TERM ]]; then
         export TERMINFO=~/.terminfo
       fi
-      if (( install_tmux )); then
+      if (( need_restart )); then
         print -ru2 ${(%):-"%F{3}z4h%f: restarting %F{2}zsh%f"}
         exec -- $_z4h_exe -i || return
       else

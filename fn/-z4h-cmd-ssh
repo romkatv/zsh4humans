@@ -75,7 +75,7 @@ local default_ssh_command=(
   command ssh
     -o ControlMaster=auto
     -o ControlPersist=5
-    -o ControlPath=~/.ssh/control-master/sock-%h-%p-%r)
+    -o ControlPath=~/.ssh/control-master/sock-%C)
 
 local -a z4h_ssh_command
 if ! zstyle -a :z4h:ssh:$z4h_ssh_host ssh-command z4h_ssh_command; then

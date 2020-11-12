@@ -304,11 +304,6 @@ if [ "$num_dirs" = 0 ]; then
   dirs_c="${dirs_c}${lf}  ${_B}(3)${_0} custom directory  ${_Y}<=${_0} manual input required${lf}"
 fi
 
-if ! zsh="$(command -v zsh)"; then
-  >&2 echo "${_R}error${_0}: command not found: ${_B}zsh${_0}"
-  exit 1
-fi
-
 if [ "$num_dirs" = 1 ]; then
   choice=1
 else

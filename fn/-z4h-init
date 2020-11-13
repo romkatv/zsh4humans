@@ -933,6 +933,16 @@ function -z4h-post-init() {
     -z4h-compile $dump
   fi
 
+  # Disable programmable completions for all commands and functions defined under $HOME
+  # that don't have their own completions. See https://zsh.org/users/26163.
+  local cmd MATCH MBEGIN MEND
+  for cmd in ${(M)${(k)_comps:/(#m)*/${${functions_source[$MATCH]:+$functions_source[$MATCH]/$MATCH}:-$commands[$MATCH]}}:#~/*}; do
+    cmd=${cmd:t}
+    if [[ $functions_source[$_comps[$cmd]] != ~/* ]]; then
+      _comps[$cmd]=_default
+    fi
+  done
+
   function compinit() {}
 
   # Replay compdef calls.
@@ -994,6 +1004,9 @@ precmd_functions=(-z4h-post-init $precmd_functions)
 
 function ssh()  { z4h ssh  "$@" }
 function sudo() { z4h sudo "$@" }
+
+compdef _ssh  ssh
+compdef _sudo sudo
 
 if [[ ! -e $Z4H/z4h.zsh.zwc ]]; then
   z4h compile -- $Z4H/zsh4humans/{main.zsh,sc/exec-zsh-i,fn/(|-|_)z4h[^.]#~*.zwc} $Z4H/z4h.zsh

@@ -76,8 +76,8 @@ if [[ $OSTYPE == darwin* ]]; then
   fi
 fi
 
-path=($Z4H/fzf/bin $path)
-manpath=($Z4H/fzf/man $manpath '')
+path+=($Z4H/fzf/bin)
+manpath=($manpath $Z4H/fzf/man '')
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}

@@ -2,16 +2,26 @@ eval "$_z4h_opt"
 
 function command_not_found_handler() {
   eval "$_z4h_opt"
-  if (( $#functrace >= 2 )); then
-    print -ru2 -- "$functrace[1]: command not found: $1"
+  local fd fname
+  if zstyle -s :z4h:command-not-found to-file fname &&
+     [[ -w $fname || ! -e $fname && -w ${fname:h} ]]; then
+    fd=3
   else
-    local msg="$(/usr/lib/command-not-found --no-failure-msg -- $1 2>&1)"
-    if [[ -n $msg ]]; then
-      print -ru2 -- ${msg#$'\n'}
-    else
-      print -ru2 -- "zsh: command not found: $1"
-    fi
+    fd=2
+    fname=/dev/null
   fi
+  {
+    if (( $#functrace >= 2 )); then
+      print -r -- "$functrace[1]: command not found: $1"
+    else
+      local msg="$(/usr/lib/command-not-found --no-failure-msg -- $1 2>&1)"
+      if [[ -n $msg ]]; then
+        print -r -- ${msg#$'\n'}
+      else
+        print -r -- "zsh: command not found: $1"
+      fi
+    fi
+  } 3>$fname >&$fd
   return 127
 }
 

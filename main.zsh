@@ -114,6 +114,8 @@ if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
   fi
 fi
 
+[[ $terminfo[Tc] == yes && -z $COLORTERM ]] && export COLORTERM=truecolor
+
 if [[ $EUID == 0 && -z ~(#qNU) && $Z4H == ~/* ]]; then
   typeset -gri _z4h_dangerous_root=1
 else
@@ -211,8 +213,13 @@ function -z4h-cmd-init() {
           fi
           if [[ -n $sock ]]; then
             sock=${sock%/}/z4h-tmux-$UID-$TERM
-            local cfg=tmux-16color.conf
-            (( terminfo[colors] >= 256 )) && cfg=tmux-256color.conf
+            if (( terminfo[colors] < 256 )); then
+              local cfg=tmux-16color.conf
+            elif [[ $COLORTERM == (24bit|truecolor) ]]; then
+              local cfg=tmux-truecolor.conf
+            else
+              local cfg=tmux-256color.conf
+            fi
             SHELL=$_z4h_exe exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
           fi
         else

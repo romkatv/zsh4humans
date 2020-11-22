@@ -1,5 +1,7 @@
 'export' TERM="${TERM:-xterm-256color}"
 
+'[' '-n' "${WT_SESSION-}" ']' && 'export' COLORTERM="${COLORTERM:-truecolor}"
+
 if '[' '-n' "${ZSH_VERSION-}" ']'; then
   if '[' '-n' "${_z4h_source_called+x}" ']'; then
     if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then

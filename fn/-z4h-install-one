@@ -104,14 +104,14 @@ local old new
       return 1
     fi
     if [[ $dirs[1] != $new/${1:t} ]]; then
-      zf_mv -- $dirs[1] $new/${1:t} || return
+      -z4h-mv $dirs[1] $new/${1:t} || return
     fi
   fi
 
   eval $postinstall || return
 
-  [[ ! -e $dst ]] || zf_mv -- $dst $old/ || return
-  zf_mv -- $new/${1:t} $dst
+  [[ ! -e $dst ]] || -z4h-mv $dst $old/${1:t} 2>/dev/null || zf_rm -rf -- $dst || return
+  -z4h-mv $new/${1:t} $dst || return
 } always {
   [[ -z $old && -z $new ]] || zf_rm -rf -- $old $new
 }

@@ -1,0 +1,19 @@
+(( ARGC == 2 )) || return '_z4h_err()'
+[[ $2 != */  ]] || return '_z4h_err()'
+
+zf_mv      -f -- "$1" "$2" 2>/dev/null && return
+command mv -f -- "$1" "$2" 2>/dev/null && return
+
+[[ -e $1     ]] || return '_z4h_err()'
+[[ -d ${2:h} ]] || return '_z4h_err()'
+
+if [[ -e $2 ]]; then
+  zf_rm -rf -- "$2" || return
+fi
+
+if ! command cp -r -- "$1" "$2"; then
+  [[ ! -e $2 ]] || zf_rm -rf -- "$2" || return
+  return 1
+fi
+
+zf_rm -rf -- "$1"

@@ -1,3 +1,39 @@
+if zstyle -T :z4h iterm2-integration && [[ $TERM != (dumb|linux) ]]; then
+  typeset -g ITERM_SHELL_INTEGRATION_INSTALLED=Yes
+  typeset -gi _z4h_iterm_cmd=0
+  function iterm2_set_user_var() {
+    (( ${+commands[base64]} )) || return
+    local x
+    x="$(printf '%s' "$2" | command base64)" || return
+    -z4h-tmux-bypass '\e]1337;SetUserVar=%s=%s\007' "$1" "${x//$'\n'}"
+  }
+  if (( ! $+functions[iterm2_print_user_vars] )); then
+    function iterm2_print_user_vars() { }
+  fi
+  function -z4h-iterm2-dump() {
+    -z4h-tmux-bypass '\e]1337;RemoteHost=%s@%s\a' "${(%):-%n}" "${iterm2_hostname:-${(%):-%m}}"
+    -z4h-tmux-bypass '\e]1337;CurrentDir=%s\a' "${(%):-%/}"
+    iterm2_print_user_vars
+  }
+  function -z4h-iterm2-precmd() {
+    local -i err=$?
+    zle && return
+    if (( _z4h_iterm_cmd )); then
+      (( _z4h_iterm_cmd == 1 )) && -z4h-tmux-bypass '\e]133;C;\a'
+      -z4h-tmux-bypass '\e]133;D;%s\a' $err
+    fi
+    -z4h-iterm2-dump
+    typeset -gi _z4h_iterm_cmd=1
+  }
+  function -z4h-iterm2-preexec() {
+    -z4h-tmux-bypass '\e]133;C;\a'
+    typeset -gi _z4h_iterm_cmd=2
+  }
+else
+  function -z4h-iterm2-precmd() { }
+  function -z4h-iterm2-preexec() { }
+fi
+
 # When a command is running, display it in the terminal title.
 function -z4h-set-term-title-preexec() {
   emulate -L zsh
@@ -7,6 +43,7 @@ function -z4h-set-term-title-preexec() {
   else
     zstyle -s :z4h:term-title:local preexec _z4h_fmt || _z4h_fmt='${1//\%/%%}'
   fi
+  -z4h-iterm2-preexec
   [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt "$@"
 }
 
@@ -19,6 +56,7 @@ function -z4h-set-term-title-precmd() {
   else
     zstyle -s :z4h:term-title:local precmd _z4h_fmt || _z4h_fmt='%~'
   fi
+  -z4h-iterm2-precmd
   [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt
 }
 
@@ -682,8 +720,13 @@ if (( _z4h_use[powerlevel10k] )); then
     builtin source $Z4H/powerlevel10k/powerlevel10k.zsh-theme
   }
   z4h source -c $POWERLEVEL9K_CONFIG_FILE
-  -z4h-set-term-title-precmd || return
 fi
+
+if (( $+_z4h_iterm_cmd )); then
+  -z4h-iterm2-dump
+  -z4h-tmux-bypass '\e]1337;ShellIntegrationVersion=12;shell=zsh\a'
+fi
+-z4h-set-term-title-precmd || return
 
 if (( _z4h_use[zsh-autosuggestions] )); then
   if (( terminfo[colors] >= 256 )); then
@@ -991,6 +1034,8 @@ precmd_functions=(-z4h-post-init $precmd_functions)
 [[ -e $Z4H/welcome ]] && precmd_functions+=(-z4h-welcome)
 
 [[ $OSTYPE == linux-* && -r /proc/version ]] && -z4h-init-wsl
+
+typeset -g iterm2_hostname=${(%):-%m}
 
 function ssh()  { z4h ssh  "$@" }
 function sudo() { z4h sudo "$@" }

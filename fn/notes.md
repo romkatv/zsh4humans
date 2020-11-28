@@ -790,18 +790,6 @@ tmux.
 
 ---
 
-hack `tty_set_title()` in tmux so that it works on iTerm2.
-
----
-
-Title doesn't update in iTerm2.
-
----
-
-Current directory doesn't work in the status bar of iTerm2.
-
----
-
 `kitty @ launch cat` doesn't work. See
 https://github.com/romkatv/zsh4humans/issues/35#issuecomment-720134760.
 

@@ -18,14 +18,15 @@ else
     ;;
     1-dev)
       case $1 in
-        fzf)                     url=https://github.com/junegunn/$1/archive/master.tar.gz;;
-        powerlevel10k)           url=https://github.com/romkatv/$1/archive/master.tar.gz;;
-        systemd)                 url=https://github.com/systemd/$1/archive/master.tar.gz;;
-        zsh-completions)         url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-        zsh-autosuggestions)     url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-        zsh-syntax-highlighting) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-        terminfo)                url=https://github.com/romkatv/terminfo/archive/v1.0.0.tar.gz;;
-        tmux)                    command=$tmux_cmd;;
+        fzf)                          url=https://github.com/junegunn/$1/archive/master.tar.gz;;
+        powerlevel10k)                url=https://github.com/romkatv/$1/archive/master.tar.gz;;
+        systemd)                      url=https://github.com/systemd/$1/archive/master.tar.gz;;
+        zsh-completions)              url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        zsh-autosuggestions)          url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        zsh-syntax-highlighting)      url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        zsh-history-substring-search) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
+        terminfo)                     url=https://github.com/romkatv/terminfo/archive/v1.0.0.tar.gz;;
+        tmux)                         command=$tmux_cmd;;
         *)
           print -Pru2 -- "%F{3}z4h%f: %F{1}internal error%f: unknown package: ${1//\%/%%}"
           return 1

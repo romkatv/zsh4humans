@@ -39,7 +39,7 @@ add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 
 local pkg
 typeset -gA _z4h_use
-for pkg in fzf powerlevel10k systemd \
+for pkg in fzf powerlevel10k systemd zsh-history-substring-search \
            zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
   zstyle -t :z4h:$pkg channel none || _z4h_use[$pkg]=1
 done
@@ -80,18 +80,33 @@ elif (( $+commands[brew] )); then
   -z4h-brew-command-not-found
 fi
 
-function z4h-up-local-history() {
+function z4h-up-prefix-local() {
   -z4h-with-local-history 1 up-line-or-beginning-search "$@"
 }
-function z4h-down-local-history() {
+function z4h-down-prefix-local() {
   -z4h-with-local-history 1 down-line-or-beginning-search "$@"
 }
-function z4h-up-global-history() {
+function z4h-up-prefix-global() {
   -z4h-with-local-history 0 up-line-or-beginning-search "$@"
 }
-function z4h-down-global-history() {
+function z4h-down-prefix-global() {
   -z4h-with-local-history 0 down-line-or-beginning-search "$@"
 }
+
+if (( _z4h_use[zsh-history-substring-search] )); then
+  function z4h-up-substring-local() {
+    -z4h-with-local-history 1 history-substring-search-up "$@"
+  }
+  function z4h-down-substring-local() {
+    -z4h-with-local-history 1 history-substring-search-down "$@"
+  }
+  function z4h-up-substring-global() {
+    -z4h-with-local-history 0 history-substring-search-up "$@"
+  }
+  function z4h-down-substring-global() {
+    -z4h-with-local-history 0 history-substring-search-down "$@"
+  }
+fi
 
 function z4h-kill-word()           { -z4h-move-and-kill z4h-forward-word   }
 function z4h-backward-kill-word()  { -z4h-move-and-kill z4h-backward-word  }
@@ -141,10 +156,16 @@ zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer
 zle -N z4h-fzf-complete
-zle -N z4h-up-local-history
-zle -N z4h-down-local-history
-zle -N z4h-up-global-history
-zle -N z4h-down-global-history
+zle -N z4h-up-prefix-local
+zle -N z4h-down-prefix-local
+zle -N z4h-up-prefix-global
+zle -N z4h-down-prefix-global
+if (( _z4h_use[zsh-history-substring-search] )); then
+  zle -N z4h-up-substring-local
+  zle -N z4h-down-substring-local
+  zle -N z4h-up-substring-global
+  zle -N z4h-down-substring-global
+fi
 zle -N z4h-cd-back
 zle -N z4h-cd-forward
 zle -N z4h-cd-up
@@ -264,16 +285,26 @@ done
 bindkey   '^[[D'    backward-char                  # left
 # Move cursor one char forward.
 bindkey   '^[[C'    forward-char                   # right
-# Move cursor one line up or fetch the previous command from LOCAL history.
-bindkey   '^P'      z4h-up-local-history           # ctrl+p
-bindkey   '^[[A'    z4h-up-local-history           # up
-# Move cursor one line down or fetch the next command from LOCAL history.
-bindkey   '^N'      z4h-down-local-history         # ctrl+n
-bindkey   '^[[B'    z4h-down-local-history         # down
+if (( _z4h_use[zsh-history-substring-search] )); then
+  # Move cursor one line up or fetch the previous command from LOCAL history.
+  bindkey '^P'      z4h-up-substring-local         # ctrl+p
+  bindkey '^[[A'    z4h-up-substring-local         # up
+  # Move cursor one line down or fetch the next command from LOCAL history.
+  bindkey   '^N'    z4h-down-substring-local       # ctrl+n
+  bindkey   '^[[B'  z4h-down-substring-local       # down
+else
+  # Move cursor one line up or fetch the previous command from LOCAL history.
+  bindkey '^P'      z4h-up-prefix-local            # ctrl+p
+  bindkey '^[[A'    z4h-up-prefix-local            # up
+  # Move cursor one line down or fetch the next command from LOCAL history.
+  bindkey   '^N'    z4h-down-prefix-local          # ctrl+n
+  bindkey   '^[[B'  z4h-down-prefix-local          # down
+fi
+
 # Move cursor one line up or fetch the previous command from GLOBAL history.
-bindkey   '^[[1;5A' z4h-up-global-history          # ctrl+up
+bindkey   '^[[1;5A' z4h-up-prefix-global           # ctrl+up
 # Move cursor one line down or fetch the next command from GLOBAL history.
-bindkey   '^[[1;5B' z4h-down-global-history        # ctrl+down
+bindkey   '^[[1;5B' z4h-down-prefix-global         # ctrl+down
 # Move cursor to the beginning of line.
 bindkey   '^[[H'    beginning-of-line              # home
 # Move cursor to the end of line.
@@ -715,12 +746,20 @@ if (( _z4h_use[zsh-autosuggestions] )); then
   # Tell zsh-autosuggestions how to handle different widgets.
   typeset -g ZSH_AUTOSUGGEST_EXECUTE_WIDGETS=()
   typeset -g ZSH_AUTOSUGGEST_CLEAR_WIDGETS=(
-    z4h-down-global-history
-    z4h-down-local-history
     z4h-fzf-history
-    z4h-up-global-history
-    z4h-up-local-history
+    z4h-down-prefix-global
+    z4h-down-prefix-local
+    z4h-up-prefix-global
+    z4h-up-prefix-local
   )
+  if (( _z4h_use[zsh-history-substring-search] )); then
+    ZSH_AUTOSUGGEST_CLEAR_WIDGETS+=(
+      z4h-down-substring-global
+      z4h-down-substring-local
+      z4h-up-substring-global
+      z4h-up-substring-local
+    )
+  fi
   typeset -g ZSH_AUTOSUGGEST_PARTIAL_ACCEPT_WIDGETS=(
     emacs-forward-word
     forward-word
@@ -760,6 +799,10 @@ if (( _z4h_use[zsh-syntax-highlighting] )); then
   ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
   # Work around bugs in history-substring-search: https://github.com/romkatv/zsh4humans/issues/58.
   function _zsh_highlight() {}
+fi
+
+if (( _z4h_use[zsh-history-substring-search] )); then
+  builtin source $Z4H/zsh-history-substring-search/zsh-history-substring-search.zsh
 fi
 
 if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
@@ -976,16 +1019,20 @@ function -z4h-post-init() {
         zle-isearch-update user:_zsh_highlight_widget_zle-isearch-update
       )
       builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-      preexec_functions=(${preexec_functions:#_zsh_highlight_preexec_hook})
-      eval '_zsh_highlight() {
-        if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
-          region_highlight=()
-          return
-        fi
-        local -ih PENDING=0 KEYS_QUEUED_COUNT=0
-        '$functions[_zsh_highlight]'
-      }'
     }
+    preexec_functions=(${preexec_functions:#_zsh_highlight_preexec_hook})
+      eval '_zsh_highlight() {
+        {
+          if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
+            region_highlight=()
+          else
+            local -ih PENDING=0 KEYS_QUEUED_COUNT=0
+            '$functions[_zsh_highlight]'
+          fi
+        } always {
+          region_highlight+=($_z4h_substring_search_highlight)
+        }
+      }'
     local suggest_special=(
       $ZSH_AUTOSUGGEST_EXECUTE_WIDGETS
       $ZSH_AUTOSUGGEST_CLEAR_WIDGETS
@@ -994,9 +1041,30 @@ function -z4h-post-init() {
     typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${${(k)widgets}:|suggest_special})
     unset ZSH_AUTOSUGGEST_USE_ASYNC
     _zsh_autosuggest_start
-    if (( $+functions[_history-substring-search-end] )); then
+    if (( _z4h_use[zsh-history-substring-search] )); then
+      function _history-substring-search-end() {
+        builtin eval "$_z4h_opt"
+        typeset -g _history_substring_search_result=$BUFFER
+        if (( _history_substring_search_refresh_display )); then
+          CURSOR=${#BUFFER}
+        fi
+        unset _z4h_substring_search_highlight
+        [[ -z $_history_substring_search_query_highlight ]] && return
+        local query_part escaped_query_part REPLY
+        local -i highlight_start_index highlight_end_index query_part_match_index
+        for query_part in $_history_substring_search_query_parts; do
+          escaped_query_part=${query_part//(#m)[\][()|\\*?#<>~^]/\\$MATCH}
+          query_part_match_index=${${BUFFER:$highlight_start_index}[(i)(#$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)${escaped_query_part}]}
+          (( query_part_match_index > $#BUFFER - highlight_start_index )) && continue
+          highlight_start_index=$(( highlight_start_index + query_part_match_index ))
+          highlight_end_index=$(( highlight_start_index + ${#query_part} ))
+          _z4h_substring_search_highlight+=(
+              "$((highlight_start_index - 1)) $((highlight_end_index - 1)) $_history_substring_search_query_highlight")
+        done
+      }
+    elif (( $+functions[_history-substring-search-end] )); then
       # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
-      _history-substring-search-end() { _history_substring_search_result=$BUFFER }
+      function _history-substring-search-end() { _history_substring_search_result=$BUFFER }
     fi
   elif (( _z4h_use[zsh-syntax-highlighting] )); then
     builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

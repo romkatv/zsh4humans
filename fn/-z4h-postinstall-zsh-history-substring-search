@@ -1,0 +1,3 @@
+eval "$_z4h_opt"
+
+z4h compile -- $Z4H_PACKAGE_DIR/zsh-history-substring-search.zsh

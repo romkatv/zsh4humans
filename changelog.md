@@ -38,3 +38,11 @@
   ```zsh
   zstyle ':z4h:' iterm2-integration 'yes'
   ```
+- The following bindings have been changed:
+  - <kbd>Ctrl+P</kbd>/<kbd>Up</kbd>: `z4h-up-local-history` => `z4h-up-substring-local`
+  - <kbd>Ctrl+N</kbd>/<kbd>Down</kbd>: `z4h-down-local-history` => `z4h-down-substring-local`
+- The following widgets have been renamed:
+  - `z4h-up-local-history` => `z4h-up-prefix-local`
+  - `z4h-down-local-history` => `z4h-down-prefix-local`
+  - `z4h-up-global-history` => `z4h-up-prefix-global`
+  - `z4h-down-global-history` => `z4h-down-prefix-global`

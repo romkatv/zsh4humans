@@ -16,11 +16,10 @@ function -z4h-iterm2-dump() {
 }
 
 function -z4h-iterm2-precmd() {
-  local -i err=$?
   zle && return
   if (( _z4h_iterm_cmd )); then
     (( _z4h_iterm_cmd == 1 )) && -z4h-tmux-bypass '\e]133;C;\a'
-    -z4h-tmux-bypass '\e]133;D;%s\a' $err
+    -z4h-tmux-bypass '\e]133;D;%s\a' $1
   fi
   -z4h-iterm2-dump
   typeset -gi _z4h_iterm_cmd=1

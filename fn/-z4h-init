@@ -21,6 +21,7 @@ function -z4h-set-term-title-preexec() {
 
 # When no command is running, display the current directory in the terminal title.
 function -z4h-set-term-title-precmd() {
+  local -i err=$?
   emulate -L zsh
   local _z4h_fmt
   if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
@@ -28,7 +29,7 @@ function -z4h-set-term-title-precmd() {
   else
     zstyle -s :z4h:term-title:local precmd _z4h_fmt || _z4h_fmt='%~'
   fi
-  -z4h-iterm2-precmd
+  -z4h-iterm2-precmd $err
   [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt
 }
 

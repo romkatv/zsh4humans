@@ -1,34 +1,6 @@
-if zstyle -T :z4h iterm2-integration && [[ $TERM != (dumb|linux) ]]; then
-  typeset -g ITERM_SHELL_INTEGRATION_INSTALLED=Yes
-  typeset -gi _z4h_iterm_cmd=0
-  function iterm2_set_user_var() {
-    (( ${+commands[base64]} )) || return
-    local x
-    x="$(printf '%s' "$2" | command base64)" || return
-    -z4h-tmux-bypass '\e]1337;SetUserVar=%s=%s\007' "$1" "${x//$'\n'}"
-  }
-  if (( ! $+functions[iterm2_print_user_vars] )); then
-    function iterm2_print_user_vars() { }
-  fi
-  function -z4h-iterm2-dump() {
-    -z4h-tmux-bypass '\e]1337;RemoteHost=%s@%s\a' "${(%):-%n}" "${iterm2_hostname:-${(%):-%m}}"
-    -z4h-tmux-bypass '\e]1337;CurrentDir=%s\a' "${(%):-%/}"
-    iterm2_print_user_vars
-  }
-  function -z4h-iterm2-precmd() {
-    local -i err=$?
-    zle && return
-    if (( _z4h_iterm_cmd )); then
-      (( _z4h_iterm_cmd == 1 )) && -z4h-tmux-bypass '\e]133;C;\a'
-      -z4h-tmux-bypass '\e]133;D;%s\a' $err
-    fi
-    -z4h-iterm2-dump
-    typeset -gi _z4h_iterm_cmd=1
-  }
-  function -z4h-iterm2-preexec() {
-    -z4h-tmux-bypass '\e]133;C;\a'
-    typeset -gi _z4h_iterm_cmd=2
-  }
+if zstyle -t :z4h: iterm2-integration &&
+   [[ $TERM != (dumb|linux) && $ITERM_SHELL_INTEGRATION_INSTALLED != Yes ]]; then
+  -z4h-enable-iterm2-integration
 else
   function -z4h-iterm2-precmd() { }
   function -z4h-iterm2-preexec() { }
@@ -1027,6 +999,10 @@ function -z4h-post-init() {
     fi
   elif (( _z4h_use[zsh-syntax-highlighting] )); then
     builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+  fi
+
+  if (( ! $+_z4h_iterm_cmd )) && [[ $ITERM_SHELL_INTEGRATION_INSTALLED == Yes ]]; then
+    -z4h-error-iterm2-integration
   fi
 }
 

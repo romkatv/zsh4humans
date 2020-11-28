@@ -3,15 +3,10 @@ emulate -L zsh -o no_prompt_bang -o prompt_subst -o prompt_percent
 local title=$1
 shift
 print -Prnv title -- $title
-
--z4h-tmux-bypass '\e]0;%s\a' "${(V)title}"
-#printf '\e]0;%s \a' "${(V)title}" >"$TTY"
-#sleep 1
-#printf '\e]0;%s\a' "${(V)title}" >"$TTY"
-return
+printf -v title '\e]0;%s\a' "${(V)title}"
 
 if [[ -t 1 ]]; then
-  printf '\e]0;%s\a' "${(V)title}"
+  print -rn -- $title
 elif [[ -w $TTY ]]; then
-  printf '\e]0;%s\a' "${(V)title}" >"$TTY"
+  print -rn -- $title >$TTY
 fi

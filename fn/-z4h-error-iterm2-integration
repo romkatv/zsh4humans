@@ -1,0 +1,21 @@
+local home=~
+local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
+
+if [[ ! -t 2 ]]; then
+  (( $+functions[p10k] )) && p10k clear-instant-prompt
+fi
+
+print -Pru2 -- '%F{3}z4h%f: iTerm2 integration loaded incorrectly!'
+print -Pru2 -- ''
+print -Pru2 -- 'To fix this issue:'
+print -Pru2 -- ''
+print -Pru2 -- '1. Add this line at the top of %U'$zdotdir'/.zshrc%u:'
+print -Pru2 -- ''
+print -Pru2 -- "  %F{2}zstyle%f %F{3}':z4h:'%f iterm2-integration %F{3}'yes'%f"
+print -Pru2 -- ''
+print -Pru2 -- '2. (Optional) Remove the following line (or similar) from %U'$zdotdir'/.zshrc%u:'
+print -Pru2 -- ''
+print -Pru2 -- '  %F{2}source%f %U~/.iterm2_shell_integration.zsh%u'
+
+unfunction -- -z4h-error-iterm2-integration
+autoload -Uz -- -z4h-error-iterm2-integration

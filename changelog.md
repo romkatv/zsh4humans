@@ -33,20 +33,6 @@
   ```zsh
   zstyle :z4h:fzf-history fzf-preview no
   ```
-- Functions and commands defined under `$HOME` that don't have their own completion definitions
-  will no longer use completion functions defined outside of `$HOME`. This is meant to avoid the
-  accidental use of a completion function for a standard command when the user defines an unrelated
-  command that happens to have the same name. Use `compdef` if you really want your command or
-  function to use the standard completion function.
-  ```zsh
-  function cd() {
-    print -r -- "cd: $@" >>~/cd.log
-    builtin cd "$@"
-  }
-
-  # Use _cd to complete cd.
-  compdef _cd cd
-  ```
 - iTerm2 integration can no longer be enabled by sourcing `~/.iterm2_shell_integration.zsh`.
   Instead, you need to put this line in `~/.zshrc`:
   ```zsh

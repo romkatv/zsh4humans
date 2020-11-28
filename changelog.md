@@ -47,3 +47,8 @@
   # Use _cd to complete cd.
   compdef _cd cd
   ```
+- iTerm2 integration can no longer be enabled by sourcing `~/.iterm2_shell_integration.zsh`.
+  Instead, you need to put this line in `~/.zshrc`:
+  ```zsh
+  zstyle ':z4h:' iterm2-integration 'yes'
+  ```

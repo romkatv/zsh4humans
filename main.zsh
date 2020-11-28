@@ -253,9 +253,9 @@ function -z4h-cmd-init() {
     fi
 
     if [[ -w $TTY && (-n $Z4H_SSH && -n $_Z4H_SSH_MARKER || -n $_Z4H_TMUX) ]]; then
-      typeset -gri _z4h_can_save_restore_screen=1
+      typeset -gri _z4h_can_save_restore_screen=1  # this parameter is read by p10k
     else
-      typeset -gri _z4h_can_save_restore_screen=0
+      typeset -gri _z4h_can_save_restore_screen=0  # this parameter is read by p10k
     fi
   } || return
 

@@ -3,7 +3,7 @@ emulate -L zsh -o no_prompt_bang -o prompt_subst -o prompt_percent
 local title=$1
 shift
 print -Prnv title -- $title
-title=$'\e]0;'${(V)title}$'\a'
+printf -v title '\e]0;%s\a' "${(V)title}"
 
 if [[ -t 1 ]]; then
   print -rn -- $title

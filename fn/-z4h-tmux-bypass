@@ -1,0 +1,10 @@
+local x
+builtin printf -v x "$@"
+
+(( _z4h_can_save_restore_screen )) && x+=$'\ePtmux;'${x//$'\e'/$'\e\e'}$'\e\\'
+
+if [[ -t 1 ]]; then
+  print -rn -- "$x"
+elif [[ -w $TTY ]]; then
+  print -rn -- "$x" >"$TTY"
+fi

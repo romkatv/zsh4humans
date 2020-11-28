@@ -10,10 +10,10 @@ zstyle ':z4h:'                auto-update      'ask'
 zstyle ':z4h:'                auto-update-days '28'
 
 # Keyboard type: 'mac' or 'pc'.
-zstyle ':z4h:bindkey'         keyboard         'pc'
+zstyle ':z4h:bindkey'         keyboard     'pc'
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
-zstyle ':z4h:autosuggestions' forward-char     'accept'
+zstyle ':z4h:autosuggestions' forward-char 'accept'
 
 # Enable ('yes') or disable ('no') automatic teleportation of z4h over
 # ssh when connecting to these hosts.
@@ -23,8 +23,8 @@ zstyle ':z4h:ssh:*.example-hostname2' enable 'no'
 zstyle ':z4h:ssh:*'                   enable 'no'
 
 # Send these files over to the remote host when connecting over ssh to the
-# enabled hosts. Multiple files can be listed here.
-zstyle ':z4h:ssh:*' send-extra-files '~/.iterm2_shell_integration.zsh'
+# enabled hosts.
+zstyle ':z4h:ssh:*' send-extra-files '~/.nanorc' '~/.env.zsh'
 
 # Move the cursor to the end when Up/Down fetches a command from history?
 zstyle ':zle:up-line-or-beginning-search'   leave-cursor 'yes'
@@ -43,11 +43,14 @@ z4h install ohmyzsh/ohmyzsh || return
 # perform network I/O must be done above. Everything else is best done below.
 z4h init || return
 
+# Extend PATH.
+path=(~/bin $path)
+
 # Export environment variables.
 export GPG_TTY=$TTY
 
-# Extend PATH.
-path=(~/bin $path)
+# Source additional local files if they exist.
+z4h source ~/.env.zsh
 
 # Use additional Git repositories pulled in with `z4h install`.
 #
@@ -55,9 +58,6 @@ path=(~/bin $path)
 z4h source $Z4H/ohmyzsh/ohmyzsh/lib/diagnostics.zsh
 z4h source $Z4H/ohmyzsh/ohmyzsh/plugins/emoji-clock/emoji-clock.plugin.zsh
 fpath+=($Z4H/ohmyzsh/ohmyzsh/plugins/supervisor)
-
-# Source additional local files if they exist.
-z4h source ~/.iterm2_shell_integration.zsh
 
 # Define key bindings.
 z4h bindkey z4h-backward-kill-word  Ctrl+Backspace Ctrl+H

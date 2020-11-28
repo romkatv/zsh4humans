@@ -1,0 +1,37 @@
+function iterm2_set_user_var() {
+  (( ${+commands[base64]} )) || return
+  local x
+  x="$(printf '%s' "$2" | command base64 2>/dev/null)" || return
+  -z4h-tmux-bypass '\e]1337;SetUserVar=%s=%s\007' "$1" "${x//$'\n'}"
+}
+
+if (( ! $+functions[iterm2_print_user_vars] )); then
+  function iterm2_print_user_vars() { }
+fi
+
+function -z4h-iterm2-dump() {
+  -z4h-tmux-bypass '\e]1337;RemoteHost=%s@%s\a' "${(%):-%n}" "${iterm2_hostname:-${(%):-%m}}"
+  -z4h-tmux-bypass '\e]1337;CurrentDir=%s\a' "${(%):-%/}"
+  iterm2_print_user_vars
+}
+
+function -z4h-iterm2-precmd() {
+  zle && return
+  if (( _z4h_iterm_cmd )); then
+    (( _z4h_iterm_cmd == 1 )) && -z4h-tmux-bypass '\e]133;C;\a'
+    -z4h-tmux-bypass '\e]133;D;%s\a' $1
+  fi
+  -z4h-iterm2-dump
+  typeset -gi _z4h_iterm_cmd=1
+}
+
+function -z4h-iterm2-preexec() {
+  -z4h-tmux-bypass '\e]133;C;\a'
+  typeset -gi _z4h_iterm_cmd=2
+}
+
+typeset -g ITERM_SHELL_INTEGRATION_INSTALLED=Yes
+typeset -gi _z4h_iterm_cmd=0  # this parameter is read by p10k
+
+unfunction -- -z4h-enable-iterm2-integration
+autoload -Uz -- -z4h-enable-iterm2-integration

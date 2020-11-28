@@ -168,7 +168,7 @@ function -z4h-cmd-init() {
     eval "$_z4h_opt"
 
     [[ $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] ||
-      ! zstyle -T :z4h start-tmux integrated
+      ! zstyle -T :z4h: start-tmux integrated
     local -i install_tmux=$? need_restart
 
     if (( $+ZSH_SCRIPT || $+ZSH_EXECUTION_STRING )) || ! [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
@@ -193,7 +193,7 @@ function -z4h-cmd-init() {
         else
           unset _Z4H_TMUX _Z4H_TMUX_CMD
         fi
-        if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -T :z4h prompt-position bottom; then
+        if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -T :z4h: prompt-position bottom; then
           local cursor_y cursor_x
           -z4h-get-cursor-pos || return
           local -i n=$((LINES - cursor_y))

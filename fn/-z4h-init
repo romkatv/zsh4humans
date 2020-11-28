@@ -355,7 +355,7 @@ if (( _z4h_use[fzf] )); then
   # cd into a subdirectory (interactive).
   bindkey '^[[1;2B' z4h-cd-down                    # shift+down
 fi
-if zstyle -T :z4h prompt-position bottom; then
+if zstyle -T :z4h: prompt-position bottom; then
   bindkey '^L' z4h-clear-screen-soft-bottom
   bindkey '^[^L' z4h-clear-screen-hard-bottom
 else

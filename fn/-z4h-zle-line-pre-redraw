@@ -5,10 +5,11 @@ if (( ${+widgets[-z4h-orig-zle-line-pre-redraw]} )); then
 fi
 
 if (( ${+_z4h_substring_search_highlight} )) &&
-   [[ ${_history_substring_search_result-} != $BUFFER ]]; then
+   [[ ${_history_substring_search_cursor-} != $CURSOR ||
+      ${_history_substring_search_result-} != $BUFFER ]]; then
   typeset -g _history_substring_search_result=
   typeset -g _history_substring_search_query_highlight=
-  unset _z4h_substring_search_highlight
+  unset _z4h_substring_search_highlight _history_substring_search_cursor
 fi
 
 if (( PENDING || KEYS_QUEUED_COUNT )); then

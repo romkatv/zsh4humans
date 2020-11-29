@@ -1044,10 +1044,11 @@ function -z4h-post-init() {
     if (( _z4h_use[zsh-history-substring-search] )); then
       function _history-substring-search-end() {
         builtin eval "$_z4h_opt"
-        typeset -g _history_substring_search_result=$BUFFER
         if (( _history_substring_search_refresh_display )); then
           CURSOR=${#BUFFER}
         fi
+        typeset -g _history_substring_search_result=$BUFFER
+        typeset -gi _history_substring_search_cursor=CURSOR
         unset _z4h_substring_search_highlight
         [[ -z $_history_substring_search_query_highlight ]] && return
         local query_part escaped_query_part REPLY
@@ -1064,7 +1065,13 @@ function -z4h-post-init() {
       }
     elif (( $+functions[_history-substring-search-end] )); then
       # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
-      function _history-substring-search-end() { _history_substring_search_result=$BUFFER }
+      function _history-substring-search-end() {
+        emulate -L zsh
+        _history_substring_search_result=$BUFFER
+        if (( _history_substring_search_refresh_display )); then
+          CURSOR=${#BUFFER}
+        fi
+      }
     fi
   elif (( _z4h_use[zsh-syntax-highlighting] )); then
     builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

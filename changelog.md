@@ -46,3 +46,9 @@
   - `z4h-down-local-history` => `z4h-down-prefix-local`
   - `z4h-up-global-history` => `z4h-up-prefix-global`
   - `z4h-down-global-history` => `z4h-down-prefix-global`
+- It's now possible to automatically start `tmux` when zsh4humans is initializing.
+  ```zsh
+  zstyle :z4h: start-tmux [arg]...
+  ```
+  Where `[arg]...` is either `integrated` (the default), `no`, `command <cmd> [flag]...`, or
+  `system`. The latter is equivalent to `command tmux -u`.

@@ -167,9 +167,16 @@ function -z4h-cmd-init() {
   () {
     eval "$_z4h_opt"
 
-    [[ $MACHTYPE != x86_64 || $OSTYPE != (linux|darwin)* ]] ||
-      ! zstyle -T :z4h: start-tmux integrated
-    local -i install_tmux=$? need_restart
+    local -a start_tmux
+    # 'integrated', 'system', or 'command' <cmd> [arg]...
+    zstyle -a :z4h: start-tmux start_tmux || start_tmux=(integrated)
+    local -i install_tmux need_restart
+    if (( $#start_tmux == 1 )); then
+      case $start_tmux[1] in
+        integrated) install_tmux=1;;
+        system)     start_tmux=(command tmux -u);;
+      esac
+    fi
 
     if (( $+ZSH_SCRIPT || $+ZSH_EXECUTION_STRING )) || ! [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
       unset _Z4H_TMUX _Z4H_TMUX_CMD
@@ -220,11 +227,13 @@ function -z4h-cmd-init() {
             else
               local cfg=tmux-256color.conf
             fi
-            SHELL=$_z4h_exe exec $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
+            SHELL=$_z4h_exe exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
           fi
         else
           need_restart=1
         fi
+      elif [[ -z $TMUX && $start_tmux[1] == command ]] && (( $+commands[$start_tmux[2]] )); then
+        SHELL=$_z4h_exe exec - ${start_tmux:1} || return
       fi
     fi
 

@@ -49,6 +49,7 @@ local -i list_colors=$((!$?))
           --ansi
           --exact
           --no-mouse
+          --no-sort
           --tiebreak=length,begin,index
           --no-multi
           --border=horizontal

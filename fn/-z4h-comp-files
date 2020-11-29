@@ -32,6 +32,7 @@
     --ansi
     --exact
     --no-mouse
+    --no-sort
     --tiebreak=length,begin,index
     --multi
     --cycle

@@ -32,7 +32,7 @@
     --ansi
     --exact
     --no-mouse
-    --no-sort
+    --tiebreak=length,begin,index
     --multi
     --cycle
     --border=horizontal
@@ -43,11 +43,10 @@
     # Set dot_glob in case the value of find-flags depends on it (via `zstyle -e`).
     # Ideally we should run this with user options.
     (( dot_glob )) && setopt dot_glob
+    local -a bin
     zstyle -a :z4h:${WIDGET#z4h-} find-command bin
     if (( ! $#bin )) && (( $+commands[bfs] )); then
-      opts+=(--tiebreak=index)
-    else
-      opts+=(--tiebreak=length,begin,index)
+      opts+=(--no-sort)
     fi
   }
 

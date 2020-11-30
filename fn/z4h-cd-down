@@ -49,11 +49,22 @@ local -i list_colors=$((!$?))
           --ansi
           --exact
           --no-mouse
-          --no-sort
           --tiebreak=length,begin,index
           --no-multi
           --border=horizontal
         )
+
+        () {
+          emulate -L zsh
+          # Set dot_glob in case the value of find-flags depends on it (via `zstyle -e`).
+          # Ideally we should run this with user options.
+          (( dot_glob )) && setopt dot_glob
+          local -a bin
+          zstyle -a :z4h:${WIDGET#z4h-} find-command bin
+          if (( ! $#bin )) && (( $+commands[bfs] )); then
+            opts+=(--no-sort)
+          fi
+        }
 
         local cursor_y cursor_x
         -z4h-get-cursor-pos || return

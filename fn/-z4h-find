@@ -4,7 +4,7 @@ local dirs=("${@:3}")
 
 (( $#dirs )) || return 0
 
-local bin
+local -a bin
 local -a flags
 () {
   emulate -L zsh

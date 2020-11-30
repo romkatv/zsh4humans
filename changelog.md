@@ -52,3 +52,11 @@
   ```
   Where `[arg]...` is either `integrated` (the default), `no`, `command <cmd> [flag]...`, or
   `system`. The latter is equivalent to `command tmux -u`.
+- Widgets the perform recursive directory traversal (`z4h-cd-down` and `z4h-fzf-complete`) now
+  use [bfs](https://github.com/tavianator/bfs) instead of `find` if it's installed. You can get
+  the original behavior with the following declaration:
+  ```zsh
+  zstyle ':z4h:(z4h-cd-down|z4h-fzf-complete)' find-command command find
+  ```
+  You can also use a custom function in place of `command find` if you want to transform command
+  line arguments.

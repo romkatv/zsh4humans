@@ -4,6 +4,7 @@ local dirs=("${@:3}")
 
 (( $#dirs )) || return 0
 
+local bin
 local -a flags
 () {
   emulate -L zsh
@@ -11,7 +12,15 @@ local -a flags
   # Ideally we should run this with user options.
   (( dot_glob )) && setopt dot_glob
   local widget=${WIDGET#z4h-}
-  zstyle -a :z4h:${WIDGET#z4h-} find-flags flags
+  zstyle -a :z4h:$widget find-command bin
+  if (( ! $#bin )); then
+    if (( $+commands[bfs] )); then
+      bin=(command bfs)
+    else
+      bin=(command find)
+    fi
+  fi
+  zstyle -a :z4h:$widget find-flags flags
   if (( ! $#flags )); then
     flags=(-name '.*' -prune -print -o -print)
   fi
@@ -19,9 +28,9 @@ local -a flags
 
 local -a cmd
 local -aU fss
-fss=(${(f)"$(command find / . -maxdepth 0 -printf '%F\n' 2>/dev/null)"}) || fss=()
+fss=(${(f)"$("${bin[@]}" / . -maxdepth 0 -printf '%F\n' 2>/dev/null)"}) || fss=()
 if (( $#fss )) && [[ -z ${(M)fss:#unknown} ]]; then
-  cmd+=(command find -L ./$^dirs)
+  cmd+=("${bin[@]}" -L ./$^dirs)
   (( only_dirs )) && cmd+=('!' -type d -prune -o)
   cmd+=('!' '(')
   local fs
@@ -32,7 +41,7 @@ if (( $#fss )) && [[ -z ${(M)fss:#unknown} ]]; then
   (( dot_glob )) || cmd+=(-o -name '.*' -prune)
   cmd+=(-o "${flags[@]}")
 else
-  cmd+=(command find -L . -xdev -mindepth 1)
+  cmd+=("${bin[@]}" -L . -xdev -mindepth 1)
   (( only_dirs )) && cmd+=('!' -type d -prune -o)
   cmd+=('!' -path './*/*' '!' '(')
   local dir

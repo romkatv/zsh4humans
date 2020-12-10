@@ -125,7 +125,7 @@ function z4h-expand() { zle _expand_alias || zle .expand-word || true }
 
 function z4h-cd-back() { -z4h-cd-rotate +1 }
 function z4h-cd-forward() { -z4h-cd-rotate -0 }
-function z4h-cd-up() { cd .. && -z4h-redraw-prompt }
+function z4h-cd-up() { builtin cd -q .. && -z4h-redraw-prompt }
 
 function z4h-do-nothing() {}
 

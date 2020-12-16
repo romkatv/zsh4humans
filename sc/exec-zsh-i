@@ -57,7 +57,7 @@ _z4h_exec_zsh_i() {
     fi
   ) || 'return'
 
-  if '[' '-n' "${Z4H_SSH-}" ']'; then
+  if '[' '-n' "${Z4H_SSH-}" '-o' "${USER-}" '=' 'cloudshell-user' ']'; then
     >&2 'printf' '\033[33mz4h\033[0m: installing \033[1mzsh 5.8\033[0m to \033[4m~/.local\033[0m\n'
     'command' 'sh' '--' "$install" '-d' ~/'.local' '-e' 'no' '-q' || 'return'
     'local' 'dir'="$HOME"/.local

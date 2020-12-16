@@ -2,7 +2,7 @@ eval "$_z4h_opt"
 
 local user=${(%):-%n}
 [[ -n $user && -r /etc/shells && $_z4h_exe == /* && -x $_z4h_exe &&
-   -t 0 && -t 1 && -t 2 ]] || return 0
+   $user != cloudshell-user && -t 0 && -t 1 && -t 2 ]] || return 0
 
 if [[ $OSTYPE == linux* ]]; then
   [[ -r /etc/passwd ]] || return 0

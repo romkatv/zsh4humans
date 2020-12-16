@@ -1014,18 +1014,18 @@ function -z4h-post-init() {
       builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     }
     preexec_functions=(${preexec_functions:#_zsh_highlight_preexec_hook})
-      eval '_zsh_highlight() {
-        {
-          if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
-            region_highlight=()
-          else
-            local -ih PENDING=0 KEYS_QUEUED_COUNT=0
-            '$functions[_zsh_highlight]'
-          fi
-        } always {
-          region_highlight+=($_z4h_substring_search_highlight)
-        }
-      }'
+    eval '_zsh_highlight() {
+      {
+        if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
+          region_highlight=()
+        else
+          local -ih PENDING=0 KEYS_QUEUED_COUNT=0
+          '$functions[_zsh_highlight]'
+        fi
+      } always {
+        [[ $WIDGET == zle-line-finish ]] || region_highlight+=($_z4h_substring_search_highlight)
+      }
+    }'
     local suggest_special=(
       $ZSH_AUTOSUGGEST_EXECUTE_WIDGETS
       $ZSH_AUTOSUGGEST_CLEAR_WIDGETS

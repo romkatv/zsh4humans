@@ -71,7 +71,7 @@ print -Pr -- ""
       fi
       print -Prn -- "%BChoice [yn]:%b "
       {
-        read -k choice
+        read -k choice || return
       } always {
         [[ $choice == $'\n' ]] || print
       }

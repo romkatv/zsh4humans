@@ -44,32 +44,52 @@ fi
 
 [[ -n $my_shell || $+commands[sudo] == 1 || -w /etc/shells ]] || return 0
 
-print -Pr -- "%F{3}z4h%f: login shell isn't the same as this shell"
+-z4h-flowing -- %F{3}z4h%f: login shell isn\'t the same as this shell
 print -Pr -- ""
 print -Pr -- "  user         %F{3}${user//\%/%%}%f"
 print -Pr -- "  login shell  %F{2}${login_shell//\%/%%}%f"
 print -Pr -- "  this shell   %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f"
+print -Pr -- ""
+-z4h-flowing -- Change login shell of "%F{3}${user//\%/%%}%f" to "%F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f?"
+print -Pr -- ""
+print -Pr -- "  %B(y)%b  Yes. %BRecommended%b."
+print -Pr -- "  %B(n)%b  No."
+print -Pr -- ""
 
 (
   trap '' INT
   (
-    local query="Change login shell of %F{3}${user//\%/%%}%f to %F{2}${${my_shell:-$_z4h_exe}//\%/%%}%f?"
+    local -i error
     while true; do
+      if (( error )); then
+        print -Pr -- ''
+        print -Pr -- 'Bummer! Try again?'
+        print -Pr -- ""
+        print -Pr -- "  %B(y)%b  Yes."
+        print -Pr -- "  %B(n)%b  No."
+        print -Pr -- ""
+      fi
+      print -Prn -- "%BChoice [yn]:%b "
       {
-        local REPLY=n
-        print
-        read -q ${(%):-"?$query [y/N]: "} && REPLY=y
+        read -k choice
       } always {
-        print -l -- '' ''
+        [[ $choice == $'\n' ]] || print
       }
-      if [[ $REPLY != y ]]; then
+      if [[ $choice == (n|N) ]]; then
+        print
         print -rn >$Z4H/stickycache/no-chsh || return '_z4h_err()'
         local home=~
         local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
         print -Pr -- "Won't ask again unless %U\$Z4H/stickycache/no-chsh%u is deleted."
         return 1
       fi
-      query="Try again?"
+      [[ $choice == $'\n' ]] && continue
+      if [[ $choice != (y|Y) ]]; then
+        print -Pr -- '%F{3}z4h%f: invalid choice: '${(q-)choice//\%/%%}
+        continue
+      fi
+      error=1
+      print
       if [[ -z $my_shell ]]; then
         print -Pr -- "Adding %F{2}${_z4h_exe//\%/%%}%f to %U/etc/shells%u."
         local precmd=(command)

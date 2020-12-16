@@ -324,7 +324,7 @@ function z4h() {
 
 typeset -gr _z4h_orig_shell=${SHELL-}
 
-(( !EUID || $+Z4H_SSH ))                                                                 ||
+(( _z4h_dangerous_root || $+Z4H_SSH ))                                                   ||
   ! zstyle -T :z4h: chsh                                                                 ||
   [[ ${SHELL-} == $_z4h_exe || ${SHELL-} -ef $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] ||
   -z4h-chsh                                                                              ||

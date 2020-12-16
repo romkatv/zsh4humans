@@ -75,6 +75,9 @@ cleanup() {
 
 'trap' 'cleanup' 'INT' 'TERM' 'EXIT'
 
+lf='
+'
+
 read_choice() {
   choice=''
   'command' 'stty' '-icanon' 'min' '1' 'time' '0'
@@ -85,10 +88,9 @@ read_choice() {
     '[' "$n" '-eq' '0' ']' || 'break'
   done
   'command' 'stty' "$saved_tty_settings"
-  'echo'
+  '[' "$choice" '=' "$lf" ] || 'echo'
 }
 
->&2 'printf' '\033[H\033[2J'
 >&2 'printf' 'Greetings, Human!\n'
 >&2 'printf' '\n'
 >&2 'printf' 'What kind of \033[1mkeyboard\033[0m are you using?\n'
@@ -114,13 +116,15 @@ while 'true'; do
     'q')
       'exit' '1'
     ;;
+    "$lf")
+    ;;
     *)
       >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
     ;;
   esac
 done
 
->&2 'printf' '\033[H\033[2J'
+>&2 'printf' '\n'
 >&2 'printf' 'What \033[1mkeybindings\033[0m do you prefer?\n'
 >&2 'printf' '\n'
 >&2 'printf' '  \033[1m(1)\033[0m  Standard. I delete characters with \033[33m%s\033[0m key.\n' "$bs_key"
@@ -143,13 +147,15 @@ while 'true'; do
     'q')
       'exit' '1'
     ;;
+    "$lf")
+    ;;
     *)
       >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
     ;;
   esac
 done
 
->&2 'printf' '\033[H\033[2J'
+>&2 'printf' '\n'
 >&2 'printf' 'Do you use \033[32mtmux\033[0m?\n'
 >&2 'printf' '\n'
 >&2 'printf' '  \033[1m(y)\033[0m  Yes.\n'
@@ -170,6 +176,8 @@ while 'true'; do
     ;;
     'q')
       'exit' '1'
+    ;;
+    "$lf")
     ;;
     *)
       >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
@@ -199,8 +207,8 @@ if '[' '-n' "$rcs" ']'; then
     done
     backup_dir="$backup_dir.$i"
   fi
-  >&2 'printf' '\033[H\033[2J'
-  >&2 'printf' 'You have the following Zsh startup files:\n'
+  >&2 'printf' '\n'
+  >&2 'printf' 'You have the following Zsh \033[1mstartup files\033[0m:\n'
   >&2 'printf' '\n'
   for f in $rcs; do
     >&2 'printf' '    \033[4m~/%s\033[0m\n' "$f"
@@ -226,6 +234,8 @@ if '[' '-n' "$rcs" ']'; then
       ;;
       'q')
         'exit' '1'
+      ;;
+      "$lf")
       ;;
       *)
         >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"

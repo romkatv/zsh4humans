@@ -61,6 +61,33 @@ if '[' '!' '-t' '2' ']'; then
   'exit' '1'
 fi
 
+saved_tty_settings="$('command' 'stty' '-g')"
+
+zshenv=''
+zshrc=''
+z4h=''
+
+cleanup() {
+  'trap' '-' 'INT' 'TERM' 'EXIT'
+  'command' 'rm' '-f' '--' "$zshenv" "$zshrc" "${zshrc:+$zshrc.bak}" "$z4h"
+  'command' 'stty' "$saved_tty_settings"
+}
+
+'trap' 'cleanup' 'INT' 'TERM' 'EXIT'
+
+read_choice() {
+  choice=''
+  'command' 'stty' '-icanon' 'min' '1' 'time' '0'
+  while :; do
+    c="$('command' 'dd' 'bs=1' 'count=1' 2>'/dev/null' && 'echo' 'x')"
+    choice="$choice${c%x}"
+    n="$('printf' '%s' "$choice" | 'command' 'wc' '-m')"
+    '[' "$n" '-eq' '0' ']' || 'break'
+  done
+  'command' 'stty' "$saved_tty_settings"
+  'echo'
+}
+
 >&2 'printf' '\033[H\033[2J'
 >&2 'printf' 'Greetings, Human!\n'
 >&2 'printf' '\n'
@@ -72,7 +99,7 @@ fi
 >&2 'printf' '\n'
 while 'true'; do
   >&2 'printf' '\033[1mChoice [12q]:\033[0m '
-  IFS='' 'read' '-r' 'choice'
+  'read_choice'
   case "$choice" in
     '1')
       bs_key='Delete'
@@ -102,7 +129,7 @@ done
 >&2 'printf' '\n'
 while 'true'; do
   >&2 'printf' '\033[1mChoice [12q]:\033[0m '
-  IFS='' 'read' '-r' 'choice'
+  'read_choice'
   case "$choice" in
     '1')
       'break'
@@ -131,7 +158,7 @@ done
 >&2 'printf' '\n'
 while 'true'; do
   >&2 'printf' '\033[1mChoice [ynq]:\033[0m '
-  IFS='' 'read' '-r' 'choice'
+  'read_choice'
   case "$choice" in
     'y')
       tmux='1'
@@ -187,7 +214,7 @@ if '[' '-n' "$rcs" ']'; then
   >&2 'printf' '\n'
   while 'true'; do
     >&2 'printf' '\033[1mChoice [12q]:\033[0m '
-    IFS='' 'read' '-r' 'choice'
+    'read_choice'
     case "$choice" in
       '1')
         backup_dir="$HOME/$backup_dir"
@@ -207,13 +234,6 @@ if '[' '-n' "$rcs" ']'; then
   done
   >&2 'printf' '\n'
 fi
-
-zshenv=
-zshrc=
-z4h=
-
-'trap' '"trap" "-" "INT" "TERM" "EXIT"; "command" "rm" "-f" "--" "$zshenv" "$zshrc" "${zshrc:+$zshrc.bak}" "$z4h" 2>/dev/null' \
-  'INT' 'TERM' 'EXIT'
 
 if command -v 'mktemp' >'/dev/null' 2>&1; then
   zshenv="$('command' 'mktemp' "$HOME"/.zshenv.XXXXXXXXXX)"
@@ -260,7 +280,7 @@ fi
 
 Z4H="${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
 
-umask o-w
+'umask' 'o-w'
 
 'command' 'rm' '-rf' '--' "$Z4H"
 'command' 'mkdir' '-p' -- "$Z4H"
@@ -278,9 +298,9 @@ fi
 'command' 'mv' '--' "$zshrc" ~/'.zshrc'
 'command' 'mv' '--' "$z4h" "$Z4H"/z4h.zsh
 
-printf '%s\n' "$backup_dir" >"$Z4H"/welcome
+'printf' '%s\n' "$backup_dir" >"$Z4H"/welcome
 
-'trap' '-' 'INT' 'TERM' 'EXIT'
+'cleanup'
 
 >&2 'printf' '\033[33mz4h\033[0m: bootstrapping \033[32mzsh\033[0m environment\n'
 

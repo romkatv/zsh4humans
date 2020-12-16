@@ -123,7 +123,7 @@ while 'true'; do
 done
 
 >&2 'printf' '\033[H\033[2J'
->&2 'printf' 'Do you use \033[31mtmux\033[0m?\n'
+>&2 'printf' 'Do you use \033[32mtmux\033[0m?\n'
 >&2 'printf' '\n'
 >&2 'printf' '  \033[1m(y)\033[0m  Yes.\n'
 >&2 'printf' '  \033[1m(n)\033[0m  No.\n'

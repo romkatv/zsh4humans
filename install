@@ -257,7 +257,7 @@ fi
 
 url='https://raw.githubusercontent.com/romkatv/zsh4humans/v5'
 
->&2 'printf' '\033[H\033[2J'
+>&2 'printf' '\n'
 >&2 'printf' 'Settings up \033[33mZsh For Humans\033[0m...\n'
 >&2 'printf' '\n'
 

@@ -122,6 +122,8 @@ else
   typeset -gri _z4h_dangerous_root=0
 fi
 
+[[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] || -z4h-fix-locale
+
 function compinit() {}
 
 function compdef() {

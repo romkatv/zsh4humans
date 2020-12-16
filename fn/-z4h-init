@@ -45,20 +45,13 @@ for pkg in fzf powerlevel10k systemd zsh-history-substring-search \
 done
 typeset -grA _z4h_use
 
-local p10k_cfg=
-# If the current locale isn't UTF-8, change it to an UTF-8 one.
-# Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
-() {
-  [[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] && return 0
-  (( $+commands[locale] )) || return
-  local loc=(${(@M)$(locale -a):#*.(utf|UTF)(-|)8})
-  (( $#loc )) || return
-  export LC_ALL=${loc[(r)(#i)C.UTF(-|)8]:-${loc[(r)(#i)en_US.UTF(-|)8]:-$loc[1]}}
-} && [[ $TERM != (dumb|linux) ]] || p10k_cfg+=-ascii
-(( terminfo[colors] >= 256 )) || p10k_cfg+=-8color
-
-if (( _z4h_use[powerlevel10k] )); then
-  : ${POWERLEVEL9K_CONFIG_FILE:=$ZDOTDIR/.p10k${p10k_cfg}.zsh}
+if (( _z4h_use[powerlevel10k] && ! $#POWERLEVEL9K_CONFIG_FILE )) ; then
+  POWERLEVEL9K_CONFIG_FILE=$ZDOTDIR/.p10k
+  if [[ $langinfo[CODESET] != (utf|UTF)(-|)8 || $TERM == (dumb|linux) ]]; then
+    POWERLEVEL9K_CONFIG_FILE+=-ascii
+  fi
+  (( terminfo[colors] >= 256 )) || POWERLEVEL9K_CONFIG_FILE+=-8color
+  POWERLEVEL9K_CONFIG_FILE+=.zsh
 fi
 
 # Enable command_not_found_handler if possible.

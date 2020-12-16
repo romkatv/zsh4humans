@@ -5,12 +5,17 @@
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v5/README.md.
 
 # Periodic auto-update on Zsh startup: 'ask' or 'no'.
-zstyle ':z4h:'                auto-update      'ask'
+zstyle ':z4h:' auto-update      'ask'
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
-zstyle ':z4h:'                auto-update-days '28'
+zstyle ':z4h:' auto-update-days '28'
+
+# Automaticaly wrap TTY with a transparent tmux ('integrated'), or start a
+# full-fledged tmux ('system'), or disable features that require tmux ('no').
+zstyle ':z4h:' start-tmux 'integrated'
 
 # Keyboard type: 'mac' or 'pc'.
-zstyle ':z4h:bindkey'         keyboard     'pc'
+zstyle ':z4h:bindkey' keyboard 'pc'
+
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char 'accept'
@@ -25,10 +30,6 @@ zstyle ':z4h:ssh:*'                   enable 'no'
 # Send these files over to the remote host when connecting over ssh to the
 # enabled hosts.
 zstyle ':z4h:ssh:*' send-extra-files '~/.nanorc' '~/.env.zsh'
-
-# Move the cursor to the end when Up/Down fetches a command from history?
-zstyle ':zle:up-line-or-beginning-search'   leave-cursor 'yes'
-zstyle ':zle:down-line-or-beginning-search' leave-cursor 'yes'
 
 # Clone additional Git repositories from GitHub.
 #

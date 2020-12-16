@@ -123,21 +123,21 @@ while 'true'; do
 done
 
 >&2 'printf' '\033[H\033[2J'
->&2 'printf' 'Do you use \033[1mtmux\033[0m?\n'
+>&2 'printf' 'Do you use \033[31mtmux\033[0m?\n'
 >&2 'printf' '\n'
->&2 'printf' '  \033[1m(1)\033[0m  Yes.\n'
->&2 'printf' '  \033[1m(2)\033[0m  No.\n'
+>&2 'printf' '  \033[1m(y)\033[0m  Yes.\n'
+>&2 'printf' '  \033[1m(n)\033[0m  No.\n'
 >&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
 >&2 'printf' '\n'
 while 'true'; do
-  >&2 'printf' '\033[1mChoice [12q]:\033[0m '
+  >&2 'printf' '\033[1mChoice [ynq]:\033[0m '
   IFS='' 'read' '-r' 'choice'
   case "$choice" in
-    '1')
+    'y')
       tmux='1'
       'break'
     ;;
-    '2')
+    'n')
       tmux='0'
       'break'
     ;;

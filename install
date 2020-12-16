@@ -113,7 +113,7 @@ while 'true'; do
       zshrc_suffix=''
       'break'
     ;;
-    'q')
+    'q'|'Q')
       'exit' '1'
     ;;
     "$lf")
@@ -144,7 +144,7 @@ while 'true'; do
       'exit' '1'
       'break'
     ;;
-    'q')
+    'q'|'Q')
       'exit' '1'
     ;;
     "$lf")
@@ -166,15 +166,15 @@ while 'true'; do
   >&2 'printf' '\033[1mChoice [ynq]:\033[0m '
   'read_choice'
   case "$choice" in
-    'y')
+    'y'|'Y')
       tmux='1'
       'break'
     ;;
-    'n')
+    'n'|'N')
       tmux='0'
       'break'
     ;;
-    'q')
+    'q'|'Q')
       'exit' '1'
     ;;
     "$lf")
@@ -232,7 +232,7 @@ if '[' '-n' "$rcs" ']'; then
         backup_dir=''
         'break'
       ;;
-      'q')
+      'q'|'Q')
         'exit' '1'
       ;;
       "$lf")

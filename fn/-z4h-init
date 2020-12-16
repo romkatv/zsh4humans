@@ -1005,6 +1005,10 @@ function -z4h-post-init() {
     complete -o nospace -C =vault vault
   fi
 
+  if (( $+commands[aws_completer] && ! $+_comps[aws] )); then
+    complete -C =aws_completer aws
+  fi
+
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
     () {
       local -hA widgets=(

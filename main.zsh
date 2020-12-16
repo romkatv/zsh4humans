@@ -212,13 +212,15 @@ function -z4h-cmd-init() {
            [[ -z $TMUX && ! -w ${_Z4H_TMUX%,(|<->),(|<->)} && -z $Z4H_SSH ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD TMUX TMUX_PANE
         if [[ -x $tmux && -d $Z4H/terminfo ]]; then
+          # We prefer /tmp over $TMPDIR because the latter breaks the rendering
+          # of wide chars on iTerm2.
           local sock
           if [[ -n $TMUX_TMPDIR && -d $TMUX_TMPDIR && -w $TMUX_TMPDIR ]]; then
             sock=$TMUX_TMPDIR
-          elif [[ -n $TMPDIR && -d $TMPDIR && -w $TMPDIR ]]; then
-            sock=$TMPDIR
           elif [[ -d /tmp && -w /tmp ]]; then
             sock=/tmp
+          elif [[ -n $TMPDIR && -d $TMPDIR && -w $TMPDIR ]]; then
+            sock=$TMPDIR
           fi
           if [[ -n $sock ]]; then
             sock=${sock%/}/z4h-tmux-$UID-$TERM
@@ -229,7 +231,7 @@ function -z4h-cmd-init() {
             else
               local cfg=tmux-256color.conf
             fi
-            SHELL=$_z4h_exe exec - $tmux -S $sock -f $Z4H/zsh4humans/$cfg || return
+            SHELL=$_z4h_exe exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
           fi
         else
           need_restart=1

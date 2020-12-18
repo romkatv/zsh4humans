@@ -822,9 +822,24 @@ fi
 
 ---
 
-Add `z4h clipboard-{cut,copy,paste}` and make them work over `ssh` through markers. Enable them
-on the remote only when `zstyle :z4h:ssh:hostname clipboard global`. Another option is `local`,
-which works on just one host.
+Implement `z4h clipboard-{cut,copy,paste}` that can work over ssh. Add this to `.zshrc`:
+
+```zsh
+# Should clipboard-related z4h commands on the local host use
+# the OS clipboard ('system') or a file ('file')?
+zstyle :z4h: clipboard system
+
+# Allow remote hosts access to the clipboard of the client? If set to 'no',
+# clipboard-related z4h functions on the remote host will use a file.
+zstyle ':z4h:ssh:*' client-clipboard no
+
+# Copy the current command line to clipboard.
+z4h bindkey z4h-copy-bufer-to-clipboard Ctrl+X
+
+alias x='z4h clipboard-copy'   # write stdin to clipboard
+alias c='z4h clipboard-copy'   # write stdin to clipboard and to stdout
+alias v='z4h clipboard-paste'  # write clipboard to stdout
+```
 
 ---
 

@@ -857,3 +857,8 @@ zstyle :z4h:tmux force-tmux-256color   kak vi
 ```
 
 Or maybe hook `TRAPDEBUG` and use the first syntax?
+
+---
+
+Profile tmux when printing a ton of data to the terminal and see if there is an easy way to speed
+it up (likely not).

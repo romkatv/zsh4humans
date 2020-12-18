@@ -55,9 +55,9 @@
 
   if (( _z4h_can_save_restore_screen )); then
     opts+=(--no-clear)
-    if { (( height <= cursor_y - 1 )) && zstyle -T :z4h: prompt-position bottom } ||
+    if { (( height <= cursor_y - 1 )) && zstyle -T :z4h: prompt-at-bottom } ||
        (( cursor_y - 1 > LINES - cursor_y && cursor_y - 1 > 6 )) &&
-       { (( height > LINES - cursor_y )) || zstyle -T :z4h: prompt-position bottom }; then
+       { (( height > LINES - cursor_y )) || zstyle -T :z4h: prompt-at-bottom }; then
       (( height <= cursor_y - 1 )) || (( height = cursor_y - 1 ))
       local move=$'\e[0m\e['$((cursor_y-height))';1H'
       opts+=(--layout=default)

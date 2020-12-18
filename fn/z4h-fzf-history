@@ -90,9 +90,9 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 
     if (( _z4h_can_save_restore_screen )); then
       opts+=(--no-clear)
-      if { (( height <= cursor_y - 1 )) && zstyle -T :z4h: prompt-position bottom } ||
+      if { (( height <= cursor_y - 1 )) && zstyle -T :z4h: prompt-at-bottom } ||
         (( cursor_y - 1 > LINES - cursor_y && cursor_y - 1 > 5 + preview_lines )) &&
-        { (( height > LINES - cursor_y )) || zstyle -T :z4h: prompt-position bottom }; then
+        { (( height > LINES - cursor_y )) || zstyle -T :z4h: prompt-at-bottom }; then
         preview_window+=':up'
         (( preview_lines )) || opts+=(--border=horizontal)
         (( height <= cursor_y - 1 )) || (( height = cursor_y - 1 ))

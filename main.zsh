@@ -202,7 +202,7 @@ function -z4h-cmd-init() {
         else
           unset _Z4H_TMUX _Z4H_TMUX_CMD
         fi
-        if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -T :z4h: prompt-position bottom; then
+        if [[ -n $_Z4H_TMUX && -t 1 ]] && zstyle -T :z4h: prompt-at-bottom; then
           local cursor_y cursor_x
           -z4h-get-cursor-pos || return
           local -i n=$((LINES - cursor_y))

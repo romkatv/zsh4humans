@@ -24,6 +24,9 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
   local cursor_y cursor_x
   -z4h-get-cursor-pos || return
 
+  local query=${(j: :)${(@Z:cn:)BUFFER}}
+  [[ -n $query ]] && query+=' '
+
   if (( _z4h_can_save_restore_screen )) && zstyle -T :z4h:fzf-history fzf-preview; then
     local opts=(
       --read0
@@ -35,7 +38,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       --exact
       --no-mouse
       --tabstop 1
-      --query=${(j: :)${(@Z:cn:)LBUFFER}}
+      --query=$query
       --color=hl:201,hl+:201
       --no-clear
       --layout=default
@@ -70,7 +73,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       --exact
       --no-mouse
       --tabstop 1
-      --query=${(j: :)${(@Z:cn:)LBUFFER}}
+      --query=$query
       --color=hl:201,hl+:201
     )
 

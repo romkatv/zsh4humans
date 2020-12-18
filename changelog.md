@@ -60,3 +60,6 @@
   ```
   You can also use a custom function in place of `command find` if you want to transform command
   line arguments.
+- `z4h-fzf-history` (<kbd>Ctrl+R</kbd>) now uses `BUFFER` instead of `LBUFFER` for the initial
+  query. This makes a difference only when the widget is invoked when the cursor is not at the very
+  end of the command line.

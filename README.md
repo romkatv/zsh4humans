@@ -63,20 +63,21 @@ confirmation on every step so that you are always in control. Installation requi
 
 ## Try it in Docker
 
-Try Zsh for Humans in a Docker container. You can safely make any changes to the file system. Once
-you exit Zsh, the image is deleted.
+Try Zsh for Humans in a Docker container. You can safely install additional software and make any
+changes to the file system. Once you exit Zsh, the image is deleted.
 
-- **Alpine Linux**: starts quickly; install additional software with `pkg add <package>`
+- **Alpine Linux**: starts quickly; install additional software with `apk add <package>`
   ```zsh
   sudo docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
-    sh -c "$(wget -qO- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
+    apk add zsh curl tmux
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
   ```
 - **Ubuntu**: install additional software with `apt install <package>`:
   ```zsh
   sudo docker run -e TERM -e COLORTERM -w /root -it --rm ubuntu sh -uec '
     apt-get update
-    apt-get install -y wget
-    sh -c "$(wget -qO- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
+    apt-get install -y zsh curl tmux
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
   ```
 
 ## Caveats

@@ -36,6 +36,8 @@ fi
 if '[' '-n' "$_z4h_bypass" ']'; then
   command -v 'rm' >'/dev/null' 2>&1 && 'command' 'rm' '-f' '--' "$0"
 
+  export TERM=^TERM^
+
   if '[' '-x' "${SHELL-}" ']'; then
     case "/$SHELL" in
       */'ksh93') 'exec' "$SHELL" '-l'; 'exit';;

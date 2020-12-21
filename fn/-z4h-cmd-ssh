@@ -239,6 +239,7 @@ fi
 
   local script
   script=${"$(<$Z4H/zsh4humans/sc/ssh-bootstrap)"//$'\r'} || return
+  script=${script//'^TERM^'/${(q)term}}
   script=${script//'^MIN_VERSION^'/${(q)z4h_min_version}}
   script=${script//'^SSH_HOST^'/${(q)z4h_ssh_host}}
   script=${script//'^SSH_CLIENT^'/${(q)z4h_ssh_client}}

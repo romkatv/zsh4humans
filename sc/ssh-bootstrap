@@ -23,6 +23,7 @@ if '[' '-z' "$_z4h_bypass" ']'; then
   } 2>'/dev/null'
 
   case "$_z4h_ssh_platform" in
+    'darwin arm64');;
     'darwin x86_64');;
     'linux aarch64');;
     'linux armv6l');;

@@ -11,6 +11,7 @@ fi
 readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v3.0.1
 
 readonly archives='
+file:tmux-darwin-arm64.tar.gz;  md5:9eaea968b7e8e6790df997d0bb79860f; sha256:98537503260a9895925de7e74c4d933578f46bc0c5b136922a4f233aea266424;
 file:tmux-darwin-x86_64.tar.gz; md5:09d49fd026c22268fd3ee22bfdade488; sha256:5cf6e710756afbee39ebdec064fa81f6e82a57425f34315e2377eac5d0cfb682;
 file:tmux-linux-aarch64.tar.gz; md5:1c384a948c72960544991ed41d4ae469; sha256:d9a7f3fda417fdeeafa55599d1ecda2b262ea7ecbff4c9b1f8ae9ed3d65e5511;
 file:tmux-linux-armv6l.tar.gz;  md5:98905a26129ebbdd98fd4faa16f4226c; sha256:46b1d29a51318d89efb17708a2c18caf7315de1cf6b21eed483e6ef2e85cfad6;

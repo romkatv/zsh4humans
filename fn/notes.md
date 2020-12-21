@@ -891,3 +891,14 @@ it up (likely not).
 This breaks a bunch of things. For example, <kbd>Tab</kbd> doesn't work. To fix this, `dup` one of
 the standard file descriptors into `_z4h_tty_fd` on startup and use it through the code instead of
 `$TTY`.
+
+---
+
+Change the way <kbd>Up</kbd>/<kbd>Down</kbd> work with multi-line commands. Pressing <kbd>Up</kbd>
+twice should always have the effect of fetching from history twice, whether the command line was
+empty or not to begin with.
+
+---
+
+Consider changing <kbd>Up</kbd>/<kbd>Down</kbd> so that it searches for individual words. There
+is `HISTORY_SUBSTRING_SEARCH_FUZZY=1` for it.

@@ -5,10 +5,34 @@ if [[ -e $Z4H/.updating ]]; then
 else
   print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}
 fi
-local BASH_SOURCE=($Z4H_PACKAGE_DIR/install) err
-if ! err=$(local opt && emulate sh && set -- --bin && builtin source "${BASH_SOURCE[0]}" 2>&1); then
-  print -ru2 -- $err
-  return 1
+if [[ "$(uname -sm)" == 'Darwin arm64' ]]; then
+  local err
+  local v=0.24.4
+  local url=https://github.com/zsh4humans/fzf/releases/download/$v/fzf-$v-darwin_arm8.tar.gz
+  local archive=$Z4H_PACKAGE_DIR/fzf.tar.gz
+  if (( $+commands[curl] )); then
+    err="$(command curl -fsSL -- $url 2>&1 >$archive)"
+  elif (( $+commands[wget] )); then
+    err="$(command wget -O-   -- $url 2>&1 >$archive)"
+  else
+    print -Pru2 -- "%F{3}z4h%f: please install %F{1}curl%f or %F{1}wget%f"
+    return 1
+  fi
+  if (( $? )); then
+    print -ru2 -- $err
+    print -Pru2 -- "%F{3}z4h%f: failed to download %F{1}${url//\%/%%}%f"
+    return 1
+  fi
+  [[ -e $Z4H_PACKAGE_DIR/bin ]] || zf_mkdir -- $Z4H_PACKAGE_DIR/bin || return
+  command tar -C $Z4H_PACKAGE_DIR/bin -xzf $archive || return
+  zf_rm -- $archive || return
+else
+  local BASH_SOURCE=($Z4H_PACKAGE_DIR/install) err
+  if ! err=$(local opt && emulate sh && set -- --bin &&
+                builtin source "${BASH_SOURCE[0]}" 2>&1); then
+    print -ru2 -- $err
+    return 1
+  fi
 fi
 if [[ -h $Z4H_PACKAGE_DIR/bin/fzf ]]; then
   command cp -- $Z4H_PACKAGE_DIR/bin/fzf $Z4H_PACKAGE_DIR/bin/fzf.tmp || return

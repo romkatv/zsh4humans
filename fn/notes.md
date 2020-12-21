@@ -877,3 +877,17 @@ Or maybe hook `TRAPDEBUG` and use the first syntax?
 
 Profile tmux when printing a ton of data to the terminal and see if there is an easy way to speed
 it up (likely not).
+
+---
+
+`$TTY` is not writable when doing something like this:
+
+```zsh
+% sudo useradd -ms =zsh test
+% sudo -iu test
+% [[ -w $TTY ]] || echo 'not writable'
+```
+
+This breaks a bunch of things. For example, <kbd>Tab</kbd> doesn't work. To fix this, `dup` one of
+the standard file descriptors into `_z4h_tty_fd` on startup and use it through the code instead of
+`$TTY`.

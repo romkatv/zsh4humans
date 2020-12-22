@@ -873,6 +873,14 @@ zstyle :z4h:tmux force-tmux-256color   kak vi
 
 Or maybe hook `TRAPDEBUG` and use the first syntax?
 
+Or do it like this:
+
+```zsh
+zstyle :z4h: term-spec {ssh,sudo,docker}:{tmux-256color:screen-256color,alacritty:xterm-256color}
+```
+
+This isn't good. Figure out how to make it possible to add commands without wiping the default ones.
+
 ---
 
 Profile tmux when printing a ton of data to the terminal and see if there is an easy way to speed
@@ -902,3 +910,10 @@ empty or not to begin with.
 
 Consider changing <kbd>Up</kbd>/<kbd>Down</kbd> so that it searches for individual words. There
 is `HISTORY_SUBSTRING_SEARCH_FUZZY=1` for it.
+
+---
+
+Add a banner to `~/.zshrc` that requires confirmation. Add the same banner to `install`. When
+the user consents during the installation, remove the banner from `~/.zshrc`.
+
+The banner should say that this is bleeding edge, blah, blah.

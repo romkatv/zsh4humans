@@ -5,7 +5,11 @@ if [[ -e $Z4H/.updating ]]; then
 else
   print -ru2 -- ${(%):-"%F{3}z4h%f: fetching %Bfzf%b binary"}
 fi
-if [[ "$(uname -sm)" == 'Darwin arm64' ]]; then
+
+local uname_sm
+[[ ! -v commands[uname] ]] || uname_sm=$(uname -sm) || return
+
+if [[ $uname_sm == 'Darwin arm64' ]]; then
   local err
   local v=0.24.4
   local url=https://github.com/zsh4humans/fzf/releases/download/$v/fzf-$v-darwin_arm8.tar.gz

@@ -917,3 +917,10 @@ Add a banner to `~/.zshrc` that requires confirmation. Add the same banner to `i
 the user consents during the installation, remove the banner from `~/.zshrc`.
 
 The banner should say that this is bleeding edge, blah, blah.
+
+---
+
+Do not install zsh-bin if the only thing missing from the stock is terminfo. Also remove the
+requirement for `zsh/pcre`. Better yet, add a `zstyle` for required modules.
+
+The goal here is to avoid installing zsh-bin when using macOS Big Sur or having zsh from brew.

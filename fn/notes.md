@@ -924,3 +924,7 @@ Do not install zsh-bin if the only thing missing from the stock is terminfo. Als
 requirement for `zsh/pcre`. Better yet, add a `zstyle` for required modules.
 
 The goal here is to avoid installing zsh-bin when using macOS Big Sur or having zsh from brew.
+
+---
+
+Make zsh-bin work like `tmux -u`. That is, assume UTF-8 always. If there is no UTF-8 locale on the machine (or maybe if the current locale is not UTF-8) require zsh-bin.

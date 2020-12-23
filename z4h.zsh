@@ -1,4 +1,4 @@
-'export' TERM="${TERM:-xterm-256color}"
+'[' '-n' "${TERM-}" ']' || 'export' TERM='xterm-256color'
 
 '[' '-n' "${WT_SESSION-}" ']' && 'export' COLORTERM="${COLORTERM:-truecolor}"
 

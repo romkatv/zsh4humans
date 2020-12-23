@@ -21,9 +21,9 @@ fi
   typeset -gr _z4h_exe=${exe:A}
 }
 
-if ! { zmodload zsh/terminfo zsh/zselect zsh/pcre && (( $#terminfo )) ||
+if ! { zmodload -s zsh/terminfo zsh/zselect zsh/pcre ||
        [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
-          -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]] } 2>/dev/null; then
+          -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]] }; then
   builtin source $Z4H/zsh4humans/sc/exec-zsh-i || return
 fi
 
@@ -237,7 +237,11 @@ function -z4h-cmd-init() {
           need_restart=1
         fi
       elif [[ -z $TMUX && $start_tmux[1] == command ]] && (( $+commands[$start_tmux[2]] )); then
-        SHELL=$_z4h_exe exec - ${start_tmux:1} || return
+        if [[ -d $Z4H/terminfo ]]; then
+          SHELL=$_z4h_exe exec - ${start_tmux:1} || return
+        else
+          need_restart=1
+        fi
       fi
     fi
 

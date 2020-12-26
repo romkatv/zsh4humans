@@ -927,4 +927,49 @@ The goal here is to avoid installing zsh-bin when using macOS Big Sur or having 
 
 ---
 
-Make zsh-bin work like `tmux -u`. That is, assume UTF-8 always. If there is no UTF-8 locale on the machine (or maybe if the current locale is not UTF-8) require zsh-bin.
+Make zsh-bin work like `tmux -u`. That is, assume UTF-8 always. If there is no UTF-8 locale on the
+machine (or maybe if the current locale is not UTF-8) require zsh-bin.
+
+---
+
+Make integrated tmux work with `TERM=xterm-256color`.
+
+---
+
+Remove client-server architecture from the integrated tmux. Would be nice to put it in the same
+process as zsh but it might make it more difficult to update tmux. For starters it's probably a good
+idea to have zsh in one process and everything else in another (`z4hd`).
+
+Actually, maybe this is a bad idea. Maybe it's better to run `z4hd` the way `tmux` currently runs.
+Just add `version` to the socket name. The latter can be done right now, without any architectural
+changes.
+
+---
+
+Add a special escape code to the integrated tmux that would allow identifying via a roundtrip to
+the TTY. Since other terminals won't reply, the logic should be like this:
+
+1. Write "are you integrated tmux".
+2. Write "where is cursor".
+3. Read the cursor positions. If a special response preceeds it, this is integrated tmux.
+
+---
+
+Add `z4h [-r] output` that prints the output of the last command. With `-r` the output is printed
+without styling (no colors, etc.). Print a warning if the output has more than `N` bytes (or
+terminal lines?). `N` should be configurable.
+
+Implement this by printing a marker in preexec and another in precmd.
+
+---
+
+Complain if users override `TERM` when using integrated tmux.
+
+---
+
+Figure out better key bindings for macOS.
+
+---
+
+If using iTerm2 with the default color scheme, change it to Tango Dark with dark-grey for black.
+Do it in `p10k configure` for now.

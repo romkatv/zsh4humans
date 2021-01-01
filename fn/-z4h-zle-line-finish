@@ -10,7 +10,8 @@ if (( ${+_z4h_redraw_fd} )); then
   unset _z4h_redraw_fd
 fi
 
-if [[ $BUFFER == *' ' ]] && eval "() { $PREBUFFER$BUFFER }" 2>/dev/null; then
+if [[ $BUFFER == *' ' ]] && eval "-z4h-buffer-func() { $PREBUFFER$BUFFER ; }" 2>/dev/null; then
+  builtin unfunction -- -z4h-buffer-func
   BUFFER=${BUFFER%% #}
 fi
 

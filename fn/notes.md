@@ -973,3 +973,8 @@ Figure out better key bindings for macOS.
 
 If using iTerm2 with the default color scheme, change it to Tango Dark with dark-grey for black.
 Do it in `p10k configure` for now.
+
+---
+
+`z4h ssh` should backup remote files to `~/zsh-backup/ssh`. Each file/directory just once. When
+backing up, write a message to the tty saying so. Have a `zstyle` to control this.

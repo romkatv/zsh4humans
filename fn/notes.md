@@ -978,3 +978,7 @@ Do it in `p10k configure` for now.
 
 `z4h ssh` should backup remote files to `~/zsh-backup/ssh`. Each file/directory just once. When
 backing up, write a message to the tty saying so. Have a `zstyle` to control this.
+
+---
+
+List `~/.tmux.conf` in `~/.zshrc` among the files to send over ssh.

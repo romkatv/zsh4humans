@@ -34,23 +34,32 @@ local success
     fi
   fi
 
-  _z4h_install_queue=(${(u)_z4h_install_queue})
-  local repo have=($Z4H/$^_z4h_install_queue(N))
+  local -aU want=(${_z4h_install_queue%%@*})
+  local have=($Z4H/$^want(N))
   have=(${have#$Z4H/})
-  _z4h_install_queue=(${_z4h_install_queue:|have})
+  local missing=(${want:|have})
+  (( $#missing )) || return 0
 
-  if (( $#_z4h_install_queue )); then
-    if (( _z4h_dangerous_root )); then
-      for repo in $_z4h_install_queue; do
-        print -Pru2 -- "%F{3}z4h%f: refusing to %Binstall%b as %F{1}root%f: %B${repo//\%/%%}%b"
-      done
-      return 1
-    fi
-    typeset -gi _z4h_installed_something=1
+  local repo base queue=()
+  for repo in $_z4h_install_queue; do
+    base=${repo%%@*}
+    (( missing[(Ie)$base] )) || continue
+    missing=(${missing:#$base})
+    queue+=($repo)
+  done
+
+  typeset -p want have queue _z4h_install_queue
+
+  if (( _z4h_dangerous_root )); then
+    for repo in $queue; do
+      print -Pru2 -- "%F{3}z4h%f: refusing to %Binstall%b as %F{1}root%f: %B${repo//\%/%%}%b"
+    done
+    return 1
   fi
+  typeset -gi _z4h_installed_something=1
 
-  if (( $#_z4h_install_queue <= 1 )) || [[ -o interactive && $ZSH_SUBSHELL != 0 ]]; then
-    for repo in $_z4h_install_queue; do
+  if (( $#queue == 1 )) || [[ -o interactive && $ZSH_SUBSHELL != 0 ]]; then
+    for repo in $queue; do
       -z4h-install-one $repo || return
     done
     return
@@ -67,7 +76,7 @@ local success
   function '-z4h-install-many-parallel'() {
     local repo fd head=() tail=()
     local omz=ohmyzsh/ohmyzsh
-    local queue=(${(M)_z4h_install_queue:#powerlevel10k} ${_z4h_install_queue:#powerlevel10k})
+    queue=(${(M)queue:#powerlevel10k} ${queue:#powerlevel10k})
     queue=(${queue:#$omz} ${(M)queue:#$omz})
     for repo in $queue; do
       if (( $#head + $#tail == 4 )); then

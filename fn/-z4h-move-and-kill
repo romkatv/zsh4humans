@@ -1,9 +1,24 @@
 local -i cursor=CURSOR
 "$@"
 emulate -L zsh
-if (( CURSOR > cursor )); then
-  BUFFER[cursor+1,CURSOR]=
+
+local -i from to
+if (( CURSOR < cursor )); then
+  from=CURSOR+1
+  to=cursor
+else
+  from=cursor+1
+  to=CURSOR
   CURSOR=$cursor
-elif (( CURSOR < cursor )); then
-  BUFFER[CURSOR+1,cursor]=
 fi
+
+if [[ $LASTWIDGET != ((z4h-|.|)(backward-|)kill-*|(.|)copy-region-as-kill) ]]; then
+  zle .copy-region-as-kill $BUFFER[from,to]
+elif (( CURSOR < cursor )); then
+  CUTBUFFER=$BUFFER[from,to]$CUTBUFFER
+else
+  CUTBUFFER+=$BUFFER[from,to]
+fi
+
+BUFFER[from,to]=
+zle -f kill

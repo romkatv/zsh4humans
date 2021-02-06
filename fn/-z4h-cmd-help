@@ -3,7 +3,7 @@ eval "$_z4h_opt"
 if (( ARGC == 1 )); then
   case $1 in
     install)
-      print -Pr -- "Usage: %F{2}z4h%f %Binstall%b [-f|--force] [%Uuser/project%u]..."
+      print -Pr -- "Usage: %F{2}z4h%f %Binstall%b [-f|--force] [%Uuser/project[@branch]%u]..."
       print -Pr -- ""
       print -Pr -- "Clone or update GitHub project(s)."
     ;;
@@ -40,7 +40,7 @@ else
   local fd=2 ret=1
 fi
 
-print -Pru$fd -- "Usage: %F{2}z4h%f %Binstall%b [-f|--force] [%Uuser/project%u]..."
+print -Pru$fd -- "Usage: %F{2}z4h%f %Binstall%b [-f|--force] [%Uuser/project[@branch]%u]..."
 print -Pru$fd -- "           %Bupdate%b"
 print -Pru$fd -- "           %Binit%b"
 print -Pru$fd -- "           %Bsource%b [-c|--compile] [--] [%Ufile%u]..."

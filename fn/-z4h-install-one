@@ -1,7 +1,12 @@
 local url postinstall command
 
 if [[ $1 == */* ]]; then
-  url=https://github.com/$1/archive/master.tar.gz
+  if [[ $1 == *@* ]]; then
+    url=https://github.com/${1%%@*}/archive/${1#*@}.tar.gz
+    1=${1%%@*}
+  else
+    url=https://github.com/$1/archive/master.tar.gz
+  fi
   zstyle -s :z4h:$1 postinstall postinstall || postinstall=
 else
   local -a channel

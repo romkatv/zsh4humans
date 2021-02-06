@@ -63,4 +63,5 @@
 - `z4h-fzf-history` (<kbd>Ctrl+R</kbd>) now uses `BUFFER` instead of `LBUFFER` for the initial
   query. This makes a difference only when the widget is invoked when the cursor is not at the very
   end of the command line.
+- All `z4h-kill-*` and `z4h-backward-kill-*` widgets now add the killed region to the kill ring.
 - `z4h install` now allows specifying the branch explicitly: `z4h install user/repo@branch`.

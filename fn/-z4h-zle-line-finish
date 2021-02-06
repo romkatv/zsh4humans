@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local -i ret
 
 if [[ -v widgets[-z4h-orig-zle-line-finish] ]]; then

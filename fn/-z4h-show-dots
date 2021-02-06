@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local -i cursor=CURSOR
 local postdisplay=$POSTDISPLAY
 local buffer=$BUFFER

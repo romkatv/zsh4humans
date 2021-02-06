@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 eval "$_z4h_opt"
 
 print -Pru2 -- "%F{3}z4h%f: core parameters have unexpectedly changed"

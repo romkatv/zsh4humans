@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local -i COLUMNS=1024
 local -i x y=${#1} m
 if (( y )); then

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local oc="${commands[oc]-}"
 local orig_cmd="${_comps[oc]-}"
 local comp="$Z4H"/cache/oc-completion-$EUID.zsh

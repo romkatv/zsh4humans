@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # Try in order: C.UTF-8, en_US.UTF-8, the first UTF-8 locale in lexicographical order.
 (( $+commands[locale] )) || return
 local loc=(${(@M)$(locale -a):#*.(utf|UTF)(-|)8})

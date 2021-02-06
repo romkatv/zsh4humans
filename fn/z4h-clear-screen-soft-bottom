@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 builtin echoti civis >"$TTY"
 local -i cursor_x cursor_y
 -z4h-get-cursor-pos

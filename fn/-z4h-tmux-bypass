@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local x
 builtin printf -v x "$@"
 

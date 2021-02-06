@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 emulate -L zsh
 
 if (( $#_z4h_scaffolds == 1 )); then

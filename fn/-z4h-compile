@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # Runs with user options.
 #
 # Precondition: [[ -e $1 ]].

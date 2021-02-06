@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 {
   -z4h-cursor-hide
   local f

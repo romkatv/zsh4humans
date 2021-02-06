@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local dot_glob=$1
 local only_dirs=$2
 local dirs=("${@:3}")

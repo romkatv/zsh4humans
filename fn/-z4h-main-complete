@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # Based on _main_complete from Zsh 5.8.
 
 local IFS=$' \t\n\0'

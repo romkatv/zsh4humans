@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local url postinstall command
 
 if [[ $1 == */* ]]; then

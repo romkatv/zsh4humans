@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local -i ret
 
 if (( ${+widgets[-z4h-orig-zle-line-init]} )); then

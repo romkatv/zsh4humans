@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # TODO: write proper docs for these configuration options.
 #
 # zstyle ':z4h:ssh:my_host' enable              'yes'

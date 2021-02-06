@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 [[ "$(</proc/version)" == *[Mm]icrosoft* ]] || return
 
 local cmd=${commands[cmd.exe]:-/mnt/c/Windows/System32/cmd.exe}

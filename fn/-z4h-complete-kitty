@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local kitty="${commands[kitty]-}"
 local orig_cmd="${_comps[kitty]-}"
 local comp="$Z4H"/cache/kitty-completion-$EUID.zsh

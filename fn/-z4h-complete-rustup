@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 (( $+commands[rustup] )) || {
   unset '_comps[rustup]'
   _default "$@"

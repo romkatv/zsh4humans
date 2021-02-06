@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 eval "$_z4h_opt"
 
 add-zsh-hook -d -- precmd -z4h-welcome

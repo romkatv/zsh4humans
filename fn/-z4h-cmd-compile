@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local file
 zparseopts -D -F -- || return '_z4h_err()'
 emulate zsh -o extended_glob -c 'local files=(${^@}(N))'

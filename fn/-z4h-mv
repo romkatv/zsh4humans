@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 (( ARGC == 2 )) || return '_z4h_err()'
 [[ $2 != */  ]] || return '_z4h_err()'
 

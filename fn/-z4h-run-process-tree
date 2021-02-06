@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 # Copied from https://github.com/romkatv/run-process-tree.
 
 zmodload zsh/parameter                                   || return

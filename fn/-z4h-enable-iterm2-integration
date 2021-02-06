@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 function iterm2_set_user_var() {
   (( ${+commands[base64]} )) || return
   local x

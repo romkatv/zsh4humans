@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 if zstyle -t :z4h: iterm2-integration &&
    [[ $TERM != (dumb|linux) && $ITERM_SHELL_INTEGRATION_INSTALLED != Yes ]]; then
   -z4h-enable-iterm2-integration

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 builtin echoti civis >"$TTY"
 builtin print -rn -- $'\e[H\e[2J' >"$TTY"
 builtin zle .reset-prompt

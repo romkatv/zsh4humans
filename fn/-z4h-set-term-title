@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 emulate -L zsh -o no_prompt_bang -o prompt_subst -o prompt_percent
 
 local title=$1

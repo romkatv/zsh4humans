@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 [[ -w $TTY && -r $TTY ]] || return
 
 [[ -o auto_menu ]] && local -i auto_menu=1 || local -i auto_menu=0

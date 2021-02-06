@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local kubectl="${commands[kubectl]-}"
 local orig_cmd="${_comps[kubectl]-}"
 local comp="$Z4H"/cache/kubectl-completion-$EUID.zsh

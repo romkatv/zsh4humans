@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 [[ -w $TTY && -r $TTY ]] || return
 
 autoload +X -Uz -- -z4h-present-files -z4h-cursor-show -z4h-find -z4h-fzf

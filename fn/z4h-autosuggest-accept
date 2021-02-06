@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 local -i cursor=CURSOR
 {
   if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 print -Pr -- "$(<<\END
 Usage: %F{2}z4h%f %Bssh%b [%Ussh-options%u]... [--] [%Uuser@%u]%Uhostname%u
 

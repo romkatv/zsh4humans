@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 eval "$_z4h_opt"
 
 local term

@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 if [[ -z $BUFFER || $CONTEXT != start ]]; then
   unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion
 else

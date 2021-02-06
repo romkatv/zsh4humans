@@ -1,3 +1,5 @@
+#!/usr/bin/env zsh
+
 if (( ${+_z4h_redraw_fd} )); then
   zle -F "$_z4h_redraw_fd"
   exec {_z4h_redraw_fd}>&-

@@ -1,0 +1,39 @@
+local oc="${commands[oc]-}"
+local orig_cmd="${_comps[oc]-}"
+local comp="$Z4H"/cache/oc-completion-$EUID.zsh
+local cmd
+
+() {
+  [[ -n "$oc" ]] || return
+
+  [[ "$comp" -nt "$oc" ]] || {
+    local tmp="$comp".tmp."${sysparams[pid]}"
+    "$oc" completion zsh >"$tmp" || return
+    zf_mv -f -- "$tmp" "$comp" || return
+    -z4h-compile "$comp" || return
+  }
+
+  () {
+    emulate -L zsh
+    if (( ${+functions[_bash_comp]} )); then
+      builtin source -- "$comp"
+    else
+      {
+        function _bash_comp() {}
+        builtin source -- "$comp"
+      } always {
+        unfunction _bash_comp
+      }
+    fi
+    unset LWORD RWORD
+  } || true
+
+  cmd="${_comps[oc]-}"
+  [[ "$cmd" != "$orig_cmd" ]] || return
+} || {
+  builtin unset '_comps[oc]'
+  _default "$@"
+  return
+}
+
+builtin eval "$cmd"

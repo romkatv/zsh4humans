@@ -1,8 +1,10 @@
-'[' '-n' "${TERM-}" ']' || 'export' TERM='xterm-256color'
-
-'[' '-n' "${WT_SESSION-}" ']' && 'export' COLORTERM="${COLORTERM:-truecolor}"
-
 if '[' '-n' "${ZSH_VERSION-}" ']'; then
+  'typeset' '-gaU' 'cdpath' 'fpath' 'mailpath' 'path'
+  if '[' "${1-}" '=' 'zshenv' ']'; then
+    'zmodload' 'zsh/zutil'
+    'return'
+  fi
+
   if '[' '-n' "${_z4h_source_called+x}" ']'; then
     if '[' "${ZDOTDIR:-$HOME}" '=' "$HOME" ']'; then
       >&2 'printf' '\033[33mz4h\033[0m: please use \033[4;32mexec\033[0m \033[32mzsh\033[0m instead of \033[32msource\033[0m \033[4m~/.zshenv\033[0m\n'
@@ -101,6 +103,10 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
 
   'set' '-A' '_z4h_script_argv' "$@"
 fi
+
+'[' '-n' "${TERM-}" ']' || 'export' TERM='xterm-256color'
+
+'[' '-n' "${WT_SESSION-}" ']' && 'export' COLORTERM="${COLORTERM:-truecolor}"
 
 if '[' '-n' "${Z4H-}" ']' &&
    '[' "${Z4H_URL-}" '=' 'https://raw.githubusercontent.com/romkatv/zsh4humans/v5' ']' &&

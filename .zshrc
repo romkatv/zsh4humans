@@ -4,6 +4,9 @@
 #
 # Documentation: https://github.com/romkatv/zsh4humans/blob/v5/README.md.
 
+# Activate zsh4humans.
+source $Z4H/z4h.zsh || return
+
 # Periodic auto-update on Zsh startup: 'ask' or 'no'.
 zstyle ':z4h:' auto-update      'ask'
 # Ask whether to auto-update this often; has no effect if auto-update is 'no'.
@@ -43,11 +46,12 @@ z4h install ohmyzsh/ohmyzsh || return
 
 # Install or update core components (fzf, zsh-autosuggestions, etc.) and
 # initialize Zsh. After this point console I/O is unavailable until Zsh
-# is fully initialized. Everything that requires user interaction or can
-# perform network I/O must be done above. Everything else is best done below.
+# is fully initialized. Everything that requires user interaction, prints
+# to stdout/stderr or can perform network I/O must be done above. Everything
+# else is best done below.
 z4h init || return
 
-# Extend PATH.
+# Add ~/bin in front of PATH.
 path=(~/bin $path)
 
 # Export environment variables.

@@ -60,48 +60,44 @@ export -T MANPATH=${MANPATH:-:} manpath
 export -T INFOPATH=${INFOPATH:-:} infopath
 typeset -gaU cdpath fpath mailpath path manpath infopath
 
+function -z4h-init-homebrew() {
+  (( ARGC )) || return 0
+  local dir=${1:h:h}
+  export HOMEBREW_PREFIX=$dir
+  export HOMEBREW_CELLAR=$dir/Cellar
+  export HOMEBREW_REPOSITORY=$dir/Homebrew
+  (( ${manpath[(Ie)$dir/share/man]}   )) || manpath=($dir/share/man $manpath '')
+  (( ${infopath[(Ie)$dir/share/info]} )) || infopath=($dir/share/info $infopath '')
+}
+
+if [[ $OSTYPE == darwin* ]]; then
+  if [[ ! -e $Z4H/cache/init-darwin-paths ]] || ! source $Z4H/cache/init-darwin-paths; then
+    -z4h-gen-init-darwin-paths && source $Z4H/cache/init-darwin-paths
+  fi
+  [[ -z $HOMEBREW_PREFIX ]] && -z4h-init-homebrew {/opt/homebrew,/usr/local}/bin/brew(N)
+elif [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
+  -z4h-init-homebrew {/home/linuxbrew/.linuxbrew,~/.linuxbrew}/bin/brew(N)
+fi
+
 fpath=(
-  ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(FN)
-  ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(FN)
-  /usr{/local,}/share/zsh/{site-functions,vendor-completions}(FN)
+  ${^${(M)fpath:#*/$ZSH_VERSION/functions}/%$ZSH_VERSION\/functions/site-functions}(-/N)
+  ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/zsh/site-functions}(-/N)
+  /opt/homebrew/share/zsh/site-functions(-/N)
+  /usr{/local,}/share/zsh/{site-functions,vendor-completions}(-/N)
   $fpath
   $Z4H/zsh4humans/fn)
 
 autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h[^.]#(:t) || return
 functions -Ms _z4h_err
 
-if [[ $OSTYPE == darwin* ]]; then
-  if [[ ! -e $Z4H/cache/init-darwin-paths ]] || ! source $Z4H/cache/init-darwin-paths; then
-    -z4h-gen-init-darwin-paths && source $Z4H/cache/init-darwin-paths
-  fi
-fi
-
 path+=($Z4H/fzf/bin)
 manpath=($manpath $Z4H/fzf/man '')
-[[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
-
-: ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
-: ${ZSH=$Z4H/ohmyzsh/ohmyzsh}
-: ${ZSH_CUSTOM=$Z4H/ohmyzsh/ohmyzsh/custom}
-: ${ZSH_CACHE_DIR=$Z4H/cache/ohmyzsh}
-
-if [[ $OSTYPE == linux* && -z $HOMEBREW_PREFIX ]]; then
-  () {
-    local -aU dir=(/home/linuxbrew/.linuxbrew(-/N) ~/.linuxbrew(-/N))
-    (( $#dir == 1 )) || return
-    export HOMEBREW_PREFIX=$dir
-    export HOMEBREW_CELLAR=$dir/Cellar
-    export HOMEBREW_REPOSITORY=$dir/Homebrew
-    (( ${path[(Ie)$dir/sbin]}           )) || path=($dir/sbin $path)
-    (( ${path[(Ie)$dir/bin]}            )) || path=($dir/bin $path)
-    (( ${manpath[(Ie)$dir/share/man]}   )) || manpath=($dir/share/man $manpath '')
-    (( ${infopath[(Ie)$dir/share/info]} )) || infopath=($dir/share/info $infopath '')
-  }
-fi
 
 () {
   path=(${@:|path} $path)
-} {~/bin,~/.local/bin,~/.cargo/bin,/usr/local/bin,/snap/bin}(-/N)
+} {~/bin,~/.local/bin,~/.cargo/bin,${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin},${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin},/usr/local/sbin,/usr/local/bin,/snap/bin}(-/N)
+
+[[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
@@ -113,6 +109,11 @@ if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
     manpath=(${_z4h_exe:h:h}/share/man $manpath '')
   fi
 fi
+
+: ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
+: ${ZSH=$Z4H/ohmyzsh/ohmyzsh}
+: ${ZSH_CUSTOM=$Z4H/ohmyzsh/ohmyzsh/custom}
+: ${ZSH_CACHE_DIR=$Z4H/cache/ohmyzsh}
 
 [[ $terminfo[Tc] == yes && -z $COLORTERM ]] && export COLORTERM=truecolor
 

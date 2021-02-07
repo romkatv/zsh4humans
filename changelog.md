@@ -65,3 +65,5 @@
   end of the command line.
 - All `z4h-kill-*` and `z4h-backward-kill-*` widgets now add the killed region to the kill ring.
 - `z4h install` now allows specifying the branch explicitly: `z4h install user/repo@branch`.
+- If `brew` is installed, zsh4humans now automatically installs `homebrew/command-not-found`.
+- `command_not_found_handler` now uses `homebrew/command-not-found` if it's available.

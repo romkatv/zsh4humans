@@ -259,7 +259,8 @@ function -z4h-cmd-init() {
     fi
     _z4h_install_queue+=(
       zsh-history-substring-search zsh-autosuggestions zsh-completions
-      zsh-syntax-highlighting terminfo fzf powerlevel10k)
+      zsh-syntax-highlighting terminfo fzf ${commands[brew]:+homebrew-command-not-found}
+      powerlevel10k)
     (( install_tmux )) && _z4h_install_queue+=(tmux)
     if ! -z4h-install-many; then
       [[ -e $Z4H/.updating ]] || -z4h-error-command init

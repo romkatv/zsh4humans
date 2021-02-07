@@ -72,6 +72,7 @@ function -z4h-init-homebrew() {
 
 if [[ $OSTYPE == darwin* ]]; then
   if [[ ! -e $Z4H/cache/init-darwin-paths ]] || ! source $Z4H/cache/init-darwin-paths; then
+    autoload -Uz $Z4H/zsh4humans/fn/-z4h-gen-init-darwin-paths
     -z4h-gen-init-darwin-paths && source $Z4H/cache/init-darwin-paths
   fi
   [[ -z $HOMEBREW_PREFIX ]] && -z4h-init-homebrew {/opt/homebrew,/usr/local}/bin/brew(N)

@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+local fd fname
+if zstyle -s :z4h:command-not-found to-file fname &&
+    [[ -w $fname || ! -e $fname && -w ${fname:h} ]]; then
+  fd=3
+else
+  fd=2
+  fname=/dev/null
+fi
+{
+  if (( $#functrace >= 2 )); then
+    print -r -- "$functrace[1]: command not found: $1"
+    return 127
+  fi
+  local msg
+  if [[ -x /usr/lib/command-not-found ]]; then
+    msg="$(/usr/lib/command-not-found --no-failure-msg -- $1 2>&1)"
+    if [[ -n $msg ]]; then
+      print -r -- ${msg#$'\n'}
+      return 127
+    fi
+  fi
+  if [[ -v commands[brew] &&
+        -n $HOMEBREW_REPOSITORY &&
+        -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ]]; then
+    if msg="$(command brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
+      print -r -- $msg
+      return 127
+    fi
+  fi
+  print -r -- "zsh: command not found: $1"
+  return 127
+} 3>$fname >&$fd

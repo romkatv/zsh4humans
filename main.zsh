@@ -66,8 +66,6 @@ function -z4h-init-homebrew() {
   export HOMEBREW_PREFIX=$dir
   export HOMEBREW_CELLAR=$dir/Cellar
   export HOMEBREW_REPOSITORY=$dir/Homebrew
-  (( ${manpath[(Ie)$dir/share/man]}   )) || manpath=($dir/share/man $manpath '')
-  (( ${infopath[(Ie)$dir/share/info]} )) || infopath=($dir/share/info $infopath '')
 }
 
 if [[ $OSTYPE == darwin* ]]; then
@@ -96,7 +94,15 @@ manpath=($manpath $Z4H/fzf/man '')
 
 () {
   path=(${@:|path} $path)
-} {~/bin,~/.local/bin,~/.cargo/bin,${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin},${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin},/usr/local/sbin,/usr/local/bin,/snap/bin}(-/N)
+} {~/bin,~/.local/bin,~/.cargo/bin,${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin},${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin},/opt/local/sbin,/opt/local/bin,/usr/local/sbin,/usr/local/bin,/snap/bin}(-/N)
+
+() {
+  manpath=(${@:|manpath} $manpath '')
+} {${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/man},/opt/local/share/man}(-/N)
+
+() {
+  infopath=(${@:|infopath} $infopath '')
+} {${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/info},/opt/local/share/info}(-/N)
 
 [[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
 

@@ -257,10 +257,15 @@ function -z4h-cmd-init() {
           -z ${^fpath}/_systemctl(#qN) ]]; then
       _z4h_install_queue+=(systemd)
     fi
+    local brew
+    if [[ -v commands[brew] &&
+          -n $HOMEBREW_REPOSITORY &&
+          ! -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ]]; then
+      brew=homebrew-command-not-found
+    fi
     _z4h_install_queue+=(
       zsh-history-substring-search zsh-autosuggestions zsh-completions
-      zsh-syntax-highlighting terminfo fzf ${commands[brew]:+homebrew-command-not-found}
-      powerlevel10k)
+      zsh-syntax-highlighting terminfo fzf $brew powerlevel10k)
     (( install_tmux )) && _z4h_install_queue+=(tmux)
     if ! -z4h-install-many; then
       [[ -e $Z4H/.updating ]] || -z4h-error-command init

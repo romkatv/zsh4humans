@@ -13,7 +13,7 @@ local uname_sm
 
 if [[ $uname_sm == 'Darwin arm64' ]]; then
   local err
-  local v=0.24.4
+  local v=0.25.1
   local url=https://github.com/zsh4humans/fzf/releases/download/$v/fzf-$v-darwin_arm8.tar.gz
   local archive=$Z4H_PACKAGE_DIR/fzf.tar.gz
   if (( $+commands[curl] )); then

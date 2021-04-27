@@ -21,7 +21,7 @@ else
       case $1 in
         tmux)                       command=$tmux_cmd;;
         homebrew-command-not-found) command=$brew_cmd;;
-        terminfo)                   url=https://github.com/romkatv/terminfo/archive/v1.0.0.tar.gz;;
+        terminfo)                   url=https://github.com/romkatv/terminfo/archive/v1.1.0.tar.gz;;
         *)                          url=https://github.com/zsh4humans/$1/archive/z4h-$channel[1].tar.gz;;
       esac
     ;;
@@ -34,7 +34,7 @@ else
         zsh-autosuggestions)          url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-syntax-highlighting)      url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
         zsh-history-substring-search) url=https://github.com/zsh-users/$1/archive/master.tar.gz;;
-        terminfo)                     url=https://github.com/romkatv/terminfo/archive/v1.0.0.tar.gz;;
+        terminfo)                     url=https://github.com/romkatv/terminfo/archive/v1.1.0.tar.gz;;
         tmux)                         command=$tmux_cmd;;
         homebrew-command-not-found)   command=$brew_cmd;;
         *)

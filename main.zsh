@@ -231,7 +231,11 @@ function -z4h-cmd-init() {
             sock=$TMPDIR
           fi
           if [[ -n $sock ]]; then
-            sock=${sock%/}/z4h-tmux-$UID-$TERM
+            # Append a unique per-installation number to the socket path to workd
+            # around a bug in tmux. See https://github.com/romkatv/zsh4humans/issues/71.
+            local stamp
+            IFS= read -r stamp <$Z4H/tmux/stamp || return
+            sock=${sock%/}/z4h-tmux-$UID-$TERM-$stamp
             if (( terminfo[colors] < 256 )); then
               local cfg=tmux-16color.conf
             elif [[ $COLORTERM == (24bit|truecolor) ]]; then

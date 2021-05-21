@@ -14,6 +14,7 @@ else
   local -a channel
   zstyle -a :z4h:$1 channel channel || channel=(stable)
   local tmux_cmd='sh -- '${(q)Z4H}/zsh4humans/sc/install-tmux' -d "${Z4H_PACKAGE_DIR}" -q'
+  tmux_cmd+=' && print -r -- "$EPOCHREALTIME" >"${Z4H_PACKAGE_DIR}"/stamp'
   local brew_cmd='command brew tap --quiet homebrew/command-not-found && zf_mkdir -- "${Z4H_PACKAGE_DIR}"'
   case $#channel-$channel[1] in
     2-command) command=$channel[2];;

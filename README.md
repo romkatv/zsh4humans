@@ -20,9 +20,8 @@ If you want a great shell that just works, this project is for you.
   * 5.5. [SSH](#SSH)
 * 6. [Customization](#customization)
   * 6.1. [Customizing prompt](#customizing-prompt)
-  * 6.2. [Customizing key bindings](#customizing-key-bindings)
-  * 6.3. [Customizing appearance](#customizing-appearance)
-  * 6.4. [Additional Zsh startup files](#additional-zsh-startup-files)
+  * 6.2. [Customizing appearance](#customizing-appearance)
+  * 6.3. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 7. [Updating](#updating)
 * 8. [Uninstalling](#uninstalling)
 
@@ -48,9 +47,9 @@ Run this command in bash, zsh, or sh:
 
 ```shell
 if command -v curl >/dev/null 2>&1; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
 else
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"
+  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"
 fi
 ```
 
@@ -64,13 +63,22 @@ confirmation on every step so that you are always in control. Installation requi
 
 ## Try it in Docker
 
-Try Zsh for Humans in a Docker container. You can safely make any changes to the file system. Once
-you exit Zsh, the image is deleted.
+Try Zsh for Humans in a Docker container. You can safely install additional software and make any
+changes to the file system. Once you exit Zsh, the image is deleted.
 
-```zsh
-sudo docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
-  sh -c "$(wget -O- https://raw.githubusercontent.com/romkatv/zsh4humans/v4/install)"'
-```
+- **Alpine Linux**: starts quickly; install additional software with `apk add <package>`
+  ```zsh
+  sudo docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
+    apk add zsh curl tmux
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
+  ```
+- **Ubuntu**: install additional software with `apt install <package>`:
+  ```zsh
+  sudo docker run -e TERM -e COLORTERM -w /root -it --rm ubuntu sh -uec '
+    apt-get update
+    apt-get install -y zsh curl tmux
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
+  ```
 
 ## Caveats
 
@@ -224,11 +232,7 @@ create these files.**
 
 ## Updating
 
-By default you'll be prompted to update once a month when starting Zsh. You can customize frequency
-or disable auto-update prompt altogether. You can manually update with `z4h update`. There are three
-update channels. From the most stable to the most fresh: `stable` (default), `testing` and `dev`.
-
-There is no update mechanism for `~/.zshrc` itself.
+Run `z4h update` to update Zsh for Humans. There is no update mechanism for `~/.zshrc` itself.
 
 ## Uninstalling
 

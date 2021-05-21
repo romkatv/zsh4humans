@@ -67,3 +67,5 @@
 - `z4h install` now allows specifying the branch explicitly: `z4h install user/repo@branch`.
 - If `brew` is installed, zsh4humans now automatically installs `homebrew/command-not-found`.
 - `command_not_found_handler` now uses `homebrew/command-not-found` if it's available.
+- Auto-update is now disabled by default. It is recommended to use `z4h update` to update
+  manually.

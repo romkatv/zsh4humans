@@ -232,11 +232,7 @@ create these files.**
 
 ## Updating
 
-By default you'll be prompted to update once a month when starting Zsh. You can customize frequency
-or disable auto-update prompt altogether. You can manually update with `z4h update`. There are three
-update channels. From the most stable to the most fresh: `stable` (default), `testing` and `dev`.
-
-There is no update mechanism for `~/.zshrc` itself.
+Run `z4h update` to update Zsh for Humans. There is no update mechanism for `~/.zshrc` itself.
 
 ## Uninstalling
 

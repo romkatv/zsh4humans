@@ -65,7 +65,11 @@ function -z4h-init-homebrew() {
   local dir=${1:h:h}
   export HOMEBREW_PREFIX=$dir
   export HOMEBREW_CELLAR=$dir/Cellar
-  export HOMEBREW_REPOSITORY=$dir/Homebrew
+  if [[ -e $dir/Homebrew/Library ]]; then
+    export HOMEBREW_REPOSITORY=$dir/Homebrew
+  else
+    export HOMEBREW_REPOSITORY=$dir
+  fi
 }
 
 if [[ $OSTYPE == darwin* ]]; then

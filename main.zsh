@@ -192,7 +192,7 @@ function -z4h-cmd-init() {
       esac
     fi
 
-    if (( $+ZSH_SCRIPT || $+ZSH_EXECUTION_STRING )) || ! [[ -o zle && -t 0 && -t 1 && -t 2 ]]; then
+    if [[ -v ZSH_SCRIPT || -v ZSH_EXECUTION_STRING || ! ( -o zle && -t 0 && -t 1 && -t 2 )  ]]; then
       unset _Z4H_TMUX _Z4H_TMUX_CMD
     else
       if [[ $USES_VSCODE_SERVER_SPAWN == true && $TERM == xterm-256color ]]; then

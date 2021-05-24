@@ -69,3 +69,7 @@
 - `command_not_found_handler` now uses `homebrew/command-not-found` if it's available.
 - Auto-update is now disabled by default. It is recommended to use `z4h update` to update
   manually.
+- Recursive file completions can now be disabled:
+  ```zsh
+  zstyle ':z4h:fzf-complete' recurse-dirs 'no'
+  ```

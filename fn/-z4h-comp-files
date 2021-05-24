@@ -21,7 +21,17 @@
   local -i pct=60
   (( _z4h_can_save_restore_screen )) && pct=100
 
-  local -i height=$(( ! $#dirs && 100 * ($#_z4h_words + 4) < pct * LINES ? $#_z4h_words + 4 : pct * LINES / 100 ))
+  local -i recurse
+  () {
+    emulate -L zsh
+    # Set curcontext and dot_glob in case the value of recurse depends on them (via `zstyle -e`).
+    # Ideally we should run this with user options.
+    (( dot_glob )) && setopt dot_glob
+    local curcontext=$_z4h_curcontext
+    zstyle -T :z4h:${WIDGET#z4h-} recurse-dirs bin && recurse=1
+  }
+
+  local -i height=$(( ! (recurse && $#dirs) && 100 * ($#_z4h_words + 4) < pct * LINES ? $#_z4h_words + 4 : pct * LINES / 100 ))
 
   (( height >= 6 )) || (( height = 6 ))
   (( height <= LINES - 1 )) || (( height = LINES - 1 ))

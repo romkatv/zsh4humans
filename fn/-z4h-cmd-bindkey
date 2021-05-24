@@ -9,6 +9,8 @@ if (( ARGC < 2 )); then
   return 1
 fi
 
+[[ -v ZSH_SCRIPT || -v ZSH_EXECUTION_STRING ]] && return 0
+
 local kb seq seqs new_seqs
 
 for kb in ${@:2}; do

@@ -36,15 +36,22 @@ function -z4h-set-term-title-precmd() {
 }
 
 autoload -Uz add-zsh-hook                           || return
-add-zsh-hook -- preexec -z4h-set-term-title-preexec || return
-add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
 
 local pkg
 typeset -gA _z4h_use
-for pkg in fzf powerlevel10k systemd zsh-history-substring-search \
-           zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
-  zstyle -t :z4h:$pkg channel none || _z4h_use[$pkg]=1
-done
+if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
+  autoload -Uz up-line-or-beginning-search down-line-or-beginning-search || return
+  autoload -Uz run-help ${^fpath}/run-help-*(N:t)                        || return
+  [[ -v aliases[run-help] ]] && unalias run-help
+
+  add-zsh-hook -- preexec -z4h-set-term-title-preexec || return
+  add-zsh-hook -- precmd -z4h-set-term-title-precmd   || return
+
+  for pkg in fzf powerlevel10k systemd zsh-history-substring-search \
+            zsh-completions zsh-autosuggestions zsh-syntax-highlighting; do
+    zstyle -t :z4h:$pkg channel none || _z4h_use[$pkg]=1
+  done
+fi
 typeset -grA _z4h_use
 
 if (( _z4h_use[powerlevel10k] && ! $#POWERLEVEL9K_CONFIG_FILE )) ; then
@@ -57,8 +64,8 @@ if (( _z4h_use[powerlevel10k] && ! $#POWERLEVEL9K_CONFIG_FILE )) ; then
 fi
 
 # Enable command_not_found_handler if possible.
-if (( $+functions[command_not_found_handler] )); then
-  # already installed
+if [[ -v functions[command_not_found_handler] || -v ZSH_SCRIPT || -v ZSH_EXECUTION_STRING ]]; then
+  # Already installed or not needed.
 elif [[ -v commands[brew] &&
         -n $HOMEBREW_REPOSITORY &&
         -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ||
@@ -125,10 +132,6 @@ function z4h-cd-forward() { -z4h-cd-rotate -0 }
 function z4h-cd-up() { builtin cd -q .. && -z4h-redraw-prompt }
 
 function z4h-do-nothing() {}
-
-autoload -Uz up-line-or-beginning-search down-line-or-beginning-search || return
-autoload -Uz run-help ${^fpath}/run-help-*(N:t)                        || return
-(( $+aliases[run-help] )) && unalias run-help  # make run-help more useful
 
 if (( $+terminfo[civis] && $+terminfo[cnorm] )) && [[ -w $TTY ]]; then
   function -z4h-cursor-hide() { [[ -t 1 ]] && echoti civis || echoti civis >"$TTY" }
@@ -201,455 +204,456 @@ SAVEHIST=1000000000  # infinite command history
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
-bindkey -e
 
-local keymap
-for keymap in emacs viins vicmd; do
-  # If NumLock is off, translate keys to make them appear the same as with NumLock on.
-  bindkey -M $keymap -s '^[OM'     '^M'      # enter
-  bindkey -M $keymap -s '^[Ok'     '+'
-  bindkey -M $keymap -s '^[Om'     '-'
-  bindkey -M $keymap -s '^[Oj'     '*'
-  bindkey -M $keymap -s '^[Oo'     '/'
-  bindkey -M $keymap -s '^[OX'     '='
+if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
+  local keymap
+  for keymap in emacs viins vicmd; do
+    # If NumLock is off, translate keys to make them appear the same as with NumLock on.
+    bindkey -M $keymap -s '^[OM'     '^M'      # enter
+    bindkey -M $keymap -s '^[Ok'     '+'
+    bindkey -M $keymap -s '^[Om'     '-'
+    bindkey -M $keymap -s '^[Oj'     '*'
+    bindkey -M $keymap -s '^[Oo'     '/'
+    bindkey -M $keymap -s '^[OX'     '='
 
-  # If someone switches our terminal to application mode (smkx), translate keys to make
-  # them appear the same as in raw mode (rmkx).
-  bindkey -M $keymap -s '^[OA'     '^[[A'    # up
-  bindkey -M $keymap -s '^[OB'     '^[[B'    # down
-  bindkey -M $keymap -s '^[OD'     '^[[D'    # left
-  bindkey -M $keymap -s '^[OC'     '^[[C'    # right
-  bindkey -M $keymap -s '^[OH'     '^[[H'    # home
-  bindkey -M $keymap -s '^[OF'     '^[[F'    # end
+    # If someone switches our terminal to application mode (smkx), translate keys to make
+    # them appear the same as in raw mode (rmkx).
+    bindkey -M $keymap -s '^[OA'     '^[[A'    # up
+    bindkey -M $keymap -s '^[OB'     '^[[B'    # down
+    bindkey -M $keymap -s '^[OD'     '^[[D'    # left
+    bindkey -M $keymap -s '^[OC'     '^[[C'    # right
+    bindkey -M $keymap -s '^[OH'     '^[[H'    # home
+    bindkey -M $keymap -s '^[OF'     '^[[F'    # end
 
-  # TTY sends different key codes. Translate them to xterm equivalents.
-  # Missing: {ctrl,alt,shift}+{up,down,left,right,home,end}, {ctrl,alt}+delete.
-  bindkey -M $keymap -s '^[[1~'    '^[[H'    # home
-  bindkey -M $keymap -s '^[[4~'    '^[[F'    # end
+    # TTY sends different key codes. Translate them to xterm equivalents.
+    # Missing: {ctrl,alt,shift}+{up,down,left,right,home,end}, {ctrl,alt}+delete.
+    bindkey -M $keymap -s '^[[1~'    '^[[H'    # home
+    bindkey -M $keymap -s '^[[4~'    '^[[F'    # end
 
-  # Urxvt sends different key codes. Translate them to xterm equivalents.
-  bindkey -M $keymap -s '^[[7~'    '^[[H'    # home
-  bindkey -M $keymap -s '^[[8~'    '^[[F'    # end
-  bindkey -M $keymap -s '^[Oa'     '^[[1;5A' # ctrl+up
-  bindkey -M $keymap -s '^[Ob'     '^[[1;5B' # ctrl+down
-  bindkey -M $keymap -s '^[Od'     '^[[1;5D' # ctrl+left
-  bindkey -M $keymap -s '^[Oc'     '^[[1;5C' # ctrl+right
-  bindkey -M $keymap -s '^[[7\^'   '^[[1;5H' # ctrl+home
-  bindkey -M $keymap -s '^[[8\^'   '^[[1;5F' # ctrl+end
-  bindkey -M $keymap -s '^[[3\^'   '^[[3;5~' # ctrl+delete
-  bindkey -M $keymap -s '^[^[[A'   '^[[1;3A' # alt+up
-  bindkey -M $keymap -s '^[^[[B'   '^[[1;3B' # alt+down
-  bindkey -M $keymap -s '^[^[[D'   '^[[1;3D' # alt+left
-  bindkey -M $keymap -s '^[^[[C'   '^[[1;3C' # alt+right
-  bindkey -M $keymap -s '^[^[[7~'  '^[[1;3H' # alt+home
-  bindkey -M $keymap -s '^[^[[8~'  '^[[1;3F' # alt+end
-  bindkey -M $keymap -s '^[^[[3~'  '^[[3;3~' # alt+delete
-  bindkey -M $keymap -s '^[[a'     '^[[1;2A' # shift+up
-  bindkey -M $keymap -s '^[[b'     '^[[1;2B' # shift+down
-  bindkey -M $keymap -s '^[[d'     '^[[1;2D' # shift+left
-  bindkey -M $keymap -s '^[[c'     '^[[1;2C' # shift+right
-  bindkey -M $keymap -s '^[[7$'    '^[[1;2H' # shift+home
-  bindkey -M $keymap -s '^[[8$'    '^[[1;2F' # shift+end
+    # Urxvt sends different key codes. Translate them to xterm equivalents.
+    bindkey -M $keymap -s '^[[7~'    '^[[H'    # home
+    bindkey -M $keymap -s '^[[8~'    '^[[F'    # end
+    bindkey -M $keymap -s '^[Oa'     '^[[1;5A' # ctrl+up
+    bindkey -M $keymap -s '^[Ob'     '^[[1;5B' # ctrl+down
+    bindkey -M $keymap -s '^[Od'     '^[[1;5D' # ctrl+left
+    bindkey -M $keymap -s '^[Oc'     '^[[1;5C' # ctrl+right
+    bindkey -M $keymap -s '^[[7\^'   '^[[1;5H' # ctrl+home
+    bindkey -M $keymap -s '^[[8\^'   '^[[1;5F' # ctrl+end
+    bindkey -M $keymap -s '^[[3\^'   '^[[3;5~' # ctrl+delete
+    bindkey -M $keymap -s '^[^[[A'   '^[[1;3A' # alt+up
+    bindkey -M $keymap -s '^[^[[B'   '^[[1;3B' # alt+down
+    bindkey -M $keymap -s '^[^[[D'   '^[[1;3D' # alt+left
+    bindkey -M $keymap -s '^[^[[C'   '^[[1;3C' # alt+right
+    bindkey -M $keymap -s '^[^[[7~'  '^[[1;3H' # alt+home
+    bindkey -M $keymap -s '^[^[[8~'  '^[[1;3F' # alt+end
+    bindkey -M $keymap -s '^[^[[3~'  '^[[3;3~' # alt+delete
+    bindkey -M $keymap -s '^[[a'     '^[[1;2A' # shift+up
+    bindkey -M $keymap -s '^[[b'     '^[[1;2B' # shift+down
+    bindkey -M $keymap -s '^[[d'     '^[[1;2D' # shift+left
+    bindkey -M $keymap -s '^[[c'     '^[[1;2C' # shift+right
+    bindkey -M $keymap -s '^[[7$'    '^[[1;2H' # shift+home
+    bindkey -M $keymap -s '^[[8$'    '^[[1;2F' # shift+end
 
-  # Tmux sends different key codes. Translate them to xterm equivalents.
-  bindkey -M $keymap -s '^[[1~'    '^[[H'    # home
-  bindkey -M $keymap -s '^[[4~'    '^[[F'    # end
-  bindkey -M $keymap -s '^[^[[A'   '^[[1;3A' # alt+up
-  bindkey -M $keymap -s '^[^[[B'   '^[[1;3B' # alt+down
-  bindkey -M $keymap -s '^[^[[D'   '^[[1;3D' # alt+left
-  bindkey -M $keymap -s '^[^[[C'   '^[[1;3C' # alt+right
-  bindkey -M $keymap -s '^[^[[1~'  '^[[1;3H' # alt+home
-  bindkey -M $keymap -s '^[^[[4~'  '^[[1;3F' # alt+end
-  bindkey -M $keymap -s '^[^[[3~'  '^[[3;3~' # alt+delete
+    # Tmux sends different key codes. Translate them to xterm equivalents.
+    bindkey -M $keymap -s '^[[1~'    '^[[H'    # home
+    bindkey -M $keymap -s '^[[4~'    '^[[F'    # end
+    bindkey -M $keymap -s '^[^[[A'   '^[[1;3A' # alt+up
+    bindkey -M $keymap -s '^[^[[B'   '^[[1;3B' # alt+down
+    bindkey -M $keymap -s '^[^[[D'   '^[[1;3D' # alt+left
+    bindkey -M $keymap -s '^[^[[C'   '^[[1;3C' # alt+right
+    bindkey -M $keymap -s '^[^[[1~'  '^[[1;3H' # alt+home
+    bindkey -M $keymap -s '^[^[[4~'  '^[[1;3F' # alt+end
+    bindkey -M $keymap -s '^[^[[3~'  '^[[3;3~' # alt+delete
 
-  # iTerm2 sends different key codes. Translate them to xterm equivalents.
-  # Missing (depending on settings): ctrl+{up,down,left,right}, {ctrl,alt}+{delete,backspace}.
-  bindkey -M $keymap -s '^[^[[A'   '^[[1;3A' # alt+up
-  bindkey -M $keymap -s '^[^[[B'   '^[[1;3B' # alt+down
-  bindkey -M $keymap -s '^[^[[D'   '^[[1;3D' # alt+left
-  bindkey -M $keymap -s '^[^[[C'   '^[[1;3C' # alt+right
-  bindkey -M $keymap -s '^[[1;9A'  '^[[1;3A' # alt+up
-  bindkey -M $keymap -s '^[[1;9B'  '^[[1;3B' # alt+down
-  bindkey -M $keymap -s '^[[1;9D'  '^[[1;3D' # alt+left
-  bindkey -M $keymap -s '^[[1;9C'  '^[[1;3C' # alt+right
-  bindkey -M $keymap -s '^[[1;9H'  '^[[1;3H' # alt+home
-  bindkey -M $keymap -s '^[[1;9F'  '^[[1;3F' # alt+end
+    # iTerm2 sends different key codes. Translate them to xterm equivalents.
+    # Missing (depending on settings): ctrl+{up,down,left,right}, {ctrl,alt}+{delete,backspace}.
+    bindkey -M $keymap -s '^[^[[A'   '^[[1;3A' # alt+up
+    bindkey -M $keymap -s '^[^[[B'   '^[[1;3B' # alt+down
+    bindkey -M $keymap -s '^[^[[D'   '^[[1;3D' # alt+left
+    bindkey -M $keymap -s '^[^[[C'   '^[[1;3C' # alt+right
+    bindkey -M $keymap -s '^[[1;9A'  '^[[1;3A' # alt+up
+    bindkey -M $keymap -s '^[[1;9B'  '^[[1;3B' # alt+down
+    bindkey -M $keymap -s '^[[1;9D'  '^[[1;3D' # alt+left
+    bindkey -M $keymap -s '^[[1;9C'  '^[[1;3C' # alt+right
+    bindkey -M $keymap -s '^[[1;9H'  '^[[1;3H' # alt+home
+    bindkey -M $keymap -s '^[[1;9F'  '^[[1;3F' # alt+end
 
-  # TODO: Add missing translations.
-done
+    # TODO: Add missing translations.
+  done
 
-# Move cursor one char backward.
-bindkey   '^[[D'    backward-char                  # left
-# Move cursor one char forward.
-bindkey   '^[[C'    forward-char                   # right
-if (( _z4h_use[zsh-history-substring-search] )); then
-  # Move cursor one line up or fetch the previous command from LOCAL history.
-  bindkey '^P'      z4h-up-substring-local         # ctrl+p
-  bindkey '^[[A'    z4h-up-substring-local         # up
-  # Move cursor one line down or fetch the next command from LOCAL history.
-  bindkey   '^N'    z4h-down-substring-local       # ctrl+n
-  bindkey   '^[[B'  z4h-down-substring-local       # down
-else
-  # Move cursor one line up or fetch the previous command from LOCAL history.
-  bindkey '^P'      z4h-up-prefix-local            # ctrl+p
-  bindkey '^[[A'    z4h-up-prefix-local            # up
-  # Move cursor one line down or fetch the next command from LOCAL history.
-  bindkey   '^N'    z4h-down-prefix-local          # ctrl+n
-  bindkey   '^[[B'  z4h-down-prefix-local          # down
-fi
+  # Move cursor one char backward.
+  bindkey   '^[[D'    backward-char                  # left
+  # Move cursor one char forward.
+  bindkey   '^[[C'    forward-char                   # right
+  if (( _z4h_use[zsh-history-substring-search] )); then
+    # Move cursor one line up or fetch the previous command from LOCAL history.
+    bindkey '^P'      z4h-up-substring-local         # ctrl+p
+    bindkey '^[[A'    z4h-up-substring-local         # up
+    # Move cursor one line down or fetch the next command from LOCAL history.
+    bindkey   '^N'    z4h-down-substring-local       # ctrl+n
+    bindkey   '^[[B'  z4h-down-substring-local       # down
+  else
+    # Move cursor one line up or fetch the previous command from LOCAL history.
+    bindkey '^P'      z4h-up-prefix-local            # ctrl+p
+    bindkey '^[[A'    z4h-up-prefix-local            # up
+    # Move cursor one line down or fetch the next command from LOCAL history.
+    bindkey   '^N'    z4h-down-prefix-local          # ctrl+n
+    bindkey   '^[[B'  z4h-down-prefix-local          # down
+  fi
 
-# Move cursor one line up or fetch the previous command from GLOBAL history.
-bindkey   '^[[1;5A' z4h-up-prefix-global           # ctrl+up
-# Move cursor one line down or fetch the next command from GLOBAL history.
-bindkey   '^[[1;5B' z4h-down-prefix-global         # ctrl+down
-# Move cursor to the beginning of line.
-bindkey   '^[[H'    beginning-of-line              # home
-# Move cursor to the end of line.
-bindkey   '^[[F'    end-of-line                    # end
-# Move cursor to the beginning of buffer.
-bindkey   '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
-bindkey   '^[[1;3H' z4h-beginning-of-buffer        # alt+home
-# Move cursor to the end of buffer.
-bindkey   '^[[1;5F' z4h-end-of-buffer              # ctrl+end
-bindkey   '^[[1;3F' z4h-end-of-buffer              # alt+end
-# Delete the character under the cursor.
-bindkey   '^D'      delete-char                    # ctrl+d
-bindkey   '^[[3~'   delete-char                    # delete
-# Delete next word.
-bindkey   '^[d'     z4h-kill-word                  # alt+d
-bindkey   '^[D'     z4h-kill-word                  # alt+D
-bindkey   '^[[3;5~' z4h-kill-word                  # ctrl+del
-bindkey   '^[[3;3~' z4h-kill-word                  # alt+del
-# Delete previous word.
-bindkey   '^W'      z4h-backward-kill-word         # ctrl+w
-bindkey   '^[^?'    z4h-backward-kill-word         # alt+bs
-bindkey   '^[^H'    z4h-backward-kill-word         # ctrl+alt+bs
+  # Move cursor one line up or fetch the previous command from GLOBAL history.
+  bindkey   '^[[1;5A' z4h-up-prefix-global           # ctrl+up
+  # Move cursor one line down or fetch the next command from GLOBAL history.
+  bindkey   '^[[1;5B' z4h-down-prefix-global         # ctrl+down
+  # Move cursor to the beginning of line.
+  bindkey   '^[[H'    beginning-of-line              # home
+  # Move cursor to the end of line.
+  bindkey   '^[[F'    end-of-line                    # end
+  # Move cursor to the beginning of buffer.
+  bindkey   '^[[1;5H' z4h-beginning-of-buffer        # ctrl+home
+  bindkey   '^[[1;3H' z4h-beginning-of-buffer        # alt+home
+  # Move cursor to the end of buffer.
+  bindkey   '^[[1;5F' z4h-end-of-buffer              # ctrl+end
+  bindkey   '^[[1;3F' z4h-end-of-buffer              # alt+end
+  # Delete the character under the cursor.
+  bindkey   '^D'      delete-char                    # ctrl+d
+  bindkey   '^[[3~'   delete-char                    # delete
+  # Delete next word.
+  bindkey   '^[d'     z4h-kill-word                  # alt+d
+  bindkey   '^[D'     z4h-kill-word                  # alt+D
+  bindkey   '^[[3;5~' z4h-kill-word                  # ctrl+del
+  bindkey   '^[[3;3~' z4h-kill-word                  # alt+del
+  # Delete previous word.
+  bindkey   '^W'      z4h-backward-kill-word         # ctrl+w
+  bindkey   '^[^?'    z4h-backward-kill-word         # alt+bs
+  bindkey   '^[^H'    z4h-backward-kill-word         # ctrl+alt+bs
 
-# Move cursor one zsh word forward.
-bindkey   '^[[1;6C' z4h-forward-zword              # ctrl+shift+right
-# Move cursor one zsh word backward.
-bindkey   '^[[1;6D' z4h-backward-zword             # ctrl+shift+left
-# Delete next zsh word.
-bindkey   '^[[3;6~' z4h-kill-zword                 # ctrl+shift+del
+  # Move cursor one zsh word forward.
+  bindkey   '^[[1;6C' z4h-forward-zword              # ctrl+shift+right
+  # Move cursor one zsh word backward.
+  bindkey   '^[[1;6D' z4h-backward-zword             # ctrl+shift+left
+  # Delete next zsh word.
+  bindkey   '^[[3;6~' z4h-kill-zword                 # ctrl+shift+del
 
-# Delete line before cursor.
-bindkey   '^[k'     backward-kill-line             # alt+k
-bindkey   '^[K'     backward-kill-line             # alt+K
-# Delete all lines.
-bindkey   '^[j'     kill-buffer                    # alt+j
-bindkey   '^[J'     kill-buffer                    # alt+J
-# Push buffer to ephemeral history (won't be saved to HISTFILE) and delete all lines.
-bindkey   '^[o'     z4h-stash-buffer               # alt+o
-bindkey   '^[O'     z4h-stash-buffer               # alt+O
-# Accept autosuggestion.
-bindkey   '^[m'     z4h-autosuggest-accept         # alt+m
-bindkey   '^[M'     z4h-autosuggest-accept         # alt+M
-# Redo.
-bindkey   '^[/'     redo                           # alt+/
-# Expand alias/glob/parameter.
-bindkey   '^ '      z4h-expand                     # ctrl+space
-# Generic command completion.
-bindkey   '^I'      z4h-fzf-complete               # tab
-if (( _z4h_use[fzf] )); then
-  # Command history.
-  bindkey '^R'      z4h-fzf-history                # ctrl+r
-fi
-# Show help for the command at cursor.
-bindkey   '^[h'     run-help                       # alt+h
-bindkey   '^[H'     run-help                       # alt+H
-# Do nothing (better than printing '~').
-bindkey   '^[[5~'   z4h-do-nothing                 # pageup
-bindkey   '^[[6~'   z4h-do-nothing                 # pagedown
+  # Delete line before cursor.
+  bindkey   '^[k'     backward-kill-line             # alt+k
+  bindkey   '^[K'     backward-kill-line             # alt+K
+  # Delete all lines.
+  bindkey   '^[j'     kill-buffer                    # alt+j
+  bindkey   '^[J'     kill-buffer                    # alt+J
+  # Push buffer to ephemeral history (won't be saved to HISTFILE) and delete all lines.
+  bindkey   '^[o'     z4h-stash-buffer               # alt+o
+  bindkey   '^[O'     z4h-stash-buffer               # alt+O
+  # Accept autosuggestion.
+  bindkey   '^[m'     z4h-autosuggest-accept         # alt+m
+  bindkey   '^[M'     z4h-autosuggest-accept         # alt+M
+  # Redo.
+  bindkey   '^[/'     redo                           # alt+/
+  # Expand alias/glob/parameter.
+  bindkey   '^ '      z4h-expand                     # ctrl+space
+  # Generic command completion.
+  bindkey   '^I'      z4h-fzf-complete               # tab
+  if (( _z4h_use[fzf] )); then
+    # Command history.
+    bindkey '^R'      z4h-fzf-history                # ctrl+r
+  fi
+  # Show help for the command at cursor.
+  bindkey   '^[h'     run-help                       # alt+h
+  bindkey   '^[H'     run-help                       # alt+H
+  # Do nothing (better than printing '~').
+  bindkey   '^[[5~'   z4h-do-nothing                 # pageup
+  bindkey   '^[[6~'   z4h-do-nothing                 # pagedown
 
-# Move cursor one word backward.
-bindkey   '^[b'     z4h-backward-word              # alt+b
-bindkey   '^[B'     z4h-backward-word              # alt+B
-bindkey   '^[[1;3D' z4h-backward-word              # alt+left
-bindkey   '^[[1;5D' z4h-backward-word              # ctrl+left
+  # Move cursor one word backward.
+  bindkey   '^[b'     z4h-backward-word              # alt+b
+  bindkey   '^[B'     z4h-backward-word              # alt+B
+  bindkey   '^[[1;3D' z4h-backward-word              # alt+left
+  bindkey   '^[[1;5D' z4h-backward-word              # ctrl+left
 
-# Move cursor one word forward.
-bindkey   '^[f'     z4h-forward-word               # alt+f
-bindkey   '^[F'     z4h-forward-word               # alt+F
-bindkey   '^[[1;3C' z4h-forward-word               # alt+right
-bindkey   '^[[1;5C' z4h-forward-word               # ctrl+right
+  # Move cursor one word forward.
+  bindkey   '^[f'     z4h-forward-word               # alt+f
+  bindkey   '^[F'     z4h-forward-word               # alt+F
+  bindkey   '^[[1;3C' z4h-forward-word               # alt+right
+  bindkey   '^[[1;5C' z4h-forward-word               # ctrl+right
 
-# cd into the previous directory.
-bindkey   '^[[1;2D' z4h-cd-back                    # shift+left
-# cd into the next directory.
-bindkey   '^[[1;2C' z4h-cd-forward                 # shift+right
-# cd into the parent directory.
-bindkey   '^[[1;2A' z4h-cd-up                      # shift+up
-if (( _z4h_use[fzf] )); then
-  # cd into a subdirectory (interactive).
-  bindkey '^[[1;2B' z4h-cd-down                    # shift+down
-fi
-if zstyle -T :z4h: prompt-at-bottom; then
-  bindkey '^L' z4h-clear-screen-soft-bottom
-  bindkey '^[^L' z4h-clear-screen-hard-bottom
-else
-  bindkey '^L' z4h-clear-screen-soft-top
-  bindkey '^[^L' z4h-clear-screen-hard-top
-fi
+  # cd into the previous directory.
+  bindkey   '^[[1;2D' z4h-cd-back                    # shift+left
+  # cd into the next directory.
+  bindkey   '^[[1;2C' z4h-cd-forward                 # shift+right
+  # cd into the parent directory.
+  bindkey   '^[[1;2A' z4h-cd-up                      # shift+up
+  if (( _z4h_use[fzf] )); then
+    # cd into a subdirectory (interactive).
+    bindkey '^[[1;2B' z4h-cd-down                    # shift+down
+  fi
+  if zstyle -T :z4h: prompt-at-bottom; then
+    bindkey '^L' z4h-clear-screen-soft-bottom
+    bindkey '^[^L' z4h-clear-screen-hard-bottom
+  else
+    bindkey '^L' z4h-clear-screen-soft-top
+    bindkey '^[^L' z4h-clear-screen-hard-top
+  fi
 
-if zstyle -T :z4h:bindkey macos-option-as-alt; then
-  typeset -grA _z4h_macos_opt_key=(
-    q  'œ'
-    w  '∑'
-    r  '®'
-    t  '†'
-    o  'ø'
-    p  'π'
-    [ '“'
-    ] '‘'
-    a  'å'
-    s  'ß'
-    d  '∂'
-    f  'ƒ'
-    g  '©'
-    h  '˙'
-    j  '∆'
-    k  '˚'
-    l  '¬'
-    z  'Ω'
-    x  '≈'
-    c  'ç'
-    v  '√'
-    b  '∫'
-    m  'µ'
-    ,  '≤'
-    .  '≥'
-    /  '÷'
-    \\ '«'
-    # Option+y is just '\'.
-    # Dead key functionality: e, u, i, n.
-    Q  'Œ'
-    W  '„'
-    E  '´'
-    R  '‰'
-    T  'ˇ'
-    Y  'Á'
-    U  '¨'
-    I  'ˆ'
-    O  'Ø'
-    P  '∏'
-    A  'Å'
-    S  'Í'
-    D  'Î'
-    F  'Ï'
-    G  '˝'
-    H  'Ó'
-    J  'Ô'
-    K  '\357\243\277'
-    L  'Ò'
-    Z  '¸'
-    X  '˛'
-    C  'Ç'
-    V  '◊'
-    B  'ı'
-    N  '˜'
-    M  'Â'
+  if zstyle -T :z4h:bindkey macos-option-as-alt; then
+    typeset -grA _z4h_macos_opt_key=(
+      q  'œ'
+      w  '∑'
+      r  '®'
+      t  '†'
+      o  'ø'
+      p  'π'
+      [ '“'
+      ] '‘'
+      a  'å'
+      s  'ß'
+      d  '∂'
+      f  'ƒ'
+      g  '©'
+      h  '˙'
+      j  '∆'
+      k  '˚'
+      l  '¬'
+      z  'Ω'
+      x  '≈'
+      c  'ç'
+      v  '√'
+      b  '∫'
+      m  'µ'
+      ,  '≤'
+      .  '≥'
+      /  '÷'
+      \\ '«'
+      # Option+y is just '\'.
+      # Dead key functionality: e, u, i, n.
+      Q  'Œ'
+      W  '„'
+      E  '´'
+      R  '‰'
+      T  'ˇ'
+      Y  'Á'
+      U  '¨'
+      I  'ˆ'
+      O  'Ø'
+      P  '∏'
+      A  'Å'
+      S  'Í'
+      D  'Î'
+      F  'Ï'
+      G  '˝'
+      H  'Ó'
+      J  'Ô'
+      K  '\357\243\277'
+      L  'Ò'
+      Z  '¸'
+      X  '˛'
+      C  'Ç'
+      V  '◊'
+      B  'ı'
+      N  '˜'
+      M  'Â'
+    )
+
+    bindkey '∂'            z4h-kill-word                  # opt+d
+    bindkey 'Î'            z4h-kill-word                  # opt+D
+    bindkey '˚'            backward-kill-line             # opt+k
+    bindkey '\357\243\277' backward-kill-line             # opt+K (U+F8FF)
+    bindkey '∆'            kill-buffer                    # opt+j
+    bindkey 'Ô'            kill-buffer                    # opt+J
+    bindkey 'ø'            z4h-stash-buffer               # opt+o
+    bindkey 'Ø'            z4h-stash-buffer               # opt+O
+    bindkey 'µ'            z4h-autosuggest-accept         # opt+m
+    bindkey 'Â'            z4h-autosuggest-accept         # opt+M
+    bindkey '÷'            redo                           # opt+/
+    bindkey '˙'            run-help                       # opt+h
+    bindkey 'Ó'            run-help                       # opt+H
+    bindkey '∫'            z4h-backward-word              # opt+b
+    bindkey 'ı'            z4h-backward-word              # opt+B
+  else
+    typeset -grA _z4h_macos_opt_key=()
+  fi
+
+  if zstyle -t :z4h:bindkey keyboard mac; then
+    local del=Fn+Delete
+  else
+    local del=Delete
+  fi
+
+  typeset -gA _z4h_key=(
+    Tab                         '^I'
+    Space                       ' '
+    Ctrl+/                      '^_'
+    Ctrl+_                      '^_'
+    Ctrl+Space                  '^ '
+    Alt+Space                   '^[ '
+
+    Up                          '^[[A'
+    Down                        '^[[B'
+    Right                       '^[[C'
+    Left                        '^[[D'
+    Home                        '^[[H'
+    End                         '^[[F'
+    Insert                      '^[[2~'
+    $del                        '^[[3~'
+    PageUp                      '^[[5~'
+    PageDown                    '^[[6~'
+    Backspace                   '^?'
+
+    Shift+Up                    '^[[1;2A'
+    Shift+Down                  '^[[1;2B'
+    Shift+Right                 '^[[1;2C'
+    Shift+Left                  '^[[1;2D'
+    Shift+Home                  '^[[1;2H'
+    Shift+End                   '^[[1;2F'
+    Shift+Insert                '^[[2;2~'
+    Shift+$del                  '^[[3;2~'
+    Shift+PageUp                '^[[5;2~'
+    Shift+PageDown              '^[[6;2~'
+    Shift+Backspace             '^?'
+
+    Alt+Up                      '^[[1;3A'
+    Alt+Down                    '^[[1;3B'
+    Alt+Right                   '^[[1;3C'
+    Alt+Left                    '^[[1;3D'
+    Alt+Home                    '^[[1;3H'
+    Alt+End                     '^[[1;3F'
+    Alt+Insert                  '^[[2;3~'
+    Alt+$del                    '^[[3;3~'
+    Alt+PageUp                  '^[[5;3~'
+    Alt+PageDown                '^[[6;3~'
+    Alt+Backspace               '^[^?'
+
+    Alt+Shift+Up                '^[[1;4A'
+    Alt+Shift+Down              '^[[1;4B'
+    Alt+Shift+Right             '^[[1;4C'
+    Alt+Shift+Left              '^[[1;4D'
+    Alt+Shift+Home              '^[[1;4H'
+    Alt+Shift+End               '^[[1;4F'
+    Alt+Shift+Insert            '^[[2;4~'
+    Alt+Shift+$del              '^[[3;4~'
+    Alt+Shift+PageUp            '^[[5;4~'
+    Alt+Shift+PageDown          '^[[6;4~'
+    Alt+Shift+Backspace         '^[^H'
+
+    Ctrl+Up                     '^[[1;5A'
+    Ctrl+Down                   '^[[1;5B'
+    Ctrl+Right                  '^[[1;5C'
+    Ctrl+Left                   '^[[1;5D'
+    Ctrl+Home                   '^[[1;5H'
+    Ctrl+End                    '^[[1;5F'
+    Ctrl+Insert                 '^[[2;5~'
+    Ctrl+$del                   '^[[3;5~'
+    Ctrl+PageUp                 '^[[5;5~'
+    Ctrl+PageDown               '^[[6;5~'
+    Ctrl+Backspace              '^H'
+
+    Ctrl+Shift+Up               '^[[1;6A'
+    Ctrl+Shift+Down             '^[[1;6B'
+    Ctrl+Shift+Right            '^[[1;6C'
+    Ctrl+Shift+Left             '^[[1;6D'
+    Ctrl+Shift+Home             '^[[1;6H'
+    Ctrl+Shift+End              '^[[1;6F'
+    Ctrl+Shift+Insert           '^[[2;6~'
+    Ctrl+Shift+$del             '^[[3;6~'
+    Ctrl+Shift+PageUp           '^[[5;6~'
+    Ctrl+Shift+PageDown         '^[[6;6~'
+    Ctrl+Shift+Backspace        '^?'
+
+    Ctrl+Alt+Up                 '^[[1;7A'
+    Ctrl+Alt+Down               '^[[1;7B'
+    Ctrl+Alt+Right              '^[[1;7C'
+    Ctrl+Alt+Left               '^[[1;7D'
+    Ctrl+Alt+Home               '^[[1;7H'
+    Ctrl+Alt+End                '^[[1;7F'
+    Ctrl+Alt+Insert             '^[[2;7~'
+    Ctrl+Alt+$del               '^[[3;7~'
+    Ctrl+Alt+PageUp             '^[[5;7~'
+    Ctrl+Alt+PageDown           '^[[6;7~'
+    Ctrl+Alt+Backspace          '^[^H'
+
+    Ctrl+Alt+Shift+Up           '^[[1;8A'
+    Ctrl+Alt+Shift+Down         '^[[1;8B'
+    Ctrl+Alt+Shift+Right        '^[[1;8C'
+    Ctrl+Alt+Shift+Left         '^[[1;8D'
+    Ctrl+Alt+Shift+Home         '^[[1;8H'
+    Ctrl+Alt+Shift+End          '^[[1;8F'
+    Ctrl+Alt+Shift+Insert       '^[[2;8~'
+    Ctrl+Alt+Shift+$del         '^[[3;8~'
+    Ctrl+Alt+Shift+PageUp       '^[[5;8~'
+    Ctrl+Alt+Shift+PageDown     '^[[6;8~'
+    Ctrl+Alt+Shift+Backspace    '^?'
+
+    # Duplicate all Alt bindings with s/Alt/Option/.
+    Option+Space                '^[ '
+
+    Option+Up                   '^[[1;3A'
+    Option+Down                 '^[[1;3B'
+    Option+Right                '^[[1;3C'
+    Option+Left                 '^[[1;3D'
+    Option+Home                 '^[[1;3H'
+    Option+End                  '^[[1;3F'
+    Option+Insert               '^[[2;3~'
+    Option+$del                 '^[[3;3~'
+    Option+PageUp               '^[[5;3~'
+    Option+PageDown             '^[[6;3~'
+    Option+Backspace            '^[^?'
+
+    Option+Shift+Up             '^[[1;4A'
+    Option+Shift+Down           '^[[1;4B'
+    Option+Shift+Right          '^[[1;4C'
+    Option+Shift+Left           '^[[1;4D'
+    Option+Shift+Home           '^[[1;4H'
+    Option+Shift+End            '^[[1;4F'
+    Option+Shift+Insert         '^[[2;4~'
+    Option+Shift+$del           '^[[3;4~'
+    Option+Shift+PageUp         '^[[5;4~'
+    Option+Shift+PageDown       '^[[6;4~'
+    Option+Shift+Backspace      '^[^H'
+
+    Ctrl+Option+Up              '^[[1;7A'
+    Ctrl+Option+Down            '^[[1;7B'
+    Ctrl+Option+Right           '^[[1;7C'
+    Ctrl+Option+Left            '^[[1;7D'
+    Ctrl+Option+Home            '^[[1;7H'
+    Ctrl+Option+End             '^[[1;7F'
+    Ctrl+Option+Insert          '^[[2;7~'
+    Ctrl+Option+$del            '^[[3;7~'
+    Ctrl+Option+PageUp          '^[[5;7~'
+    Ctrl+Option+PageDown        '^[[6;7~'
+    Ctrl+Option+Backspace       '^[^H'
+
+    Ctrl+Option+Shift+Up        '^[[1;8A'
+    Ctrl+Option+Shift+Down      '^[[1;8B'
+    Ctrl+Option+Shift+Right     '^[[1;8C'
+    Ctrl+Option+Shift+Left      '^[[1;8D'
+    Ctrl+Option+Shift+Home      '^[[1;8H'
+    Ctrl+Option+Shift+End       '^[[1;8F'
+    Ctrl+Option+Shift+Insert    '^[[2;8~'
+    Ctrl+Option+Shift+$del      '^[[3;8~'
+    Ctrl+Option+Shift+PageUp    '^[[5;8~'
+    Ctrl+Option+Shift+PageDown  '^[[6;8~'
+    Ctrl+Option+Shift+Backspace '^?'
   )
 
-  bindkey '∂'            z4h-kill-word                  # opt+d
-  bindkey 'Î'            z4h-kill-word                  # opt+D
-  bindkey '˚'            backward-kill-line             # opt+k
-  bindkey '\357\243\277' backward-kill-line             # opt+K (U+F8FF)
-  bindkey '∆'            kill-buffer                    # opt+j
-  bindkey 'Ô'            kill-buffer                    # opt+J
-  bindkey 'ø'            z4h-stash-buffer               # opt+o
-  bindkey 'Ø'            z4h-stash-buffer               # opt+O
-  bindkey 'µ'            z4h-autosuggest-accept         # opt+m
-  bindkey 'Â'            z4h-autosuggest-accept         # opt+M
-  bindkey '÷'            redo                           # opt+/
-  bindkey '˙'            run-help                       # opt+h
-  bindkey 'Ó'            run-help                       # opt+H
-  bindkey '∫'            z4h-backward-word              # opt+b
-  bindkey 'ı'            z4h-backward-word              # opt+B
-else
-  typeset -grA _z4h_macos_opt_key=()
+  if zstyle -t :z4h:bindkey keyboard mac; then
+    # Duplicate all Backspace bindings with s/Backspace/Delete/.
+    _z4h_key+=(
+      Delete                    '^?'
+      Shift+Delete              '^?'
+      Alt+Delete                '^[^?'
+      Alt+Shift+Delete          '^[^H'
+      Ctrl+Delete               '^H'
+      Ctrl+Shift+Delete         '^?'
+      Ctrl+Alt+Delete           '^[^H'
+      Ctrl+Alt+Shift+Delete     '^?'
+      Option+Delete             '^[^?'
+      Option+Shift+Delete       '^[^H'
+      Ctrl+Option+Delete        '^[^H'
+      Ctrl+Option+Shift+Delete  '^?'
+    )
+  fi
+
+  typeset -grA _z4h_key
 fi
-
-if zstyle -t :z4h:bindkey keyboard mac; then
-  local del=Fn+Delete
-else
-  local del=Delete
-fi
-
-typeset -gA _z4h_key=(
-  Tab                         '^I'
-  Space                       ' '
-  Ctrl+/                      '^_'
-  Ctrl+_                      '^_'
-  Ctrl+Space                  '^ '
-  Alt+Space                   '^[ '
-
-  Up                          '^[[A'
-  Down                        '^[[B'
-  Right                       '^[[C'
-  Left                        '^[[D'
-  Home                        '^[[H'
-  End                         '^[[F'
-  Insert                      '^[[2~'
-  $del                        '^[[3~'
-  PageUp                      '^[[5~'
-  PageDown                    '^[[6~'
-  Backspace                   '^?'
-
-  Shift+Up                    '^[[1;2A'
-  Shift+Down                  '^[[1;2B'
-  Shift+Right                 '^[[1;2C'
-  Shift+Left                  '^[[1;2D'
-  Shift+Home                  '^[[1;2H'
-  Shift+End                   '^[[1;2F'
-  Shift+Insert                '^[[2;2~'
-  Shift+$del                  '^[[3;2~'
-  Shift+PageUp                '^[[5;2~'
-  Shift+PageDown              '^[[6;2~'
-  Shift+Backspace             '^?'
-
-  Alt+Up                      '^[[1;3A'
-  Alt+Down                    '^[[1;3B'
-  Alt+Right                   '^[[1;3C'
-  Alt+Left                    '^[[1;3D'
-  Alt+Home                    '^[[1;3H'
-  Alt+End                     '^[[1;3F'
-  Alt+Insert                  '^[[2;3~'
-  Alt+$del                    '^[[3;3~'
-  Alt+PageUp                  '^[[5;3~'
-  Alt+PageDown                '^[[6;3~'
-  Alt+Backspace               '^[^?'
-
-  Alt+Shift+Up                '^[[1;4A'
-  Alt+Shift+Down              '^[[1;4B'
-  Alt+Shift+Right             '^[[1;4C'
-  Alt+Shift+Left              '^[[1;4D'
-  Alt+Shift+Home              '^[[1;4H'
-  Alt+Shift+End               '^[[1;4F'
-  Alt+Shift+Insert            '^[[2;4~'
-  Alt+Shift+$del              '^[[3;4~'
-  Alt+Shift+PageUp            '^[[5;4~'
-  Alt+Shift+PageDown          '^[[6;4~'
-  Alt+Shift+Backspace         '^[^H'
-
-  Ctrl+Up                     '^[[1;5A'
-  Ctrl+Down                   '^[[1;5B'
-  Ctrl+Right                  '^[[1;5C'
-  Ctrl+Left                   '^[[1;5D'
-  Ctrl+Home                   '^[[1;5H'
-  Ctrl+End                    '^[[1;5F'
-  Ctrl+Insert                 '^[[2;5~'
-  Ctrl+$del                   '^[[3;5~'
-  Ctrl+PageUp                 '^[[5;5~'
-  Ctrl+PageDown               '^[[6;5~'
-  Ctrl+Backspace              '^H'
-
-  Ctrl+Shift+Up               '^[[1;6A'
-  Ctrl+Shift+Down             '^[[1;6B'
-  Ctrl+Shift+Right            '^[[1;6C'
-  Ctrl+Shift+Left             '^[[1;6D'
-  Ctrl+Shift+Home             '^[[1;6H'
-  Ctrl+Shift+End              '^[[1;6F'
-  Ctrl+Shift+Insert           '^[[2;6~'
-  Ctrl+Shift+$del             '^[[3;6~'
-  Ctrl+Shift+PageUp           '^[[5;6~'
-  Ctrl+Shift+PageDown         '^[[6;6~'
-  Ctrl+Shift+Backspace        '^?'
-
-  Ctrl+Alt+Up                 '^[[1;7A'
-  Ctrl+Alt+Down               '^[[1;7B'
-  Ctrl+Alt+Right              '^[[1;7C'
-  Ctrl+Alt+Left               '^[[1;7D'
-  Ctrl+Alt+Home               '^[[1;7H'
-  Ctrl+Alt+End                '^[[1;7F'
-  Ctrl+Alt+Insert             '^[[2;7~'
-  Ctrl+Alt+$del               '^[[3;7~'
-  Ctrl+Alt+PageUp             '^[[5;7~'
-  Ctrl+Alt+PageDown           '^[[6;7~'
-  Ctrl+Alt+Backspace          '^[^H'
-
-  Ctrl+Alt+Shift+Up           '^[[1;8A'
-  Ctrl+Alt+Shift+Down         '^[[1;8B'
-  Ctrl+Alt+Shift+Right        '^[[1;8C'
-  Ctrl+Alt+Shift+Left         '^[[1;8D'
-  Ctrl+Alt+Shift+Home         '^[[1;8H'
-  Ctrl+Alt+Shift+End          '^[[1;8F'
-  Ctrl+Alt+Shift+Insert       '^[[2;8~'
-  Ctrl+Alt+Shift+$del         '^[[3;8~'
-  Ctrl+Alt+Shift+PageUp       '^[[5;8~'
-  Ctrl+Alt+Shift+PageDown     '^[[6;8~'
-  Ctrl+Alt+Shift+Backspace    '^?'
-
-  # Duplicate all Alt bindings with s/Alt/Option/.
-  Option+Space                '^[ '
-
-  Option+Up                   '^[[1;3A'
-  Option+Down                 '^[[1;3B'
-  Option+Right                '^[[1;3C'
-  Option+Left                 '^[[1;3D'
-  Option+Home                 '^[[1;3H'
-  Option+End                  '^[[1;3F'
-  Option+Insert               '^[[2;3~'
-  Option+$del                 '^[[3;3~'
-  Option+PageUp               '^[[5;3~'
-  Option+PageDown             '^[[6;3~'
-  Option+Backspace            '^[^?'
-
-  Option+Shift+Up             '^[[1;4A'
-  Option+Shift+Down           '^[[1;4B'
-  Option+Shift+Right          '^[[1;4C'
-  Option+Shift+Left           '^[[1;4D'
-  Option+Shift+Home           '^[[1;4H'
-  Option+Shift+End            '^[[1;4F'
-  Option+Shift+Insert         '^[[2;4~'
-  Option+Shift+$del           '^[[3;4~'
-  Option+Shift+PageUp         '^[[5;4~'
-  Option+Shift+PageDown       '^[[6;4~'
-  Option+Shift+Backspace      '^[^H'
-
-  Ctrl+Option+Up              '^[[1;7A'
-  Ctrl+Option+Down            '^[[1;7B'
-  Ctrl+Option+Right           '^[[1;7C'
-  Ctrl+Option+Left            '^[[1;7D'
-  Ctrl+Option+Home            '^[[1;7H'
-  Ctrl+Option+End             '^[[1;7F'
-  Ctrl+Option+Insert          '^[[2;7~'
-  Ctrl+Option+$del            '^[[3;7~'
-  Ctrl+Option+PageUp          '^[[5;7~'
-  Ctrl+Option+PageDown        '^[[6;7~'
-  Ctrl+Option+Backspace       '^[^H'
-
-  Ctrl+Option+Shift+Up        '^[[1;8A'
-  Ctrl+Option+Shift+Down      '^[[1;8B'
-  Ctrl+Option+Shift+Right     '^[[1;8C'
-  Ctrl+Option+Shift+Left      '^[[1;8D'
-  Ctrl+Option+Shift+Home      '^[[1;8H'
-  Ctrl+Option+Shift+End       '^[[1;8F'
-  Ctrl+Option+Shift+Insert    '^[[2;8~'
-  Ctrl+Option+Shift+$del      '^[[3;8~'
-  Ctrl+Option+Shift+PageUp    '^[[5;8~'
-  Ctrl+Option+Shift+PageDown  '^[[6;8~'
-  Ctrl+Option+Shift+Backspace '^?'
-)
-
-if zstyle -t :z4h:bindkey keyboard mac; then
-  # Duplicate all Backspace bindings with s/Backspace/Delete/.
-  _z4h_key+=(
-    Delete                    '^?'
-    Shift+Delete              '^?'
-    Alt+Delete                '^[^?'
-    Alt+Shift+Delete          '^[^H'
-    Ctrl+Delete               '^H'
-    Ctrl+Shift+Delete         '^?'
-    Ctrl+Alt+Delete           '^[^H'
-    Ctrl+Alt+Shift+Delete     '^?'
-    Option+Delete             '^[^?'
-    Option+Shift+Delete       '^[^H'
-    Ctrl+Option+Delete        '^[^H'
-    Ctrl+Option+Shift+Delete  '^?'
-  )
-fi
-
-typeset -grA _z4h_key
 
 # Use lesspipe if available. It allows you to use less on binary files (*.tar.gz, *.jpg, etc.).
 if (( $+commands[lesspipe] || $+commands[lesspipe.sh] )); then
@@ -676,38 +680,40 @@ export LSCOLORS='ExGxDxDxCxDxDxFxFxexEx'
 # TREE_COLORS is used by GNU tree. It looks awful with underlined text, so we turn it off.
 export TREE_COLORS=${LS_COLORS//04;}
 
-# Configure completions.
-zstyle ':completion:*'               matcher-list      "m:{a-z}={A-Z}"
-zstyle ':completion:*'               menu              "false"
-zstyle ':completion:*'               verbose           "true"
-zstyle ':completion:::::'            insert-tab        "pending"
-zstyle ':completion:*:-subscript-:*' tag-order         "indexes parameters"
-zstyle ':completion:*:-tilde-:*'     tag-order         "directory-stack" "named-directories" "users"
-zstyle ':completion:*'               squeeze-slashes   "true"
-zstyle ':completion:*:rm:*'          ignore-line       "other"
-zstyle ':completion:*:kill:*'        ignore-line       "other"
-zstyle ':completion:*:diff:*'        ignore-line       "other"
-zstyle ':completion:*:rm:*'          file-patterns     "*:all-files"
-zstyle ':completion:*:paths'         accept-exact-dirs "true"
-zstyle ':completion:*'               single-ignored    "show"
-zstyle ':completion:*:functions'     ignored-patterns  "-z4h*|_*"
-zstyle ':completion:*:parameters'    ignored-patterns  \
-  "_(z4h|p9k|_p9k|POWERLEVEL9K|gitstatus|GITSTATUS|zsh_highlight|zsh_autosuggest|ZSH_HIGHLIGHT|ZSH_AUTOSUGGEST)*"
+if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
+  # Configure completions.
+  zstyle ':completion:*'               matcher-list      "m:{a-z}={A-Z}"
+  zstyle ':completion:*'               menu              "false"
+  zstyle ':completion:*'               verbose           "true"
+  zstyle ':completion:::::'            insert-tab        "pending"
+  zstyle ':completion:*:-subscript-:*' tag-order         "indexes parameters"
+  zstyle ':completion:*:-tilde-:*'     tag-order         "directory-stack" "named-directories" "users"
+  zstyle ':completion:*'               squeeze-slashes   "true"
+  zstyle ':completion:*:rm:*'          ignore-line       "other"
+  zstyle ':completion:*:kill:*'        ignore-line       "other"
+  zstyle ':completion:*:diff:*'        ignore-line       "other"
+  zstyle ':completion:*:rm:*'          file-patterns     "*:all-files"
+  zstyle ':completion:*:paths'         accept-exact-dirs "true"
+  zstyle ':completion:*'               single-ignored    "show"
+  zstyle ':completion:*:functions'     ignored-patterns  "-z4h*|_*"
+  zstyle ':completion:*:parameters'    ignored-patterns  \
+    "_(z4h|p9k|_p9k|POWERLEVEL9K|gitstatus|GITSTATUS|zsh_highlight|zsh_autosuggest|ZSH_HIGHLIGHT|ZSH_AUTOSUGGEST)*"
 
-if (( ! _z4h_dangerous_root )); then
-  zstyle ':completion:*'             use-cache         "true"
-  zstyle ':completion:*'             cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
+  if (( ! _z4h_dangerous_root )); then
+    zstyle ':completion:*'             use-cache         "true"
+    zstyle ':completion:*'             cache-path        "$Z4H/cache/zcompcache-$ZSH_VERSION"
+  fi
+
+  zstyle ':completion:*:ssh:argument-1:*'                    sort             'true'
+  zstyle ':completion:*:scp:argument-rest:*'                 sort             'true'
+
+  zstyle ':completion:*:git-*:argument-rest:heads'           ignored-patterns '(FETCH_|ORIG_|*/|)HEAD'
+  zstyle ':completion:*:git-*:argument-rest:heads-local'     ignored-patterns '(FETCH_|ORIG_|)HEAD'
+  zstyle ':completion:*:git-*:argument-rest:heads-remote'    ignored-patterns '*/HEAD'
+  zstyle ':completion:*:git-*:argument-rest:commits'         ignored-patterns '*'
+  zstyle ':completion:*:git-*:argument-rest:commit-objects'  ignored-patterns '*'
+  zstyle ':completion:*:git-*:argument-rest:recent-branches' ignored-patterns '*'
 fi
-
-zstyle ':completion:*:ssh:argument-1:*'                    sort             'true'
-zstyle ':completion:*:scp:argument-rest:*'                 sort             'true'
-
-zstyle ':completion:*:git-*:argument-rest:heads'           ignored-patterns '(FETCH_|ORIG_|*/|)HEAD'
-zstyle ':completion:*:git-*:argument-rest:heads-local'     ignored-patterns '(FETCH_|ORIG_|)HEAD'
-zstyle ':completion:*:git-*:argument-rest:heads-remote'    ignored-patterns '*/HEAD'
-zstyle ':completion:*:git-*:argument-rest:commits'         ignored-patterns '*'
-zstyle ':completion:*:git-*:argument-rest:commit-objects'  ignored-patterns '*'
-zstyle ':completion:*:git-*:argument-rest:recent-branches' ignored-patterns '*'
 
 # Make it possible to use completion specifications and functions written for bash.
 autoload -Uz bashcompinit
@@ -723,7 +729,7 @@ if (( _z4h_use[powerlevel10k] )); then
   z4h source -c $POWERLEVEL9K_CONFIG_FILE
 fi
 
-if (( $+_z4h_iterm_cmd )); then
+if [[ -v _z4h_iterm_cmd ]]; then
   -z4h-iterm2-dump
   -z4h-tmux-bypass '\e]1337;ShellIntegrationVersion=12;shell=zsh\a'
 fi

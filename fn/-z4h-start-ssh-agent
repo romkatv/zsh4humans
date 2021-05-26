@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+[[ -v commands[ssh-agent] ]] || return 0
+
+function -z4h-ssh-agent-running() {
+  [[ -w $SSH_AUTH_SOCK ]] && builtin kill -0 -- $SSH_AGENT_PID 2>/dev/null
+}
+
+{
+  -z4h-ssh-agent-running && return
+  unset SSH_AGENT_PID SSH_AUTH_SOCK
+
+  local env_file=$Z4H/stickycache/ssh-agent-$EUID
+  [[ -r $env_file ]] && builtin source $env_file >/dev/null && -z4h-ssh-agent-running && return
+
+  local tmp=$env_file.tmp.$$
+  local -a args
+  zstyle -a :z4h:ssh-agent: extra-args args
+  command ssh-agent -s $args >$tmp || return
+  builtin source $tmp >/dev/null   || return
+  -z4h-ssh-agent-running           || return
+  zf_mv -f -- $tmp $env_file       || return
+} always {
+  builtin unfunction -- -z4h-ssh-agent-running
+}

@@ -1094,6 +1094,8 @@ precmd_functions=(-z4h-post-init $precmd_functions)
 
 [[ $OSTYPE == linux-* && -r /proc/version ]] && -z4h-init-wsl
 
+zstyle -t :z4h:ssh-agent: start && -z4h-start-ssh-agent
+
 typeset -g iterm2_hostname=${(%):-%m}
 
 function ssh()  { z4h ssh  "$@" }

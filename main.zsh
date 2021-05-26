@@ -303,6 +303,8 @@ function -z4h-cmd-init() {
     fi
   } || return
 
+  : ${ZLE_RPROMPT_INDENT:=0}
+
   # Enable Powerlevel10k instant prompt.
   zstyle -t :z4h:powerlevel10k channel none || () {
     local user=${(%):-%n}

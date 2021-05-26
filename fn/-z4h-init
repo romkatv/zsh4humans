@@ -695,7 +695,7 @@ if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
   zstyle ':completion:*:rm:*'          file-patterns     "*:all-files"
   zstyle ':completion:*:paths'         accept-exact-dirs "true"
   zstyle ':completion:*'               single-ignored    "show"
-  zstyle ':completion:*:functions'     ignored-patterns  "-z4h*|_*"
+  zstyle ':completion:*:functions'     ignored-patterns  "-*|_*"
   zstyle ':completion:*:parameters'    ignored-patterns  \
     "_(z4h|p9k|_p9k|POWERLEVEL9K|gitstatus|GITSTATUS|zsh_highlight|zsh_autosuggest|ZSH_HIGHLIGHT|ZSH_AUTOSUGGEST)*"
 

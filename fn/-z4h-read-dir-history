@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+local content
+local file=$Z4H/stickycache/dir-history-$EUID
+if [[ -r $file ]] && content=$(<$file); then
+  typeset -ga _z4h_dir_history=(${(f)content})
+else
+  typeset -ga _z4h_dir_history=()
+fi

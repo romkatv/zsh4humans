@@ -171,6 +171,7 @@ zle -N z4h-cd-forward
 zle -N z4h-cd-up
 zle -N z4h-cd-down
 zle -N z4h-fzf-history
+zle -N z4h-fzf-dir-history
 zle -N z4h-autosuggest-accept
 zle -N z4h-do-nothing
 zle -N z4h-clear-screen-soft-top
@@ -386,6 +387,11 @@ if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
     # cd into a subdirectory (interactive).
     bindkey '^[[1;2B' z4h-cd-down                    # shift+down
   fi
+
+  # Directory history.
+  bindkey   '^[r'     z4h-dir-history                # alt+r
+  bindkey   '^[R'     z4h-dir-history                # alt+R
+
   if zstyle -T :z4h: prompt-at-bottom; then
     bindkey '^L' z4h-clear-screen-soft-bottom
     bindkey '^[^L' z4h-clear-screen-hard-bottom
@@ -1097,6 +1103,8 @@ precmd_functions=(-z4h-post-init $precmd_functions)
 zstyle -t :z4h:ssh-agent: start && -z4h-start-ssh-agent
 
 typeset -g iterm2_hostname=${(%):-%m}
+
+typeset -ga _z4h_dir_history
 
 function ssh()  { z4h ssh  "$@" }
 function sudo() { z4h sudo "$@" }

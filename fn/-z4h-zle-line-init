@@ -17,4 +17,6 @@ typeset -g _ZSH_HIGHLIGHT_PRIOR_BUFFER=
 typeset -gi _ZSH_HIGHLIGHT_PRIOR_CURSOR=CURSOR
 region_highlight=()
 
+-z4h-update-dir-history
+
 return ret

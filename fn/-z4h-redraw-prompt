@@ -11,6 +11,8 @@
     typeset -gi _ZSH_HIGHLIGHT_PRIOR_CURSOR=0
   fi
   zle .reset-prompt
+  (( ${1:-0} )) || zle -R
 } always {
   (( ${1:-0} )) || -z4h-cursor-show
+  -z4h-update-dir-history
 }

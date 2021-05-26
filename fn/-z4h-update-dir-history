@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+
+local dir=${(%):-%~}
+[[ $dir == ${_z4h_last_dir-} ]] && return
+
+eval "$_z4h_opt"
+
+typeset -g _z4h_last_dir=$dir
+[[ $dir != ('~'|/)* ]] && return
+
+-z4h-read-dir-history || return
+
+local -i pos=$_z4h_dir_history[(ie)$dir]
+_z4h_dir_history[pos]=()
+_z4h_dir_history[1,0]=($dir)
+
+local max_size
+zstyle -s :z4h:dir-history: max-size max_size
+if [[ $max_size != -<-> ]]; then
+  [[ $max_size == <-> ]] || max_size=10000
+  local -i drop=$(($#_z4h_dir_history - max_size))
+  if (( drop > 0 )); then
+    _z4h_dir_history[-drop,-1]=()
+  fi
+fi
+
+-z4h-write-dir-history

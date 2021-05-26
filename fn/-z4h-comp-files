@@ -114,7 +114,7 @@
         local curcontext=$_z4h_curcontext
         -z4h-find $dot_glob $_z4h_only_dirs $dirs | command cut -b3-
       } | {
-        -z4h-present-files $list_colors $list_types
+        -z4h-present-files $list_colors $list_types 0
       } | {
         print -rn -- $move >$TTY
         -z4h-cursor-show

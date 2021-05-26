@@ -4,7 +4,8 @@ eval "$_z4h_opt"
 setopt octalzeroes
 
 local -i list_colors=$1
-local -i list_types=$1
+local -i list_types=$2
+local -i tilde_unexpand=$3
 
 [[ $_z4h_mode_colors[ln] != target ]]
 local -i ln_target=$?
@@ -31,12 +32,12 @@ while true; do
   buf=$files[-1]
   files[-1]=()
 
-  if (( ! list_colors && ! list_types )) || ! zstat -L -A modes +mode -- $files; then
+  if (( ! list_colors && ! list_types && ! tilde_unexpand )) || ! zstat -L -A modes +mode -- $files; then
     printf '%1$s\0%1$q\n' $files
     continue
   fi
 
-  if (( ! list_colors )); then
+  if (( ! list_colors && ! tilde_unexpand )); then
     printf '%2$s\0%2$q%1$s\n' \
       ${"${(@)modes/(#m)*/$suf[$((((MATCH & 61440) >> 11) | !(MATCH & 73)))]}":^files}
     continue
@@ -64,7 +65,35 @@ while true; do
   #   L symlink (loop)
   #   N symlink (nonexistent)
 
-  if (( $#_z4h_name_colors )); then
+  if (( tilde_unexpand )); then
+    # This implementation is the same as below except that $file in the second output field
+    # is replaced with ${(D)file}.
+    for file m in ${files:^modes}; do
+      if [[ ${style::=${${_z4h_mode_codes[$((m & 64075))]:-$'\0'}/%$'\0'/$'\0'$_z4h_name_colors[(ke)$file:t]}} \
+              == $'@\0.' ]]; then
+        if ! zstat -L -A link +link -- $file; then
+          printf '%1$s\0\e[%2$sm%3$s\e[0m\n' $file "${or:-$_z4h_name_colors[$file:t]}" ${(D)file}
+        elif ! zstat -A link_mode +mode -- $file; then
+          printf '%1$s\0\e[%2$sm%5$s\e[0m -> \e[%4$sm%3$q\e[0m\n' \
+            $file "${or:-$_z4h_name_colors[$file:t]}"             \
+            $link "${or:-$_z4h_name_colors[$link:t]}"             \
+            ${(D)file}
+        elif (( ln_target )); then
+          printf '%1$s\0\e[%4$sm%5$s\e[0m -> \e[%4$sm%2$q\e[0m%3$s\n'                                             \
+            $file $link                                                                                           \
+            "${(@0)${${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}/%$nil/$nil$_z4h_name_colors[(ke)$link:t]}}" \
+            ${(D)file}
+        else
+          printf '%1$s\0\e[%3$sm%6$s\e[0m -> \e[%5$sm%2$q\e[0m%4$s\n'                                             \
+            $file $link "${ln:-$_z4h_name_colors[$link:t]}"                                                       \
+            "${(@0)${${_z4h_mode_codes[$((link_mode & 64075))]:-$nil}/%$nil/$nil$_z4h_name_colors[(ke)$link:t]}}" \
+            ${(D)file}
+        fi
+      else
+        printf '%1$s\0\e[%3$sm%4$s\e[0m%2$s\n' $file "${(@0)style}" ${(D)file}
+      fi
+    done
+  elif (( $#_z4h_name_colors )); then
     # This implementation works whether _z4h_name_colors is empty or not. It's about 30%
     # slower than the alternative implementation below, which only works if _z4h_name_colors
     # is empty.

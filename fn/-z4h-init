@@ -389,8 +389,8 @@ if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
   fi
 
   # Directory history.
-  bindkey   '^[r'     z4h-dir-history                # alt+r
-  bindkey   '^[R'     z4h-dir-history                # alt+R
+  bindkey   '^[r'     z4h-fzf-dir-history            # alt+r
+  bindkey   '^[R'     z4h-fzf-dir-history            # alt+R
 
   if zstyle -T :z4h: prompt-at-bottom; then
     bindkey '^L' z4h-clear-screen-soft-bottom

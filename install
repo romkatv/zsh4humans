@@ -289,6 +289,11 @@ if '[' "$tmux" '=' '1' ']'; then
   'command' 'rm' '-f' '--' "$zshrc".bak
 fi
 
+if '[' '-r' '/proc/version' ']' && 'command' 'grep' '-q' '[Mm]icrosoft' '/proc/version' 2>'/dev/null'; then
+  'command' 'awk' "/Clone additional Git repositories from GitHub/ {print \"# Start ssh-agent if it's not running yet.\"; print \"zstyle ':z4h:ssh-agent:' start yes\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
+  'command' 'mv' '--' "$zshrc.bak" "$zshrc"
+fi
+
 Z4H="${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
 
 'umask' 'o-w'

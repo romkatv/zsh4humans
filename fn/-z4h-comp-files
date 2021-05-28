@@ -28,7 +28,7 @@
     # Ideally we should run this with user options.
     (( dot_glob )) && setopt dot_glob
     local curcontext=$_z4h_curcontext
-    zstyle -T :z4h:${WIDGET#z4h-} recurse-dirs bin && recurse=1
+    zstyle -T :z4h:${WIDGET#z4h-} recurse-dirs && recurse=1
   }
 
   local -i height=$(( ! (recurse && $#dirs) && 100 * ($#_z4h_words + 4) < pct * LINES ? $#_z4h_words + 4 : pct * LINES / 100 ))

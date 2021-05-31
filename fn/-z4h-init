@@ -205,6 +205,7 @@ SAVEHIST=1000000000  # infinite command history
 
 # Delete all existing keymaps and reset to the default state.
 bindkey -d
+bindkey -e
 
 if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
   local keymap

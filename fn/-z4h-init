@@ -475,6 +475,8 @@ if [[ ! -v ZSH_SCRIPT && ! -v ZSH_EXECUTION_STRING ]]; then
     bindkey 'Ó'            run-help                       # opt+H
     bindkey '∫'            z4h-backward-word              # opt+b
     bindkey 'ı'            z4h-backward-word              # opt+B
+    bindkey '®'            z4h-fzf-dir-history            # opt+r
+    bindkey '‰'            z4h-fzf-dir-history            # opt+R
   else
     typeset -grA _z4h_macos_opt_key=()
   fi

@@ -21,7 +21,7 @@ local new=$Z4H.new.$$
   zf_mkdir -p -- $new      || return
   print -n >$new/.updating || return
 
-  Z4H=$new Z4H_UPDATING=$Z4H </dev/null >/dev/null $_z4h_exe -ic '
+  Z4H_UPDATING=$Z4H Z4H=$new </dev/null >/dev/null $_z4h_exe -ic '
     (( $? )) && "exit" "1"
     "builtin" "emulate" "zsh" "-o" "no_aliases"
     [[ $Z4H == '${(q)new}' ]] || exit 0

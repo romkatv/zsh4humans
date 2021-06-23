@@ -1109,8 +1109,9 @@ typeset -g iterm2_hostname=${(%):-%m}
 
 typeset -ga _z4h_dir_history
 
-function ssh()  { z4h ssh  "$@" }
-function sudo() { z4h sudo "$@" }
+function ssh()    { z4h ssh    "$@" }
+function sudo()   { z4h sudo   "$@" }
+function docker() { z4h docker "$@" }
 
 compdef _ssh  ssh
 compdef _sudo sudo

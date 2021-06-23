@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+local term
+zstyle -s :z4h:docker term term || term=${TERM:/tmux-256color/screen-256color}
+TERM=${term:-$TERM} command docker "$@"

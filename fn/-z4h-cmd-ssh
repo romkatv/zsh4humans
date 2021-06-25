@@ -423,7 +423,7 @@ local -i pid=$sysparams[pid]
         done
       } >$dump_file || return
       if [[ $dump_file != /dev/null ]]; then
-        if base64 -d <<<'Cg==' 2>/dev/null; then
+        if base64 -d <<<'Cg==' &>/dev/null; then
           local base64_opt=-d
         else
           local base64_opt=-D

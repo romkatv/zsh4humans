@@ -73,3 +73,8 @@
   ```zsh
   zstyle ':z4h:fzf-complete' recurse-dirs 'no'
   ```
+- It's now possible to contract prompt on <kbd>Ctrl+D</kbd> when using Transient Prompt.
+  ```zsh
+  z4h bindkey z4h-eof Ctrl+D
+  setopt ignore_eof
+  ```

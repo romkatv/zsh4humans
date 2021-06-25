@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+
+builtin zle || builtin exit 0
+[[ "$CONTEXT" == start && -z "$BUFFER" ]] || return 0
+typeset -g precmd_functions=(z4h-eof)
+builtin zle accept-line

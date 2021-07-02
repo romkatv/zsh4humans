@@ -108,7 +108,10 @@ manpath=($manpath $Z4H/fzf/man '')
   infopath=(${@:|infopath} $infopath '')
 } {${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/info},/opt/local/share/info}(-/N)
 
-[[ $commands[zsh] == $_z4h_exe ]] || path=(${_z4h_exe:h} $path)
+if [[ $commands[zsh] != $_z4h_exe ]]; then
+  export _Z4H_EXE=$_z4h_exe
+  path=($Z4H/zsh4humans/zb $path)
+fi
 
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then

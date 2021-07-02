@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ -x "${_Z4H_EXE}" ]; then
+  exec "${_Z4H_EXE}" "$@"
+else
+  dir="$(dirname -- "$0")"                                                    || exit
+  dir="$( [ -d "$dir" ] && cd -- "$dir" && pwd )"                             || exit
+  p="$(printf '%s' "$PATH" | awk -v RS=: -v ORS=: -v dir="$dir" '$0 != dir')" || exit
+  PATH="${p%:}" exec zsh "$@"
+fi

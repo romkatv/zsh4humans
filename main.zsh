@@ -97,8 +97,8 @@ path+=($Z4H/fzf/bin)
 manpath=($manpath $Z4H/fzf/man '')
 
 () {
-  path=(${@:|path} $path)
-} {~/bin,~/.local/bin,~/.cargo/bin,${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin},${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin},/opt/local/sbin,/opt/local/bin,/usr/local/sbin,/usr/local/bin,/snap/bin}(-/N)
+  path=(${@:|path} $path /snap/bin(-/N))
+} {~/bin,~/.local/bin,~/.cargo/bin,${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin},${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin},/opt/local/sbin,/opt/local/bin,/usr/local/sbin,/usr/local/bin}(-/N)
 
 () {
   manpath=(${@:|manpath} $manpath '')

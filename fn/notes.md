@@ -982,3 +982,7 @@ backing up, write a message to the tty saying so. Have a `zstyle` to control thi
 ---
 
 List `~/.tmux.conf` in `~/.zshrc` among the files to send over ssh.
+
+---
+
+Make it possible for users to tell which commit their zsh4humans is synced to.

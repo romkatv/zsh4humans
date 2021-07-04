@@ -74,11 +74,15 @@ local -r z4h_ssh_host
 local -i z4h_ssh_enable=$(( !must_passthrough ))
 zstyle -t :z4h:ssh:$z4h_ssh_host enable || z4h_ssh_enable=0
 
-local default_ssh_command=(
-  command ssh
+local -i mkdir_control_master=0
+local default_ssh_command=(command ssh)
+if (( z4h_ssh_enable )); then
+  mkdir_control_master=1
+  default_ssh_command+=(
     -o ControlMaster=auto
     -o ControlPersist=5
     -o ControlPath=~/.ssh/control-master/sock-%C)
+fi
 
 local -a z4h_ssh_command
 if ! zstyle -a :z4h:ssh:$z4h_ssh_host ssh-command z4h_ssh_command; then
@@ -155,7 +159,8 @@ if (( ! $#z4h_ssh_command )); then
   return 1
 fi
 
-if [[ ${(pj:\0:)z4h_ssh_command} == ${(pj:\0:)default_ssh_command} &&
+if [[ $mkdir_control_master == 1 &&
+      ${(pj:\0:)z4h_ssh_command} == ${(pj:\0:)default_ssh_command} &&
       ! -d ~/.ssh/control-master && -n ~(#qNU) ]]; then
   zf_mkdir -pm 700 ~/.ssh/control-master || return
   {

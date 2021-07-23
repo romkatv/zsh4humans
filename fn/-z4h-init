@@ -79,7 +79,7 @@ elif [[ -e /usr/share/doc/pkgfile/command-not-found.zsh ]]; then
 elif [[ -x /usr/libexec/pk-command-not-found && -S /var/run/dbus/system_bus_socket ]]; then
   command_not_found_handler() { /usr/libexec/pk-command-not-found "$@" }
 elif [[ -x /data/data/com.termux/files/usr/libexec/termux/command-not-found ]]; then
-  command_not_found_handler() { /data/data/com.termux/files/usr/libexec/termux/command-not-found "$@" }
+  command_not_found_handler() { /data/data/com.termux/files/usr/libexec/termux/command-not-found "$1" }
 elif [[ -x /run/current-system/sw/bin/command-not-found ]]; then
   command_not_found_handler() { /run/current-system/sw/bin/command-not-found "$@" }
 fi

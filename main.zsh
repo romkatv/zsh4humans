@@ -275,7 +275,7 @@ function -z4h-cmd-init() {
     fi
     local brew
     if [[ -v commands[brew] &&
-          -n $HOMEBREW_REPOSITORY &&
+          -n $HOMEBREW_REPOSITORY(#qNU) &&
           ! -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ]]; then
       brew=homebrew-command-not-found
     fi

@@ -7,20 +7,18 @@
 # environment variables in ~/.zshenv, do it where indicated by comments below.
 
 if [ -n "${ZSH_VERSION-}" ]; then
-  : ${ZDOTDIR:=~}
-  setopt no_global_rcs
-  if [[ -o no_interactive && -z "${Z4H_BOOTSTRAPPING-}" ]]; then
-    return
-  fi
-  setopt no_rcs
-  unset Z4H_BOOTSTRAPPING
-
   # If you are certain that you must export some environment variables
   # in ~/.zshenv (see comments at the top!), do it here:
   #
   #   export GOPATH=$HOME/go
   #
   # Do not change anything else in this file.
+
+  : ${ZDOTDIR:=~}
+  setopt no_global_rcs
+  [[ -o no_interactive && -z "${Z4H_BOOTSTRAPPING-}" ]] && return
+  setopt no_rcs
+  unset Z4H_BOOTSTRAPPING
 fi
 
 Z4H_URL="https://raw.githubusercontent.com/romkatv/zsh4humans/v5"

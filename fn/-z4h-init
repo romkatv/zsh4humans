@@ -35,7 +35,7 @@ function -z4h-set-term-title-precmd() {
   [[ -z $_z4h_fmt ]] || -z4h-set-term-title $_z4h_fmt
 }
 
-autoload -Uz add-zsh-hook                           || return
+autoload -Uz add-zsh-hook || return
 
 local pkg
 typeset -gA _z4h_use

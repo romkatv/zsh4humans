@@ -204,6 +204,7 @@ function -z4h-cmd-init() {
       if [[ $TMUX == (#b)(/*),(|<->),(|<->) && -w $match[1] ]]; then
         if [[ $TMUX == */z4h-tmux-* ]]; then
           export _Z4H_TMUX=$TMUX
+          export _Z4H_TMUX_PANE=$TMUX_PANE
           export _Z4H_TMUX_CMD=$tmux
           export _Z4H_TMUX_TTY=$TTY
           unset TMUX TMUX_PANE

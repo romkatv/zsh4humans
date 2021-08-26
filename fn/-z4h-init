@@ -1097,6 +1097,9 @@ function -z4h-post-init() {
   if (( ! $+_z4h_iterm_cmd )) && [[ $ITERM_SHELL_INTEGRATION_INSTALLED == Yes ]]; then
     -z4h-error-iterm2-integration
   fi
+
+  # Send WINCH just in case we've set incorrect TTY dimensions manually.
+  builtin kill -WINCH $$
 }
 
 precmd_functions=(-z4h-post-init $precmd_functions)

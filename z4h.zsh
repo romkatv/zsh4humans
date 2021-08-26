@@ -56,6 +56,12 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'export' TERMINFO=~/'.terminfo'
   fi
 
+  if '[' '-n' "${_Z4H_LINES-}" '-a' '-n' "${_Z4H_COLUMNS-}" ']'; then
+    'typeset' '-gi' LINES='_Z4H_LINES'
+    'typeset' '-gi' COLUMNS='_Z4H_COLUMNS'
+    'unset' '_Z4H_LINES' '_Z4H_COLUMNS'
+  fi
+
   'bindkey' '-d'
   'bindkey' '-e'
 

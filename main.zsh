@@ -255,7 +255,8 @@ function -z4h-cmd-init() {
             else
               local cfg=tmux-256color.conf
             fi
-            SHELL=$_z4h_exe exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg || return
+            SHELL=$_z4h_exe _Z4H_LINES=$LINES _Z4H_COLUMNS=$COLUMNS \
+              exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg >/dev/null || return
           fi
         else
           need_restart=1

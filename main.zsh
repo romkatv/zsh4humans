@@ -256,8 +256,26 @@ function -z4h-cmd-init() {
             else
               local cfg=tmux-256color.conf
             fi
+            if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
+              local exec=
+              local dir=${TMPDIR:-/tmp}/z4h-tmux-cwd-$UID-$$-${TTY//\//.}
+              export _Z4H_ORIG_CWD=${(%):-%/}
+              {
+                zf_mkdir -p -- $dir || return
+                print -r -- "TMUX=${(q)sock} TMUX_PANE= ${(q)tmux} "'"$@"' >$dir/tmux || return
+                builtin cd -- $dir || return
+              } always {
+                (( $? )) && zf_rm -rf -- "$dir" 2>/dev/null
+              }
+            else
+              local exec=exec
+            fi
             SHELL=$_z4h_exe _Z4H_LINES=$LINES _Z4H_COLUMNS=$COLUMNS \
-              exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg >/dev/null || return
+              builtin $exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg >/dev/null || return
+            [[ -z $exec ]] || return
+            builtin cd /
+            zf_rm -rf -- $dir 2>/dev/null
+            builtin exit 0
           fi
         else
           need_restart=1

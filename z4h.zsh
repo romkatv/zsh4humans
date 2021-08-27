@@ -106,6 +106,23 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   'bindkey' '^[[1;5C' 'forward-word'
 
   'set' '-A' '_z4h_script_argv' "$@"
+
+  if [[ -n "${_Z4H_ORIG_CWD-}" ]]; then
+    builtin cd -q -- "$_Z4H_ORIG_CWD" 2>/dev/null || builtin cd -q
+    unset _Z4H_ORIG_CWD
+  else
+    builtin eval '
+      if [[ "${(%):-%1/}" == "z4h-tmux-cwd-"<->-<->-* ]]; then
+        [[ -r ./tmux(#qNU) ]] &&
+          _z4h_x="$(builtin source -- ./tmux list-clients -F "#{client_tty} #{pane_id}" 2>/dev/null)" &&
+          _z4h_x="${${(@M)${(f)_z4h_x}:#${${${(%):-%1/}#z4h-tmux-cwd-<->-<->-}//.//} %<->}##* }" &&
+          [[ "$_z4h_x" == '%'<-> ]] &&
+          _z4h_x="$(builtin source -- ./tmux display-message -t "$_z4h_x" -p "#{pane_current_path}" 2>/dev/null)" &&
+          [[ -n "$_z4h_x" ]] &&
+          builtin cd -q -- "$_z4h_x" || builtin cd -q
+        unset _z4h_x
+      fi'
+  fi
 fi
 
 if '[' '-n' "${Z4H-}" ']' &&

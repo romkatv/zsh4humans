@@ -257,16 +257,20 @@ function -z4h-cmd-init() {
               local cfg=tmux-256color.conf
             fi
             if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
-              local exec=
+              local orig_dir=${(%):-%/}
               local dir=${TMPDIR:-/tmp}/z4h-tmux-cwd-$UID-$$-${TTY//\//.}
-              export _Z4H_ORIG_CWD=${(%):-%/}
               {
-                zf_mkdir -p -- $dir || return
-                print -r -- "TMUX=${(q)sock} TMUX_PANE= ${(q)tmux} "'"$@"' >$dir/tmux || return
-                builtin cd -- $dir || return
-              } always {
-                (( $? )) && zf_rm -rf -- "$dir" 2>/dev/null
-              }
+                zf_mkdir -p -- $dir &&
+                  print -r -- "TMUX=${(q)sock} TMUX_PANE= ${(q)tmux} "'"$@"' >$dir/tmux &&
+                  builtin cd -- $dir
+              } 2>/dev/null
+              if (( $? )); then
+                zf_rm -rf -- "$dir" 2>/dev/null
+                local exec=
+              else
+                export _Z4H_ORIG_CWD=$orig_dir
+                local exec=
+              fi
             else
               local exec=exec
             fi

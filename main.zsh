@@ -262,7 +262,7 @@ function -z4h-cmd-init() {
               {
                 zf_mkdir -p -- $dir &&
                   print -r -- "TMUX=${(q)sock} TMUX_PANE= ${(q)tmux} "'"$@"' >$dir/tmux &&
-                  builtin cd -- $dir
+                  builtin cd -q -- $dir
               } 2>/dev/null
               if (( $? )); then
                 zf_rm -rf -- "$dir" 2>/dev/null

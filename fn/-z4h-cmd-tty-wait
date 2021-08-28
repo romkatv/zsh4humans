@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+local -a timeout pattern
+zparseopts -D -F --                   \
+  {t,-timeout-seconds}:=timeout       \
+  {p,-lines-columns-pattern}:=pattern \
+  || return '_z4h_err()'
+
+if (( $#pattern == 2 )); then
+  pattern=$pattern[2]
+else
+  return '_z4h_err()'
+fi
+
+if (( $#timeout == 2 )); then
+  [[ $timeout[2] == <->(|.<->) ]] || return '_z4h_err()'
+  typeset -F timeout=$timeout[2]
+else
+  return '_z4h_err()'
+fi
+
+[[ $TERM == (screen|tmux)* ]] && return 0
+[[ -v commands[true]       ]] || return 0
+
+local -F deadline='EPOCHREALTIME + timeout'
+while [[ "$LINES $COLUMNS" != $~pattern ]] && (( EPOCHREALTIME < deadline )); do
+  command true
+done
+
+return 0

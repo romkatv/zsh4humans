@@ -14,6 +14,11 @@ if (( ARGC == 1 )); then
       print -Pr -- ""
       print -Pr -- "Update %Bzsh4humans%b and all dependencies (%Bfzf%b, %Bzsh-autosuggestions%b, etc.)."
     ;;
+    create-tty)
+      print -Pr -- "Usage: %F{2}z4h%f %Bcreate-tty%b [[-s|--system] | <command> [arg]...]"
+      print -Pr -- ""
+      print -Pr -- "Create dedicated TTY for this shell."
+    ;;
     init)
       print -Pr -- "Usage: %F{2}z4h%f %Binit%b"
       print -Pr -- ""
@@ -44,6 +49,7 @@ fi
 
 print -Pru$fd -- "Usage: %F{2}z4h%f %Binstall%b [-f|--force] [%Uuser/project[@branch]%u]..."
 print -Pru$fd -- "           %Bupdate%b"
+print -Pru$fd -- "           %Bcreate-tty%b [[-s|--system] | [--] <command> [arg]...]"
 print -Pru$fd -- "           %Binit%b"
 print -Pru$fd -- "           %Bsource%b [-c|--compile] [--] [%Ufile%u]..."
 print -Pru$fd -- "           %Bcompile%b [--] [%Ufile%u]..."

@@ -45,6 +45,15 @@ zstyle ':z4h:ssh:*' send-extra-files '~/.nanorc' '~/.env.zsh'
 # example. If you don't plan to use Oh My Zsh, delete this line.
 z4h install ohmyzsh/ohmyzsh || return
 
+# Created a dedicated TTY for this shell if necessary.
+z4h create-tty || return
+
+# Invoke commands that may print something to the terminal or ask for
+# user input. For example, if you want to invoke neofetch whenever you
+# start zsh, do it here.
+#
+#   print; neofetch
+
 # Install or update core components (fzf, zsh-autosuggestions, etc.) and
 # initialize Zsh. After this point console I/O is unavailable until Zsh
 # is fully initialized. Everything that requires user interaction or can

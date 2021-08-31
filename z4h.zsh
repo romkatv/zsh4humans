@@ -110,6 +110,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
   if '[' '-n' "${_Z4H_ORIG_CWD-}" ']'; then
     'builtin' 'cd' '-q' '--' "$_Z4H_ORIG_CWD" 2>'/dev/null' || 'builtin' 'cd' '-q'
     'builtin' 'unset' '_Z4H_ORIG_CWD'
+    'builtin' 'eval' 'dirstack=()'
   else
     "builtin" "eval" '
       if [[ "${(%):-%1/}" == "z4h-tmux-cwd-"<->-<->-* ]]; then
@@ -121,6 +122,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
           [[ -n "$_z4h_x" ]] &&
           "builtin" "cd" "-q" "--" "$_z4h_x" 2>"/dev/null" || "builtin" "cd" "-q"
         "builtin" "unset" "_z4h_x"
+        dirstack=()
       fi'
   fi
 fi

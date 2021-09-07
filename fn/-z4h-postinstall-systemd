@@ -3,6 +3,11 @@ eval "$_z4h_opt"
 local comp=$Z4H_PACKAGE_DIR/shell-completion/zsh/_systemctl
 [[ -e $comp.in ]] || return 0
 
+if [[ ! -v commands[systemd-path] ]]; then
+  print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}systemd-path%f'
+  return 1
+fi
+
 local lib
 lib=$(systemd-path system-library-private) || return
 

@@ -122,7 +122,7 @@ function -z4h-cmd-init() {
   () {
     eval "$_z4h_opt"
     if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
-          -z ${^fpath}/_systemctl(#qN) ]]; then
+          -v commands[systemd-path] && -z ${^fpath}/_systemctl(#qN) ]]; then
       _z4h_install_queue+=(systemd)
     fi
     _z4h_install_queue+=(

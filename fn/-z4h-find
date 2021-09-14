@@ -55,4 +55,4 @@ else
   cmd+=(-o "${flags[@]}")
 fi
 
-"${cmd[@]}" | command grep '/.*/'
+"${cmd[@]}"

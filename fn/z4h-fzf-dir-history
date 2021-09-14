@@ -25,9 +25,9 @@ local -i list_colors=$((!$?))
         local -i num_non_empty=0
       else
         if (( dot_glob )); then
-          local dirs=(./*(-/DN))
+          local dirs=(*(-/DN))
         else
-          local dirs=(./*(-/N))
+          local dirs=(*(-/N))
         fi
         local non_empty=(${^${dirs}}/*(D-/Y1N:h:t))
         (( $#dirs )) || return 0
@@ -112,19 +112,28 @@ local -i list_colors=$((!$?))
             unsetopt pipe_fail
             exec 2>/dev/null
             {
+              print -r -- $sysparams[pid]
               if (( first )); then
                 local dir
                 for dir in $_z4h_dir_history; do
-                  [[ -d ${dir::=${~dir}} ]] && print -r -- --$dir
+                  [[ -d ${dir::=${~dir}} ]] && print -r -- $dir
                 done
               else
                 print -rC1 -- $dirs
-                -z4h-find $dot_glob 1 $non_empty
+                -z4h-find $dot_glob 1 $non_empty | command sed -n '/\/.*\// s/^..//p'
               fi
-            } | command cut -b3- | -z4h-present-files $list_colors $list_types 1 | {
+            } | {
+              local -a pids
+              IFS=' ' builtin read -rA pids || exit
+              print -r -- $pids $sysparams[pid] || exit
+              -z4h-present-files $list_colors $list_types 1
+            } | {
+              local -a pids
+              IFS=' ' builtin read -rA pids || pids=()
               print -rn -- $move >$TTY
               -z4h-cursor-show
               2>$TTY -z4h-fzf $opts
+              (( $#pids )) && builtin kill -- $pids
             } always {
               -z4h-cursor-hide
             })

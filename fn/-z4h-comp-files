@@ -101,6 +101,7 @@
       exec 2>/dev/null
       [[ -n $_z4h_path_prefix ]] && builtin cd -q -- $_z4h_path_prefix
       {
+        print -r -- $sysparams[pid]
         print -lr -- ${(Q)_z4h_words}
         if (( recurse )); then
           # Set curcontext to support this:
@@ -113,14 +114,20 @@
           #     fi
           #   }
           local curcontext=$_z4h_curcontext
-          -z4h-find $dot_glob $_z4h_only_dirs $dirs | command cut -b3-
+          -z4h-find $dot_glob $_z4h_only_dirs $dirs | command sed -n '/\/.*\// s/^..//p'
         fi
       } | {
+        local -a pids
+        IFS=' ' builtin read -rA pids || exit
+        print -r -- $pids $sysparams[pid] || exit
         -z4h-present-files $list_colors $list_types 0
       } | {
+        local -a pids
+        IFS=' ' builtin read -rA pids || pids=()
         print -rn -- $move >$TTY
         -z4h-cursor-show
         2>$TTY -z4h-fzf $opts
+        (( $#pids )) && builtin kill -- $pids
       }
     )"
   } always {

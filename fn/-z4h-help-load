@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+print -Pr -- "$(<<\END
+Usage: %F{2}z4h%f %Bload%b [-c|--compile] [--] [%Udir%u]...
+
+Load plugins in Oh My Zsh or Prezto format.
+END
+)"

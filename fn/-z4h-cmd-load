@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+local -a compile
+zparseopts -D -F -- c=compile -compile=compile || return '_z4h_err()'
+
+local -a files
+
+() {
+  emulate -L zsh -o extended_glob
+  builtin set -- ${^${(u)@}}(-/FN)
+  local dirs=(${^@}/functions(-/FN))
+  local funcs=(${^dirs}/^([_.]*|prompt_*_setup|README*|*~|*.zwc)(-.N:t))
+  fpath+=($@ $dirs)
+  (( $#funcs )) && autoload -Uz -- $funcs
+  local dir
+  for dir in "$@"; do
+    if [[ -s $dir/init.zsh ]]; then
+      files+=($dir/init.zsh)
+    elif [[ -s $dir/${dir:t}.plugin.zsh ]]; then
+      files+=($dir/${dir:t}.plugin.zsh)
+    fi
+  done
+} "$@"
+
+-z4h-cmd-source "${compile[@]}" -- "${files[@]}"

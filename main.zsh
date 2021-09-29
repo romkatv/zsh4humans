@@ -45,16 +45,19 @@ zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm,zf_rmdir,zf_ln}         || return
     print -Pru2 -- "%F{3}z4h%f: confusing %Umain.zsh%u location: %F{1}${1//\%/%%}%f"
     return 1
   fi
-  typeset -gr _z4h_param_pat=$'ZDOTDIR=$ZDOTDIR\0Z4H=$Z4H\0Z4H_URL=$Z4H_URL'
-  typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
+  if (( _z4h_zle )); then
+    typeset -gr _z4h_param_pat=$'ZDOTDIR=$ZDOTDIR\0Z4H=$Z4H\0Z4H_URL=$Z4H_URL'
+    typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}
+    function -z4h-check-core-params() {
+      [[ "${(e)_z4h_param_pat}" == "$_z4h_param_sig" ]] || {
+        -z4h-error-param-changed
+        return 1
+      }
+    }
+  else
+    function -z4h-check-core-params() {}
+  fi
 } ${${(%):-%x}:a} || return
-
-function -z4h-check-core-params() {
-  [[ "${(e)_z4h_param_pat}" == "$_z4h_param_sig" ]] || {
-    -z4h-error-param-changed
-    return 1
-  }
-}
 
 export -T MANPATH=${MANPATH:-:} manpath
 export -T INFOPATH=${INFOPATH:-:} infopath
@@ -161,6 +164,32 @@ function -z4h-cmd-source() {
   done
 }
 
+function -z4h-cmd-load() {
+  local -a compile
+  zparseopts -D -F -- c=compile -compile=compile || return '_z4h_err()'
+
+  local -a files
+
+  () {
+    emulate -L zsh -o extended_glob
+    builtin set -- ${^${(u)@}}(-/FN)
+    local dirs=(${^@}/functions(-/FN))
+    local funcs=(${^dirs}/^([_.]*|prompt_*_setup|README*|*~|*.zwc)(-.N:t))
+    fpath+=($@ $dirs)
+    (( $#funcs )) && autoload -Uz -- $funcs
+    local dir
+    for dir in "$@"; do
+      if [[ -s $dir/init.zsh ]]; then
+        files+=($dir/init.zsh)
+      elif [[ -s $dir/${dir:t}.plugin.zsh ]]; then
+        files+=($dir/${dir:t}.plugin.zsh)
+      fi
+    done
+  } "$@"
+
+  -z4h-cmd-source "${compile[@]}" -- "${files[@]}"
+}
+
 function -z4h-cmd-init() {
   if (( ARGC )); then
     print -ru2 -- ${(%):-"%F{3}z4h%f: unexpected %F{1}init%f argument"}
@@ -195,7 +224,7 @@ function -z4h-cmd-init() {
       esac
     fi
 
-    if [[ -v ZSH_SCRIPT || -v ZSH_EXECUTION_STRING || ! ( -o zle && -t 0 && -t 1 && -t 2 )  ]]; then
+    if ! [[ _z4h_zle -eq 1 && -o zle && -t 0 && -t 1 && -t 2 ]]; then
       unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
     else
       [[ $_Z4H_TMUX_TTY == $TTY ]] || unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
@@ -334,7 +363,7 @@ function -z4h-cmd-init() {
   : ${ZLE_RPROMPT_INDENT:=0}
 
   # Enable Powerlevel10k instant prompt.
-  zstyle -t :z4h:powerlevel10k channel none || () {
+  (( ! _z4h_zle )) || zstyle -t :z4h:powerlevel10k channel none || () {
     local user=${(%):-%n}
     local XDG_CACHE_HOME=$Z4H/cache/powerlevel10k
     [[ -r $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh ]] || return 0

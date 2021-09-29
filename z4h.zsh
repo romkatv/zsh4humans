@@ -27,27 +27,6 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'share_history'          'typeset_silent'         'hist_save_no_dups'      \
     'no_auto_remove_slash'   'no_list_types'          'no_beep'
 
-  PS1="%B%F{2}%n@%m%f %F{4}%~%f
-%F{%(?.2.1)}%#%f%b "
-  RPS1="%B%F{3}z4h recovery mode%f%b"
-
-  WORDCHARS=''
-  ZLE_REMOVE_SUFFIX_CHARS=''
-  HISTSIZE='1000000000'
-  SAVEHIST='1000000000'
-
-  if '[' '-n' "$HISTFILE" ']'; then
-    'typeset' '-gri' _z4h_custom_histfile='1'
-  else
-    'typeset' '-gri' _z4h_custom_histfile='0'
-    HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
-  fi
-
-  if '[' '-n' "${_z4h_ssh_feedback-}" ']'; then
-    { 'print' '-r' '--' "HISTFILE=${(q)HISTFILE}" >"$_z4h_ssh_feedback"; } 2>'/dev/null'
-    'unset' '_z4h_ssh_feedback'
-  fi
-
   if '[' '!' '-e' "${${TMPPREFIX:-/tmp/zsh}:h}" '-a' '-e' "${TMPDIR:-/tmp}" ']'; then
     'export' TMPPREFIX="${${TMPDIR:-/tmp}%/}/zsh"
   fi
@@ -56,74 +35,101 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'export' TERMINFO=~/'.terminfo'
   fi
 
-  if '[' '-n' "${_Z4H_LINES-}" '-a' '-n' "${_Z4H_COLUMNS-}" ']'; then
-    'typeset' '-gi' LINES='_Z4H_LINES'
-    'typeset' '-gi' COLUMNS='_Z4H_COLUMNS'
-    'unset' '_Z4H_LINES' '_Z4H_COLUMNS'
-  fi
-
-  'bindkey' '-d'
-  'bindkey' '-e'
-
-  'bindkey' '-s' '^[OM'    '^M'
-  'bindkey' '-s' '^[Ok'    '+'
-  'bindkey' '-s' '^[Om'    '-'
-  'bindkey' '-s' '^[Oj'    '*'
-  'bindkey' '-s' '^[Oo'    '/'
-  'bindkey' '-s' '^[OX'    '='
-  'bindkey' '-s' '^[OH'    '^[[H'
-  'bindkey' '-s' '^[OF'    '^[[F'
-  'bindkey' '-s' '^[OA'    '^[[A'
-  'bindkey' '-s' '^[OB'    '^[[B'
-  'bindkey' '-s' '^[OD'    '^[[D'
-  'bindkey' '-s' '^[OC'    '^[[C'
-  'bindkey' '-s' '^[[1~'   '^[[H'
-  'bindkey' '-s' '^[[4~'   '^[[F'
-  'bindkey' '-s' '^[Od'    '^[[1;5D'
-  'bindkey' '-s' '^[Oc'    '^[[1;5C'
-  'bindkey' '-s' '^[^[[D'  '^[[1;3D'
-  'bindkey' '-s' '^[^[[C'  '^[[1;3C'
-  'bindkey' '-s' '^[[7~'   '^[[H'
-  'bindkey' '-s' '^[[8~'   '^[[F'
-  'bindkey' '-s' '^[[3\^'  '^[[3;5~'
-  'bindkey' '-s' '^[^[[3~' '^[[3;3~'
-  'bindkey' '-s' '^[[1;9D' '^[[1;3D'
-  'bindkey' '-s' '^[[1;9C' '^[[1;3C'
-
-  'bindkey' '^[[H'    'beginning-of-line'
-  'bindkey' '^[[F'    'end-of-line'
-  'bindkey' '^[[3~'   'delete-char'
-  'bindkey' '^[[3;5~' 'kill-word'
-  'bindkey' '^[[3;3~' 'kill-word'
-  'bindkey' '^[k'     'backward-kill-line'
-  'bindkey' '^[K'     'backward-kill-line'
-  'bindkey' '^[j'     'kill-buffer'
-  'bindkey' '^[J'     'kill-buffer'
-  'bindkey' '^[/'     'redo'
-  'bindkey' '^[[1;3D' 'backward-word'
-  'bindkey' '^[[1;5D' 'backward-word'
-  'bindkey' '^[[1;3C' 'forward-word'
-  'bindkey' '^[[1;5C' 'forward-word'
-
   'set' '-A' '_z4h_script_argv' "$@"
 
-  if '[' '-n' "${_Z4H_ORIG_CWD-}" ']'; then
-    'builtin' 'cd' '-q' '--' "$_Z4H_ORIG_CWD" 2>'/dev/null' || 'builtin' 'cd' '-q'
-    'builtin' 'unset' '_Z4H_ORIG_CWD'
-    'builtin' 'eval' 'dirstack=()'
+  if '[' '-n' "${ZSH_SCRIPT+X}${ZSH_EXECUTION_STRING+X}" ']'; then
+    'typeset' '-gri' _z4h_zle='0'
   else
-    "builtin" "eval" '
-      if [[ "${(%):-%1/}" == "z4h-tmux-cwd-"<->-<->-* ]]; then
-        [[ -r "./tmux"(#qNU) ]] &&
-          _z4h_x="$("builtin" "source" "--" "./tmux" "list-clients" "-F" "#{client_tty} #{pane_id}" 2>"/dev/null")" &&
-          _z4h_x="${${(@M)${(f)_z4h_x}:#${${${(%):-%1/}#z4h-tmux-cwd-<->-<->-}//.//} %<->}##* }" &&
-          [[ "$_z4h_x" == "%"<-> ]] &&
-          _z4h_x="$("builtin" "source" "--" "./tmux" "display-message" "-t" "$_z4h_x" "-p" "#{pane_current_path}" 2>"/dev/null")" &&
-          [[ -n "$_z4h_x" ]] &&
-          "builtin" "cd" "-q" "--" "$_z4h_x" 2>"/dev/null" || "builtin" "cd" "-q"
-        "builtin" "unset" "_z4h_x"
-        dirstack=()
-      fi'
+    'typeset' '-gri' _z4h_zle='1'
+
+    PS1="%B%F{2}%n@%m%f %F{4}%~%f
+  %F{%(?.2.1)}%#%f%b "
+    RPS1="%B%F{3}z4h recovery mode%f%b"
+
+    WORDCHARS=''
+    ZLE_REMOVE_SUFFIX_CHARS=''
+    HISTSIZE='1000000000'
+    SAVEHIST='1000000000'
+
+    if '[' '-n' "$HISTFILE" ']'; then
+      'typeset' '-gri' _z4h_custom_histfile='1'
+    else
+      'typeset' '-gri' _z4h_custom_histfile='0'
+      HISTFILE="${ZDOTDIR:-$HOME}/.zsh_history"
+    fi
+
+    if '[' '-n' "${_z4h_ssh_feedback-}" ']'; then
+      { 'print' '-r' '--' "HISTFILE=${(q)HISTFILE}" >"$_z4h_ssh_feedback"; } 2>'/dev/null'
+      'unset' '_z4h_ssh_feedback'
+    fi
+
+    if '[' '-n' "${_Z4H_LINES-}" '-a' '-n' "${_Z4H_COLUMNS-}" ']'; then
+      'typeset' '-gi' LINES='_Z4H_LINES'
+      'typeset' '-gi' COLUMNS='_Z4H_COLUMNS'
+      'unset' '_Z4H_LINES' '_Z4H_COLUMNS'
+    fi
+
+    'bindkey' '-d'
+    'bindkey' '-e'
+
+    'bindkey' '-s' '^[OM'    '^M'
+    'bindkey' '-s' '^[Ok'    '+'
+    'bindkey' '-s' '^[Om'    '-'
+    'bindkey' '-s' '^[Oj'    '*'
+    'bindkey' '-s' '^[Oo'    '/'
+    'bindkey' '-s' '^[OX'    '='
+    'bindkey' '-s' '^[OH'    '^[[H'
+    'bindkey' '-s' '^[OF'    '^[[F'
+    'bindkey' '-s' '^[OA'    '^[[A'
+    'bindkey' '-s' '^[OB'    '^[[B'
+    'bindkey' '-s' '^[OD'    '^[[D'
+    'bindkey' '-s' '^[OC'    '^[[C'
+    'bindkey' '-s' '^[[1~'   '^[[H'
+    'bindkey' '-s' '^[[4~'   '^[[F'
+    'bindkey' '-s' '^[Od'    '^[[1;5D'
+    'bindkey' '-s' '^[Oc'    '^[[1;5C'
+    'bindkey' '-s' '^[^[[D'  '^[[1;3D'
+    'bindkey' '-s' '^[^[[C'  '^[[1;3C'
+    'bindkey' '-s' '^[[7~'   '^[[H'
+    'bindkey' '-s' '^[[8~'   '^[[F'
+    'bindkey' '-s' '^[[3\^'  '^[[3;5~'
+    'bindkey' '-s' '^[^[[3~' '^[[3;3~'
+    'bindkey' '-s' '^[[1;9D' '^[[1;3D'
+    'bindkey' '-s' '^[[1;9C' '^[[1;3C'
+
+    'bindkey' '^[[H'    'beginning-of-line'
+    'bindkey' '^[[F'    'end-of-line'
+    'bindkey' '^[[3~'   'delete-char'
+    'bindkey' '^[[3;5~' 'kill-word'
+    'bindkey' '^[[3;3~' 'kill-word'
+    'bindkey' '^[k'     'backward-kill-line'
+    'bindkey' '^[K'     'backward-kill-line'
+    'bindkey' '^[j'     'kill-buffer'
+    'bindkey' '^[J'     'kill-buffer'
+    'bindkey' '^[/'     'redo'
+    'bindkey' '^[[1;3D' 'backward-word'
+    'bindkey' '^[[1;5D' 'backward-word'
+    'bindkey' '^[[1;3C' 'forward-word'
+    'bindkey' '^[[1;5C' 'forward-word'
+
+    if '[' '-n' "${_Z4H_ORIG_CWD-}" ']'; then
+      'builtin' 'cd' '-q' '--' "$_Z4H_ORIG_CWD" 2>'/dev/null' || 'builtin' 'cd' '-q'
+      'builtin' 'unset' '_Z4H_ORIG_CWD'
+      'builtin' 'eval' 'dirstack=()'
+    else
+      "builtin" "eval" '
+        if [[ "${(%):-%1/}" == "z4h-tmux-cwd-"<->-<->-* ]]; then
+          [[ -r "./tmux"(#qNU) ]] &&
+            _z4h_x="$("builtin" "source" "--" "./tmux" "list-clients" "-F" "#{client_tty} #{pane_id}" 2>"/dev/null")" &&
+            _z4h_x="${${(@M)${(f)_z4h_x}:#${${${(%):-%1/}#z4h-tmux-cwd-<->-<->-}//.//} %<->}##* }" &&
+            [[ "$_z4h_x" == "%"<-> ]] &&
+            _z4h_x="$("builtin" "source" "--" "./tmux" "display-message" "-t" "$_z4h_x" "-p" "#{pane_current_path}" 2>"/dev/null")" &&
+            [[ -n "$_z4h_x" ]] &&
+            "builtin" "cd" "-q" "--" "$_z4h_x" 2>"/dev/null" || "builtin" "cd" "-q"
+          "builtin" "unset" "_z4h_x"
+          dirstack=()
+        fi'
+    fi
   fi
 fi
 

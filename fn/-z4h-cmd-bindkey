@@ -9,7 +9,7 @@ if (( ARGC < 2 )); then
   return 1
 fi
 
-[[ -v ZSH_SCRIPT || -v ZSH_EXECUTION_STRING ]] && return 0
+(( _z4h_zle )) || return 0
 
 local kb seq seqs new_seqs
 

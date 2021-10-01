@@ -992,5 +992,5 @@ Make it possible for users to tell which commit their zsh4humans is synced to.
 Implement a benchmark that measures the startup time.
 
 ```zsh
-print 'print foo""bar; exit' | script -E never -qec "script -E never -f -T /tmp/timing -qe /tmp/script" /dev/null
+print 'print foo""bar; exit' | script -E never -qec "script -E never -f -T /tmp/timing -qe /tmp/script" /dev/null >/dev/null
 ```

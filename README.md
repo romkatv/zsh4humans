@@ -158,7 +158,7 @@ You can (and should) edit `~/.zshrc` to customize your shell. It's a very good i
 the whole file to see which customization options are in there and to flip some of them to your
 liking.
 
-When adding your customizations, put them next to the exiting lines that do similar things. The
+When adding your customizations, put them next to the existing lines that do similar things. The
 default `~/.zshrc` contains the following types of customizations that should serve as examples:
 
 - Export environment variables.

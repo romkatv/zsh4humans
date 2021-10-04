@@ -2,10 +2,10 @@ if '[' '-z' "${ZSH_VERSION-}" ']' || ! 'eval' '[[ "$ZSH_VERSION" == (5.<8->*|<6-
   '.' "$Z4H"/zsh4humans/sc/exec-zsh-i || 'return'
 fi
 
-() {
-  if [[ -x /proc/self/exe ]]; then
-    local exe=/proc/self/exe
-  else
+if [[ -x /proc/self/exe ]]; then
+  typeset -gr _z4h_exe=${${:-/proc/self/exe}:A}
+else
+  () {
     emulate zsh -o posix_argzero -c 'local exe=${0#-}'
     if [[ $SHELL == /* && ${SHELL:t} == $exe && -x $SHELL ]]; then
       exe=$SHELL
@@ -17,9 +17,9 @@ fi
       print -Pru2 -- "%F{3}z4h%f: unable to find path to %F{1}zsh%f"
       return 1
     fi
-  fi
-  typeset -gr _z4h_exe=${exe:A}
-}
+    typeset -gr _z4h_exe=${exe:A}
+  } || return
+fi
 
 if ! { zmodload -s zsh/terminfo zsh/zselect ||
        [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
@@ -110,11 +110,6 @@ manpath=($manpath $Z4H/fzf/man '')
 () {
   infopath=(${@:|infopath} $infopath '')
 } {${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/info},/opt/local/share/info}(-/N)
-
-if [[ $commands[zsh] != $_z4h_exe ]]; then
-  export _Z4H_EXE=$_z4h_exe
-  path=($Z4H/zsh4humans/zb $path)
-fi
 
 if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
       -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]]; then
@@ -322,14 +317,13 @@ function -z4h-cmd-init() {
       fi
     fi
 
-    if [[ ( -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ) &&
-          -v commands[systemd-path] && -z ${^fpath}/_systemctl(#qN) ]]; then
+    if [[ -x /usr/lib/systemd/systemd || -x /lib/systemd/systemd ]]; then
       _z4h_install_queue+=(systemd)
     fi
     local brew
-    if [[ -v commands[brew] &&
-          -n $HOMEBREW_REPOSITORY(#qNU) &&
-          ! -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ]]; then
+    if [[ -n $HOMEBREW_REPOSITORY(#qNU) &&
+          ! -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb &&
+          -v commands[brew] ]]; then
       brew=homebrew-command-not-found
     fi
     _z4h_install_queue+=(

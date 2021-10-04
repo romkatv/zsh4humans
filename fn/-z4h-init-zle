@@ -924,11 +924,11 @@ function -z4h-post-init() {
     fi
   fi
 
-  (( _z4h_use[zsh-completions]              )) &&
-    [[ -d $Z4H/zsh-completions/src          ]] &&
+  (( _z4h_use[zsh-completions] )) &&
+    [[ -d $Z4H/zsh-completions/src ]] &&
     fpath+=($Z4H/zsh-completions/src)
-  (( _z4h_use[systemd]                      )) &&
-    [[ -d $Z4H/systemd/shell-completion/zsh ]] &&
+  (( _z4h_use[systemd] )) &&
+    [[ -e $Z4H/systemd/shell-completion/zsh/_systemctl && -z ${^fpath}/_systemctl(#qN) ]] &&
     fpath+=($Z4H/systemd/shell-completion/zsh)
 
   unfunction compinit compdef

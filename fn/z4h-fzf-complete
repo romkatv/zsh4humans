@@ -2,6 +2,8 @@
 
 [[ -w $TTY && -r $TTY ]] || return
 
+[[ ! -v _z4h_compinit_fd ]] || -z4h-compinit || true
+
 [[ -o auto_menu ]] && local -i auto_menu=1 || local -i auto_menu=0
 
 setopt local_options always_to_end no_auto_list no_auto_menu no_auto_param_keys     \

@@ -907,81 +907,12 @@ function -z4h-post-init() {
 
   add-zsh-hook -d -- precmd -z4h-post-init
 
-  local -aU editors=(
-    vi vim nvim emacs nano gedit code kak kate mcedit joe $EDITOR $VISUAL
-    bat cat less more $PAGER)
-  zstyle ':completion:*:*:('${(j:|:)editors}'):*:*' ignored-patterns '*.zwc'
-
-  zstyle ':completion:*' list-colors "${(@s.:.)LS_COLORS}"
-
-  # Initialize completions.
-  if (( !_z4h_dangerous_root )) && zstyle -t ':completion::complete:' use-cache; then
-    local cache
-    zstyle -s ':completion::complete:' cache-path cache
-    : ${cache:=${ZDOTDIR:-~}/.zcompcache}
-    if [[ ! -e $cache ]]; then
-      zf_mkdir -m 0700 -p -- $cache
-    fi
-  fi
-
-  (( _z4h_use[zsh-completions] )) &&
-    [[ -d $Z4H/zsh-completions/src ]] &&
-    fpath+=($Z4H/zsh-completions/src)
-  (( _z4h_use[systemd] )) &&
-    [[ -e $Z4H/systemd/shell-completion/zsh/_systemctl && -z ${^fpath}/_systemctl(#qN) ]] &&
-    fpath+=($Z4H/systemd/shell-completion/zsh)
-
-  unfunction compinit compdef
-  autoload -Uz compinit
-
-  local dump
-  zstyle -s ':z4h:compinit' dump-path dump
-  : ${dump:=$Z4H/cache/zcompdump-$EUID-$ZSH_VERSION}
-
-  local -a stat files=(${^fpath}/^([^_]*|*~|*.zwc)(.N))
-  (( ! $#files )) || zstat -A stat +mtime -- $files
-  local real_sig=($ZSH_VERSION $ZSH_PATCHLEVEL $files $stat)
-  real_sig='# '${(V)${(pj:\0:)real_sig}}$'\n'
-
-  local sig
-  if [[ -r $dump ]] &&
-     sysread -s $#real_sig sig <$dump        &&
-     [[ $sig == $real_sig && -r $dump.zwc ]] &&
-     zstat -A stat +mtime -- $dump $dump.zwc &&
-     (( stat[2] == stat[1] + 1 )); then
-    compinit -C -d $dump
+  typeset -gi _z4h_compinit_fd
+  if sysopen -o cloexec -ru _z4h_compinit_fd /dev/null; then
+    zle -F $_z4h_compinit_fd -z4h-compinit
   else
-    local tmp=$Z4H/tmp/zcompdump.$sysparams[pid]
-    zf_rm -f -- $dump $dump.zwc $tmp $tmp.2
-    compinit -C -d $tmp
-    { print -rn -- $real_sig; <$tmp } >$tmp.2
-    zf_rm -f -- $tmp
-    zf_mv -- $tmp.2 $dump
-    -z4h-compile $dump
-  fi
-
-  function compinit() {}
-
-  # Replay compdef calls.
-  local args
-  for args in $_z4h_compdef; do
-    compdef "${(@0)args}"
-  done
-  unset _z4h_compdef
-
-  local cmd
-  for cmd in cargo helm kitty kubectl oc rustup; do
-    # Homebrew ships broken completions for kubectl, so we use our own even
-    # if _comps[kubectl] is set.
-    (( $+commands[$cmd] )) && compdef -- -z4h-complete-$cmd $cmd
-  done
-
-  if (( $+commands[vault] && ! $+_comps[vault] )); then
-    complete -o nospace -C =vault vault
-  fi
-
-  if (( $+commands[aws_completer] && ! $+_comps[aws] )); then
-    complete -C =aws_completer aws
+    unset _z4h_compinit_fd
+    -z4h-compinit
   fi
 
   if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
@@ -995,6 +926,7 @@ function -z4h-post-init() {
     preexec_functions=(${preexec_functions:#_zsh_highlight_preexec_hook})
     eval '_zsh_highlight() {
       {
+        [[ ${WIDGET-} == zle-line-pre-redraw && ${LASTWIDGET-} == accept-line ]] && return
         if [[ ${#BUFFER} -gt ${ZSH_HIGHLIGHT_MAXLENGTH:-${#BUFFER}} ]]; then
           region_highlight=()
         else

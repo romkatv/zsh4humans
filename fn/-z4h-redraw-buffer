@@ -6,7 +6,8 @@ if (( ${+_z4h_redraw_fd} )); then
   unset _z4h_redraw_fd
 fi
 
-if (( $+region_highlight )); then
+if [[ -v region_highlight &&
+      ( ${LASTWIDGET-} != accept-line || ${WIDGET-} != zle-line-pre-redraw ) ]]; then
   _zsh_highlight
   -z4h-autosuggest-fetch
 fi

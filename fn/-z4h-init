@@ -47,6 +47,8 @@ fi
 
 TIMEFMT='user=%U system=%S cpu=%P total=%*E'  # output format of `time` reserved word
 
+: ${DIRSTACKSIZE:=10000}
+
 zstyle -t :z4h:ssh-agent: start && -z4h-start-ssh-agent
 
 function ssh()    { z4h ssh    "$@" }

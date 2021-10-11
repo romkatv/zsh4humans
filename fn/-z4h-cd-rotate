@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+(( ${+_z4h_dir_hist_fd} )) && -z4h-update-dir-history
+
 () {
   eval "$_z4h_opt"
   while (( $#dirstack )) && ! pushd -q $1 &>/dev/null; do

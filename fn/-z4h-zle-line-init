@@ -17,6 +17,13 @@ typeset -g _ZSH_HIGHLIGHT_PRIOR_BUFFER=
 typeset -gi _ZSH_HIGHLIGHT_PRIOR_CURSOR=CURSOR
 region_highlight=()
 
--z4h-update-dir-history
+if [[ ${(%):-%~} != ${_z4h_last_dir-} && ! -v _z4h_dir_hist_fd ]]; then
+  typeset -gi _z4h_dir_hist_fd
+  if sysopen -o cloexec -ru _z4h_dir_hist_fd /dev/null; then
+    zle -F $_z4h_dir_hist_fd -z4h-update-dir-history
+  else
+    unset _z4h_dir_hist_fd
+  fi
+fi
 
 return ret

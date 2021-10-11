@@ -1,5 +1,11 @@
 #!/usr/bin/env zsh
 
+if (( ${+_z4h_dir_hist_fd} )); then
+  zle -F "$_z4h_dir_hist_fd"
+  exec {_z4h_dir_hist_fd}>&-
+  unset _z4h_dir_hist_fd
+fi
+
 local dir=${(%):-%~}
 [[ $dir == ${_z4h_last_dir-} ]] && return
 
@@ -9,6 +15,17 @@ typeset -g _z4h_last_dir=$dir
 [[ $dir != ('~'|/)* ]] && return
 
 -z4h-read-dir-history || return
+
+if (( ! $#dirstack && (DIRSTACKSIZE || ! $+DIRSTACKSIZE) )); then
+  local d stack=()
+  for d in $_z4h_dir_history; do
+    if [[ ($#stack -ne 0 || $d != $dir) && -d ${d::=${~d}} ]]; then
+      stack+=($d)
+      (( $+DIRSTACK && $#stack >= DIRSTACK - 1 )) && break
+    fi
+  done
+  dirstack=($stack)
+fi
 
 local -i pos=$_z4h_dir_history[(ie)$dir]
 _z4h_dir_history[pos]=()

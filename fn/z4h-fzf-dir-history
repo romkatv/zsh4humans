@@ -11,6 +11,8 @@ local -i dot_glob list_types
 -z4h-set-list-colors :complete:cd:: $list_types
 local -i list_colors=$((!$?))
 
+(( ${+_z4h_dir_hist_fd} )) && -z4h-update-dir-history
+
 {
   -z4h-cursor-hide
 

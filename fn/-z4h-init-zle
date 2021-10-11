@@ -787,6 +787,7 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
   precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
 
   _zsh_autosuggest_widget_execute() {
+    -z4h-autosuggest-fetch
     if [[ -n $POSTDISPLAY ]]; then
       BUFFER=$BUFFER$POSTDISPLAY
       region_highlight[-1]=()
@@ -812,6 +813,7 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
   }
 
   _zsh_autosuggest_widget_accept() {
+    -z4h-autosuggest-fetch
     if [[ -z $POSTDISPLAY ||
           $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
           $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
@@ -833,6 +835,7 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
   }
 
   _zsh_autosuggest_widget_partial_accept() {
+    -z4h-autosuggest-fetch
     if [[ -z $POSTDISPLAY ||
           $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
           $CURSOR -lt $((${#BUFFER} - 1)) ]]; then

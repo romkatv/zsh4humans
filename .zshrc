@@ -63,8 +63,8 @@ z4h source ~/.env.zsh
 # Use additional Git repositories pulled in with `z4h install`.
 #
 # This is just an example that you should delete. It does nothing useful.
-z4h source -c $Z4H/ohmyzsh/ohmyzsh/lib/diagnostics.zsh  # source a file
-z4h load   -c $Z4H/ohmyzsh/ohmyzsh/plugins/emoji-clock  # load a plugin
+z4h source $Z4H/ohmyzsh/ohmyzsh/lib/diagnostics.zsh  # source an individual file
+z4h load   $Z4H/ohmyzsh/ohmyzsh/plugins/emoji-clock  # load a plugin
 
 # Define key bindings.
 z4h bindkey z4h-backward-kill-word  Ctrl+Backspace Ctrl+H

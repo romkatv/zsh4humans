@@ -145,18 +145,24 @@ function compdef() {
 }
 
 function -z4h-cmd-source() {
-  local file compile
-  zparseopts -D -F -- c=compile -compile=compile || return '_z4h_err()'
-  emulate zsh -o extended_glob -c 'local files=(${^@}(N))'
-  builtin set --
-  for file in "${files[@]}"; do
-    if (( ${#compile} )); then
-      -z4h-compile "$file" || true
-    else
-      [[ ! -e "$file".zwc ]] || zf_rm -f -- "$file".zwc || true
-    fi
-    builtin source -- "$file"
-  done
+  local _z4h_file _z4h_compile
+  zparseopts -D -F -- c=_z4h_compile -compile=_z4h_compile || return '_z4h_err()'
+  if (( ${#_z4h_compile} )); then
+    emulate zsh -o extended_glob -c 'local _z4h_files=(${^@}(N))'
+    builtin set --
+    for _z4h_file in "${_z4h_files[@]}"; do
+      -z4h-compile "$_z4h_file" || true
+      builtin source -- "$_z4h_file"
+    done
+  else
+    emulate zsh -o extended_glob -c \
+      'local _z4h_files=(${^@}(N)); local _z4h_rm=(${^${(@)_z4h_files:#$Z4H/*}}.zwc(N))'
+    (( ! ${#_z4h_rm} )) || zf_rm -f -- "${_z4h_rm[@]}" || true
+    builtin set --
+    for _z4h_file in "${_z4h_files[@]}"; do
+      builtin source -- "$_z4h_file"
+    done
+  fi
 }
 
 function -z4h-cmd-load() {

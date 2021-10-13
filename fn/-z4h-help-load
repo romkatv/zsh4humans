@@ -5,6 +5,21 @@ eval "$_z4h_opt"
 print -Pr -- "$(<<\END
 Usage: %F{2}z4h%f %Bload%b [-c|--compile] [--] [%Udir%u]...
 
-Load plugins in Oh My Zsh or Prezto format.
+Load plugins in Oh My Zsh or Prezto format skipping over
+inexisting directories. If %B-c%b or %B--compile%b is specified,
+plugin source files are automatically compiled with %F{2}zcompile%f
+to speed up subsequent loading. This gives you faster Zsh
+startup.
+
+Relative directory names are resolved from %U$Z4H/%u. This is
+the directory where %F{2}z4h%f %Binstall%b puts downloaded files.
+
+  %F{2}z4h%f %Binstall%b ohmyzsh/ohmyzsh
+  ...
+  %F{2}z4h%f %Bload%b    ohmyzsh/ohmyzsh/plugins/emoji-clock
+
+Exit code of %F{2}z4h%f %Bload%b is that of sourcing the last plugin's
+source file. Inexisting plugin directories do not affect
+exit code.
 END
 )"

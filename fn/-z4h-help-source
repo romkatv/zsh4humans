@@ -10,6 +10,13 @@ If %B-c%b or %B--compile%b is specified, files are automatically
 compiled with %F{2}zcompile%f to speed up subsequent sourcing. This
 gives you faster Zsh startup.
 
+Relative file names are resolved from %U$Z4H/%u. This is the
+directory where %F{2}z4h%f %Binstall%b puts downloaded files.
+
+  %F{2}z4h%f %Binstall%b ohmyzsh/ohmyzsh
+  ...
+  %F{2}z4h%f %Bsource%b  ohmyzsh/ohmyzsh/lib/diagnostics.zsh
+
 Exit code of %F{2}z4h%f %Bsource%b is that of the last sourced file.
 Inexisting files do not affect exit code.
 
@@ -18,16 +25,16 @@ negative side effect. Namely, aliases defined within a
 sourced file are not expanded in that same file. For
 example:
 
-  %% %F{2}cat%f %Uconfig.zsh%u
+  %% %F{2}cat%f %U~/config.zsh%u
 
     %F{2}alias%f echo=%F{3}'echo hello'%f
     %F{2}echo%f world
 
-  %% ( %F{2}z4h%f source %Uconfig.zsh%u )
+  %% ( %F{2}z4h%f source %U~/config.zsh%u )
 
     hello world
 
-  %% ( %F{2}z4h%f source -c %Uconfig.zsh%u )
+  %% ( %F{2}z4h%f source -c %U~/config.zsh%u )
 
     world
 END

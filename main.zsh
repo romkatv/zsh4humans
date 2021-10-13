@@ -147,16 +147,15 @@ function compdef() {
 function -z4h-cmd-source() {
   local _z4h_file _z4h_compile
   zparseopts -D -F -- c=_z4h_compile -compile=_z4h_compile || return '_z4h_err()'
+  emulate zsh -o extended_glob -c 'local _z4h_files=(${^${(M)@:#/*}}(N) $Z4H/${^${@:#/*}}(N))'
   if (( ${#_z4h_compile} )); then
-    emulate zsh -o extended_glob -c 'local _z4h_files=(${^@}(N))'
     builtin set --
     for _z4h_file in "${_z4h_files[@]}"; do
       -z4h-compile "$_z4h_file" || true
       builtin source -- "$_z4h_file"
     done
   else
-    emulate zsh -o extended_glob -c \
-      'local _z4h_files=(${^@}(N)); local _z4h_rm=(${^${(@)_z4h_files:#$Z4H/*}}.zwc(N))'
+    emulate zsh -o extended_glob -c 'local _z4h_rm=(${^${(@)_z4h_files:#$Z4H/*}}.zwc(N))'
     (( ! ${#_z4h_rm} )) || zf_rm -f -- "${_z4h_rm[@]}" || true
     builtin set --
     for _z4h_file in "${_z4h_files[@]}"; do
@@ -173,13 +172,14 @@ function -z4h-cmd-load() {
 
   () {
     emulate -L zsh -o extended_glob
-    builtin set -- ${^${(u)@}}(-/FN)
-    local dirs=(${^@}/functions(-/FN))
+    local pkgs=(${(M)@:#/*} $Z4H/${^${@:#/*}})
+    pkgs=(${^${(u)pkgs}}(-/FN))
+    local dirs=(${^pkgs}/functions(-/FN))
     local funcs=(${^dirs}/^([_.]*|prompt_*_setup|README*|*~|*.zwc)(-.N:t))
-    fpath+=($@ $dirs)
+    fpath+=($pkgs $dirs)
     (( $#funcs )) && autoload -Uz -- $funcs
     local dir
-    for dir in "$@"; do
+    for dir in $pkgs; do
       if [[ -s $dir/init.zsh ]]; then
         files+=($dir/init.zsh)
       elif [[ -s $dir/${dir:t}.plugin.zsh ]]; then

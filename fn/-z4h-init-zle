@@ -876,7 +876,7 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
     [[ -z $POSTDISPLAY ]] || region_highlight[-1]=()
     POSTDISPLAY=${1-}
     typeset -g _z4h_autosuggest_buffer="$BUFFER"
-    typeset -gi _z4h_autosuggestion=$((${#BUFFER} + ${#POSTDISPLAY}))
+    typeset -g _z4h_autosuggestion="${BUFFER}${POSTDISPLAY}"
     if [[ -n $POSTDISPLAY ]]; then
       region_highlight+=(
         "${#BUFFER} $((${#BUFFER} + ${#POSTDISPLAY})) $ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE")

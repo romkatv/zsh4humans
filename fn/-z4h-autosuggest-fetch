@@ -8,7 +8,7 @@ else
       if (( ${#BUFFER} == ${#_z4h_autosuggest_buffer} )); then
         return
       elif [[ -v _z4h_autosuggestion ]]; then
-        if (( ! _z4h_autosuggestion )); then
+        if [[ -z "$_z4h_autosuggestion" ]]; then
           return
         elif [[ $POSTDISPLAY == ${BUFFER:${#_z4h_autosuggest_buffer}}* ]]; then
           POSTDISPLAY="${POSTDISPLAY:$((${#BUFFER} - ${#_z4h_autosuggest_buffer}))}"
@@ -24,7 +24,7 @@ else
     fi
     POSTDISPLAY=${suggestion:${#BUFFER}}
     typeset -g _z4h_autosuggest_buffer="$BUFFER"
-    typeset -gi _z4h_autosuggestion=${#suggestion}
+    typeset -g _z4h_autosuggestion="$suggestion"
   }
 fi
 

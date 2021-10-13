@@ -68,13 +68,13 @@ changes to the file system. Once you exit Zsh, the image is deleted.
 
 - **Alpine Linux**: starts quickly; install additional software with `apk add <package>`
   ```zsh
-  sudo docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
+  docker run -e TERM -e COLORTERM -w /root -it --rm alpine sh -uec '
     apk add zsh curl tmux
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
   ```
 - **Ubuntu**: install additional software with `apt install <package>`:
   ```zsh
-  sudo docker run -e TERM -e COLORTERM -w /root -it --rm ubuntu sh -uec '
+  docker run -e TERM -e COLORTERM -w /root -it --rm ubuntu sh -uec '
     apt-get update
     apt-get install -y zsh curl tmux
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'

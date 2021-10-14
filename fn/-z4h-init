@@ -55,8 +55,8 @@ function ssh()    { z4h ssh    "$@" }
 function sudo()   { z4h sudo   "$@" }
 function docker() { z4h docker "$@" }
 
-if [[ ! -e $Z4H/z4h.zsh.zwc ]]; then
-  z4h compile -- $Z4H/zsh4humans/{main.zsh,sc/exec-zsh-i,fn/(|-|_)z4h[^.]#~*.zwc} $Z4H/z4h.zsh
+if [[ ! -e $Z4H/zsh4humans/fn/-z4h-compinit-impl ]]; then
+  -z4h-postinstall-self || return
 fi
 
 if (( _z4h_zle )); then

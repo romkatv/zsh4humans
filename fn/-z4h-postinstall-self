@@ -7,7 +7,7 @@ z4h compile -- $Z4H/zsh4humans/{main.zsh,sc/exec-zsh-i,fn/(|-|_)z4h[^.]#~*.zwc} 
 [[ -v functions[compinit] ]] && unfunction compinit
 autoload -Uz +X compinit
 local orig="bindkey '^i' | IFS=\$' \t' read -A _i_line"
-local replacement='_i_line=( '"^I"' z4h-fzf-complete )'
+local replacement="_i_line=( '\"^I\"' z4h-fzf-complete )"
 print -r -- ${functions[compinit]/$orig/$replacement} >$Z4H/zsh4humans/fn/tmp.$$.compinit || return
 zf_mv -- $Z4H/zsh4humans/fn/tmp.$$.compinit $Z4H/zsh4humans/fn/-z4h-compinit-impl || return
 z4h compile -- $Z4H/zsh4humans/fn/-z4h-compinit-impl || return

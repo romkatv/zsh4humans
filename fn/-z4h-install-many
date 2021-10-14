@@ -17,7 +17,7 @@ local success
         {
           read -q ${(%):-"?%F{3}z4h%f: update dependencies? [y/N]: "} && REPLY=y
         } always {
-          [[ -w $TTY ]] && print >>$TTY || print -u2
+          [[ -v _z4h_tty_fd ]] && print >&$_z4h_tty_fd || print -u2
         }
         print -n >$Z4H/cache/last-update-ts || return
         if [[ $REPLY == y ]]; then

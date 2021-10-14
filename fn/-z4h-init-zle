@@ -128,9 +128,9 @@ function z4h-cd-up() { builtin cd -q .. && -z4h-redraw-prompt }
 
 function z4h-do-nothing() {}
 
-if (( $+terminfo[civis] && $+terminfo[cnorm] )) && [[ -w $TTY ]]; then
-  function -z4h-cursor-hide() { [[ -t 1 ]] && echoti civis || echoti civis >"$TTY" }
-  function -z4h-cursor-show() { [[ -t 1 ]] && echoti cnorm || echoti cnorm >"$TTY" }
+if (( $+terminfo[civis] && $+terminfo[cnorm] )) && [[ -v _z4h_tty_fd ]]; then
+  function -z4h-cursor-hide() { [[ -t 1 ]] && echoti civis || echoti civis >&$_z4h_tty_fd }
+  function -z4h-cursor-show() { [[ -t 1 ]] && echoti cnorm || echoti cnorm >&$_z4h_tty_fd }
 else
   function -z4h-cursor-hide() {}
   function -z4h-cursor-show() {}

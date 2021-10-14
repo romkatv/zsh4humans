@@ -314,7 +314,7 @@ args[pos[1]]='-t'
 
 local stty
 if (( $+commands[stty] )); then
-  stty=$(command stty -g <$TTY 2>/dev/null) || stty=
+  stty=$(command stty -g <&$_z4h_tty_fd 2>/dev/null) || stty=
 fi
 
 { (  # subshell to avoid TTOU
@@ -474,5 +474,5 @@ if (( bypass )); then
 fi
 
  ) } always {
-  [[ -n $stty ]] && command stty $stty <$TTY 2>/dev/null
+  [[ -n $stty ]] && command stty $stty <&$_z4h_tty_fd 2>/dev/null
 }

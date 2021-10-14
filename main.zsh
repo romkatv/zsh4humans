@@ -353,7 +353,17 @@ function -z4h-cmd-init() {
       fi
     fi
 
-    if [[ -w $TTY && (-n $Z4H_SSH && -n $_Z4H_SSH_MARKER || -n $_Z4H_TMUX) ]]; then
+    if [[ -w $TTY ]]; then
+      typeset -gi _z4h_tty_fd
+      sysopen -o cloexec -rwu _z4h_tty_fd -- $TTY || return
+      typeset -gri _z4h_tty_fd
+    elif [[ -w /dev/tty ]]; then
+      typeset -gi _z4h_tty_fd
+      sysopen -o cloexec -rwu _z4h_tty_fd -- /dev/tty || return
+      typeset -gri _z4h_tty_fd
+    fi
+
+    if [[ -v _z4h_tty_fd && (-n $Z4H_SSH && -n $_Z4H_SSH_MARKER || -n $_Z4H_TMUX) ]]; then
       typeset -gri _z4h_can_save_restore_screen=1  # this parameter is read by p10k
     else
       typeset -gri _z4h_can_save_restore_screen=0  # this parameter is read by p10k

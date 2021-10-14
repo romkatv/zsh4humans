@@ -9,6 +9,6 @@ printf -v title '\e]0;%s\a' "${(V)title}"
 
 if [[ -t 1 ]]; then
   print -rn -- $title
-elif [[ -w $TTY ]]; then
-  print -rn -- $title >$TTY
+elif [[ -v _z4h_tty_fd ]]; then
+  print -rn -- $title >&$_z4h_tty_fd
 fi

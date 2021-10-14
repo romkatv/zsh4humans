@@ -1,9 +1,11 @@
 #!/usr/bin/env zsh
 
-builtin echoti civis >"$TTY"
+[[ -v _z4h_tty_fd ]] || return
+
+builtin echoti civis >&$_z4h_tty_fd
 local -i cursor_x cursor_y
 -z4h-get-cursor-pos
-builtin print -rn -- "${(pl:$((2 * LINES - cursor_y - 1))::\n:)}" >"$TTY"
+builtin print -rn -- "${(pl:$((2 * LINES - cursor_y - 1))::\n:)}" >&$_z4h_tty_fd
 builtin zle -I
 builtin zle -R
-builtin echoti cnorm >"$TTY"
+builtin echoti cnorm >&$_z4h_tty_fd

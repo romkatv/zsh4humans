@@ -2,13 +2,13 @@
 
 eval "$_z4h_opt"
 
-[[ -w $TTY ]] || return
+[[ -v _z4h_tty_fd ]] || return
 
 if [[ -n $_Z4H_TMUX ]]; then
   (( ${+_z4h_saved_screen} )) || return
-  print -rn -- "$_z4h_saved_screen" >"$TTY"
+  print -rn -- "$_z4h_saved_screen" >&$_z4h_tty_fd
 elif [[ -n $Z4H_SSH && -n $_Z4H_SSH_MARKER ]]; then
-  printf '\001z4h.%s%s' "$_Z4H_SSH_MARKER" 'restore-screen  ' >"$TTY"
+  printf '\001z4h.%s%s' "$_Z4H_SSH_MARKER" 'restore-screen  ' >&$_z4h_tty_fd
 else
   return 1
 fi

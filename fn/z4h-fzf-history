@@ -8,7 +8,7 @@
 
 eval "$_z4h_opt"
 
-[[ -w $TTY && -r $TTY ]] || return
+[[ -v _z4h_tty_fd ]] || return
 
 local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 (( $+commands[bat] )) && preview+=' | command bat -l bash --color always -pp --wrap=character --terminal-width=$((FZF_PREVIEW_COLUMNS-1))'
@@ -111,7 +111,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       else
         preview_window+=':down'
         local -i extra=$((height - LINES + cursor_y))
-        print -rn -- ${(pl:$height::\n:)} >$TTY || return
+        print -rn -- ${(pl:$height::\n:)} >&$_z4h_tty_fd || return
         (( cursor_y += LINES - cursor_y - height ))
         local move=$'\e[0m\e['$((cursor_y+1))';1H'
         opts+=(--layout=reverse)
@@ -119,7 +119,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       local _z4h_saved_screen
       -z4h-save-screen || return
     else
-      print >$TTY || return
+      print >&$_z4h_tty_fd || return
       preview_window+=':down'
       local move=
       opts+=(--layout=reverse)
@@ -142,9 +142,9 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
         (( $#history )) && printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
       } | {
         {
-          print -rn -- $move >$TTY
+          print -rn -- $move >&$_z4h_tty_fd
           -z4h-cursor-show
-          2>$TTY -z4h-fzf $opts
+          2>&$_z4h_tty_fd -z4h-fzf $opts
         } always {
           -z4h-cursor-hide
         }

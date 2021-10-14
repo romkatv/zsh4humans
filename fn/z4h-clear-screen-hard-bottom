@@ -1,8 +1,10 @@
 #!/usr/bin/env zsh
 
-builtin echoti civis >"$TTY"
-builtin print -rn -- $'\e[H\e[2J'"${(pl:$((LINES-1))::\n:)}" >"$TTY"
+[[ -v _z4h_tty_fd ]] || return
+
+builtin echoti civis >&$_z4h_tty_fd
+builtin print -rn -- $'\e[H\e[2J'"${(pl:$((LINES-1))::\n:)}" >&$_z4h_tty_fd
 builtin zle -I
 builtin zle -R
-builtin print -rn -- $'\e[3J' >"$TTY"
-builtin echoti cnorm >"$TTY"
+builtin print -rn -- $'\e[3J' >&$_z4h_tty_fd
+builtin echoti cnorm >&$_z4h_tty_fd

@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-[[ -w $TTY && -r $TTY ]] || return
+[[ -v _z4h_tty_fd ]] || return
 
 [[ ! -v _z4h_compinit_fd ]] || -z4h-compinit || true
 

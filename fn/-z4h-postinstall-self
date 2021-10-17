@@ -1,7 +1,5 @@
 #!/usr/bin/env zsh
 
-print post-install-self >>/tmp/log
-
 z4h compile -- $Z4H/zsh4humans/{main.zsh,sc/exec-zsh-i,fn/(|-|_)z4h[^.]#~*.zwc} $Z4H/z4h.zsh || return
 
 [[ -v functions[compinit] ]] && unfunction compinit

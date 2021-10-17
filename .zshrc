@@ -14,7 +14,9 @@ zstyle ':z4h:' auto-update-days '28'
 # full-fledged tmux ('system'), or disable features that require tmux ('no').
 zstyle ':z4h:' start-tmux       'integrated'
 # Move prompt to the bottom when zsh starts up so that it's always in the
-# same position. Has no effect if start-tmux is 'no'.
+# same position if start-tmux is 'system' or 'integrated'. Also move prompt
+# to the bottom of screen is cleared with Ctrl-L or Ctrl-Alt-Shift-L
+# regardless of start-tmux setting.
 zstyle ':z4h:' prompt-at-bottom 'yes'
 
 # Keyboard type: 'mac' or 'pc'.

@@ -11,10 +11,10 @@ zstyle ':z4h:' auto-update      'no'
 zstyle ':z4h:' auto-update-days '28'
 
 # Automaticaly wrap TTY with a transparent tmux ('integrated'), or start a
-# full-fledged tmux ('system'), or disable features that require tmux ('no').
+# full-fledged tmux ('system'), or do nothing ('no').
 zstyle ':z4h:' start-tmux       'integrated'
-# Move prompt to the bottom when zsh starts up so that it's always in the
-# same position. Has no effect if start-tmux is 'no'.
+# Move prompt to the bottom when zsh starts and on Ctrl+L. Has no effect if
+# not running under tmux.
 zstyle ':z4h:' prompt-at-bottom 'yes'
 
 # Keyboard type: 'mac' or 'pc'.

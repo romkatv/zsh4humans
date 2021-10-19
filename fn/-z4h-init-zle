@@ -378,7 +378,8 @@ fi
 bindkey   '^[r'     z4h-fzf-dir-history            # alt+r
 bindkey   '^[R'     z4h-fzf-dir-history            # alt+R
 
-if zstyle -T :z4h: prompt-at-bottom; then
+if (( _z4h_can_save_restore_screen )) &&
+   zstyle -T :z4h: prompt-at-bottom; then
   bindkey '^L' z4h-clear-screen-soft-bottom
   bindkey '^[^L' z4h-clear-screen-hard-bottom
 else

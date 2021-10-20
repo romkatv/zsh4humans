@@ -6,7 +6,7 @@
   for f in chpwd "${chpwd_functions[@]}" precmd "${precmd_functions[@]}"; do
     [[ "${+functions[$f]}" == 0 ]] || "$f" &>/dev/null || true
   done
-  if [[ ${_z4h_use[zsh-autosuggestions]} == 1 && ${_z4h_use[zsh-syntax-highlighting]} == 1 ]]; then
+  if (( _z4h_use[zsh-syntax-highlighting] )); then
     typeset -g _ZSH_HIGHLIGHT_PRIOR_BUFFER=
     typeset -gi _ZSH_HIGHLIGHT_PRIOR_CURSOR=0
   fi

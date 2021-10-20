@@ -156,9 +156,11 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     else
       CURSOR=$#BUFFER
     fi
-    if (( _z4h_use[zsh-autosuggestions] && _z4h_use[zsh-syntax-highlighting] )); then
+    if (( _z4h_use[zsh-autosuggestions] )); then
       typeset -g _z4h_autosuggest_buffer=$BUFFER
       unset _z4h_autosuggestion POSTDISPLAY
+    fi
+    if (( _z4h_use[zsh-autosuggestions] || _z4h_use[zsh-syntax-highlighting] )); then
       -z4h-redraw-buffer
     fi
     return 0

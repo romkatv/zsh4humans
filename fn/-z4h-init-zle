@@ -758,33 +758,6 @@ if (( _z4h_use[zsh-autosuggestions] )); then
   fi
 
   builtin source $Z4H/zsh-autosuggestions/zsh-autosuggestions.zsh
-fi
-
-if (( _z4h_use[zsh-syntax-highlighting] )); then
-  if (( terminfo[colors] >= 256 )); then
-    typeset -gA ZSH_HIGHLIGHT_STYLES=(comment fg=96)  # the default is hard to see
-  fi
-  ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
-  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
-  # Work around bugs in history-substring-search: https://github.com/romkatv/zsh4humans/issues/58.
-  function _zsh_highlight() {}
-fi
-
-if (( _z4h_use[zsh-history-substring-search] )); then
-  builtin source $Z4H/zsh-history-substring-search/zsh-history-substring-search.zsh
-fi
-
-if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
-  typeset -gi zsh_highlight__memo_feature=0
-
-  local event
-  for event in pre-redraw init finish; do
-    if (( $+widgets[zle-line-$event] )); then
-      zle -A -- zle-line-$event -z4h-orig-zle-line-$event
-    fi
-    zle -N -- zle-line-$event -z4h-zle-line-$event
-  done
-
   precmd_functions=(${precmd_functions:#_zsh_autosuggest_start})
 
   _zsh_autosuggest_widget_execute() {
@@ -904,7 +877,42 @@ if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); the
       _zsh_autosuggest_widget_disable
     fi
   }
+else
+  function -z4h-autosuggest-fetch() {
+    unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion
+  }
 fi
+
+# Define _zsh_highlight before sourcing history-substring-search to work around bugs
+# in the latter: https://github.com/romkatv/zsh4humans/issues/58.
+function _zsh_highlight() {
+  if [[ $WIDGET == zle-line-finish || ! -v _z4h_substring_search_highlight ]]; then
+    region_highlight=()
+  else
+    region_highlight=("${_z4h_substring_search_highlight[@]}")
+  fi
+}
+
+if (( _z4h_use[zsh-history-substring-search] )); then
+  builtin source $Z4H/zsh-history-substring-search/zsh-history-substring-search.zsh
+fi
+
+if (( _z4h_use[zsh-syntax-highlighting] )); then
+  if (( terminfo[colors] >= 256 )); then
+    typeset -gA ZSH_HIGHLIGHT_STYLES=(comment fg=96)  # the default is hard to see
+  fi
+  ZSH_HIGHLIGHT_MAXLENGTH=1024                # don't colorize long command lines (slow)
+  ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets)  # main syntax highlighting plus matching brackets
+  typeset -gi zsh_highlight__memo_feature=0
+fi
+
+local event
+for event in pre-redraw init finish; do
+  if (( $+widgets[zle-line-$event] )); then
+    zle -A -- zle-line-$event -z4h-orig-zle-line-$event
+  fi
+  zle -N -- zle-line-$event -z4h-zle-line-$event
+done
 
 function -z4h-post-init() {
   eval "$_z4h_opt"
@@ -919,7 +927,7 @@ function -z4h-post-init() {
     -z4h-compinit
   fi
 
-  if (( _z4h_use[zsh-syntax-highlighting] && _z4h_use[zsh-autosuggestions] )); then
+  if (( _z4h_use[zsh-syntax-highlighting] )); then
     () {
       local -hA widgets=(
         zle-line-finish    user:_zsh_highlight_widget_zle-line-finish
@@ -938,9 +946,45 @@ function -z4h-post-init() {
           '$functions[_zsh_highlight]'
         fi
       } always {
-        [[ $WIDGET == zle-line-finish ]] || region_highlight+=($_z4h_substring_search_highlight)
+        [[ $WIDGET == zle-line-finish ]] || region_highlight+=("${_z4h_substring_search_highlight[@]}")
       }
     }'
+  fi
+
+  if (( _z4h_use[zsh-history-substring-search] )); then
+    function _history-substring-search-end() {
+      builtin eval "$_z4h_opt"
+      if (( _history_substring_search_refresh_display )); then
+        CURSOR=${#BUFFER}
+      fi
+      typeset -g _history_substring_search_result=$BUFFER
+      typeset -gi _history_substring_search_cursor=CURSOR
+      unset _z4h_substring_search_highlight
+      [[ -z $_history_substring_search_query_highlight ]] && return
+      local query_part escaped_query_part REPLY
+      local -i highlight_start_index highlight_end_index query_part_match_index
+      for query_part in $_history_substring_search_query_parts; do
+        escaped_query_part=${query_part//(#m)[\][()|\\*?#<>~^]/\\$MATCH}
+        query_part_match_index=${${BUFFER:$highlight_start_index}[(i)(#$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)${escaped_query_part}]}
+        (( query_part_match_index > $#BUFFER - highlight_start_index )) && continue
+        highlight_start_index=$(( highlight_start_index + query_part_match_index ))
+        highlight_end_index=$(( highlight_start_index + ${#query_part} ))
+        _z4h_substring_search_highlight+=(
+            "$((highlight_start_index - 1)) $((highlight_end_index - 1)) $_history_substring_search_query_highlight")
+      done
+    }
+  elif (( $+functions[_history-substring-search-end] )); then
+    # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
+    function _history-substring-search-end() {
+      emulate -L zsh
+      _history_substring_search_result=$BUFFER
+      if (( _history_substring_search_refresh_display )); then
+        CURSOR=${#BUFFER}
+      fi
+    }
+  fi
+
+  if (( _z4h_use[zsh-autosuggestions] )); then
     local suggest_special=(
       $ZSH_AUTOSUGGEST_EXECUTE_WIDGETS
       $ZSH_AUTOSUGGEST_CLEAR_WIDGETS
@@ -949,40 +993,6 @@ function -z4h-post-init() {
     typeset -g ZSH_AUTOSUGGEST_IGNORE_WIDGETS=(${${(k)widgets}:|suggest_special})
     unset ZSH_AUTOSUGGEST_USE_ASYNC
     _zsh_autosuggest_start
-    if (( _z4h_use[zsh-history-substring-search] )); then
-      function _history-substring-search-end() {
-        builtin eval "$_z4h_opt"
-        if (( _history_substring_search_refresh_display )); then
-          CURSOR=${#BUFFER}
-        fi
-        typeset -g _history_substring_search_result=$BUFFER
-        typeset -gi _history_substring_search_cursor=CURSOR
-        unset _z4h_substring_search_highlight
-        [[ -z $_history_substring_search_query_highlight ]] && return
-        local query_part escaped_query_part REPLY
-        local -i highlight_start_index highlight_end_index query_part_match_index
-        for query_part in $_history_substring_search_query_parts; do
-          escaped_query_part=${query_part//(#m)[\][()|\\*?#<>~^]/\\$MATCH}
-          query_part_match_index=${${BUFFER:$highlight_start_index}[(i)(#$HISTORY_SUBSTRING_SEARCH_GLOBBING_FLAGS)${escaped_query_part}]}
-          (( query_part_match_index > $#BUFFER - highlight_start_index )) && continue
-          highlight_start_index=$(( highlight_start_index + query_part_match_index ))
-          highlight_end_index=$(( highlight_start_index + ${#query_part} ))
-          _z4h_substring_search_highlight+=(
-              "$((highlight_start_index - 1)) $((highlight_end_index - 1)) $_history_substring_search_query_highlight")
-        done
-      }
-    elif (( $+functions[_history-substring-search-end] )); then
-      # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
-      function _history-substring-search-end() {
-        emulate -L zsh
-        _history_substring_search_result=$BUFFER
-        if (( _history_substring_search_refresh_display )); then
-          CURSOR=${#BUFFER}
-        fi
-      }
-    fi
-  elif (( _z4h_use[zsh-syntax-highlighting] )); then
-    builtin source $Z4H/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
   fi
 
   if (( ! $+_z4h_iterm_cmd )) && [[ $ITERM_SHELL_INTEGRATION_INSTALLED == Yes ]]; then

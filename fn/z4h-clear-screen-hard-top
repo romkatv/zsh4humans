@@ -3,8 +3,8 @@
 [[ -v _z4h_tty_fd ]] || return
 
 builtin echoti civis >&$_z4h_tty_fd
-builtin print -rn -- $'\e[H\e[2J' >&$_z4h_tty_fd
+builtin print -rnu $_z4h_tty_fd -- $'\e[H\e[2J'
 builtin zle .reset-prompt
 builtin zle -R
-builtin print -rn -- $'\e[3J' >&$_z4h_tty_fd
+builtin print -rnu $_z4h_tty_fd -- $'\e[3J'
 builtin echoti cnorm >&$_z4h_tty_fd

@@ -8,5 +8,5 @@ builtin printf -v x "$@"
 if [[ -t 1 ]]; then
   print -rn -- "$x"
 elif [[ -v _z4h_tty_fd ]]; then
-  print -rn -- "$x" >&$_z4h_tty_fd
+  print -rnu $_z4h_tty_fd -- "$x"
 fi

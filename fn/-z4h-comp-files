@@ -79,7 +79,7 @@
       opts+=(--layout=reverse)
     else
       local -i extra=$((height - LINES + cursor_y))
-      print -rn -- ${(pl:$height::\n:)} >&$_z4h_tty_fd || return
+      print -rnu $_z4h_tty_fd -- ${(pl:$height::\n:)} || return
       (( cursor_y += LINES - cursor_y - height ))
       local move=$'\e[0m\e['$((cursor_y+1))';1H'
       opts+=(--layout=reverse)
@@ -87,7 +87,7 @@
     local _z4h_saved_screen
     -z4h-save-screen || return
   else
-    print >&$_z4h_tty_fd || return
+    print -u $_z4h_tty_fd || return
     local move=
     opts+=(--layout=reverse)
   fi
@@ -124,7 +124,7 @@
       } | {
         local -a pids
         IFS=' ' builtin read -rA pids || pids=()
-        print -rn -- $move >&$_z4h_tty_fd
+        print -rnu $_z4h_tty_fd -- $move
         -z4h-cursor-show
         2>&$_z4h_tty_fd -z4h-fzf $opts
         (( $#pids )) && builtin kill -- $pids

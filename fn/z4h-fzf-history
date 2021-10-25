@@ -111,7 +111,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       else
         preview_window+=':down'
         local -i extra=$((height - LINES + cursor_y))
-        print -rn -- ${(pl:$height::\n:)} >&$_z4h_tty_fd || return
+        print -rnu $_z4h_tty_fd -- ${(pl:$height::\n:)} || return
         (( cursor_y += LINES - cursor_y - height ))
         local move=$'\e[0m\e['$((cursor_y+1))';1H'
         opts+=(--layout=reverse)
@@ -119,7 +119,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       local _z4h_saved_screen
       -z4h-save-screen || return
     else
-      print >&$_z4h_tty_fd || return
+      print -u $_z4h_tty_fd || return
       preview_window+=':down'
       local move=
       opts+=(--layout=reverse)
@@ -142,7 +142,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
         (( $#history )) && printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
       } | {
         {
-          print -rn -- $move >&$_z4h_tty_fd
+          print -rnu $_z4h_tty_fd -- $move
           -z4h-cursor-show
           2>&$_z4h_tty_fd -z4h-fzf $opts
         } always {

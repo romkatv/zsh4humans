@@ -5,7 +5,7 @@
 builtin echoti civis >&$_z4h_tty_fd
 local -i cursor_x cursor_y
 -z4h-get-cursor-pos
-builtin print -rn -- "${(pl:$((2 * LINES - cursor_y - 1))::\n:)}" >&$_z4h_tty_fd
+builtin print -rnu $_z4h_tty_fd -- "${(pl:$((2 * LINES - cursor_y - 1))::\n:)}"
 builtin zle -I
 builtin zle -R
 builtin echoti cnorm >&$_z4h_tty_fd

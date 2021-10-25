@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+#
+# The original __vte_osc7 looks like this:
+#
+#   __vte_osc7 () {
+#     printf "\033]7;file://%s%s\033\\" "${HOSTNAME}" "$(/usr/libexec/vte-urlencode-cwd)"
+#   }
+#
+# It runs on precmd.
+
+emulate -L zsh -o no_multi_byte -o extended_glob
+
+local cwd=${(%):-%/}
+[[ -n $cwd && $HOSTNAME != *$'\e'* ]] || return
+
+if [[ $cwd != $_z4h_vte_last_cwd ]]; then
+  if [[ $cwd == [a-zA-Z0-9"/:_.-!'()~ "]# ]]; then
+    typeset -g _z4h_vte_last_encoded_cwd=${cwd// /%20}
+  else
+    local c
+    typeset -g _z4h_vte_last_encoded_cwd=
+    for c in ${(s::)cwd}; do
+      [[ $c == [a-zA-Z0-9"/:_.-!'()~"] ]] || printf -v c '%%%02X' $(( #c ))
+      _z4h_vte_last_encoded_cwd+=$c
+    done
+  fi
+  typeset -g _z4h_vte_last_cwd=$cwd
+fi
+
+-z4h-tmux-bypass '\e]7;file://%s%s\e\' "$HOSTNAME" "$_z4h_vte_last_encoded_cwd"

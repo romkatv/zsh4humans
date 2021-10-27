@@ -320,8 +320,8 @@ if '[' "$tmux" '=' '1' ']'; then
   'command' 'mv' '--' "$zshrc.bak" "$zshrc"
 fi
 
-if '[' "$direnv" '=' '0' ']'; then
-  'command' 'sed' '-i.bak' '-E' '/direnv.*enable/ s/yes/no/' "$zshrc"
+if '[' "$direnv" '=' '1' ']'; then
+  'command' 'sed' '-i.bak' '-E' "/direnv.*enable/ s/'no'/'yes'/" "$zshrc"
   'command' 'rm' '-f' '--' "$zshrc".bak
 fi
 

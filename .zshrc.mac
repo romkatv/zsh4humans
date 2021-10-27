@@ -24,7 +24,7 @@ zstyle ':z4h:autosuggestions' forward-char 'accept'
 zstyle ':z4h:fzf-complete' recurse-dirs 'yes'
 
 # Enable direnv to automatically source .envrc files.
-zstyle ':z4h:direnv'         enable 'yes'
+zstyle ':z4h:direnv'         enable 'no'
 # Show "loading" and "unloading" notifications from direnv.
 zstyle ':z4h:direnv:success' notify 'yes'
 

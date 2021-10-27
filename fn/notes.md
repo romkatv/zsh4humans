@@ -994,3 +994,13 @@ Implement a benchmark that measures the startup time.
 ```zsh
 print 'print foo""bar; exit' | script -E never -qec "script -E never -f -T /tmp/timing -qe /tmp/script" /dev/null >/dev/null
 ```
+
+---
+
+Add a `zstyle` to disable VTE integration.
+
+---
+
+Think of a better name for `iterm-integration` style. Maybe something with "osc133" or "final-term"
+in the name. See [docs](
+  https://iterm2.com/documentation-escape-codes.html#:~:text=FTCS_PROMPT-,OSC%20133%20%3B,-A%20ST).

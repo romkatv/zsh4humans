@@ -1,0 +1,73 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+unset _z4h_direnv_err
+
+if (( ARGC )); then
+  local direnv=$1
+else
+  local direnv=${commands[direnv]-}
+  if [[ -z $direnv ]]; then
+    unset _z4h_direnv_sig
+    return 1
+  fi
+fi
+
+local sig
+local envrc=(./(../)#.envrc(NY1:a))
+if (( $#envrc )); then
+  local -a deps=(
+    ${XDG_DATA_HOME:-~/.local/share}/direnv/allow
+    ${XDG_CONFIG_HOME:-~/.config}/{direnv.toml,config.toml})
+  local -a stat
+  local files=($^deps(N))
+  local non_files=(${deps:|files})
+  if zstat -A stat +mtime -- $envrc $files 2>/dev/null; then
+    local sig=$envrc$'\0'${(pj:\0:)stat}
+  else
+    local sig=stat-error
+  fi
+elif [[ ! -v DIRENV_WATCHES ]]; then
+  typeset -g _z4h_direnv_sig=none
+  return
+else
+  local sig=none
+fi
+
+[[ $sig == ${_z4h_direnv_sig-} ]] && return
+
+unset _z4h_direnv_sig
+
+local data
+data=$(
+  local out
+  out=$($direnv export zsh) 2>&1
+  builtin printf '%s%18d%d' "$out" $#out $(( ! $? ))
+) || return
+
+local -i success=$data[-1]
+local -i out_len=$data[-19,-2]
+local out=$data[-out_len-19,-20]
+local err=${data[1,-out_len-20]%%$'\n'#}
+
+if [[ -n $err ]]; then
+  local ctx=:z4h:direnv:
+  (( success )) && ctx+='success' || ctx+='error'
+  if zstyle -T $ctx notify; then
+    if builtin zle; then
+      typeset -g _p9k__raw_msg=${err//\%/%%}$'\n'
+    else
+      print -ru2 -- $err
+    fi
+  fi
+fi
+
+emulate -L zsh
+if [[ ! -v __p9k_trapped ]]; then
+  local -i __p9k_trapped
+  builtin trap : INT
+  builtin trap "builtin trap ${(q)__p9k_trapint:--} INT" EXIT
+fi
+builtin eval -- $out
+typeset -g _z4h_direnv_sig=$sig

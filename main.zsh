@@ -373,6 +373,10 @@ function -z4h-cmd-init() {
     else
       typeset -gri _z4h_can_save_restore_screen=0  # this parameter is read by p10k
     fi
+
+    if (( _z4h_zle )) && zstyle -t :z4h:direnv enable && [[ -e $Z4H/cache/direnv ]]; then
+      -z4h-direnv-init 0 || return '_z4h_err()'
+    fi
   } || return
 
   : ${ZLE_RPROMPT_INDENT:=0}

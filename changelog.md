@@ -78,3 +78,45 @@
   z4h bindkey z4h-eof Ctrl+D
   setopt ignore_eof
   ```
+- There is now builtin integration with [direnv](https://github.com/direnv/direnv). It is much
+  faster than the stock one and works well with all z4h features. Specifically:
+
+  - If there is `.envrc` in the current or ancestor directory when starting
+    zsh, it gets ingested before instant prompt.
+  - Messages from direnv are displayed not only if you execute `cd foo`
+    but also when you change the current directory with one of the
+    specialized z4h widgets (`z4h-cd-up`, `z4h-cd-back`, etc.).
+  - "Loading" and "unloading" notifications from direnv can be suppressed.
+
+  Note that powerlevel10k has a prompt segment for direnv. It shows an icon
+  if some `.envrc` has been loaded and not yet unloaded. If you are using direnv,
+  you'll probably want to use this segment. If the icon is enough, consider
+  suppressing "loading" and "unloading" notifications from direnv.
+
+  Enable direnv integration:
+  ```zsh
+  zstyle ':z4h:direnv' enable 'yes'
+  ```
+
+  Disable "loading" and "unloading" notifications from direnv:
+  ```zsh
+  zstyle ':z4h:direnv:success' notify 'no'
+  ```
+
+  If you enable direnv integration in this way, the stock integration won't
+  do anything useful. zsh4humans will dismantle it as soon as it sees it. It's
+  highly recommended to remove stock integration calls from your zshrc to avoid
+  wasting time on zsh startup and tripping over direnv quirks. The stock
+  integration calls usually look like this:
+
+  ```zsh
+  eval "$(direnv export zsh)"
+  eval "$(direnv hook zsh)"
+  ```
+
+  Or perhaps like this:
+  
+  ```zsh
+  emulate zsh -c "$(direnv export zsh)"
+  emulate zsh -c "$(direnv hook zsh)"
+  ```

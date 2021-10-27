@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+
+local direnv cache=$Z4H/cache/direnv
+if [[ -e $cache ]]; then
+  builtin source -- $cache || return
+  [[ -n $direnv ]] || return '_z4h_err()'
+fi
+
+if (( $1 )); then
+  local real_direnv=${commands[direnv]-}
+  if [[ $direnv != $real_direnv ]]; then
+    if [[ -n $real_direnv ]]; then
+      direnv=$real_direnv
+      local tmp=$cache.tmp.$$
+      typeset -p direnv >$tmp || return
+      zf_mv -f -- $tmp $cache || return
+    else
+      [[ ! -e $cache ]] || builtin : >$cache || return
+      return
+    fi
+  elif [[ -z $direnv ]]; then
+    return
+  fi
+elif [[ ! -x $direnv ]]; then
+  return
+fi
+
+-z4h-direnv-hook $direnv || return
+
+typeset -gi _z4h_direnv_initialized=1

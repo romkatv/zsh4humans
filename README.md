@@ -1,8 +1,7 @@
 # Zsh for Humans
 
-A turnkey configuration for [Z shell](https://en.wikipedia.org/wiki/Z_shell) that aims to work
-really well out of the box. It combines the best Zsh plugins into a coherent whole that feels like
-a finished product rather than a DIY starter kit.
+A turnkey configuration for Zsh that aims to work really well out of the box. It combines the best
+Zsh plugins into a coherent whole that feels like a finished product rather than a DIY starter kit.
 
 If you want a great shell that just works, this project is for you.
 
@@ -35,9 +34,10 @@ If you want a great shell that just works, this project is for you.
 - [Command prompt](https://github.com/romkatv/powerlevel10k) configurable through a builtin
   configuration wizard.
 - Command completions and history searchable with [fzf](https://github.com/junegunn/fzf).
-- Super fast. No lag when you open a new tab in the terminal or run a command.
-- The complete shell environment gets teleported to the remote host automatically on `ssh`.
-  This does not require `git`, `zsh` or `sudo` on the remote host.
+- [Super fast](https://github.com/romkatv/zsh-bench). No lag when you open a new tab in the terminal
+  or run a command.
+- The complete shell environment can be automatically teleported to the remote host when connecting
+  over `ssh`. This does not require `git`, `zsh` or `sudo` on the remote host.
 - Command history can be shared across different hosts. For example, history from `ssh foo`
   can be made available within `ssh bar` and/or on the local machine.
 

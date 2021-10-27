@@ -316,7 +316,7 @@ if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
 fi
 
 if '[' "$tmux" '=' '1' ']'; then
-  'command' 'awk' "/Move prompt to the bottom/ {print \"# Start tmux if not already in tmux.\"; print \"zstyle ':z4h:' start-tmux       command tmux -u\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
+  'command' 'awk' "/Move prompt to the bottom/ {print \"# Start tmux if not already in tmux.\"; print \"zstyle ':z4h:' start-tmux       command tmux -u new -A -D -t z4h\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
   'command' 'mv' '--' "$zshrc.bak" "$zshrc"
 fi
 

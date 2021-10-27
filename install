@@ -187,6 +187,36 @@ while 'true'; do
   esac
 done
 
+>&2 'printf' '\n'
+>&2 'printf' 'Do you use \033[32mdirenv\033[0m?\n'
+>&2 'printf' '\n'
+>&2 'printf' '  \033[1m(y)\033[0m  Yes.\n'
+>&2 'printf' '  \033[1m(n)\033[0m  No.\n'
+>&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
+>&2 'printf' '\n'
+while 'true'; do
+  >&2 'printf' '\033[1mChoice [ynq]:\033[0m '
+  'read_choice'
+  case "$choice" in
+    'y'|'Y')
+      direnv='1'
+      'break'
+    ;;
+    'n'|'N')
+      direnv='0'
+      'break'
+    ;;
+    'q'|'Q')
+      'exit' '1'
+    ;;
+    "$lf")
+    ;;
+    *)
+      >&2 'printf' '\033[33mz4h\033[0m: invalid choice: \033[31m%s\033[0m\n' "$choice"
+    ;;
+  esac
+done
+
 rcs=''
 
 for f in ~/'.zshenv' ~/'.zprofile' ~/'.zshrc' ~/'.zlogin' ~/'.zlogout'; do
@@ -286,7 +316,12 @@ if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
 fi
 
 if '[' "$tmux" '=' '1' ']'; then
-  'command' 'sed' '-i.bak' '-E' "s/ 'integrated'/ 'system'/" "$zshrc"
+  'command' 'sed' '-i.bak' '-E' '/start-tmux/ s/integrated/system/' "$zshrc"
+  'command' 'rm' '-f' '--' "$zshrc".bak
+fi
+
+if '[' "$direnv" '=' '0' ']'; then
+  'command' 'sed' '-i.bak' '-E' '/direnv.*enable/ s/yes/no/' "$zshrc"
   'command' 'rm' '-f' '--' "$zshrc".bak
 fi
 

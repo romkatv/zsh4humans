@@ -27,7 +27,7 @@ If you want a great shell that just works, this project is for you.
 
 ## Features
 
-- Powerfull POSIX-based shell preconfigured to work great out of the box.
+- Powerful POSIX-based shell preconfigured to work great out of the box.
 - Easy-to-use installation wizard. Does not require `git`, `zsh` or `sudo`.
 - [Syntax highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) for the command line.
 - [Autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) for commands based on command

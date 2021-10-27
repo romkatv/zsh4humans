@@ -3,7 +3,7 @@
 {
   -z4h-cursor-hide
   local f
-  for f in chpwd "${chpwd_functions[@]}" precmd "${precmd_functions[@]}"; do
+  for f in chpwd "${chpwd_functions[@]}" precmd "${(@)precmd_functions:#-z4h-direnv-hook}"; do
     [[ "${+functions[$f]}" == 0 ]] || "$f" &>/dev/null || true
   done
   if (( _z4h_use[zsh-syntax-highlighting] )); then

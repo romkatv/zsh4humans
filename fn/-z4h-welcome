@@ -59,7 +59,7 @@ fi
                         limiting the number of colors your terminal can display. You might want \
                         to create this file and restart Zsh to enable more colors:
     print
-    -z4h-flowing -i4 -- "      >%U~/.tmux.conf%u <<<%3F'set -g default-terminal screen-256color'%f"
+    -z4h-flowing -i4 -- "      %3F>%f%U~/.tmux.conf%u %3F<<<'set -g default-terminal screen-256color'%f"
     -z4h-flowing -i4 -- '      TERM=screen-256color %U%2Fexec%u%f %2Fzsh%f'
     print
     -z4h-flowing -i4 -- '    You' will see %4FPowerlevel10k%f wizard once again, this time with \

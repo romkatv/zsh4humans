@@ -148,9 +148,12 @@ See [fzf](https://github.com/junegunn/fzf) homepage for more information.
 
 ### SSH
 
-When you connect to a remote host over SSH, your local Zsh for Humans environment gets teleported
+When you connect to a remote host over SSH, your local Zsh for Humans environment can be teleported
 over to it. The first login to a remote host may take some time. After that it's as fast as normal
 `ssh`.
+
+Search for "ssh" in your `~/.zshrc` for information on how to enable and configure SSH
+teleportation.
 
 ## Customization
 

@@ -152,6 +152,8 @@ When you connect to a remote host over SSH, your local Zsh for Humans environmen
 over to it. The first login to a remote host may take some time. After that it's as fast as normal
 `ssh`.
 
+Look for the `zstyle ':z4h:ssh:...'` lines in your `~/.zshrc` for information on how to configure SSH teleportation.
+
 ## Customization
 
 You can (and should) edit `~/.zshrc` to customize your shell. It's a very good idea to read through

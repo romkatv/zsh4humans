@@ -11,9 +11,11 @@ if (( $1 )); then
   if [[ $direnv != $real_direnv ]]; then
     if [[ -n $real_direnv ]]; then
       direnv=$real_direnv
-      local tmp=$cache.tmp.$$
-      typeset -p direnv >$tmp || return
-      zf_mv -f -- $tmp $cache || return
+      if (( ! _z4h_dangerous_root )); then
+        local tmp=$cache.tmp.$$
+        typeset -p direnv >$tmp || return
+        zf_mv -f -- $tmp $cache || return
+      fi
     else
       [[ ! -e $cache ]] || builtin : >$cache || return
       return

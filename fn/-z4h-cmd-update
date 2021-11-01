@@ -46,6 +46,21 @@ local new=$Z4H.new.$$
   zf_rm -- $new/tmp/update-successful                || return
   zf_rm -- $new/.updating                            || return
   -z4h-mv $Z4H $old 2>/dev/null || zf_rm -rf -- $Z4H || return
+  if [[ -e $Z4H ]]; then
+    print -Pru2 -- ''
+    print -Pru2 -- '%F{3}z4h%f: cannot delete %U%F{1}'${Z4H//\%/%%}'%u%f.'
+    print -Pru2 -- ''
+    print -Pru2 -- 'This might help:'
+    print -Pru2 -- ''
+    print -Pru2 -- '  %F{2}%Ucommand%u %Usudo%u rm%f -rf -- %U'$Z4H'%u && %U%F{2}exec%u zsh%f'
+    print -Pru2 -- ''
+    print -Pru2 -- "%F{3}z4h%f: attempting to repair %F{2}zsh%f"
+    if [[ -o zle ]]; then
+      exec -- $_z4h_exe -i || return
+    else
+      exec -- $_z4h_exe -i --no-zle || return
+    fi
+  fi
   -z4h-mv $new $Z4H                                  || return
 } always {
   if (( $? )); then

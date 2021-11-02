@@ -424,30 +424,41 @@ if [ "$check_sig" = 1 ]; then
     hash=none
     case "$algo" in
       sha256)
-        if command -v shasum >/dev/null 2>/dev/null; then
-          hash="$(shasum -b -a 256 -- "$file")"
-          hash="${hash%% *}"
-        elif command -v sha256sum >/dev/null 2>/dev/null; then
-          hash="$(sha256sum -b -- "$file")"
-          hash="${hash%% *}"
-        elif command -v sha256 >/dev/null 2>/dev/null; then
-          # Ignore sha256 output if it's from hashalot. It's incompatible.
-          hash="$(sha256 -- "$file" </dev/null)"
-          if [ ${#hash} -lt 64 ]; then
-            hash=none
-          else
-            hash="${hash##* }"
-          fi
-        fi
+        {
+          command -v shasum >/dev/null 2>/dev/null                       &&
+            hash="$(shasum -b -a 256 -- "$file" </dev/null 2>/dev/null)" &&
+            hash="${hash%% *}"                                           &&
+            [ ${#hash} -eq 64 ]
+        } || {
+          command -v sha256sum >/dev/null 2>/dev/null                    &&
+            hash="$(sha256sum -b -- "$file" </dev/null 2>/dev/null)"     &&
+            hash="${hash%% *}"                                           &&
+            [ ${#hash} -eq 64 ]
+        } || {
+          # Note: sha256 can be from hashalot. It's incompatible.
+          # Thankfully, it produces shorter output.
+          command -v sha256 >/dev/null 2>/dev/null                      &&
+            hash="$(sha256 -- "$file" </dev/null 2>/dev/null)"          &&
+            hash="${hash##* }"                                          &&
+            [ ${#hash} -eq 64 ]
+        } || {
+          hash=none
+        }
       ;;
       md5)
-        if command -v md5sum >/dev/null 2>/dev/null; then
-          hash="$(md5sum -b -- "$file")"
-          hash="${hash%% *}"
-        elif command -v md5 >/dev/null 2>/dev/null; then
-          hash="$(md5 -- "$file")"
-          hash="${hash##* }"
-        fi
+        {
+          command -v md5sum >/dev/null 2>/dev/null                      &&
+            hash="$(md5sum -b -- "$file" </dev/null 2>/dev/null)"       &&
+            hash="${hash%% *}"                                          &&
+            [ ${#hash} -eq 32 ]
+        } || {
+          command -v md5 >/dev/null 2>/dev/null                         &&
+          hash="$(md5 -- "$file" </dev/null 2>/dev/null)"               &&
+          hash="${hash##* }"                                            &&
+          [ ${#hash} -eq 32 ]
+        } || {
+          hash=none
+        }
       ;;
       *)
         >&2 echo "${_R}internal error${_0}: unhandled algorithm: ${_B}$algo${_0}"

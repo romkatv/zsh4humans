@@ -12,12 +12,13 @@ if [[ -v _z4h_redraw_fd ]]; then
   unset _z4h_redraw_fd
 fi
 
-if [[ $BUFFER == *' ' ]]; then
+if [[ $BUFFER == *' ' ]] &&
+   ! zstyle -t :z4h:history preserve-trailing-whitespace; then
   if [[ -v functions[-z4h-buffer-func] ]]; then
     builtin unfunction -- -z4h-buffer-func
   fi
   if functions[-z4h-buffer-func]="$PREBUFFER$BUFFER" 2>/dev/null &&
-     [[ -v functions[-z4h-buffer-func] ]]; then
+      [[ -v functions[-z4h-buffer-func] ]]; then
     builtin unfunction -- -z4h-buffer-func
     BUFFER=${BUFFER%% #}
   fi

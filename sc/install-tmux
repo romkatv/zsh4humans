@@ -8,19 +8,19 @@ if [ -n "${ZSH_VERSION:-}" ]; then
   emulate sh -o err_exit -o no_unset
 fi
 
-readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v3.0.3
+readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v3.0.4
 
 readonly archives='
 ---------------------
-file:tmux-darwin-arm64.tar.gz;  md5:0bea93f236d4745c862fdc80b58bf25a; sha256:2badb926c952492b48b83b4b55fe794d58e08e5680eab2cf440ecfac62063ebd;
-file:tmux-darwin-x86_64.tar.gz; md5:6bc7b266bcccbf55c5f10ffdff782a82; sha256:2d46f4274a83b5ba4c3369de0528788d8e1132b9663185bd32d1875fa40483d8;
-file:tmux-linux-aarch64.tar.gz; md5:37fe0a9e38b16e0fc5c46d74913292b9; sha256:acf6a3b42a68a4b92c9e8f972e934a75ed357d402c511b16dd579205c948124d;
-file:tmux-linux-armv6l.tar.gz;  md5:100892cb778a132c47d1bdf69e9e05fc; sha256:605831bcb8f36797b4450a09be714472e643b224806a38c094ee7bb77a390fe7;
-file:tmux-linux-armv7l.tar.gz;  md5:8ca487faef2f30a51628e150db7d72f2; sha256:c5842548349dc0e80c80be43f58458c7ac190d16211914450801ecd4b816bd1a;
-file:tmux-linux-i386.tar.gz;    md5:f9378480fa4c723e08ebef17b94a93b3; sha256:e2ff86b4295fb472a254958acfc063d783d8d2099fc4a94d58cb745ca6e69690;
-file:tmux-linux-i586.tar.gz;    md5:f27dc3eeca611051058c53a2466693ac; sha256:c0b4d2af42303a5345fe1e794ddf7a6d3082ff49379f1d3a95a3a65ed2f163bb;
-file:tmux-linux-i686.tar.gz;    md5:41c60646861b48247001a209bc8447a0; sha256:d956eef4c7fb5bf75864637574b1ecf815f91f89e3eaddb5aaf3f564b92147c0;
-file:tmux-linux-x86_64.tar.gz;  md5:37ebc4ad8d0e27b0051cac6a300e4d5b; sha256:8770285b3cdebdc02528350998270a33df20096520ee19dc98dffb0647497de5;'
+file:tmux-darwin-arm64.tar.gz;  md5:354879821a8f0f38dd88f466f2f34686; sha256:bebf80306c6a9167123af08154d9e12f68b1c645bd074988d0f78416af031538;
+file:tmux-darwin-x86_64.tar.gz; md5:b3913c5f4bf3b191957432c73a889036; sha256:628efddf7d57d19f8d2cdbdfb1f566dd47d9ed054e3ba00c42c46a4e386d9579;
+file:tmux-linux-aarch64.tar.gz; md5:9404625f71460f0b8dd0e5567dddf719; sha256:66b2fc8aa5c0bb7fe3b3d6d0e2ff6407fba99d1cc45505ddd73760722472e75a;
+file:tmux-linux-armv6l.tar.gz;  md5:72eb0a1d1a2253aa377365132a74d735; sha256:09d8120ee0d8d27a61eea3f9fee1e7dab54671061e72489ecb82f1f5d667e5da;
+file:tmux-linux-armv7l.tar.gz;  md5:9d8ee423292d6c798abb05b323ff7b46; sha256:ff2029a77326939ccdf3030ca9259bc189a02764aa2f314106a62be53515a843;
+file:tmux-linux-i386.tar.gz;    md5:391081e0f5b11adcf0a310cd7de66c55; sha256:fca06a9e4e39b0c2eadab3e9cc53b44f0bfb521688a727aac8f35b4fb59f880a;
+file:tmux-linux-i586.tar.gz;    md5:059f21f29c8f641d8fd3a2ee2a5e965f; sha256:7d47232578d51207c511db95f316f19fce969af574724f1ce9099d8cd2ef4c0f;
+file:tmux-linux-i686.tar.gz;    md5:450fba91ba74eaa5dacab9a12fc3c0c1; sha256:0168fe2d531f9e6f6e31961984180299ad64fcbcbf0e0970c7d277a6c7946c99;
+file:tmux-linux-x86_64.tar.gz;  md5:b6a5978a865055a4e6284e97062230b2; sha256:f60686f4bf5fb82250531c07ec479da9f50794ee465fa6f7f67a79a12c2afa9d;'
 
 readonly lf="
 "

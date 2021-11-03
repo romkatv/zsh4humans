@@ -1010,3 +1010,14 @@ in the name. See [docs](
 Run recovery code from `z4h.zsh` on `precmd` to lower startup lag (perhaps by defining
 `-z4h-post-init` and later redefining it). This should also solve the problem with custom `HISTFILE`
 -- just `fc -R` it on recovery.
+
+---
+
+When using `su blah -` with the source and the target users both having z4h with integrated tmux,
+screen gets cleared unnecessarily. See https://github.com/romkatv/zsh4humans/issues/159. This can
+be fixed by creating world-writable directory `/tmp/z4h-tty` with world-writabable files in it.
+The names of the files would be derived from `$TTY` of tmux (both integrated and real) and the
+content would have `$TTY`, `$_Z4H_TMUX`, etc. Note that `$_Z4H_TMUX_CMD` may be unaccessible, so
+some fallback would be needed. If `$_Z4H_TMUX_CMD` is integrated tmux, then it should be OK to use
+the integrated tmux from the target user provided that it's compatible. So some version would need
+to be included in the file.

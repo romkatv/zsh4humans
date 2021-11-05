@@ -19,11 +19,15 @@ typeset -g _z4h_last_dir=$dir
 if (( ! $#dirstack && (DIRSTACKSIZE || ! $+DIRSTACKSIZE) )); then
   local d stack=()
   for d in $_z4h_dir_history; do
-    if [[ ($#stack -ne 0 || $d != $dir) && -d ${d::=${~d}} ]]; then
-      stack+=($d)
-      (( $+DIRSTACK && $#stack >= DIRSTACK - 1 )) && break
-    fi
-  done
+    {
+      if [[ ($#stack -ne 0 || $d != $dir) && -d ${d::=${~d}} ]]; then
+        stack+=($d)
+        (( $+DIRSTACK && $#stack >= DIRSTACK - 1 )) && break
+      fi
+    } always {
+      TRY_BLOCK_ERROR=0
+    }
+  done 2>/dev/null
   dirstack=($stack)
 fi
 

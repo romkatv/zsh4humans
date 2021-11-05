@@ -313,7 +313,7 @@ esac
 args[pos[1]]='-t'
 
 local stty
-if (( $+commands[stty] )); then
+if [[ -v commands[stty] && -v _z4h_tty_fd ]]; then
   stty=$(command stty -g <&$_z4h_tty_fd 2>/dev/null) || stty=
 fi
 

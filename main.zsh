@@ -353,18 +353,16 @@ function -z4h-cmd-init() {
       fi
     fi
 
-    if (( _z4h_zle )); then
-      if [[ -w $TTY ]]; then
-        typeset -gi _z4h_tty_fd
-        sysopen -o cloexec -rwu _z4h_tty_fd -- $TTY || return
+    if [[ -w $TTY ]]; then
+      typeset -gi _z4h_tty_fd
+      sysopen -o cloexec -rwu _z4h_tty_fd -- $TTY || return
+      typeset -gri _z4h_tty_fd
+    elif [[ -w /dev/tty ]]; then
+      typeset -gi _z4h_tty_fd
+      if sysopen -o cloexec -rwu _z4h_tty_fd -- /dev/tty 2>/dev/null; then
         typeset -gri _z4h_tty_fd
-      elif [[ -w /dev/tty ]]; then
-        typeset -gi _z4h_tty_fd
-        if sysopen -o cloexec -rwu _z4h_tty_fd -- /dev/tty 2>/dev/null; then
-          typeset -gri _z4h_tty_fd
-        else
-          unset _z4h_tty_fd
-        fi
+      else
+        unset _z4h_tty_fd
       fi
     fi
 

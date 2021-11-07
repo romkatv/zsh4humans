@@ -279,12 +279,13 @@ function -z4h-cmd-init() {
               local stamp=0
             fi
             sock=${sock%/}/z4h-tmux-$UID-$TERM-$stamp
-            if (( terminfo[colors] < 256 )); then
-              local cfg=tmux-16color.conf
-            elif [[ $COLORTERM == (24bit|truecolor) ]]; then
-              local cfg=tmux-truecolor.conf
-            else
-              local cfg=tmux-256color.conf
+            local -a cmds=()
+            if (( terminfo[colors] >= 256 )); then
+              cmds+=(set -g default-terminal tmux-256color ';')
+              if [[ $COLORTERM == (24bit|truecolor) ]]; then
+                cmds+=(set -ga terminal-overrides ',*:Tc' ';')
+                sock+='-tc'
+              fi
             fi
             if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
               local orig_dir=${(%):-%/}
@@ -305,7 +306,8 @@ function -z4h-cmd-init() {
               local exec=exec
             fi
             SHELL=$_z4h_exe _Z4H_LINES=$LINES _Z4H_COLUMNS=$COLUMNS \
-              builtin $exec - $tmux -u -S $sock -f $Z4H/zsh4humans/$cfg >/dev/null || return
+              builtin $exec - $tmux -u -S $sock -f $Z4H/zsh4humans/.tmux.conf -- \
+              "${cmds[@]}" new >/dev/null || return
             [[ -z $exec ]] || return
             builtin cd /
             zf_rm -rf -- $dir 2>/dev/null

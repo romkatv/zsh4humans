@@ -48,7 +48,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       --preview=$preview
       --height=$LINES
     )
-    local move=$'\e[0m\eH'
+    local move=$'\e[0m\e[H'
     local _z4h_saved_screen
     -z4h-save-screen || return
   else

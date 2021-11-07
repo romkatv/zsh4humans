@@ -287,6 +287,10 @@ function -z4h-cmd-init() {
                 sock+='-tc'
               fi
             fi
+            if zstyle -t :z4h: term-vresize top; then
+              cmds+=(set -g history-limit 1024 ';')
+              sock+='-h'
+            fi
             if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
               local orig_dir=${(%):-%/}
               local dir=${TMPDIR:-/tmp}/z4h-tmux-cwd-$UID-$$-${TTY//\//.}

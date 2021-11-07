@@ -259,7 +259,7 @@ function -z4h-cmd-init() {
            [[ -z $TMUX && ! -w ${_Z4H_TMUX%,(|<->),(|<->)} && -z $Z4H_SSH ]]; then
         unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY TMUX TMUX_PANE
         if [[ -x $tmux && -d $Z4H/terminfo ]]; then
-          # We prefer /tmp over $TMPDIR because the latter breaks the rendering
+          # We prefer /tmp over $TMPDIR because the latter breaks rendering
           # of wide chars on iTerm2.
           local sock
           if [[ -n $TMUX_TMPDIR && -d $TMUX_TMPDIR && -w $TMUX_TMPDIR ]]; then
@@ -271,7 +271,7 @@ function -z4h-cmd-init() {
           fi
           if [[ -n $sock ]]; then
             if [[ -e $Z4H/tmux/stamp ]]; then
-              # Append a unique per-installation number to the socket path to workd
+              # Append a unique per-installation number to the socket path to work
               # around a bug in tmux. See https://github.com/romkatv/zsh4humans/issues/71.
               local stamp
               IFS= read -r stamp <$Z4H/tmux/stamp || return

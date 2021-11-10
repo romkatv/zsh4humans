@@ -8,12 +8,12 @@ if [ -n "${ZSH_VERSION:-}" ]; then
   emulate sh -o err_exit -o no_unset
 fi
 
-readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v3.0.4
+readonly url_base=https://github.com/romkatv/tmux-bin/releases/download/v3.0.5
 
 readonly archives='
 ---------------------
-file:tmux-darwin-arm64.tar.gz;  md5:354879821a8f0f38dd88f466f2f34686; sha256:bebf80306c6a9167123af08154d9e12f68b1c645bd074988d0f78416af031538;
-file:tmux-darwin-x86_64.tar.gz; md5:b3913c5f4bf3b191957432c73a889036; sha256:628efddf7d57d19f8d2cdbdfb1f566dd47d9ed054e3ba00c42c46a4e386d9579;
+file:tmux-darwin-arm64.tar.gz;  md5:c15701ef9c8135af040111ba549f39ba; sha256:06e726a95dfac5abb06328130270b1d7fe571b54fb0e65af43d3d95d1d35e216;
+file:tmux-darwin-x86_64.tar.gz; md5:2d11a3ba012fba109d0d6c631035ccab; sha256:5bd1b320d7655a977ee6a792f63f9adc15add48b9afc02692fa1d8a33ef20f1c;
 file:tmux-linux-aarch64.tar.gz; md5:9404625f71460f0b8dd0e5567dddf719; sha256:66b2fc8aa5c0bb7fe3b3d6d0e2ff6407fba99d1cc45505ddd73760722472e75a;
 file:tmux-linux-armv6l.tar.gz;  md5:72eb0a1d1a2253aa377365132a74d735; sha256:09d8120ee0d8d27a61eea3f9fee1e7dab54671061e72489ecb82f1f5d667e5da;
 file:tmux-linux-armv7l.tar.gz;  md5:9d8ee423292d6c798abb05b323ff7b46; sha256:ff2029a77326939ccdf3030ca9259bc189a02764aa2f314106a62be53515a843;

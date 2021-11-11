@@ -1021,3 +1021,7 @@ content would have `$TTY`, `$_Z4H_TMUX`, etc. Note that `$_Z4H_TMUX_CMD` may be 
 some fallback would be needed. If `$_Z4H_TMUX_CMD` is integrated tmux, then it should be OK to use
 the integrated tmux from the target user provided that it's compatible. So some version would need
 to be included in the file.
+
+---
+
+Disable builtin `log` in v6.

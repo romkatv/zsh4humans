@@ -37,8 +37,9 @@ typeset -gr _z4h_opt='emulate -L zsh &&
   setopt typeset_silent pipe_fail extended_glob prompt_percent no_prompt_subst &&
   setopt no_prompt_bang no_bg_nice no_aliases'
 
-zmodload zsh/{datetime,langinfo,parameter,stat,system,terminfo,zutil} || return
-zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm,zf_rmdir,zf_ln}         || return
+zmodload zsh/{datetime,langinfo,parameter,system,terminfo,zutil} || return
+zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm,zf_rmdir,zf_ln}    || return
+zmodload -F zsh/stat b:zstat                                     || return
 
 () {
   if [[ $1 != $Z4H/zsh4humans/main.zsh ]]; then

@@ -1025,6 +1025,8 @@ function -z4h-post-init() {
     fi
   fi
 
+  precmd_functions=(-z4h-wrap-commands $precmd_functions)
+
   # Send WINCH just in case we've set incorrect TTY dimensions manually.
   builtin kill -WINCH $$
 }

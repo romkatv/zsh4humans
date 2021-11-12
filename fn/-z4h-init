@@ -51,9 +51,64 @@ TIMEFMT='user=%U system=%S cpu=%P total=%*E'  # output format of `time` reserved
 
 zstyle -t :z4h:ssh-agent: start && -z4h-start-ssh-agent
 
-function ssh()    { z4h ssh    "$@" }
-function sudo()   { z4h sudo   "$@" }
-function docker() { z4h docker "$@" }
+function -z4h-wrap-commands() {
+  emulate -L zsh
+  if (( _z4h_wrap_ssh != 2 )); then
+    if (( _z4h_wrap_ssh )); then
+      if [[ ! -v functions[ssh] ]]; then
+        typeset -gi _z4h_wrap_ssh=2
+      elif [[ ! -v commands[ssh] ]]; then
+        unset _z4h_wrap_ssh
+        unfunction ssh
+      fi
+    else
+      if [[ -v functions[ssh] ]]; then
+        typeset -gi _z4h_wrap_ssh=2
+      elif [[ -v commands[ssh] ]]; then
+        function ssh() { z4h ssh "$@" }
+        typeset -gi _z4h_wrap_ssh=1
+      fi
+    fi
+  fi
+
+  if (( _z4h_wrap_sudo != 2 )); then
+    if (( _z4h_wrap_sudo )); then
+      if [[ ! -v functions[sudo] ]]; then
+        typeset -gi _z4h_wrap_sudo=2
+      elif [[ ! -v commands[sudo] ]]; then
+        unset _z4h_wrap_sudo
+        unfunction sudo
+      fi
+    else
+      if [[ -v functions[sudo] ]]; then
+        typeset -gi _z4h_wrap_sudo=2
+      elif [[ -v commands[sudo] ]]; then
+        function sudo() { z4h sudo "$@" }
+        typeset -gi _z4h_wrap_sudo=1
+      fi
+    fi
+  fi
+
+  if (( _z4h_wrap_docker != 2 )); then
+    if (( _z4h_wrap_docker )); then
+      if [[ ! -v functions[docker] ]]; then
+        typeset -gi _z4h_wrap_docker=2
+      elif [[ ! -v commands[docker] ]]; then
+        unset _z4h_wrap_docker
+        unfunction docker
+      fi
+    else
+      if [[ -v functions[docker] ]]; then
+        typeset -gi _z4h_wrap_docker=2
+      elif [[ -v commands[docker] ]]; then
+        function docker() { z4h docker "$@" }
+        typeset -gi _z4h_wrap_docker=1
+      fi
+    fi
+  fi
+}
+
+-z4h-wrap-commands
 
 if [[ ! -e $Z4H/zsh4humans/fn/-z4h-compinit-impl ]]; then
   -z4h-postinstall-self || return

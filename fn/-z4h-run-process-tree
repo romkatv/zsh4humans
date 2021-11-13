@@ -1,11 +1,8 @@
 #!/usr/bin/env zsh
+#
+# Based on https://github.com/romkatv/run-process-tree but without
+# the preservation of options, patterns, etc.
 
-# Copied from https://github.com/romkatv/run-process-tree.
-
-zmodload zsh/parameter                                   || return
-local opt=(${(kv)options[@]})                            || return
-local pat=(${patchars[@]})                               || return
-local dis_pat=(${dis_patchars[@]})                       || return
 emulate -L zsh                                           || return
 setopt monitor traps_async pipe_fail no_unset no_bg_nice || return
 zmodload zsh/system                                      || return
@@ -30,9 +27,6 @@ exec {stdout}>&1 || return
     {
       trap - ZERR
       exec {pipe}>&- || return
-      builtin enable -p -- $pat
-      builtin disable -p -- $dis_pat
-      options=($opt zle off monitor off)
       () { "$@" } "$@"
     } &
     local -i ret

@@ -71,7 +71,8 @@ local success
     print -n >$success      || return
   fi
 
-  function '-z4h-install-many-parallel'() {
+  function -z4h-install-many-parallel() {
+    eval "$_z4h_opt"
     local repo fd head=() tail=()
     local omz=ohmyzsh/ohmyzsh
     queue=(${(M)queue:#powerlevel10k} ${queue:#powerlevel10k})

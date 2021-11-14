@@ -81,7 +81,7 @@ if (( z4h_ssh_enable )); then
   default_ssh_command+=(
     -o ControlMaster=auto
     -o ControlPersist=5
-    -o ControlPath=~/.ssh/control-master/sock-%C)
+    -o ControlPath='~/.ssh/s/%C')
 fi
 
 local -a z4h_ssh_command
@@ -157,16 +157,27 @@ fi
 
 if [[ $mkdir_control_master == 1 &&
       ${(pj:\0:)z4h_ssh_command} == ${(pj:\0:)default_ssh_command} &&
-      ! -d ~/.ssh/control-master && -n ~(#qNU) ]]; then
-  zf_mkdir -pm 700 ~/.ssh/control-master || return
+      ! -d ~/.ssh/s && -n ~(#qNU) ]]; then
+  zf_mkdir -pm 700 ~/.ssh/s || return
   {
-    >~/.ssh/control-master/README <<\END
+    >~/.ssh/s/README <<\END
 This directory has been created by `z4h ssh`. It stores control sockets
 for SSH connections. See ControlMaster, ControlPath and ControlPersist
 in `man ssh_config`. This directory must not be writable by anyone other
 than the current user.
 END
   } || return
+  if [[ -e ~/.ssh/control-master/README ]]; then
+    {
+      >>~/.ssh/s/README <<\END
+
+You might also have ~/.ssh/control-master with the same file in it. This
+is the old directory that was used by zsh4humans for the same purpose
+before 2021-11-14. If you don't reference that directory explicitly from
+~/.ssh/config, you can safely delete it.
+END
+    } || return
+  fi
 fi
 
 if (( must_passthrough || !z4h_ssh_enable )); then

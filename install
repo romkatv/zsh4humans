@@ -219,7 +219,11 @@ done
 
 rcs=''
 
-for f in ~/'.zshenv' ~/'.zprofile' ~/'.zshrc' ~/'.zlogin' ~/'.zlogout'; do
+for f in ~/'.zshenv' ~/'.zshenv.zwc'     \
+         ~/'.zprofile' ~/'.zprofile.zwc' \
+         ~/'.zshrc' ~/'.zshrc.zwc'       \
+         ~/'.zlogin' ~/'.zlogin.zwc'     \
+         ~/'.zlogout' ~/'.zlogout.zwc'; do
   if '[' '-e' "$f" ']'; then
     rcs="$rcs ${f##*/}"
   fi
@@ -339,7 +343,7 @@ Z4H="${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
 
 if '[' '-n' "$backup_dir" ']'; then
   'command' 'mkdir' '-p' '--' "$backup_dir"
-  ('cd' && 'command' 'cp' '--' $rcs "$backup_dir"/) || 'exit'
+  ('cd' && 'command' 'cp' '-p' '--' $rcs "$backup_dir"/) || 'exit'
 fi
 
 if '[' '-n' "$rcs" ']'; then

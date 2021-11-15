@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+zstyle -T :z4h: check-orphan-rc-zwc || return 0
+
+local -a zwcs=($@)
+local -a rcs=(${^@:r}(N))
+
+if (( $#rcs != $#zwcs )); then
+  local home=~
+  local zdotdir=${${${(q)ZDOTDIR}/#${(q)home}/'~'}//\%/%%}
+  print -Pru2 -- "%F{3}z4h%f: detected %F{1}orphan zwc files%f"
+  print -Pru2 -- ""
+  local rc rm_args=()
+  for rc in ${${(@)zwcs:r}:|rcs}; do
+    rm_args+=("%U$zdotdir/${rc:t}.zwc%u")
+    print -Pru2 -- "  $rm_args[-1]"
+  done
+  print -Pru2 -- ""
+  print -Pru2 -- "It is highly recommended to delete them:"
+  print -Pru2 -- ""
+  print -Pru2 -- "  %F{2}rm%f -f -- ${(j: :)rm_args}"
+  print -Pru2 -- ""
+fi
+
+return 0

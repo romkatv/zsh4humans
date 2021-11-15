@@ -382,6 +382,11 @@ function -z4h-cmd-init() {
     if (( _z4h_zle )) && zstyle -t :z4h:direnv enable && [[ -e $Z4H/cache/direnv ]]; then
       -z4h-direnv-init 0 || return '_z4h_err()'
     fi
+
+    local rc_zwcs=($ZDOTDIR/{.zshenv,.zprofile,.zshrc,.zlogin,.zlogout}.zwc(N))
+    if (( $#rc_zwcs )); then
+      -z4h-check-rc-zwcs $rc_zwcs || return '_z4h_err()'
+    fi
   } || return
 
   : ${ZLE_RPROMPT_INDENT:=0}

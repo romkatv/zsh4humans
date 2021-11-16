@@ -71,8 +71,8 @@ z4h load   ohmyzsh/ohmyzsh/plugins/emoji-clock  # load a plugin
 z4h bindkey z4h-backward-kill-word  Ctrl+Backspace Ctrl+H
 z4h bindkey z4h-backward-kill-zword Ctrl+Alt+Backspace
 
-z4h bindkey undo Ctrl+/  # undo the last command line change
-z4h bindkey redo Alt+/   # redo the last undone command line change
+z4h bindkey undo Ctrl+/ Shift+Tab # undo the last command line change
+z4h bindkey redo Alt+/            # redo the last undone command line change
 
 z4h bindkey z4h-cd-back    Alt+Left   # cd into the previous directory
 z4h bindkey z4h-cd-forward Alt+Right  # cd into the next directory

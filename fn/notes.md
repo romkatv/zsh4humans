@@ -1051,3 +1051,8 @@ history can be filtered out at the end.
 
 Add `undo-repeat` action (or a better name) to fzf widgets. It should completely undo `repeat`.
 Great to bind on <kbd>Shift+Tab</kbd>.
+
+---
+
+Delete (uninstall) stuff that was installed with `z4h install` and no longer has the correspondive
+directive.

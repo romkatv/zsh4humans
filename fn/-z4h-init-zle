@@ -334,7 +334,8 @@ bindkey   '^[O'     z4h-stash-buffer               # alt+O
 # Accept autosuggestion.
 bindkey   '^[m'     z4h-autosuggest-accept         # alt+m
 bindkey   '^[M'     z4h-autosuggest-accept         # alt+M
-# Redo.
+# Undo and redo.
+bindkey   '^[[Z'    undo                           # shift+tab
 bindkey   '^[/'     redo                           # alt+/
 # Expand alias/glob/parameter.
 bindkey   '^ '      z4h-expand                     # ctrl+space

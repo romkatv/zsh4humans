@@ -1025,3 +1025,11 @@ to be included in the file.
 ---
 
 Disable builtin `log` in v6.
+
+---
+
+Add an ability to set `ZDOTDIR` for remote machines:
+
+```zsh
+zstyle :z4h:ssh:some-host zdotdir '~/.config/zsh'
+```

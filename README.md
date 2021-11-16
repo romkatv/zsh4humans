@@ -86,8 +86,8 @@ Zsh for Humans is not a good choice for users who prefer vi bindings in their sh
 
 ## Usage
 
-If you've used Zsh, Bash or Fish, Zsh for Humans should feel familiar. For the most part everything
-works as you would expect.
+If you've used Zsh, Bash or Fish before, Zsh for Humans should feel familiar. For the most part
+everything works as you would expect.
 
 ### Accepting autosuggestions
 
@@ -105,18 +105,17 @@ commands completion functions are provided by Zsh proper. Additional completion 
 contributed by [zsh-completions](https://github.com/zsh-users/zsh-completions). See its homepage
 for the list of commands it supports.
 
-Ambiguous completions automatically start [fzf](https://github.com/junegunn/fzf). Accept the desired
+Ambiguous completions automatically start [fzf](#interactive-search-with-fzf). Accept the desired
 completion with <kbd>Enter</kbd>. You can also select more than one completion with
 <kbd>Ctrl+Space</kbd> or all of them with <kbd>Ctrl+A</kbd>.
 
 ### Searching command history
 
-<kbd>Up</kbd> and <kbd>Down</kbd> keys fetch commands from history filtered the prefix bound by the
-command line start and the cursor. For example, if you press <kbd>Up</kbd> when the first line of
-the command buffer contains `echo hello world` and the cursor is positioned before `world`, it'll
-fetch the last executed command that starts with `echo hello`.
+<kbd>Up</kbd> and <kbd>Down</kbd> keys fetch commands from history that contain what you've already
+typed on the command line. For example, if you press <kbd>Up</kbd> after typing `grep`, you'll see
+the last executed command that contains `grep`.
 
-<kbd>Ctrl+R</kbd> starts [fzf](https://github.com/junegunn/fzf) to search over history.
+<kbd>Ctrl+R</kbd> starts [fzf](#interactive-search-with-fzf) to search over history.
 
 ### Interactive search with `fzf`
 
@@ -128,17 +127,17 @@ spaces. For example:
 ^music .mp3$ sbtrkt !fire
 ```
 
-| Token     | Match type           | Description                          |
-| --------- | -------------------- | ------------------------------------ |
-| `wild`    | substring-match      | Items with the substring `wild`      |
-| `^music`  | prefix-match         | Items that start with `music`        |
-| `.mp3$`   | suffix-match         | Items that end with `.mp3`           |
-| `!fire`   | inverse-match        | Items that do not include `fire`     |
-| `!^music` | inverse-prefix-match | Items that do not start with `music` |
-| `!.mp3$`  | inverse-suffix-match | Items that do not end with `.mp3`    |
+| Token     | Match type        | Description                          |
+| --------- | ----------------- | ------------------------------------ |
+| `wild`    | substring         | Items with the substring `wild`      |
+| `^music`  | prefix            | Items that start with `music`        |
+| `.mp3$`   | suffix            | Items that end with `.mp3`           |
+| `!wild`   | inverse substring | Items without the substring `wild`   |
+| `!^music` | inverse prefix    | Items that do not start with `music` |
+| `!.mp3$`  | inverse suffix    | Items that do not end with `.mp3`    |
 
-A single bar character term acts as an OR operator. For example, the following query matches entries
-that start with `core` and end with either `go`, `rb`, or `py`.
+A single bar (`|`) acts as an OR operator. For example, the following query matches entries that
+start with `core` and end with either `go`, `rb`, or `py`.
 
 ```text
 ^core go$ | rb$ | py$
@@ -199,8 +198,9 @@ Everything within the highlighted areas on the screenshot is *prompt*. It is pro
 
 The listing of files produced by `ls` command is colored by `ls` itself. Different commands have
 different ways of customizing their output, and even different version of `ls` have different flags
-and environment variables related to colors. Zsh for Humans enables colored output from common
-commands (such as `ls`). For further customization consult documentation of the respective command.
+and environment variables related to colors. Zsh for Humans enables colored output for common
+commands such as `ls` and `grep`. For further customization consult documentation of the respective
+command.
 
 `echo hello` is the current command being typed. Syntax highlighting for it is provided by
 [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting). See its homepage
@@ -214,7 +214,7 @@ great productivity booster. See [zsh-autosuggestions](
   https://github.com/zsh-users/zsh-autosuggestions) homepage for more information.
 
 Last but not least, your terminal has a say about the appearance of *everything* that runs within
-it. The base colors, numbered from 0 to 15, can look very different in different terminals and even
+it. The base colors, numbered from 0 to 15, can look differently in different terminals and even
 in the same terminal with different settings. Most modern terminals support *themes*,
 *color palettes* or *color schemes* that allow you to quickly change base colors. If colors in your
 terminal look unpleasant, try a different theme. Note that colors with codes above 15, as well as
@@ -231,7 +231,7 @@ environment variables in `~/.zshenv`, do it where indicated by comments.
 
 Zsh supports several additional startup files with complex rules governing when each file is
 sourced. The additional startup files are `~/.zprofile`, `~/.zlogin` and `~/.zlogout`. **Do not
-create these files.**
+create these files** unless you are absolutely certain you need them.
 
 ## Updating
 
@@ -239,7 +239,11 @@ Run `z4h update` to update Zsh for Humans. There is no update mechanism for `~/.
 
 ## Uninstalling
 
-To uninstall Zsh for Humans, remove `~/.zshenv` and `~/.zshrc` or replace them with a different
-version. If you had these files prior to the installation of Zsh for Humans and have replied in the
-affirmative when asked by the installer whether you want them backed up, you can find them in
-`~/zsh-backup`.
+1. Delete or replace `~/.zshenv` and `~/.zshrc`. If you had these files prior to the installation of
+   Zsh for Humans and have replied in the affirmative when asked by the installer whether you want
+   them backed up, you can find them in `~/zsh-backup`.
+2. Restart your terminal. **Restarting zsh is not enough.**
+3. Delete Zsh for Humans cache:
+   ```zsh
+   rm -rf -- "${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
+   ```

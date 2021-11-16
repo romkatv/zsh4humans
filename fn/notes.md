@@ -1033,3 +1033,21 @@ Add an ability to set `ZDOTDIR` for remote machines:
 ```zsh
 zstyle :z4h:ssh:some-host zdotdir '~/.config/zsh'
 ```
+
+---
+
+Make the list of traversed directories in `z4h-cd-down` configurable.
+
+```zsh
+zstyle ':z4h:cd-down' dirs history descendants:. descendants:~ children:/
+```
+
+Could use better naming.
+
+Make sure that the `find` command that corresponds to `descendants:~` prunes `.`. Entries from
+history can be filtered out at the end.
+
+---
+
+Add `undo-repeat` action (or a better name) to fzf widgets. It should completely undo `repeat`.
+Great to bind on <kbd>Shift+Tab</kbd>.

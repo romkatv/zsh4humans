@@ -284,8 +284,8 @@ else
   bindkey '^P'      z4h-up-prefix-local            # ctrl+p
   bindkey '^[[A'    z4h-up-prefix-local            # up
   # Move cursor one line down or fetch the next command from LOCAL history.
-  bindkey   '^N'    z4h-down-prefix-local          # ctrl+n
-  bindkey   '^[[B'  z4h-down-prefix-local          # down
+  bindkey '^N'      z4h-down-prefix-local          # ctrl+n
+  bindkey '^[[B'    z4h-down-prefix-local          # down
 fi
 
 # Move cursor one line up or fetch the previous command from GLOBAL history.
@@ -380,11 +380,11 @@ bindkey   '^[R'     z4h-fzf-dir-history            # alt+R
 
 if (( _z4h_can_save_restore_screen )) &&
    zstyle -T :z4h: prompt-at-bottom; then
-  bindkey '^L' z4h-clear-screen-soft-bottom
-  bindkey '^[^L' z4h-clear-screen-hard-bottom
+  bindkey '^L'      z4h-clear-screen-soft-bottom   # ctrl+l
+  bindkey '^[^L'    z4h-clear-screen-hard-bottom   # ctrl+alt+l
 else
-  bindkey '^L' z4h-clear-screen-soft-top
-  bindkey '^[^L' z4h-clear-screen-hard-top
+  bindkey '^L'      z4h-clear-screen-soft-top      # ctrl+l
+  bindkey '^[^L'    z4h-clear-screen-hard-top      # ctrl+alt+l
 fi
 
 if zstyle -T :z4h:bindkey macos-option-as-alt; then

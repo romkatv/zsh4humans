@@ -1056,3 +1056,35 @@ Great to bind on <kbd>Shift+Tab</kbd>.
 
 Delete (uninstall) stuff that was installed with `z4h install` and no longer has the correspondive
 directive.
+
+---
+
+When generating a config in p10k under z4h, create trampoline files for more powerful terminals.
+E.g., when generating `.p10k-ascii-8color.zsh`, create all the other variants that don't exist yet.
+
+Adjust the welcome message about tmux.
+
+---
+
+Add every `.p10k*.zsh` variant that doesn't exist locally to `z4h_ssh_receive_files`. The idea is to
+pull configs that get generated remotely.
+
+---
+
+If there is no correct `.p10k*.zsh` variant for the TTY but there are variants for less powerful
+terminals, automatically create trampoline files.
+
+---
+
+If there is no correct `.p10k*.zsh` variant for the TTY but there are variants for more powerful
+terminals, print a message explaning why the configuration wizard is about to start. Maybe also
+ask for other options? Maybe use a predefined simple config and print a message?
+
+---
+
+Create `.tmux.conf` in the installer if there is no existing config and the user chooses
+"always tmux".
+
+---
+
+Find a better solution w.r.t. functions `docker` and `sudo`.

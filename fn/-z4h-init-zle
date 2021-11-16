@@ -480,6 +480,7 @@ typeset -gA _z4h_key=(
   Ctrl+_                      '^_'
   Ctrl+Space                  '^ '
   Alt+Space                   '^[ '
+  Shift+Tab                   '^[[Z'
 
   Up                          '^[[A'
   Down                        '^[[B'

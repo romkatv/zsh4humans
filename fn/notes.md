@@ -1034,6 +1034,15 @@ Add an ability to set `ZDOTDIR` for remote machines:
 zstyle :z4h:ssh:some-host zdotdir '~/.config/zsh'
 ```
 
+Consider setting the default value to something other than `$HOME`. A naive solution will break
+this:
+
+```zsh
+sudo -su $USER
+```
+
+No one's gonna do *that* but there might be other ways of losing `ZDOTDIR` even when it's exported.
+
 ---
 
 Make the list of traversed directories in `z4h-cd-down` configurable.

@@ -1088,3 +1088,17 @@ Create `.tmux.conf` in the installer if there is no existing config and the user
 ---
 
 Find a better solution w.r.t. functions `docker` and `sudo`.
+
+---
+
+Change the default values of `:z4h:term-title:ssh` in v6 to these:
+
+```zsh
+zstyle ':z4h:term-title:ssh' precmd  ${${${Z4H_SSH##*:}//\%/%%}:-%m}': %~'
+zstyle ':z4h:term-title:ssh' preexec ${${${Z4H_SSH##*:}//\%/%%}:-%m}': ${1//\%/%%}'
+```
+
+---
+
+Make p10k display `${${${Z4H_SSH##*:}//\%/%%}:-%m}` instead of `%m` in `context`. Not sure how to
+achieve this without making the default p10k configs more complex.

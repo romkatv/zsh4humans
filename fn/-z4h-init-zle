@@ -936,11 +936,13 @@ function -z4h-post-init() {
   fi
 
   typeset -gi _z4h_compinit_fd
-  if sysopen -o cloexec -ru _z4h_compinit_fd /dev/null; then
+  if [[ -v __p9k_fd_0 ]] && zselect -t0 -r $__p9k_fd_0 &&
+     sysopen -o cloexec -ru _z4h_compinit_fd /dev/null; then
     zle -F $_z4h_compinit_fd -z4h-compinit
   else
     unset _z4h_compinit_fd
     -z4h-compinit
+    -z4h-update-dir-history
   fi
 
   if (( _z4h_use[zsh-syntax-highlighting] )); then

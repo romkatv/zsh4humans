@@ -4,7 +4,7 @@
 
 builtin echoti civis >&$_z4h_tty_fd
 local -i cursor_x cursor_y
--z4h-get-cursor-pos
+-z4h-get-cursor-pos || cursor_y=0
 builtin print -rnu $_z4h_tty_fd -- "${(pl:$((2 * LINES - cursor_y - 1))::\n:)}"
 builtin zle -I
 builtin zle -R

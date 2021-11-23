@@ -254,16 +254,9 @@ function -z4h-cmd-init() {
            zstyle -T :z4h: prompt-at-bottom &&
            ! zselect -t0 -r 0; then
           local cursor_y cursor_x
-          local esc
-          if IFS='[;' builtin read -s -d R esc\?$'\e[6n' cursor_y cursor_x; then
-            local -i n=0
-            if [[ $cursor_y == <-> && $cursor_x == <-> ]]; then
-              (( n = LINES - cursor_y ))
-            elif [[ $cursor_x == *$'\e['<->';'<-> ]]; then
-              (( n = LINES - ${${cursor_x##*'['}%';'*} ))
-            fi
-            print -rn -- ${(pl:$n::\n:)}
-          fi
+          -z4h-get-cursor-pos || cursor_y=0
+          local -i n='LINES - cursor_y'
+          print -rn -- ${(pl:$n::\n:)}
         fi
       elif (( install_tmux )) &&
            [[ -z $TMUX && ! -w ${_Z4H_TMUX%,(|<->),(|<->)} && -z $Z4H_SSH ]]; then

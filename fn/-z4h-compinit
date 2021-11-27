@@ -70,17 +70,17 @@ local cmd
 for cmd in cargo helm kitty kubectl oc rustup; do
   # Homebrew ships broken completions for kubectl, so we use our own even
   # if _comps[kubectl] is set.
-  (( $+commands[$cmd] )) && compdef -- -z4h-complete-$cmd $cmd
+  [[ -v commands[$cmd] ]] && compdef -- -z4h-complete-$cmd $cmd
 done
 
-if (( $+commands[terraform] && ! $+_comps[terraform] )); then
+if [[ -v commands[terraform] && ! -v _comps[terraform] ]]; then
   complete -o nospace -C =terraform terraform
 fi
 
-if (( $+commands[vault] && ! $+_comps[vault] )); then
+if [[ -v commands[vault] && ! -v _comps[vault] ]]; then
   complete -o nospace -C =vault vault
 fi
 
-if (( $+commands[aws_completer] && ! $+_comps[aws] )); then
+if [[ -v commands[aws_completer] && ! -v _comps[aws] ]]; then
   complete -C =aws_completer aws
 fi

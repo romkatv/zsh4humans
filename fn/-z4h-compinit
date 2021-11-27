@@ -73,13 +73,11 @@ for cmd in cargo helm kitty kubectl oc rustup; do
   [[ -v commands[$cmd] ]] && compdef -- -z4h-complete-$cmd $cmd
 done
 
-if [[ -v commands[terraform] && ! -v _comps[terraform] ]]; then
-  complete -o nospace -C =terraform terraform
-fi
-
-if [[ -v commands[vault] && ! -v _comps[vault] ]]; then
-  complete -o nospace -C =vault vault
-fi
+for cmd in terraform vault packer; do
+  if [[ -v commands[$cmd] && ! -v _comps[$cmd] ]]; then
+    complete -o nospace -C =$cmd $cmd
+  fi
+done
 
 if [[ -v commands[aws_completer] && ! -v _comps[aws] ]]; then
   complete -C =aws_completer aws

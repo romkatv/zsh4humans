@@ -4,6 +4,8 @@
 # License:
 # https://github.com/zsh-users/zsh/blob/530d6337e69941a5cd802fa7808aae8f33ab1fe9/LICENCE
 #
+# There is a modification at the bottom marked by "zsh4humans" in comments.
+
 # Starting with zsh-5.1, ZLE began to recognize the "bracketed paste"
 # capability of terminal emulators, that is, the sequences $'\e[200~' to
 # start a paste and $'\e[201~' to indicate the end of the pasted text.
@@ -215,11 +217,13 @@ bracketed-paste-magic() {
     zle .bracketed-paste -- "$@"
     zle .split-undo
 
-    # Arrange to display highlighting if necessary
-    if [[ -z $zle_highlight || -n ${(M)zle_highlight:#paste:*} ]]; then
-	zle -R
-	zle .read-command && zle -U - "$KEYS"
-    fi
+    # zsh4humans patch: disable redisplay as it breaks highlighting.
+    #
+    #    # Arrange to display highlighting if necessary
+    #    if [[ -z $zle_highlight || -n ${(M)zle_highlight:#paste:*} ]]; then
+	#    zle -R
+	#    zle .read-command && zle -U - "$KEYS"
+    #    fi
 }
 
 # Handle zsh autoloading conventions

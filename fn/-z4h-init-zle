@@ -1013,6 +1013,11 @@ function -z4h-post-init() {
     _zsh_autosuggest_start
   fi
 
+  if [[ -v functions[bracketed-paste-magic] ]]; then
+    builtin unfunction bracketed-paste-magic
+    builtin autoload -Uz -- $Z4H/zsh4humans/fn/bracketed-paste-magic
+  fi
+
   if (( ! $+_z4h_iterm_cmd )) && [[ $ITERM_SHELL_INTEGRATION_INSTALLED == Yes ]]; then
     -z4h-error-iterm2-integration
   fi

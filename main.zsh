@@ -289,6 +289,8 @@ function -z4h-cmd-init() {
                 cmds+=(set -ga terminal-overrides ',*:Tc' ';')
                 sock+='-tc'
               fi
+            else
+              cmds+=(set -g default-terminal screen ';')
             fi
             if zstyle -t :z4h: term-vresize top; then
               cmds+=(set -g history-limit 1024 ';')

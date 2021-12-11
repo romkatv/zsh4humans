@@ -36,7 +36,7 @@ function -z4h-set-term-title-precmd() {
 }
 
 autoload -Uz up-line-or-beginning-search down-line-or-beginning-search || return
-autoload -Uz run-help ${^fpath}/run-help-*(N:t)                        || return
+autoload -Uz run-help ${^fpath}/run-help-^*.zwc(N:t)                   || return
 add-zsh-hook -- preexec -z4h-set-term-title-preexec                    || return
 add-zsh-hook -- precmd  -z4h-set-term-title-precmd                     || return
 [[ -v aliases[run-help] ]] && unalias run-help

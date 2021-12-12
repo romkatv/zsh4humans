@@ -3,7 +3,11 @@
 local cmd=${commands[cmd.exe]:-/mnt/c/Windows/System32/cmd.exe}
 [[ -x $cmd ]] || return
 
-[[ "$(</proc/version)" == *[Mm]icrosoft* ]] || return
+case "$(</proc/version)" in
+  *Microsoft*) typeset -gi z4h_no_flock=1;;
+  *microsoft*)                           ;;
+  *)           return                    ;;
+esac
 
 local lines=("${(@f)${$(cd -q -- ${cmd:h} && ./${cmd:t} /c set 2>/dev/null)//$'\r'}}")
 local keys=(${lines%%=*}) vals=(${lines#*=})

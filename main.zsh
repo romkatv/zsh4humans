@@ -403,11 +403,17 @@ function -z4h-cmd-init() {
     builtin source $XDG_CACHE_HOME/p10k-instant-prompt-$user.zsh
   }
 
-  () {
-    eval "$_z4h_opt"
-    -z4h-init && return
-    [[ -e $Z4H/.updating ]] || -z4h-error-command init
-    return 1
+  local -i z4h_no_flock
+
+  {
+    () {
+      eval "$_z4h_opt"
+      -z4h-init && return
+      [[ -e $Z4H/.updating ]] || -z4h-error-command init
+      return 1
+    }
+  } always {
+    (( z4h_no_flock )) || setopt hist_fcntl_lock
   }
 }
 

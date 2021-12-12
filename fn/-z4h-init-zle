@@ -1061,3 +1061,5 @@ typeset -ga _z4h_dir_history
 
 compdef _ssh  ssh
 compdef _sudo sudo
+
+typeset -g VIRTUAL_ENV_DISABLE_PROMPT=1

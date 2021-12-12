@@ -2,6 +2,16 @@
 
 local -i ret
 
+if [[ ${CONTEXT-} != start || -v _z4h_transient_rprompt ]]; then
+  if [[ ${CONTEXT} == start ]]; then
+    unsetopt transient_rprompt
+    unset _z4h_transient_rprompt
+  elif [[ ! -o transient_rprompt ]]; then
+    setopt transient_rprompt
+    typeset -g _z4h_transient_rprompt=
+  fi
+fi
+
 if (( ${+widgets[-z4h-orig-zle-line-init]} )); then
   zle -- -z4h-orig-zle-line-init "$@" || ret=$?
 fi

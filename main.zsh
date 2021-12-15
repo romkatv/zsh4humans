@@ -391,6 +391,14 @@ function -z4h-cmd-init() {
     if (( $#rc_zwcs )); then
       -z4h-check-rc-zwcs $rc_zwcs || return '_z4h_err()'
     fi
+
+    typeset -gr _z4h_orig_shell=${SHELL-}
+
+    (( _z4h_dangerous_root || $+Z4H_SSH ))                                                   ||
+      ! zstyle -T :z4h: chsh                                                                 ||
+      [[ ${SHELL-} == $_z4h_exe || ${SHELL-} -ef $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] ||
+      -z4h-chsh                                                                              ||
+      true
   } || return
 
   : ${ZLE_RPROMPT_INDENT:=0}
@@ -449,11 +457,3 @@ function z4h() {
 }
 
 [[ ${Z4H_SSH-} != <1->:* ]] || -z4h-ssh-maybe-update || return
-
-typeset -gr _z4h_orig_shell=${SHELL-}
-
-(( _z4h_dangerous_root || $+Z4H_SSH ))                                                   ||
-  ! zstyle -T :z4h: chsh                                                                 ||
-  [[ ${SHELL-} == $_z4h_exe || ${SHELL-} -ef $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] ||
-  -z4h-chsh                                                                              ||
-  true

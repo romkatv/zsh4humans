@@ -1063,7 +1063,7 @@ Great to bind on <kbd>Shift+Tab</kbd>.
 
 ---
 
-Delete (uninstall) stuff that was installed with `z4h install` and no longer has the correspondive
+Delete (uninstall) stuff that was installed with `z4h install` and no longer has the corresponding
 directive.
 
 ---
@@ -1111,3 +1111,9 @@ zstyle ':z4h:term-title:ssh' preexec ${${${Z4H_SSH##*:}//\%/%%}:-%m}': ${1//\%/%
 
 Make p10k display `${${${Z4H_SSH##*:}//\%/%%}:-%m}` instead of `%m` in `context`. Not sure how to
 achieve this without making the default p10k configs more complex.
+
+---
+
+When replacing instant prompt with the real thing, it's not necessary to print `ed`. Zsh will do it
+on its own. Removing this `ed` might reduce the magnitude of blinking. It also might make it
+possible to get rid of the function call in `PS1`.

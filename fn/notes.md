@@ -1001,12 +1001,6 @@ Add a `zstyle` to disable VTE integration.
 
 ---
 
-Think of a better name for `iterm-integration` style. Maybe something with "osc133" or "final-term"
-in the name. See [docs](
-  https://iterm2.com/documentation-escape-codes.html#:~:text=FTCS_PROMPT-,OSC%20133%20%3B,-A%20ST).
-
----
-
 Run recovery code from `z4h.zsh` on `precmd` to lower startup lag (perhaps by defining
 `-z4h-post-init` and later redefining it). This should also solve the problem with custom `HISTFILE`
 -- just `fc -R` it on recovery.

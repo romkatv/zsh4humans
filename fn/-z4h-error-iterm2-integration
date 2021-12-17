@@ -13,7 +13,7 @@ print -Pru2 -- 'To fix this issue:'
 print -Pru2 -- ''
 print -Pru2 -- '1. Add this line at the top of %U'$zdotdir'/.zshrc%u:'
 print -Pru2 -- ''
-print -Pru2 -- "  %F{2}zstyle%f %F{3}':z4h:'%f iterm2-integration %F{3}'yes'%f"
+print -Pru2 -- "  %F{2}zstyle%f %F{3}':z4h:'%f term-shell-integration %F{3}'yes'%f"
 print -Pru2 -- ''
 print -Pru2 -- '2. (Optional) Remove the following line (or similar) from %U'$zdotdir'/.zshrc%u:'
 print -Pru2 -- ''

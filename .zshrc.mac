@@ -16,6 +16,9 @@ zstyle ':z4h:' prompt-at-bottom 'yes'
 # Keyboard type: 'mac' or 'pc'.
 zstyle ':z4h:bindkey' keyboard  'mac'
 
+# Mark up shell's output with semantic information.
+zstyle ':z4h:' term-shell-integration 'yes'
+
 # Right-arrow key accepts one character ('partial-accept') from
 # command autosuggestions or the whole thing ('accept')?
 zstyle ':z4h:autosuggestions' forward-char 'accept'

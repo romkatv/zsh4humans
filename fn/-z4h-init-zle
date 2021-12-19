@@ -1059,6 +1059,11 @@ typeset -g iterm2_hostname=${(%):-%m}
 
 typeset -ga _z4h_dir_history
 
+function compdef() {
+  eval "$_z4h_opt"
+  _z4h_compdef+=("${(pj:\0:)@}")
+}
+
 compdef _ssh  ssh
 compdef _sudo sudo
 

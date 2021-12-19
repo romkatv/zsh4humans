@@ -138,13 +138,6 @@ fi
 
 [[ $langinfo[CODESET] == (utf|UTF)(-|)8 ]] || -z4h-fix-locale
 
-function compinit() {}
-
-function compdef() {
-  eval "$_z4h_opt"
-  _z4h_compdef+=("${(pj:\0:)@}")
-}
-
 function -z4h-cmd-source() {
   local _z4h_file _z4h_compile
   zparseopts -D -F -- c=_z4h_compile -compile=_z4h_compile || return '_z4h_err()'

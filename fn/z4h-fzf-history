@@ -150,7 +150,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
         }
       })
     [[ -n $choice ]] || return
-    zle .vi-fetch-history -n $(($#history - ${${choice#*$'\n'}%%$'\1'*} + 1))
+    BUFFER=${choice#*$'\1'}
     if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
       CURSOR=$(($#BUFFER - 1))
     else

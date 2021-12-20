@@ -11,7 +11,8 @@
 emulate -L zsh -o no_multi_byte -o extended_glob
 
 local cwd=${(%):-%/}
-[[ -n $cwd && $HOSTNAME != *$'\e'* ]] || return
+local host=${HOST:-${(%):-%m}}
+[[ -n $cwd && $host != *$'\e'* ]] || return
 
 if [[ $cwd != $_z4h_vte_last_cwd ]]; then
   if [[ $cwd == [a-zA-Z0-9"/:_.-!'()~ "]# ]]; then
@@ -27,4 +28,4 @@ if [[ $cwd != $_z4h_vte_last_cwd ]]; then
   typeset -g _z4h_vte_last_cwd=$cwd
 fi
 
--z4h-tmux-bypass '\e]7;file://%s%s\e\' "$HOSTNAME" "$_z4h_vte_last_encoded_cwd"
+-z4h-tmux-bypass '\e]7;file://%s%s\e\' "$host" "$_z4h_vte_last_encoded_cwd"

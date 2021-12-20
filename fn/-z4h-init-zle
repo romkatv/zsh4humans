@@ -1037,7 +1037,8 @@ function -z4h-post-init() {
   if [[ -v _z4h_tty_fd ]]; then
     if [[ -v function[__vte_osc7] ]]; then
       builtin functions -c -- -z4h-vte-osc7 __vte_osc7
-    elif [[ $VTE_VERSION == <3405-> ]]; then
+    elif { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
+            [[ $TERM != (dumb|linux) ]]; then
       builtin functions -c -- -z4h-vte-osc7 __vte_osc7
       if (( ! $precmd_functions[(I)__vte_osc7] )); then
         precmd_functions=(__vte_osc7 $precmd_functions)

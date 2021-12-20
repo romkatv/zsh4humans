@@ -214,7 +214,7 @@ function -z4h-cmd-init() {
     local -i install_tmux need_restart
     if (( $#start_tmux == 1 )); then
       case $start_tmux[1] in
-        integrated) install_tmux=1;;
+        integrated|isolated) install_tmux=1;;
         system)     start_tmux=(command tmux -u);;
       esac
     fi
@@ -274,7 +274,7 @@ function -z4h-cmd-init() {
             else
               local stamp=0
             fi
-            sock=${sock%/}/z4h-tmux-$UID-$TERM-$stamp
+            sock=${sock%/}/z4h-tmux-$UID-$TERM-${stamp%%.*}
             local -a cmds=()
             if (( terminfo[colors] >= 256 )); then
               cmds+=(set -g default-terminal tmux-256color ';')
@@ -288,6 +288,9 @@ function -z4h-cmd-init() {
             if zstyle -t :z4h: term-vresize top; then
               cmds+=(set -g history-limit 1024 ';')
               sock+='-h'
+            fi
+            if [[ $start_tmux[1] == isolated ]]; then
+              sock+=-$sysparams[pid]
             fi
             if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
               local orig_dir=${(%):-%/}

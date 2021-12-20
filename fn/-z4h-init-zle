@@ -1055,7 +1055,7 @@ function -z4h-post-init() {
 precmd_functions=(-z4h-post-init $precmd_functions)
 [[ -e $Z4H/welcome ]] && precmd_functions+=(-z4h-welcome)
 
-typeset -g iterm2_hostname=${(%):-%m}
+typeset -g iterm2_hostname=${HOST:-${(%):-%m}}
 
 typeset -ga _z4h_dir_history
 

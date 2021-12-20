@@ -70,7 +70,15 @@ local cmd
 for cmd in cargo helm kitty kubectl oc rustup; do
   # Homebrew ships broken completions for kubectl, so we use our own even
   # if _comps[kubectl] is set.
+  #
+  # TODO: what about the rest of them in the list? Move them below?
   [[ -v commands[$cmd] ]] && compdef -- -z4h-complete-$cmd $cmd
+done
+
+for cmd in gh; do
+  if [[ -v commands[$cmd] && ! -v _comps[$cmd] ]]; then
+    compdef -- -z4h-complete-$cmd $cmd
+  fi
 done
 
 for cmd in terraform vault packer; do

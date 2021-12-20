@@ -1,0 +1,28 @@
+#!/usr/bin/env zsh
+
+local gh="${commands[gh]-}"
+local comp="$Z4H"/cache/gh-completion-$EUID.zsh
+
+() {
+  [[ -n "$gh" ]] || return
+
+  [[ "$comp" -nt "$gh" ]] || {
+    local tmp="$comp".tmp."${sysparams[pid]}"
+    "$gh" completion -s zsh >"$tmp" || return
+    zf_mv -f -- "$tmp" "$comp" || return
+    -z4h-compile "$comp" || return
+  }
+
+  () {
+    emulate -L zsh
+    local -h funcstack=(_gh)
+    builtin source -- "$comp"
+  } || true
+
+  [[ -v functions[_gh] ]] || return
+  _comps[gh]=_gh
+} || {
+  builtin unset '_comps[gh]'
+  _default "$@"
+  return
+}

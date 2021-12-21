@@ -453,3 +453,5 @@ function z4h() {
 }
 
 [[ ${Z4H_SSH-} != <1->:* ]] || -z4h-ssh-maybe-update || return
+
+unset KITTY_SHELL_INTEGRATION

@@ -126,7 +126,7 @@ local -i list_colors=$((!$?))
           [[ -n $choice ]] || return
           choice=("${(@f)choice}")
           [[ -n $choice[1] ]] && again=1
-          cd -- ${choice[2]%%$'\0'*} || return
+          cd -- ${choice[2]%%$'\0'*} 2>/dev/null || return
           redraw=1
         } always {
           if (( _z4h_can_save_restore_screen )); then

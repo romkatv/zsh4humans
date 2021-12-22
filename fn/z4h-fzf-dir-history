@@ -118,8 +118,17 @@ local -i list_colors=$((!$?))
               if (( first )); then
                 local dir
                 for dir in $_z4h_dir_history; do
-                  [[ -d ${dir::=${~dir}} ]] && print -r -- $dir
-                done
+                  {
+                    # There is a bug in zsh that triggers if these two
+                    # expansions are combined: ${(g:oce:)${~dir}}.
+                    dir=${~dir}
+                    if [[ -d ${dir::=${(g:oce:)dir}} && $dir != *$'\n'* ]]; then
+                      print -r -- $dir
+                    fi
+                  } always {
+                    TRY_BLOCK_ERROR=0
+                  }
+                done 2>/dev/null
               else
                 print -rC1 -- $dirs
                 -z4h-find $dot_glob 1 $non_empty | command sed -n '/\/.*\// s/^..//p'
@@ -142,7 +151,8 @@ local -i list_colors=$((!$?))
           [[ -n $choice ]] || return
           choice=("${(@f)choice}")
           [[ -n $choice[1] ]] && again=1
-          cd -- ${choice[2]%%$'\0'*} || return
+          # Weird chars don't roundtrip, so the directory may not exist.
+          cd -- ${choice[2]%%$'\0'*} 2>/dev/null || return
           redraw=1
         } always {
           if (( _z4h_can_save_restore_screen )); then

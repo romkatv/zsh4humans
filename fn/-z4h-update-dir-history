@@ -20,9 +20,12 @@ if (( ! $#dirstack && (DIRSTACKSIZE || ! $+DIRSTACKSIZE) )); then
   local d stack=()
   for d in $_z4h_dir_history; do
     {
-      if [[ ($#stack -ne 0 || $d != $dir) && -d ${d::=${~d}} ]]; then
-        stack+=($d)
-        (( $+DIRSTACK && $#stack >= DIRSTACK - 1 )) && break
+      if [[ ($#stack -ne 0 || $d != $dir) ]]; then
+        d=${~d}
+        if [[ -d ${d::=${(g:oce:)d}} ]]; then
+          stack+=($d)
+          (( $+DIRSTACK && $#stack >= DIRSTACK - 1 )) && break
+        fi
       fi
     } always {
       TRY_BLOCK_ERROR=0

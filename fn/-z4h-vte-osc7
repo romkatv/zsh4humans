@@ -10,7 +10,7 @@
 
 emulate -L zsh -o no_multi_byte -o extended_glob
 
-local cwd=${(%):-%/}
+local cwd=${(g:oce:)${(%):-%/}}
 local host=${HOST:-${(%):-%m}}
 [[ -n $cwd && $host != *$'\e'* ]] || return
 

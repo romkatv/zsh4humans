@@ -113,7 +113,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'bindkey' '^[[1;5C' 'forward-word'
 
     if '[' '-n' "${_Z4H_ORIG_CWD-}" ']'; then
-      'builtin' 'cd' '-q' '--' "$_Z4H_ORIG_CWD" 2>'/dev/null' || 'builtin' 'cd' '-q'
+      'builtin' 'cd' '-q' '--' "${(g:oce:)_Z4H_ORIG_CWD}" 2>'/dev/null' || 'builtin' 'cd' '-q'
       'builtin' 'unset' '_Z4H_ORIG_CWD'
       'builtin' 'eval' 'dirstack=()'
     else

@@ -279,7 +279,10 @@ function -z4h-cmd-init() {
             if (( terminfo[colors] >= 256 )); then
               cmds+=(set -g default-terminal tmux-256color ';')
               if [[ $COLORTERM == (24bit|truecolor) ]]; then
-                cmds+=(set -ga terminal-overrides ',*:Tc' ';')
+                cmds+=(
+                  set -ga terminal-overrides ',*:Tc' ';'
+                  set -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm' ';'
+                  set -ga terminal-overrides ',*:Setulc=\E[58::2::%p1%{65536}%/%d::%p1%{256}%/%{255}%&%d::%p1%{255}%&%d%;m' ';')
                 sock+='-tc'
               fi
             else

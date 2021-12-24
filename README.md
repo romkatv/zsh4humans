@@ -58,8 +58,13 @@ necessary for Zsh for Humans, starts a new shell, and configures it as login she
 confirmation on every step so that you are always in control. Installation requires `curl` or
 `wget`. It does not require `git`, `zsh`, `sudo` or anything else.
 
-![Zsh for Humans installation](
-  https://github.com/romkatv/powerlevel10k-media/raw/32c7d40239c93507277f14522be90b5750f442c9/z4h-install.gif)
+<details>
+  <summary>Recording of the installation process</summary>
+
+  ![Zsh for Humans installation](
+    https://github.com/romkatv/powerlevel10k-media/raw/32c7d40239c93507277f14522be90b5750f442c9/z4h-install.gif)
+
+</details>
 
 ## Try it in Docker
 
@@ -83,6 +88,9 @@ changes to the file system. Once you exit Zsh, the image is deleted.
 ## Caveats
 
 Zsh for Humans is not a good choice for users who prefer vi bindings in their shell.
+
+Zsh for Humans has very little documentation. There is no list of configuration options it
+recognizes and no description of what those options do.
 
 ## Usage
 

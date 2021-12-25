@@ -16,11 +16,6 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
 {
   -z4h-show-dots ''
 
-  typeset -ga _z4h_naturals
-  if (( $#_z4h_naturals < $#history )); then
-    _z4h_naturals+=({$(($#_z4h_naturals+1))..$#history})
-  fi
-
   autoload +X -Uz -- -z4h-cursor-show
 
   local cursor_y cursor_x
@@ -35,8 +30,6 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       --no-multi
       --tiebreak=index
       --cycle
-      --delimiter='\001'
-      --with-nth=2
       --exact
       --no-mouse
       --tabstop 1
@@ -70,8 +63,6 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       --no-multi
       --tiebreak=index
       --cycle
-      --delimiter='\001'
-      --with-nth=2
       --exact
       --no-mouse
       --tabstop 1
@@ -139,7 +130,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     choice=$(
       unsetopt pipe_fail
       {
-        (( $#history )) && printf '%2$s\001%1$s\000' "${(@)${history[@]}:^_z4h_naturals}"
+        (( $#history )) && printf '%s\000' "${history[@]}"
       } | {
         {
           print -rnu $_z4h_tty_fd -- $move
@@ -150,7 +141,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
         }
       })
     [[ -n $choice ]] || return
-    BUFFER=${choice#*$'\1'}
+    BUFFER=${choice#*$'\n'}
     if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
       CURSOR=$(($#BUFFER - 1))
     else

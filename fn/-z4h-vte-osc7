@@ -10,7 +10,11 @@
 
 emulate -L zsh -o no_multi_byte -o extended_glob
 
-local cwd=${(g:oce:)${(%):-%/}}
+if [[ $PWD == /* && $PWD -ef . ]]; then
+  local cwd=$PWD
+else
+  local cwd=${${:-.}:a}
+fi
 local host=${HOST:-${(%):-%m}}
 [[ -n $cwd && $host != *$'\e'* ]] || return
 

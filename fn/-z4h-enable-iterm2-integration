@@ -16,7 +16,12 @@ function -z4h-iterm2-dump() {
   # I don't know what iTerm2 wants to be escaped and how. The official shell
   # integration doesn't escape anything, which is clearly wrong because \a
   # obviously cannot be passed as is.
-  -z4h-tmux-bypass '\e]1337;CurrentDir=%s\a' "${${${(g:oce:)${(%):-%/}}//$'\a'/\\a}//$'\e'/\\e}"
+  if [[ $PWD == /* && $PWD -ef . ]]; then
+    local cwd=$PWD
+  else
+    local cwd=${${:-.}:a}
+  fi
+  -z4h-tmux-bypass '\e]1337;CurrentDir=%s\a' "${${cwd//$'\a'/\\a}//$'\e'/\\e}"
   iterm2_print_user_vars
 }
 

@@ -293,7 +293,11 @@ function -z4h-cmd-init() {
               sock+=-$sysparams[pid]
             fi
             if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
-              local orig_dir=${(%):-%/}
+              if [[ $PWD == /* && $PWD -ef . ]]; then
+                local orig_dir=$PWD
+              else
+                local orig_dir=${${:-.}:a}
+              fi
               local dir=${TMPDIR:-/tmp}/z4h-tmux-cwd-$UID-$$-${TTY//\//.}
               {
                 zf_mkdir -p -- $dir &&

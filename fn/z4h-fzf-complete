@@ -51,7 +51,33 @@ done
         _z4h_array=("${(@P)_z4h_array}")
       fi
     }
-    compadd -M "r:|${_z4h_sep}=* r:|=*" "$@" - "${_z4h_array[@]}"
+    # This ** is not ideal but alternatives are worse.
+    #
+    # Consider the following setup:
+    #
+    #   git init
+    #   mkdir -p foo1 foo2/bar
+    #   touch foo1/qux foo2/bar/qux
+    #   git add .
+    #   git commit --allow-empty-message -m ''
+    #   rm foo1/qux foo2/bar/qux
+    #   git commit <TAB>
+    #
+    # At this point there are two trial completions: foo1/qux and foo2/bar/qux.
+    #
+    # With ** we'll get foo/qux with the cursor after foo. Another TAB will
+    # give summon fzf to choose between the two trial completions.
+    #
+    # With a single * we'll get the same completion on the first TAB (foo/qux
+    # with the cursor after foo). Another TAB will produce foo1/qux. That's
+    # quite awful. The awfulness is expecially obvious if auto_menu is set.
+    # In this case `git commit <TAB>` will complete foo1/qux in a single go,
+    # even though there are two files to commit.
+    #
+    # The ideal behavior would be foo on the first TAB and fzf with both
+    # trial completions on the second. We can achieve this by dropping -M.
+    # However, this would not allow us to complete f/b, and we want that.
+    compadd -M "r:|${_z4h_sep}=** r:|=*" "$@" - "${_z4h_array[@]}"
   }
 
   function _path_files() {
@@ -71,7 +97,7 @@ done
     zparseopts -E -a _z4h_opts {D,O,A}+:=_z4h_nDOA n+=_z4h_nDOA \
       f+=_z4h_f s+:=_z4h_s S+:=_z4h_S I+:=_z4h_I W+:=_z4h_W     \
       i+:=_z4h_i P+:=_z4h_P p+:=_z4h_p d+:=_z4h_d q+=_z4h_q     \
-      r+:=_z4h_r R+:=_z4h_R e+=_z4h_e U+=_z4h_U \
+      r+:=_z4h_r R+:=_z4h_R e+=_z4h_e U+=_z4h_U                 \
       {a,k,l,1,2,C,Q}+ {F,J,X,x,V,E,M}+: o+::
     if (( ${#_z4h_nDOA} )); then
       $_z4h_orig_compadd "$@"

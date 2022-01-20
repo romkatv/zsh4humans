@@ -39,6 +39,28 @@ local success
   local missing=(${want:|have})
   (( $#missing )) || return 0
 
+  if [[ ! -v commands[uname] ]]; then
+    print -Pru2 -- '%F{3}z4h%f: command not found: %F{1}uname%f'
+    return 1
+  fi
+
+  local uname_sm
+  uname_sm=$(uname -sm) || return
+  case ${(L)uname_sm} in
+    'darwin arm64');;
+    'darwin x86_64');;
+    'linux aarch64');;
+    'linux armv6l');;
+    'linux armv7l');;
+    'linux armv8l');;
+    'linux x86_64');;
+    'linux i686');;
+    *)
+      print -Pru2 -- "%F{3}z4h%f: unsupported platform: %F{1}${uname_sm//\%/%%}%f"
+      return 1
+    ;;
+  esac
+
   local repo base queue=()
   for repo in $_z4h_install_queue; do
     base=${repo%%@*}

@@ -34,20 +34,9 @@ zmodload zsh/{datetime,langinfo,parameter,stat,system,terminfo,zutil} || return
 zmodload -F zsh/files b:{zf_mkdir,zf_mv,zf_rm}                        || return
 
 () {
-  local zshrc=${funcsourcetrace[-1]%:<->}
-  if [[ $zshrc != */.zshrc ]]; then
-    print -Pru2 -- "%F{3}z4h%f: confusing config origin: %F{1}${zshrc//\%/%%}%f"
-    return 1
-  fi
   if [[ $1 != $Z4H/romkatv/zsh4humans/main.zsh ]]; then
     print -Pru2 -- "%F{3}z4h%f: confusing %Umain.zsh%u location: %F{1}${1//\%/%%}%f"
     return 1
-  fi
-  local zdotdir=${ZDOTDIR:-~}
-  typeset -g ZDOTDIR=${zshrc:h}
-  if [[ $ZDOTDIR != $zdotdir ]]; then
-    local home=~
-    print -Pru2 -- "%F{3}z4h%f: changing %BZDOTDIR%b to %U${${${(q)ZDOTDIR}/#${(q)home}/~}//\%/%%}%u"
   fi
   typeset -gr _z4h_param_pat=$'ZDOTDIR=$ZDOTDIR\0Z4H=$Z4H\0Z4H_URL=$Z4H_URL'
   typeset -gr _z4h_param_sig=${(e)_z4h_param_pat}

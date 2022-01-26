@@ -298,7 +298,12 @@ function -z4h-cmd-init() {
               else
                 local orig_dir=${${:-.}:a}
               fi
-              local dir=${TMPDIR:-/tmp}/z4h-tmux-cwd-$UID-$$-${TTY//\//.}
+              if [[ -n "$TMPDIR" && ( ( -d "$TMPDIR" && -w "$TMPDIR" ) || ! ( -d /tmp && -w /tmp ) ) ]]; then
+                local tmpdir=$TMPDIR
+              else
+                local tmpdir=/tmp
+              fi
+              local dir=$tmpdir/z4h-tmux-cwd-$UID-$$-${TTY//\//.}
               {
                 zf_mkdir -p -- $dir &&
                   print -r -- "TMUX=${(q)sock} TMUX_PANE= ${(q)tmux} "'"$@"' >$dir/tmux &&

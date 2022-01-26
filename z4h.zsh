@@ -27,8 +27,12 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'share_history'          'typeset_silent'         'hist_save_no_dups'      \
     'no_auto_remove_slash'   'no_list_types'          'no_beep'
 
-  if '[' '!' '-e' "${${TMPPREFIX:-/tmp/zsh}:h}" '-a' '-e' "${TMPDIR:-/tmp}" ']'; then
-    'export' TMPPREFIX="${${TMPDIR:-/tmp}%/}/zsh"
+  if '[' '!' '-e' "${${TMPPREFIX:-/tmp/zsh}:h}" ']'; then
+    if '[' '-n' "$TMPDIR" '-a' '-d' "$TMPDIR" '-a' '-w' "$TMPDIR" ']'; then
+      'export' TMPPREFIX="${TMPDIR%/}/zsh"
+    elif '[' '-d' "/tmp" '-a' '-w' "/tmp" ']'; then
+      'export' TMPPREFIX="/tmp/zsh"
+    fi
   fi
 
   if '[' "$TERMINFO" '!=' ~/'.terminfo' ']' && '[' '-e' ~/".terminfo/$TERM[1]/$TERM" ']'; then

@@ -382,7 +382,12 @@ else
 fi
 
 if [ -n "$url" ]; then
-  file="${TMPDIR:-/tmp}"/tmux-bin.tmp.$$.tar.gz
+  if [ -n "$TMPDIR" -a '(' '(' -d "$TMPDIR" -a -w "$TMPDIR" ')' -o '!' '(' -d /tmp -a -w /tmp ')' ')' ]; then
+    tmpdir="$TMPDIR"
+  else
+    tmpdir=/tmp
+  fi
+  file="$tmpdir"/tmux-bin.tmp.$$.tar.gz
   cleanup() { rm -f -- "$file"; }
   trap cleanup INT QUIT TERM EXIT ILL PIPE
 

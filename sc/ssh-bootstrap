@@ -79,10 +79,16 @@ _z4h_ssh_error() {
 }
 
 _z4h_ssh_mktemp() {
-  if command -v 'mktemp' >'/dev/null' 2>&1; then
-    _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "${TMPDIR:-/tmp}"/z4h-ssh.XXXXXXXXXX)"
+  if '[' '-n' "${TMPDIR-}" '-a' '(' '(' '-d' "${TMPDIR-}" '-a' '-w' "${TMPDIR-}" ')' '-o' \
+         '!' '(' '-d' '/tmp' '-a' '-w' '/tmp' ')' ')' ]; then
+    'set' '--' "$TMPDIR"
   else
-    _z4h_ssh_tmp="${TMPDIR:-/tmp}"/z4h-ssh.tmp."$$"
+    'set' '--' '/tmp'
+  fi
+  if command -v 'mktemp' >'/dev/null' 2>&1; then
+    _z4h_ssh_tmp="$('command' 'mktemp' '-d' -- "$1"/z4h-ssh.XXXXXXXXXX)"
+  else
+    _z4h_ssh_tmp="$1"/z4h-ssh.tmp."$$"
     '[' '!' '-e' "$_z4h_ssh_tmp" ']' || 'command' 'rm' '-rf' '--' "$_z4h_ssh_tmp" || 'exit'
     'command' 'mkdir' '-p' '--' "$_z4h_ssh_tmp" || 'exit'
   fi

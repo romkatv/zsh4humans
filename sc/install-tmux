@@ -382,7 +382,7 @@ else
 fi
 
 if [ -n "$url" ]; then
-  if [ -n "$TMPDIR" -a '(' '(' -d "$TMPDIR" -a -w "$TMPDIR" ')' -o '!' '(' -d /tmp -a -w /tmp ')' ')' ]; then
+  if [ -n "${TMPDIR-}" -a '(' '(' -d "${TMPDIR-}" -a -w "${TMPDIR-}" ')' -o '!' '(' -d /tmp -a -w /tmp ')' ')' ]; then
     tmpdir="$TMPDIR"
   else
     tmpdir=/tmp

@@ -1,5 +1,9 @@
 # Zsh for Humans
 
+- **THE PROJECT HAS VERY LIMITED SUPPORT**
+- **NO NEW FEATURES ARE IN THE WORKS**
+- **MOST BUGS WILL GO UNFIXED**
+
 A turnkey configuration for Zsh that aims to work really well out of the box. It combines the best
 Zsh plugins into a coherent whole that feels like a finished product rather than a DIY starter kit.
 

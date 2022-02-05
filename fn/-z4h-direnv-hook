@@ -14,6 +14,14 @@ else
   fi
 fi
 
+# { print -n '\x1f\x8b\x08\x00\x00\x00\x00\x00'; base64 -d <<<${${DIRENV_WATCHES//-/+}//_//} } | zcat 2>/dev/null
+
+# zcat
+# gzcat
+# uncompress -c
+# gunzip -c
+# gzip -cd
+
 local sig
 local envrc=(./(../)#.envrc(NY1:a))
 if (( $#envrc )); then

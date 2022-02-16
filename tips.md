@@ -24,6 +24,7 @@ shell.
 * 13. [Backup and restore](#backup-and-restore)
 * 14. [vi mode](#vi-mode)
 * 15. [Managing dotfiles](#managing-dotfiles)
+* 16. [Privileged shell](#privileged-shell)
 
 ## tmux
 
@@ -638,3 +639,9 @@ what you like. As an option, here's what the author of Zsh for Humans uses.
 > dotfiles-public, I hit <kbd>Ctrl+P</kbd> and type `git add baz`, `git commit`,
 > etc. If I hit <kbd>Ctrl+P</kbd> another time, it activates dotfiles-private.
 > Another <kbd>Ctrl+P</kbd> gets me to normal state.
+
+## Privileged shell
+
+You can open a privileged shell with `sudo -Es`. This will start zsh as `root`
+with your regular rc files and `$HOME` will point to your regular home
+directory.

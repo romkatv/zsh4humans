@@ -27,6 +27,7 @@ If you want a great shell that just works, this project is for you.
   * 6.3. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 7. [Updating](#updating)
 * 8. [Uninstalling](#uninstalling)
+* 9. [Advanced configuration tips](#advanced-configuration-tips)
 
 ## Features
 
@@ -259,3 +260,7 @@ Run `z4h update` to update Zsh for Humans. There is no update mechanism for `~/.
    ```zsh
    rm -rf -- "${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
    ```
+
+## Advanced configuration tips
+
+See [this document](tips.md).

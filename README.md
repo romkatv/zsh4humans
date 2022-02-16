@@ -1,5 +1,9 @@
 # Zsh for Humans
 
+- **THE PROJECT HAS VERY LIMITED SUPPORT**
+- **NO NEW FEATURES ARE IN THE WORKS**
+- **MOST BUGS WILL GO UNFIXED**
+
 A turnkey configuration for Zsh that aims to work really well out of the box. It combines the best
 Zsh plugins into a coherent whole that feels like a finished product rather than a DIY starter kit.
 
@@ -23,6 +27,7 @@ If you want a great shell that just works, this project is for you.
   * 6.3. [Additional Zsh startup files](#additional-zsh-startup-files)
 * 7. [Updating](#updating)
 * 8. [Uninstalling](#uninstalling)
+* 9. [Advanced configuration tips](#advanced-configuration-tips)
 
 ## Features
 
@@ -255,3 +260,7 @@ Run `z4h update` to update Zsh for Humans. There is no update mechanism for `~/.
    ```zsh
    rm -rf -- "${XDG_CACHE_HOME:-$HOME/.cache}/zsh4humans/v5"
    ```
+
+## Advanced configuration tips
+
+See [this document](tips.md).

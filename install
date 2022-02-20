@@ -320,9 +320,9 @@ if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
 fi
 
 if '[' "$tmux" '=' '1' ']'; then
-  'command' 'awk' "/Move prompt to the bottom/ {print \"# Start tmux if not already in tmux.\"; print \"zstyle ':z4h:' start-tmux       command tmux -u new -A -D -t z4h\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
+  'command' 'awk' "/Mark up shell's output/ {print \"# Start tmux if not already in tmux.\"; print \"zstyle ':z4h:' start-tmux       command tmux -u new -A -D -t z4h\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
 else
-  'command' 'awk' "/Move prompt to the bottom/ {print \"# Don't start tmux.\"; print \"zstyle ':z4h:' start-tmux       no\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
+  'command' 'awk' "/Mark up shell's output/ {print \"# Don't start tmux.\"; print \"zstyle ':z4h:' start-tmux       no\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
 fi
 'command' 'mv' '--' "$zshrc.bak" "$zshrc"
 

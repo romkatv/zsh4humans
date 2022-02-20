@@ -208,6 +208,12 @@ function -z4h-cmd-init() {
   () {
     eval "$_z4h_opt"
 
+    (( _z4h_dangerous_root || $+Z4H_SSH ))                                                   ||
+      ! zstyle -T :z4h: chsh                                                                 ||
+      [[ ${SHELL-} == $_z4h_exe || ${SHELL-} -ef $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] ||
+      -z4h-chsh                                                                              ||
+      true
+
     local -a start_tmux
     # 'integrated', 'system', or 'command' <cmd> [arg]...
     zstyle -a :z4h: start-tmux start_tmux || start_tmux=(integrated)
@@ -398,12 +404,6 @@ function -z4h-cmd-init() {
     fi
 
     typeset -gr _z4h_orig_shell=${SHELL-}
-
-    (( _z4h_dangerous_root || $+Z4H_SSH ))                                                   ||
-      ! zstyle -T :z4h: chsh                                                                 ||
-      [[ ${SHELL-} == $_z4h_exe || ${SHELL-} -ef $_z4h_exe || -e $Z4H/stickycache/no-chsh ]] ||
-      -z4h-chsh                                                                              ||
-      true
   } || return
 
   : ${ZLE_RPROMPT_INDENT:=0}

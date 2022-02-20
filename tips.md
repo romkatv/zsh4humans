@@ -29,7 +29,7 @@ shell.
 ## tmux
 
 If you choose *No* when asked by the installer whether `zsh` should always run
-in `tmux`, you'll have the following snippet `~/.zshrc`:
+in `tmux`, you'll have the following snippet in `~/.zshrc`:
 
 ```zsh
 # Don't start tmux.
@@ -128,7 +128,7 @@ Prompt can be configured with `p10k configure`. Some options work very well
 together: try two-line prompt, sparse (adds an empty line before prompt), and
 transient prompt. If you are optimizing for productivity, use *Lean* style and
 choose *Few* icons rather than *Many*. The extra icons from *Many* are
-decorative. See: [What is the best prompt style in the configuration wizard?](
+decorative. See: [What is the best prompt style in the configuration wizard](
   https://github.com/romkatv/powerlevel10k#what-is-the-best-prompt-style-in-the-configuration-wizard).
 
 
@@ -172,7 +172,7 @@ zstyle ':z4h:term-title:local' precmd  '%~'
 `:z4h:term-title:ssh` is applied when connected over SSH while
 `:z4h:term-title:local` is applied to local shells.
 
-`preexec` title is set before executing a command `$1` is the unexpanded
+`preexec` title is set before executing a command: `$1` is the unexpanded
 command line, `$2` is the same command line after alias expansion.
 
 `precmd` title is set after executing a command. There are no positional
@@ -184,7 +184,7 @@ Tip: Add `%*` to `preexec` to display the time when the command started
 executing.
 
 Tip: Replace `%m` with `${${${Z4H_SSH##*:}//\%/%%}:-%m}` (without single
-quotes). This makes a different when using [SSH teleportation](#SSH): the title
+quotes). This makes a difference when using [SSH teleportation](#SSH): the title
 will show the hostname as you typed it on the command line when connecting
 rather than the hostname reported by the remote machine.
 
@@ -230,6 +230,14 @@ You can add directories here as well. Don't add anything heavy as it'll slow
 down SSH connection.
 
 *NOTE*: Remote files and directories get silently overwritten when teleporting.
+
+### Alternative `ZDOTDIR`
+
+By default zsh startup files are stored in the home directory. If you want to
+store them in `~/.config/zsh` instead, use [this script](
+  https://gist.github.com/romkatv/ecce772ce46b36262dc2e702ea15df9f) to migrate.
+Note that `~/.zshenv` will still exist. Without it zsh won't know where to look
+for startup files.
 
 ### Better hostname reporting
 

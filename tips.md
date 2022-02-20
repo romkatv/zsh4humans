@@ -24,6 +24,7 @@ shell.
 * 13. [Backup and restore](#backup-and-restore)
 * 14. [vi mode](#vi-mode)
 * 15. [Managing dotfiles](#managing-dotfiles)
+  * 15.1. [Alternative `ZDOTDIR`](#alternative-zdotdir)
 * 16. [Privileged shell](#privileged-shell)
 
 ## tmux
@@ -230,14 +231,6 @@ You can add directories here as well. Don't add anything heavy as it'll slow
 down SSH connection.
 
 *NOTE*: Remote files and directories get silently overwritten when teleporting.
-
-### Alternative `ZDOTDIR`
-
-By default zsh startup files are stored in the home directory. If you want to
-store them in `~/.config/zsh` instead, use [this script](
-  https://gist.github.com/romkatv/ecce772ce46b36262dc2e702ea15df9f) to migrate.
-Note that `~/.zshenv` will still exist. Without it zsh won't know where to look
-for startup files.
 
 ### Better hostname reporting
 
@@ -647,6 +640,14 @@ what you like. As an option, here's what the author of Zsh for Humans uses.
 > dotfiles-public, I hit <kbd>Ctrl+P</kbd> and type `git add baz`, `git commit`,
 > etc. If I hit <kbd>Ctrl+P</kbd> another time, it activates dotfiles-private.
 > Another <kbd>Ctrl+P</kbd> gets me to normal state.
+
+### Alternative `ZDOTDIR`
+
+By default zsh startup files are stored in the home directory. If you want to
+store them in `~/.config/zsh` instead, use [this script](
+  https://gist.github.com/romkatv/ecce772ce46b36262dc2e702ea15df9f) to migrate.
+Note that `~/.zshenv` will still exist. Without it zsh won't know where to look
+for startup files.
 
 ## Privileged shell
 

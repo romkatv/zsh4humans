@@ -86,6 +86,15 @@ done
       local -a opts files dirs pats ignore
       zparseopts -a mopts f=files /=dirs g+:=pats F:=ignore \
         P: S: q r: R: W:  M+: J+: V+: x+: X+: 1 2 o+: n
+      local -i patdirs=${#pats}
+      while (( ${#pats} )); do
+        if [[ ${pats[2]} != ('*(-/)'|'*(#q-/)') ]]; then
+          patdirs=0
+          break
+        fi
+        builtin shift 2 pats
+      done
+      (( patdirs )) && dirs=(-/)
       (( ${#files} || ! ${#dirs} )) && typeset -gi _z4h_only_dirs=0
     } "$@"
     local -ir _z4h_in_path_files=1

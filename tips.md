@@ -26,6 +26,7 @@ shell.
 * 15. [Managing dotfiles](#managing-dotfiles)
   * 15.1. [Alternative `ZDOTDIR`](#alternative-zdotdir)
 * 16. [Privileged shell](#privileged-shell)
+* 17. [asdf](#asdf)
 
 ## tmux
 
@@ -654,3 +655,11 @@ for startup files.
 You can open a privileged shell with `sudo -Es`. This will start zsh as `root`
 with your regular rc files and `$HOME` will point to your regular home
 directory.
+
+## asdf
+
+Integrate faster with [asdf](https://github.com/asdf-vm/asdf) by using:
+
+```zsh
+z4h source -- ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh}
+```

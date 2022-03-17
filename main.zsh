@@ -224,6 +224,7 @@ function -z4h-cmd-init() {
         system)     start_tmux=(command tmux -u);;
       esac
     fi
+    [[ -n $_Z4H_TMUX_CMD ]] && install_tmux=1
 
     if ! [[ _z4h_zle -eq 1 && -o zle && -t 0 && -t 1 && -t 2 ]]; then
       unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY

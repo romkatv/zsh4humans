@@ -26,6 +26,7 @@ shell.
 * 15. [Managing dotfiles](#managing-dotfiles)
   * 15.1. [Alternative `ZDOTDIR`](#alternative-zdotdir)
 * 16. [Privileged shell](#privileged-shell)
+* 17. [Homebrew](#homebrew)
 
 ## tmux
 
@@ -654,3 +655,16 @@ for startup files.
 You can open a privileged shell with `sudo -Es`. This will start zsh as `root`
 with your regular rc files and `$HOME` will point to your regular home
 directory.
+
+## Homebrew
+
+When referencing files and directories managed by [Homebrew](https://brew.sh/),
+you can rely on `HOMEBREW_PREFIX` being automatically set. This is much faster
+than invoking `brew --prefix`. For example, here's how you can load
+[asdf](https://github.com/asdf-vm/asdf):
+
+```zsh
+z4h source -- ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/opt/asdf/libexec/asdf.sh}
+```
+
+This line won't do anything unless `asdf` has been installed with `brew`.

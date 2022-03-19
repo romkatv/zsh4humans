@@ -24,7 +24,7 @@ if (( ! $#dirstack && (DIRSTACKSIZE || ! $+DIRSTACKSIZE) )); then
         d=${~d}
         if [[ -d ${d::=${(g:oce:)d}} ]]; then
           stack+=($d)
-          (( $+DIRSTACK && $#stack >= DIRSTACK - 1 )) && break
+          (( $+DIRSTACKSIZE && $#stack >= DIRSTACKSIZE - 1 )) && break
         fi
       fi
     } always {

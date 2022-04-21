@@ -42,17 +42,21 @@ Several features in Zsh for Humans require knowing the content of the terminal
 screen, and with the above option this condition won't be satisfied. If you
 remove the option altogether, Zsh for Humans will automatically start a
 stripped-down version of `tmux` (referred to as "integrated tmux" in the source
-code and discussion) that should enable the extra features with no other visible
-effects. This used to be the default in Zsh for Humans for a long time but
-eventually it's been changed because there are corner cases where integrated
+code and discussions) that should enable the extra features with no other
+visible effects. This used to be the default in Zsh for Humans for a long time
+but eventually it's been changed because there are corner cases where integrated
 tmux can cause issues. Try removing `start-tmux` option and see if everything
-still works. If your terminal has a feature that allows it to open a new tab or
-window in the same directory as the current tab, it'll break but can be fixed
-with the following option:
+still works.
+
+If your terminal has a feature that allows it to open a new tab or window in
+the same directory as the current tab, and it doesn't work, add the following
+option:
 
 ```zsh
 zstyle ':z4h:' propagate-cwd yes
 ```
+
+If terminal title breaks, see [Terminal Title](#terminal-title).
 
 If vertically resizing the terminal window breaks scrollback, add this option:
 
@@ -106,7 +110,7 @@ zstyle ':z4h:autosuggestions' end-of-line  partial-accept
 
 ## Shell integration
 
-By default your `~/.zshrc` should have the following option:
+Add the following option to `~/.zshrc`:
 
 ```zsh
 # Mark up shell's output with semantic information.
@@ -117,9 +121,11 @@ This enables extra features in terminals that understand [OSC 133](
   https://iterm2.com/documentation-escape-codes.html#:~:text=FTCS_PROMPT-,OSC%20133%20%3B,-A%20ST)
 ([iTerm2](https://iterm2.com/documentation-shell-integration.html),
 [kitty](https://sw.kovidgoyal.net/kitty/shell-integration/), and perhaps
-others).
+others). It also fixes [horrific mess when resizing terminal window](
+  https://github.com/romkatv/powerlevel10k#horrific-mess-when-resizing-terminal-window),
+provided that you've enabled [integrated tmux](#tmux).
 
-In iTerm2 you'll see blue triangles to the left of every prompt. They can be
+In iTerm2 you'll see blue triangles to the left of every prompt. This can be
 [disabled](
   https://stackoverflow.com/questions/41123922/iterm2-hide-marks/41661660#41661660)
 in iTerm2 preferences.
@@ -185,10 +191,10 @@ All values undergo prompt expansion.
 Tip: Add `%*` to `preexec` to display the time when the command started
 executing.
 
-Tip: Replace `%m` with `${${${Z4H_SSH##*:}//\%/%%}:-%m}` (without single
-quotes). This makes a difference when using [SSH teleportation](#SSH): the title
-will show the hostname as you typed it on the command line when connecting
-rather than the hostname reported by the remote machine.
+Tip: Replace `%m` with `${${${Z4H_SSH##*:}//\%/%%}:-%m}`. This makes a
+difference when using [SSH teleportation](#SSH): the title will show the
+hostname as you typed it on the command line when connecting rather than
+the hostname reported by the remote machine.
 
 ## SSH
 
@@ -233,14 +239,17 @@ down SSH connection.
 
 *NOTE*: Remote files and directories get silently overwritten when teleporting.
 
+*NOTE*: If a file doesn't exist locally, it'll be silently deleted on the remote
+host when teleporting.
+
 ### Better hostname reporting
 
 When connected over SSH, by default prompt and terminal title will display the
 hostname as reported by the remote machine. Sometimes it's not the same as
 what you've passed to `ssh` on the command line and usually you would want to
-see the latter. To achieve this, use  `${${${Z4H_SSH##*:}//\%/%%}:-%m}` (without
-single quotes) instead of `%m` in configuration options. For example, here's
-how you can configure terminal title:
+see the latter. To achieve this, use  `${${${Z4H_SSH##*:}//\%/%%}:-%m}` instead
+of `%m` in configuration options. For example, here's how you can configure
+terminal title:
 
 ```zsh
 zstyle ':z4h:term-title:ssh' preexec '%n@'${${${Z4H_SSH##*:}//\%/%%}:-%m}': ${1//\%/%%}'
@@ -552,10 +561,10 @@ Next time you need to find this command, press <kbd>Ctrl+R</kbd> and type
 
 ## Word-based widgets
 
- You can bind `*-zword` widgets that operate on whole shell arguments. For
- example, `ls '/foo/bar baz'` has two zwords: `ls` and `'/foo/bar baz'`. These
- widgets are `z4h-forward-zword`, `z4h-backward-zword`, `z4h-kill-zword` and
- `z4h-backward-kill-zword`. There are `word` variants of all these widgets, too.
+You can bind `*-zword` widgets that operate on whole shell arguments. For
+example, `ls '/foo/bar baz'` has two zwords: `ls` and `'/foo/bar baz'`. These
+widgets are `z4h-forward-zword`, `z4h-backward-zword`, `z4h-kill-zword` and
+`z4h-backward-kill-zword`. There are `word` variants of all these widgets, too.
 They behave the same as word-based navigation in Visual Studio Code.
 
 ## Oh My Zsh

@@ -396,6 +396,10 @@ initial values of all ssh parameters that Zsh for Humans lets you read/write.
 typeset -pm 'z4h_ssh_*'
 ```
 
+You'll notice that there are a few more parameters than what is documented in
+the comments above `z4h-ssh-configure`. Those are low-level blocks of code that
+get executed on the remote host. You probably shouldn't touch them.
+
 ### Unattended teleportation
 
 You can teleport Zsh for Humans to a remote host with a script like this:
@@ -432,10 +436,6 @@ teleporting, the version number of the local Zsh for Humans installation is sent
 over to the remote (it's the first part of `$Z4H_SSH`) and the remote is updated
 if its version is lower. This ensures that your rc files are compatible with
 Zsh for Humans on the remote host.
-
-You'll notice that there are a few more parameters than what is documented in
-the comments above `z4h-ssh-configure`. Those are low-level blocks of code that
-get executed on the remote host. You probably shouldn't touch them.
 
 ## Current directory
 

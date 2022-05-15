@@ -1,0 +1,29 @@
+#!/usr/bin/env zsh
+
+local bw="${commands[bw]-}"
+local comp="$Z4H"/cache/bw-completion-$EUID.zsh
+
+() {
+  [[ -n "$bw" ]] || return
+
+  [[ "$comp" -nt "$bw" ]] || {
+    local tmp="$comp".tmp."${sysparams[pid]}"
+    "$bw" completion --shell zsh >"$tmp" || return
+    zf_mv -f -- "$tmp" "$comp" || return
+    -z4h-compile "$comp" || return
+  }
+
+  () {
+    emulate -L zsh
+    local -h funcstack=(_bw)
+    builtin source -- "$comp"
+  } || true
+
+  [[ -v functions[_bw] ]] || return
+  _comps[bw]=_bw
+  _bw "$@"
+} "$@" || {
+  builtin unset '_comps[bw]'
+  _default "$@"
+  return
+}

@@ -75,7 +75,7 @@ for cmd in cargo helm kitty kubectl oc rustup; do
   [[ -v commands[$cmd] ]] && compdef -- -z4h-complete-$cmd $cmd
 done
 
-for cmd in gh; do
+for cmd in gh bw; do
   if [[ -v commands[$cmd] && ! -v _comps[$cmd] ]]; then
     compdef -- -z4h-complete-$cmd $cmd
   fi

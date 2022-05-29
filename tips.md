@@ -576,10 +576,10 @@ with `ohmyzsh` in them from `~/.zshrc`. This will speed up bootstrapping of Zsh
 for Humans when SSH teleporting to a host for the first time.
 
 If you want to load plugins from Oh My Zsh, check what you get from them. The
-vast majority of Oh My Zsh don't do anything useful on top of Zsh for Humans.
-If you are loading a plugin for the aliases it provides, it's almost always a
-better idea to copy the specific aliases to your `~/.zshrc` instead of loading
-the plugin.
+vast majority of Oh My Zsh plugins don't do anything useful on top of Zsh for
+Humans. If you are loading a plugin for the aliases it provides, it's almost
+always a better idea to copy the specific aliases to your `~/.zshrc` instead of
+loading the plugin.
 
 ## Backup and restore
 

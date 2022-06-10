@@ -16,18 +16,15 @@ fi
 
 # { print -n '\x1f\x8b\x08\x00\x00\x00\x00\x00'; base64 -d <<<${${DIRENV_WATCHES//-/+}//_//} } | zcat 2>/dev/null
 
-# zcat
-# gzcat
-# uncompress -c
-# gunzip -c
-# gzip -cd
+# zcat # gzcat # uncompress -c # gunzip -c # gzip -cd
 
 local sig
-local envrc=(./(../)#.envrc(NY1:a))
+local envrc=( ./(../)#.envrc(NY1:a) )
 if (( $#envrc )); then
   local -a deps=(
     ${XDG_DATA_HOME:-~/.local/share}/direnv/allow
-    ${XDG_CONFIG_HOME:-~/.config}/{direnv.toml,config.toml})
+    ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc}
+  )
   local -a stat
   local files=($^deps(N))
   local non_files=(${deps:|files})
@@ -43,9 +40,114 @@ else
   local sig=none
 fi
 
-[[ $sig == ${_z4h_direnv_sig-} ]] && return
+  # echo with ansi color
 
-unset _z4h_direnv_sig
+  # set -x
+  # echo "\e[1;46;95m$DIRENV_WATCHES\e[0m"
+  # set +x
+
+if [[ $sig == ${_z4h_direnv_sig-} ]]; then
+  [[ -v DIRENV_WATCHES ]] || return;
+
+
+  typeset watched_files_changed
+  (){
+    typeset -A b64_map
+    local -i i=0
+    local -a b64chars=({A..Z} {a..z} {0..9} + /)
+
+    for char in $b64chars[@]; do
+        b64_map+=( ${char} $( printf %06d $(( [##2] $i )) ) ); i+=1;
+    done
+    # adding -, and _ to the map so it works without this replacement ${${ ...  //-/+}//_//}
+    b64_map+=(
+        [-]=$b64_map[+] [_]=$b64_map[/]
+        # also adding = in the map while i'm at it
+        [=]=$( printf %06d $(( [##2] 0 )) )
+    )
+
+    local bits hexstring
+    local -i bitlength=8
+    for j in {0..${#DIRENV_WATCHES}}; do
+      bits+=${b64_map[${DIRENV_WATCHES:$j:1}]}
+      if [[ ${#bits} -ge $bitlength ]]; then
+          hexstring+="\x${(Ll:2::0:)$(( [##16] 2#${bits:0:$bitlength} ))}"
+          bits=${bits:$bitlength}
+      fi
+    done
+
+    local lead_bits='\x1f\x8b\x08\x00\x00\x00\x00\x00'
+    local -a apps=( 'zcat' 'gzcat' 'gzip' '-cd' 'gunzip' '-c' 'uncompress' '-c' )
+
+    for app in $apps; do
+      (( $+commands[$app] )) || continue;
+      local unpacked=$( echo "${lead_bits}${hexstring}" | "$app" ${${apps[((${apps[(i)$app]}+1))]}:#[^-]*} --  2>/dev/null )
+      [[ -n $unpacked  ]] && break
+    done
+
+    setopt localoptions extendedglob
+
+    local -A element
+    local sep
+    sep='},'
+    local -a data_array=( "${(ps:$sep:)${unpacked#(*)[^\{]}}" )
+    sep='}\n'
+    local data=${(pj:$sep:)data_array:#(*)($envrc|${deps[1]})(*)}
+    local stats
+
+    while [[ $#data -gt 1 ]]; do
+      (){
+        local field
+        local -A found
+
+        data=${${data//$'\r'}##[[:space:]]#}
+
+        [[ $data == '{'* ]] || return
+        data[1]=
+        while true; do
+          data=${data##[[:space:]]#}
+          [[ -n $data ]] || return
+          case $data[1] in
+            ':')          local tail=${data##([^,\\]|\\?)#}
+                          local s=${data:1:-$#tail}
+                          data=$tail
+                          if [[ $field == (Path|Modtime) ]]; then
+                            (( ! $+found[$field] ))   || return
+                            [[ -n $s ]]               || return
+                            [[ $s != *($'\n'|'\')* ]] || return
+                            found[$field]=${(Q)s}
+                            (( $#found == 2 )) && break
+                          fi
+                          ;;
+            ',')          data[1]=; field=;;
+            '"')          local tail=${data##\"([^\"\\]|\\?)#}
+                          local s=${data:1:-$#tail}
+                          data=${tail:1}
+                          [[ -z $field ]] && field=${s:-x}
+                          ;;
+              *)          return 1;;
+          esac
+        done
+        element=( ${(kv)found[@]} )
+      }
+
+      zstat -A stats +mtime $element[Path] 2>/dev/null
+
+      if [[ ${stats:=0} != $element[Modtime] ]]; then
+        watch_files_changed="$element[Path] $element[Modtime] $stats"; break
+      fi
+
+      data=${data##([^\{]|\\?)#}
+      unset stats
+
+    done
+    unsetopt localoptions extendedglob
+  }
+
+  [[ -z $watch_files_changed ]] && return
+fi
+
+unset _z4h_direnv_sig _z4h_direnv_watches
 
 local data
 data=$(
@@ -77,5 +179,7 @@ if [[ ! -v __p9k_trapped ]]; then
   builtin trap : INT
   builtin trap "builtin trap ${(q)__p9k_trapint:--} INT" EXIT
 fi
+
 builtin eval -- $out
 typeset -g _z4h_direnv_sig=$sig
+typeset -g _z4h_direnv_watches=$DIRENV_WATCHES

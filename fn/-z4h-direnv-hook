@@ -19,88 +19,50 @@ fi
 # zcat # gzcat # uncompress -c # gunzip -c # gzip -cd
 
 local sig
-local envrc=( ./(../)#.envrc(NY1:a) )
+local envrc=(./(../)#.envrc(NY1:a))
 if (( $#envrc )); then
   local -a deps=(
     ${XDG_DATA_HOME:-~/.local/share}/direnv/allow
     ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc}
   )
-  local -a stat
-  local files=($^deps(N))
-  local non_files=(${deps:|files})
-  if zstat -A stat +mtime -- $envrc $files 2>/dev/null; then
-    local sig=$envrc$'\0'${(pj:\0:)stat}
-  else
-    local sig=stat-error
-  fi
-elif [[ ! -v DIRENV_WATCHES ]]; then
-  typeset -g _z4h_direnv_sig=none
-  return
-else
-  local sig=none
-fi
-
-  # echo with ansi color
-
-  # set -x
-  # echo "\e[1;46;95m$DIRENV_WATCHES\e[0m"
-  # set +x
-
-if [[ $sig == ${_z4h_direnv_sig-} ]]; then
-  [[ -v DIRENV_WATCHES ]] || return;
-
-
-  typeset watched_files_changed
+  if [[ -v DIRENV_WATCHES ]]; then
+  local watches=$DIRENV_WATCHES
+  local -a watched
   (){
     typeset -A b64_map
     local -i i=0
     local -a b64chars=({A..Z} {a..z} {0..9} + /)
 
-    for char in $b64chars[@]; do
-        b64_map+=( ${char} $( printf %06d $(( [##2] $i )) ) ); i+=1;
-    done
-    # adding -, and _ to the map so it works without this replacement ${${ ...  //-/+}//_//}
-    b64_map+=(
-        [-]=$b64_map[+] [_]=$b64_map[/]
-        # also adding = in the map while i'm at it
-        [=]=$( printf %06d $(( [##2] 0 )) )
-    )
+    for char in $b64chars[@]; do b64_map+=( ${char} $( printf %06d $(( [##2] $i )) ) ); i+=1; done
+    b64_map+=( [-]=$b64_map[+] [_]=$b64_map[/] [=]=$b64_map[A]  )
 
-    local bits hexstring
-    local -i bitlength=8
-    for j in {0..${#DIRENV_WATCHES}}; do
-      bits+=${b64_map[${DIRENV_WATCHES:$j:1}]}
-      if [[ ${#bits} -ge $bitlength ]]; then
-          hexstring+="\x${(Ll:2::0:)$(( [##16] 2#${bits:0:$bitlength} ))}"
-          bits=${bits:$bitlength}
+    local bits
+    local hexstring='\x1f\x8b\x08\x00\x00\x00\x00\x00'
+    local -i bitlen=8
+    for j in {0..${#watches}}; do
+      bits+=${b64_map[${watches:$j:1}]}
+      if [[ ${#bits} -ge $bitlen ]]; then
+          hexstring+="\x${(Ll:2::0:)$(( [##16] 2#${bits:0:$bitlen} ))}"; bits=${bits:$bitlen}
       fi
     done
 
-    local lead_bits='\x1f\x8b\x08\x00\x00\x00\x00\x00'
     local -a apps=( 'zcat' 'gzcat' 'gzip' '-cd' 'gunzip' '-c' 'uncompress' '-c' )
-
+    local pat='[\[]*[\]]'
     for app in $apps; do
       (( $+commands[$app] )) || continue;
-      local unpacked=$( echo "${lead_bits}${hexstring}" | "$app" ${${apps[((${apps[(i)$app]}+1))]}:#[^-]*} --  2>/dev/null )
-      [[ -n $unpacked  ]] && break
+      local unpacked=$( echo "${hexstring}" | "$app" ${${apps[((${apps[(i)$app]}+1))]}:#[^-]*} --  2>/dev/null )
+      [[ -n $unpacked  ]] && [[ -z ${unpacked:#${~pat}} ]] && break
     done
 
     setopt localoptions extendedglob
+    local -a elements
+    elements=( "${=${unpacked:1:-1}//,\{/ {}" )
 
-    local -A element
-    local sep
-    sep='},'
-    local -a data_array=( "${(ps:$sep:)${unpacked#(*)[^\{]}}" )
-    sep='}\n'
-    local data=${(pj:$sep:)data_array:#(*)($envrc|${deps[1]})(*)}
-    local stats
-
-    while [[ $#data -gt 1 ]]; do
+    for obj in $elements[@]; do
       (){
         local field
         local -A found
-
-        data=${${data//$'\r'}##[[:space:]]#}
+        data=${${obj//$'\r'}##[[:space:]]#}
 
         [[ $data == '{'* ]] || return
         data[1]=
@@ -116,7 +78,8 @@ if [[ $sig == ${_z4h_direnv_sig-} ]]; then
                             [[ -n $s ]]               || return
                             [[ $s != *($'\n'|'\')* ]] || return
                             found[$field]=${(Q)s}
-                            (( $#found == 2 )) && break
+                            [[ ${(k)found} == 'Path' ]] && break
+                            # (( $#found == 2 )) && break
                           fi
                           ;;
             ',')          data[1]=; field=;;
@@ -128,26 +91,32 @@ if [[ $sig == ${_z4h_direnv_sig-} ]]; then
               *)          return 1;;
           esac
         done
-        element=( ${(kv)found[@]} )
-      }
-
-      zstat -A stats +mtime $element[Path] 2>/dev/null
-
-      if [[ ${stats:=0} != $element[Modtime] ]]; then
-        watch_files_changed="$element[Path] $element[Modtime] $stats"; break
-      fi
-
-      data=${data##([^\{]|\\?)#}
-      unset stats
-
+      watched+=( ${(v)found} )
+    }
     done
     unsetopt localoptions extendedglob
   }
-
-  [[ -z $watch_files_changed ]] && return
+  fi
+  [[ $envrc == "${(@)watched[1]}" ]]
+  deps=( ${(@)watched} ${(@)deps} )
+  local files=($^deps(N))
+  local non_files=(${deps:|files})
+  local -a stat
+  if zstat -A stat +mtime -- $files 2>/dev/null; then
+    local sig=$envrc$'\0'${(pj:\0:)stat}
+  else
+    local sig=stat-error
+  fi
+elif [[ ! -v DIRENV_WATCHES ]]; then
+  typeset -g _z4h_direnv_sig=none
+  return
+else
+  local sig=none
 fi
 
-unset _z4h_direnv_sig _z4h_direnv_watches
+[[ $sig == ${_z4h_direnv_sig-} ]] && return
+
+unset _z4h_direnv_sig
 
 local data
 data=$(
@@ -182,4 +151,3 @@ fi
 
 builtin eval -- $out
 typeset -g _z4h_direnv_sig=$sig
-typeset -g _z4h_direnv_watches=$DIRENV_WATCHES

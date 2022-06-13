@@ -16,22 +16,93 @@ fi
 
 # { print -n '\x1f\x8b\x08\x00\x00\x00\x00\x00'; base64 -d <<<${${DIRENV_WATCHES//-/+}//_//} } | zcat 2>/dev/null
 
-# zcat
-# gzcat
-# uncompress -c
-# gunzip -c
-# gzip -cd
+# zcat # gzcat # uncompress -c # gunzip -c # gzip -cd
 
 local sig
 local envrc=(./(../)#.envrc(NY1:a))
 if (( $#envrc )); then
   local -a deps=(
     ${XDG_DATA_HOME:-~/.local/share}/direnv/allow
-    ${XDG_CONFIG_HOME:-~/.config}/{direnv.toml,config.toml})
-  local -a stat
+    ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc}
+  )
+  if [[ -v DIRENV_WATCHES ]]; then
+  local watches=$DIRENV_WATCHES
+  local -a watched
+  (){
+    typeset -A b64_map
+    local -i i=0
+    local -a b64chars=({A..Z} {a..z} {0..9} + /)
+
+    for char in $b64chars[@]; do b64_map+=( ${char} $( printf %06d $(( [##2] $i )) ) ); i+=1; done
+    b64_map+=( [-]=$b64_map[+] [_]=$b64_map[/] [=]=$b64_map[A]  )
+
+    local bits
+    local hexstring='\x1f\x8b\x08\x00\x00\x00\x00\x00'
+    local -i bitlen=8
+    for j in {0..${#watches}}; do
+      bits+=${b64_map[${watches:$j:1}]}
+      if [[ ${#bits} -ge $bitlen ]]; then
+          hexstring+="\x${(Ll:2::0:)$(( [##16] 2#${bits:0:$bitlen} ))}"; bits=${bits:$bitlen}
+      fi
+    done
+
+    local -a apps=( 'zcat' 'gzcat' 'gzip' '-cd' 'gunzip' '-c' 'uncompress' '-c' )
+    local pat='[\[]*[\]]'
+    for app in $apps; do
+      (( $+commands[$app] )) || continue;
+      local unpacked=$( echo "${hexstring}" | "$app" ${${apps[((${apps[(i)$app]}+1))]}:#[^-]*} --  2>/dev/null )
+      [[ -n $unpacked  ]] && [[ -z ${unpacked:#${~pat}} ]] && break
+    done
+
+    setopt localoptions extendedglob
+    local -a elements
+    elements=( "${=${unpacked:1:-1}//,\{/ {}" )
+
+    for obj in $elements[@]; do
+      (){
+        local field
+        local -A found
+        data=${${obj//$'\r'}##[[:space:]]#}
+
+        [[ $data == '{'* ]] || return
+        data[1]=
+        while true; do
+          data=${data##[[:space:]]#}
+          [[ -n $data ]] || return
+          case $data[1] in
+            ':')          local tail=${data##([^,\\]|\\?)#}
+                          local s=${data:1:-$#tail}
+                          data=$tail
+                          if [[ $field == (Path|Modtime) ]]; then
+                            (( ! $+found[$field] ))   || return
+                            [[ -n $s ]]               || return
+                            [[ $s != *($'\n'|'\')* ]] || return
+                            found[$field]=${(Q)s}
+                            [[ ${(k)found} == 'Path' ]] && break
+                            # (( $#found == 2 )) && break
+                          fi
+                          ;;
+            ',')          data[1]=; field=;;
+            '"')          local tail=${data##\"([^\"\\]|\\?)#}
+                          local s=${data:1:-$#tail}
+                          data=${tail:1}
+                          [[ -z $field ]] && field=${s:-x}
+                          ;;
+              *)          return 1;;
+          esac
+        done
+      watched+=( ${(v)found} )
+    }
+    done
+    unsetopt localoptions extendedglob
+  }
+  fi
+  [[ $envrc == "${(@)watched[1]}" ]]
+  deps=( ${(@)watched} ${(@)deps} )
   local files=($^deps(N))
   local non_files=(${deps:|files})
-  if zstat -A stat +mtime -- $envrc $files 2>/dev/null; then
+  local -a stat
+  if zstat -A stat +mtime -- $files 2>/dev/null; then
     local sig=$envrc$'\0'${(pj:\0:)stat}
   else
     local sig=stat-error
@@ -77,5 +148,6 @@ if [[ ! -v __p9k_trapped ]]; then
   builtin trap : INT
   builtin trap "builtin trap ${(q)__p9k_trapint:--} INT" EXIT
 fi
+
 builtin eval -- $out
 typeset -g _z4h_direnv_sig=$sig

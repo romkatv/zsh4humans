@@ -1,5 +1,4 @@
 #!/usr/bin/env zsh
-
 eval "$_z4h_opt"
 
 unset _z4h_direnv_err
@@ -23,54 +22,31 @@ if (( $#envrc )); then
     ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc})
 fi
 
-    setopt localoptions extendedglob
-    local -a elements
-    elements=( "${=${unpacked:1:-1}//,\{/ {}" )
-
-    for obj in $elements[@]; do
-      (){
-        local field
-        local -A found
-        data=${${obj//$'\r'}##[[:space:]]#}
-
-        [[ $data == '{'* ]] || return
-        data[1]=
-        while true; do
-          data=${data##[[:space:]]#}
-          [[ -n $data ]] || return
-          case $data[1] in
-            ':')          local tail=${data##([^,\\]|\\?)#}
-                          local s=${data:1:-$#tail}
-                          data=$tail
-                          if [[ $field == (Path|Modtime) ]]; then
-                            (( ! $+found[$field] ))   || return
-                            [[ -n $s ]]               || return
-                            [[ $s != *($'\n'|'\')* ]] || return
-                            found[$field]=${(Q)s}
-                            [[ ${(k)found} == 'Path' ]] && break
-                            # (( $#found == 2 )) && break
-                          fi
-                          ;;
-            ',')          data[1]=; field=;;
-            '"')          local tail=${data##\"([^\"\\]|\\?)#}
-                          local s=${data:1:-$#tail}
-                          data=${tail:1}
-                          [[ -z $field ]] && field=${s:-x}
-                          ;;
-              *)          return 1;;
-          esac
-        done
-      watched+=( ${(v)found} )
-    }
-    done
-    unsetopt localoptions extendedglob
 if [[ -v DIRENV_WATCHES ]]; then
   () {
     local REPLY json
     -z4h-base64-decode ${${DIRENV_WATCHES//-/+}//_//} || return
-    json=$(printf '\x1f\x8b\x08\x00\x00\x00\x00\x00%s' $REPLY | -z4h-zcat 2>/dev/null) || return
+    json=$(printf '\x1f\x8b\x08\x00\x00\x00\x00\x00%s' $REPLY | -z4h-zcat 2>/dev/null) #|| return
     [[ $json == '['*']' ]] || return
     # TODO: extract $(jq '.[] | .Path') from $json and append it to deps.
+
+    local -i i=1;
+    local pathmatch;
+    pathmatch=${(*MSI:$i:)json##\"Path\"\:\"([^\"])#\"}
+    while [[ -n $pathmatch ]]; do
+      deps+=${(Q)${(ps+:+)pathmatch}[2]}
+      ((i++))
+      pathmatch=${(*MSI:$i:)json##\"Path\"\:\"([^\"])#\"}
+    done
+
+    # setopt localoptions noxtrace
+
+    # jsons=( $( -z4h-json-parse $json ) )
+
+    # for object in $jsons; do
+    #   deps+=$( -z4h-json-parse $object Path )
+    # done
+
     # TODO: cache those elements with $DIRENV_WATCHES as the key.
   }
   # TODO: handle errors from the above intelligently.

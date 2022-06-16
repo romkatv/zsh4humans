@@ -14,45 +14,14 @@ else
   fi
 fi
 
-# { print -n '\x1f\x8b\x08\x00\x00\x00\x00\x00'; base64 -d <<<${${DIRENV_WATCHES//-/+}//_//} } | zcat 2>/dev/null
-
-# zcat # gzcat # uncompress -c # gunzip -c # gzip -cd
-
-local sig
+local -a deps
 local envrc=(./(../)#.envrc(NY1:a))
+
 if (( $#envrc )); then
-  local -a deps=(
+  deps+=(
     ${XDG_DATA_HOME:-~/.local/share}/direnv/allow
-    ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc}
-  )
-  if [[ -v DIRENV_WATCHES ]]; then
-  local watches=$DIRENV_WATCHES
-  local -a watched
-  (){
-    typeset -A b64_map
-    local -i i=0
-    local -a b64chars=({A..Z} {a..z} {0..9} + /)
-
-    for char in $b64chars[@]; do b64_map+=( ${char} $( printf %06d $(( [##2] $i )) ) ); i+=1; done
-    b64_map+=( [-]=$b64_map[+] [_]=$b64_map[/] [=]=$b64_map[A]  )
-
-    local bits
-    local hexstring='\x1f\x8b\x08\x00\x00\x00\x00\x00'
-    local -i bitlen=8
-    for j in {0..${#watches}}; do
-      bits+=${b64_map[${watches:$j:1}]}
-      if [[ ${#bits} -ge $bitlen ]]; then
-          hexstring+="\x${(Ll:2::0:)$(( [##16] 2#${bits:0:$bitlen} ))}"; bits=${bits:$bitlen}
-      fi
-    done
-
-    local -a apps=( 'zcat' 'gzcat' 'gzip' '-cd' 'gunzip' '-c' 'uncompress' '-c' )
-    local pat='[\[]*[\]]'
-    for app in $apps; do
-      (( $+commands[$app] )) || continue;
-      local unpacked=$( echo "${hexstring}" | "$app" ${${apps[((${apps[(i)$app]}+1))]}:#[^-]*} --  2>/dev/null )
-      [[ -n $unpacked  ]] && [[ -z ${unpacked:#${~pat}} ]] && break
-    done
+    ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc})
+fi
 
     setopt localoptions extendedglob
     local -a elements
@@ -95,23 +64,30 @@ if (( $#envrc )); then
     }
     done
     unsetopt localoptions extendedglob
+if [[ -v DIRENV_WATCHES ]]; then
+  () {
+    local REPLY json
+    -z4h-base64-decode ${${DIRENV_WATCHES//-/+}//_//} || return
+    json=$(printf '\x1f\x8b\x08\x00\x00\x00\x00\x00%s' $REPLY | -z4h-zcat 2>/dev/null) || return
+    [[ $json == '['*']' ]] || return
+    # TODO: extract $(jq '.[] | .Path') from $json and append it to deps.
+    # TODO: cache those elements with $DIRENV_WATCHES as the key.
   }
-  fi
-  [[ $envrc == "${(@)watched[1]}" ]]
-  deps=( ${(@)watched} ${(@)deps} )
-  local files=($^deps(N))
-  local non_files=(${deps:|files})
-  local -a stat
-  if zstat -A stat +mtime -- $files 2>/dev/null; then
-    local sig=$envrc$'\0'${(pj:\0:)stat}
-  else
-    local sig=stat-error
-  fi
-elif [[ ! -v DIRENV_WATCHES ]]; then
+  # TODO: handle errors from the above intelligently.
+fi
+
+if (( $#envrc + $#deps == 0 )); then
   typeset -g _z4h_direnv_sig=none
   return
+fi
+
+local -a stat
+local files=($^deps(N))
+local non_files=(${deps:|files})
+if zstat -A stat +mtime -- $envrc $files 2>/dev/null; then
+  local sig=$envrc$'\0'${(pj:\0:)stat}
 else
-  local sig=none
+  local sig=stat-error
 fi
 
 [[ $sig == ${_z4h_direnv_sig-} ]] && return
@@ -148,6 +124,5 @@ if [[ ! -v __p9k_trapped ]]; then
   builtin trap : INT
   builtin trap "builtin trap ${(q)__p9k_trapint:--} INT" EXIT
 fi
-
 builtin eval -- $out
 typeset -g _z4h_direnv_sig=$sig

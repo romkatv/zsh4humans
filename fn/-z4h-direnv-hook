@@ -31,21 +31,13 @@ if [[ -v DIRENV_WATCHES ]]; then
     # TODO: extract $(jq '.[] | .Path') from $json and append it to deps.
 
     local -i i=1;
+    local pattern=${:-\"Path\":\"([^\"\\\\]|\\\\?)#\"}
     local pathmatch;
-    pathmatch=${(*MSI:$i:)json##\"Path\"\:\"([^\"])#\"}
+    pathmatch=${(*MSI:$i:)json##${~pattern}}
     while [[ -n $pathmatch ]]; do
-      deps+=${(Q)${(ps+:+)pathmatch}[2]}
-      ((i++))
-      pathmatch=${(*MSI:$i:)json##\"Path\"\:\"([^\"])#\"}
+      deps+=${(Q)pathmatch##(*):}
+      pathmatch=${(*MSI:$((++i)):)json##${~pattern}}
     done
-
-    # setopt localoptions noxtrace
-
-    # jsons=( $( -z4h-json-parse $json ) )
-
-    # for object in $jsons; do
-    #   deps+=$( -z4h-json-parse $object Path )
-    # done
 
     # TODO: cache those elements with $DIRENV_WATCHES as the key.
   }

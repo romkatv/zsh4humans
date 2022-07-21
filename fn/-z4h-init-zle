@@ -129,8 +129,14 @@ function z4h-cd-up() { builtin cd -q .. && -z4h-redraw-prompt }
 function z4h-do-nothing() {}
 
 if (( $+terminfo[civis] && $+terminfo[cnorm] )) && [[ -v _z4h_tty_fd ]]; then
-  function -z4h-cursor-hide() { [[ -t 1 ]] && echoti civis || echoti civis >&$_z4h_tty_fd }
-  function -z4h-cursor-show() { [[ -t 1 ]] && echoti cnorm || echoti cnorm >&$_z4h_tty_fd }
+  function -z4h-cursor-hide() {
+    [[ -t 1 ]] && echoti civis || echoti civis >&$_z4h_tty_fd
+  }
+  function -z4h-cursor-show() {
+    # See https://github.com/romkatv/powerlevel10k/issues/1699.
+    local cnorm=${${terminfo[cnorm]-}:/*$'\e[?25h'(|'\e'*)/$'\e[?25h'}
+    [[ -t 1 ]] && print -rn -- $cnorm || print -rnu $_z4h_tty_fd -- $cnorm
+  }
 else
   function -z4h-cursor-hide() {}
   function -z4h-cursor-show() {}

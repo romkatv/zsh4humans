@@ -11,7 +11,7 @@ fi
   if [[ -n $hook ]]; then
     builtin zle -D zle-line-pre-redraw
   fi
-  builtin zle -- -z4h-comp-insert-all
+  builtin zle -- z4h-comp-insert-all
 } always {
   if [[ -n $hook ]]; then
     zle -N -- zle-line-pre-redraw "$hook"

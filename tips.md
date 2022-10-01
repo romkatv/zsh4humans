@@ -591,7 +591,13 @@ files:
 - `~/.p10k*.zsh` (there can be more than one).
 
 You don't need to run Zsh for Humans installer on a new machine. Simply
-copy/restore these files and Zsh for Humans will bootstrap itself.
+copy/restore these files and Zsh for Humans will bootstrap itself. If you don't
+have zsh on the machine, you can bootstrap Zsh for Humans from any Bourne-based
+shell with the following command:
+
+```sh
+Z4H_BOOTSTRAPPING=1 . ~/.zshenv
+```
 
 ## vi mode
 

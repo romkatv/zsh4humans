@@ -1,11 +1,13 @@
 #!/usr/bin/env zsh
 
 eval "$_z4h_opt"
-local word buf=$BUFFER
-for word in '' ${(Z:n:)BUFFER}; do
-  local tail=${${buf:$#word}##[[:space:]]#}
-  (( $#tail <= $#RBUFFER )) && break
-  buf=$tail
+repeat ${NUMERIC:-1}; do
+  local word buf=$BUFFER
+  for word in '' ${(Z:n:)BUFFER}; do
+    local tail=${${buf:$#word}##[[:space:]]#}
+    (( $#tail <= $#RBUFFER )) && break
+    buf=$tail
+  done
+  CURSOR=$(($#BUFFER - $#buf))
 done
-CURSOR=$(($#BUFFER - $#buf))
 return 0

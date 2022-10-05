@@ -2,16 +2,18 @@
 
 emulate -L zsh -o extended_glob
 local w=${WORDCHARS//[[:space:][:alnum:]]}
-local buf=${RBUFFER##[[:space:]]#}
-if (( $#buf < 2 )); then
-  buf=
-elif [[ $buf == ?[[:space:]]* ]]; then
-  buf[1]=
-elif [[ $buf[1,2] != *[[:alnum:]$w]* ]]; then
-  buf=${buf##[^[:space:][:alnum:]$w]#}
-else
-  [[ $buf == [[:alnum:]$w]* ]] || buf[1]=
-  buf=${buf##[[:alnum:]$w]#}
-fi
-(( CURSOR += $#RBUFFER - $#buf ))
+repeat ${NUMERIC:-1}; do
+  local buf=${RBUFFER##[[:space:]]#}
+  if (( $#buf < 2 )); then
+    buf=
+  elif [[ $buf == ?[[:space:]]* ]]; then
+    buf[1]=
+  elif [[ $buf[1,2] != *[[:alnum:]$w]* ]]; then
+    buf=${buf##[^[:space:][:alnum:]$w]#}
+  else
+    [[ $buf == [[:alnum:]$w]* ]] || buf[1]=
+    buf=${buf##[[:alnum:]$w]#}
+  fi
+  (( CURSOR += $#RBUFFER - $#buf ))
+done
 return 0

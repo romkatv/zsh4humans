@@ -1,9 +1,9 @@
 #!/usr/bin/env zsh
 
 emulate -L zsh -o extended_glob
-local w=${WORDCHARS//[[:space:][:alnum:]]}
+local buf w=${WORDCHARS//[[:space:][:alnum:]]}
 repeat ${NUMERIC:-1}; do
-  local buf=${RBUFFER##[[:space:]]#}
+  buf=${RBUFFER##[[:space:]]#}
   if (( $#buf < 2 )); then
     buf=
   elif [[ $buf == ?[[:space:]]* ]]; then

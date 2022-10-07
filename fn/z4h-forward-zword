@@ -1,13 +1,15 @@
 #!/usr/bin/env zsh
 
 eval "$_z4h_opt"
-local word buf=$BUFFER
-for word in ${(Z:n:)BUFFER} ''; do
-  (( $#buf < $#RBUFFER )) && break
-  buf=${${buf##[[:space:]]#}:$#word}
+repeat ${NUMERIC:-1}; do
+  local word buf=$BUFFER
+  for word in ${(Z:n:)BUFFER} ''; do
+    (( $#buf < $#RBUFFER )) && break
+    buf=${${buf##[[:space:]]#}:$#word}
+  done
+  CURSOR=$(($#BUFFER - $#buf))
+  if [[ $KEYMAP == vicmd ]] && (( CURSOR && CURSOR == $#BUFFER )); then
+    (( --CURSOR ))
+  fi
 done
-CURSOR=$(($#BUFFER - $#buf))
-if [[ $KEYMAP == vicmd ]] && (( CURSOR && CURSOR == $#BUFFER )); then
-  (( --CURSOR ))
-fi
 return 0

@@ -1,7 +1,8 @@
 #!/usr/bin/env zsh
 
 if { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
-   [[ $TERM != (dumb|linux) && $ITERM_SHELL_INTEGRATION_INSTALLED != Yes ]]; then
+   [[ $TERM != (dumb|linux) && $ITERM_SHELL_INTEGRATION_INSTALLED != Yes &&
+      -z $NVIM_LISTEN_ADDRESS && -z $NVIM ]]; then
   -z4h-enable-iterm2-integration
 else
   function -z4h-iterm2-precmd() { }

@@ -197,6 +197,8 @@ the hostname reported by the remote machine.
 
 ## SSH
 
+[![SSH teleportation](https://asciinema.org/a/542763.svg)](https://asciinema.org/a/542763)
+
 When you connect to a remote host over SSH, your local Zsh for Humans
 environment can be teleported over to it. The first login to a remote host may
 take some time. After that it's as fast as normal `ssh`.

@@ -147,6 +147,9 @@ z4h bindkey z4h-eof Ctrl+D
 setopt ignore_eof
 ```
 
+This preserves the default zsh behavior on Ctrl+D. You can bind `z4h-exit`
+instead of `z4h-eof` if you want Ctrl+D to always exit the shell.
+
 If you are using a two-line prompt with an empty line before it, add this for
 smoother rendering:
 

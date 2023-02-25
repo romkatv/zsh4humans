@@ -115,7 +115,7 @@ if [[ ! -e $Z4H/zsh4humans/fn/-z4h-compinit-impl ]]; then
 fi
 
 if (( _z4h_zle )); then
-  -z4h-init-zle
+  -z4h-init-zle || return
 else
   -z4h-cmd-bindkey() {}
   function compdef() {}

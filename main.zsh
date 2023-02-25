@@ -21,7 +21,7 @@ else
   } || return
 fi
 
-if ! { zmodload -s zsh/terminfo zsh/zselect ||
+if ! { zmodload -s zsh/terminfo zsh/zselect && [[ -n $^fpath/compinit(#qN) ]] ||
        [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
           -e ${_z4h_exe:h:h}/share/zsh/5.8/scripts/relocate ]] }; then
   builtin source $Z4H/zsh4humans/sc/exec-zsh-i || return

@@ -224,12 +224,16 @@ function -z4h-cmd-init() {
         system)     start_tmux=(command tmux -u);;
       esac
     fi
-    [[ -n $_Z4H_TMUX_CMD ]] && install_tmux=1
+
+    if [[ $_Z4H_TMUX_TTY != $TTY ]]; then
+      unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
+    elif [[ -n $_Z4H_TMUX_CMD ]]; then
+      install_tmux=1
+    fi
 
     if ! [[ _z4h_zle -eq 1 && -o zle && -t 0 && -t 1 && -t 2 ]]; then
       unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
     else
-      [[ $_Z4H_TMUX_TTY == $TTY ]] || unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
       local tmux=$Z4H/tmux/bin/tmux
       local -a match mbegin mend
       if [[ $TMUX == (#b)(/*),(|<->),(|<->) && -w $match[1] ]]; then

@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+#
+# If invoked with an argument, passes unrecognized TTY content to zle.
 
 local fd=${_z4h_tty_fd-1}
 [[ -t $fd ]] || return
@@ -11,6 +13,11 @@ IFS= builtin read -srt 5 -d R resp$'?\e[6n' <&$fd || return
 while [[ $resp != *$'\e['<->';'<-> ]]; do
   IFS= builtin read -srt 5 -d R resp <&$fd || return
 done
+
+if (( ARGC )); then
+  local pref=${resp%$'\e['*}
+  [[ -n $pref ]] && print -rz -- $pref
+fi
 
 resp=${resp##*'['}
 typeset -g cursor_y=${resp%';'*}

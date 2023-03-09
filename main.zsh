@@ -258,7 +258,7 @@ function -z4h-cmd-init() {
            zstyle -T :z4h: prompt-at-bottom &&
            ! zselect -t0 -r 0; then
           local cursor_y cursor_x
-          -z4h-get-cursor-pos || cursor_y=0
+          -z4h-get-cursor-pos 1 || cursor_y=0
           local -i n='LINES - cursor_y'
           print -rn -- ${(pl:$n::\n:)}
         fi

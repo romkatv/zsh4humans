@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+
+if [[ -v functions[-z4h-test-func] ]]; then
+  builtin unfunction -- -z4h-test-func
+fi
+if functions[-z4h-test-func]="$1" 2>/dev/null &&
+   [[ -v functions[-z4h-test-func] ]]; then
+  builtin unfunction -- -z4h-test-func
+  return 0
+else
+  return 1
+fi

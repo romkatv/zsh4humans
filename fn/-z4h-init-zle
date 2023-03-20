@@ -156,6 +156,7 @@ zle -N z4h-forward-zword
 zle -N z4h-kill-zword
 zle -N z4h-backward-zword
 zle -N z4h-backward-kill-zword
+zle -N z4h-quote-prev-zword
 zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer

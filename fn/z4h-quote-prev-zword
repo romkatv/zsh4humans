@@ -1,0 +1,81 @@
+#!/usr/bin/env zsh
+#
+# Quote the shell word to the left of the cursor with double or single quotes.
+# Prefer quotes with the shorter result or double quotes if there is no
+# difference. If already quoted, change quotes. If there is an unterminated
+# quote, terminate it and quote the resulting word with the same kind of quotes.
+#
+# Here are a few examples. The caret shows the position of the cursor.
+# *Initial* is the content of the buffer before the widget is executed. 
+# *Once* is the content of the buffer after the widget is executed.
+# *Twice* is the content of the buffer after the widget is executed twice.
+#
+# | Initial  | Once       | Twice      | Note
+# |----------|------------|------------|-------------------
+# | foo      | "foo"      | 'foo'      | prefer double quotes
+# | ^        |  ^         |  ^         |
+# | foo      | "foo"      | 'foo'      | keep cursor on the same word char
+# |   ^      |    ^       |    ^       |
+# | foo      | "foo"      | 'foo'      |
+# |    ^     |     ^      |     ^      |
+# | foo  bar | "foo"  bar | 'foo'  bar | cursor on a space => quote prev word
+# |     ^    |       ^    |       ^    |
+# | foo bar  | foo "bar"  | foo  'bar' |
+# |     ^    |      ^     |       ^    |
+# | "foo"    | 'foo'      | "foo"      | replace quotes if already quoted
+# |      ^   |      ^     |      ^     |
+# | 'foo'    | "foo"      | 'foo'      | replace quotes if already quoted
+# |      ^   |      ^     |      ^     |
+# | foo\"    | 'foo"'     | "foo\""    | single quotes because it's shorter
+# |      ^   |       ^    |        ^   | BUG: cursor should be 1 to the left
+# | "foo     | "foo"      | 'foo'      |
+# |     ^    |     ^      |     ^      |
+# | 'foo     | 'foo'      | "foo"      | single quotes to match
+# |     ^    |     ^      |     ^      |
+# | foo"     | "foo"      | 'foo'      |
+# |     ^    |     ^      |     ^      |
+# | foo'     | 'foo'      | "foo"      |
+# |     ^    |     ^      |     ^      |
+# | foo"     | "foo"      | 'foo'      |
+# | ^        | ^          | ^          | BUG: cursor should be 1 to the right
+
+eval "$_z4h_opt"
+local word buf=$BUFFER words=(${(Z:n:)BUFFER})
+for word in '' ${(Z:n:)BUFFER}; do
+  tail=${${buf:$#word}##[[:space:]]#}
+  (( ! $#tail || $#tail < $#RBUFFER )) && break
+  buf=$tail
+done
+[[ -z $word ]] && return
+[[ $LASTWIDGET != $WIDGET ]]
+local -i cycle=$?
+local -i start=$(($#BUFFER - $#buf + 1))
+local -i end=$((start + $#word - 1))
+if -z4h-is-valid-list ": $word'"; then
+  word+="'"
+  (( cycle = 1 ))
+  typeset -gi _z4h_quote_prev_zword=1
+elif -z4h-is-valid-list ": $word\""; then
+  word+='"'
+  (( cycle = 1 ))
+  typeset -gi _z4h_quote_prev_zword=0
+fi
+local unquoted=${(Q)word}
+local quoted=(${(qq)unquoted} ${(qqq)unquoted})
+if (( cycle )); then
+  (( _z4h_quote_prev_zword = (_z4h_quote_prev_zword + 1) % 2 ))
+elif [[ $quoted[1] != $word ]] && (( $#quoted[1] < $#quoted[2] )) ||
+     [[ $quoted[2] == $word ]]; then
+  typeset -gi _z4h_quote_prev_zword=0
+else
+  typeset -gi _z4h_quote_prev_zword=1
+fi
+local qword=$quoted[_z4h_quote_prev_zword+1]
+BUFFER[start,end]=$qword
+local -i d=$(($#qword - $#word))
+if (( CURSOR > end )); then
+  (( CURSOR += d ))
+elif (( CURSOR >= start - 1 && d > 0 )); then
+  (( ++CURSOR ))
+fi
+return 0

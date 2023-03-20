@@ -232,7 +232,7 @@ function -z4h-cmd-init() {
     fi
 
     if ! [[ _z4h_zle -eq 1 && -o zle && -t 0 && -t 1 && -t 2 ]]; then
-      unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
+      unset _Z4H_TMUX _Z4H_TMUX_PANE _Z4H_TMUX_CMD _Z4H_TMUX_TTY
     else
       local tmux=$Z4H/tmux/bin/tmux
       local -a match mbegin mend
@@ -245,14 +245,16 @@ function -z4h-cmd-init() {
           unset TMUX TMUX_PANE
         elif [[ -x /proc/$match[2]/exe ]]; then
           export _Z4H_TMUX=$TMUX
+          export _Z4H_TMUX_PANE=$TMUX_PANE
           export _Z4H_TMUX_CMD=/proc/$match[2]/exe
           export _Z4H_TMUX_TTY=$TTY
         elif (( $+commands[tmux] )); then
           export _Z4H_TMUX=$TMUX
+          export _Z4H_TMUX_PANE=$TMUX_PANE
           export _Z4H_TMUX_CMD=$commands[tmux]
           export _Z4H_TMUX_TTY=$TTY
         else
-          unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY
+          unset _Z4H_TMUX _Z4H_TMUX_PANE _Z4H_TMUX_CMD _Z4H_TMUX_TTY
         fi
         if [[ -n $_Z4H_TMUX && -t 1 ]] &&
            zstyle -T :z4h: prompt-at-bottom &&
@@ -264,7 +266,7 @@ function -z4h-cmd-init() {
         fi
       elif (( install_tmux )) &&
            [[ -z $TMUX && ! -w ${_Z4H_TMUX%,(|<->),(|<->)} && -z $Z4H_SSH ]]; then
-        unset _Z4H_TMUX _Z4H_TMUX_CMD _Z4H_TMUX_TTY TMUX TMUX_PANE
+        unset _Z4H_TMUX _Z4H_TMUX_PANE _Z4H_TMUX_CMD _Z4H_TMUX_TTY TMUX TMUX_PANE
         if [[ -x $tmux && -d $Z4H/terminfo ]]; then
           # We prefer /tmp over $TMPDIR because the latter breaks rendering
           # of wide chars on iTerm2.

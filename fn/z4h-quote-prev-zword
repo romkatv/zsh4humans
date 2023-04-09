@@ -40,8 +40,8 @@
 # | ^        | ^          | ^          | BUG: cursor should be 1 to the right
 
 eval "$_z4h_opt"
-local word buf=$BUFFER words=(${(Z:n:)BUFFER})
-for word in '' ${(Z:n:)BUFFER}; do
+local word buf=$PREBUFFER$BUFFER
+for word in '' ${(Z:n:)buf}; do
   tail=${${buf:$#word}##[[:space:]]#}
   (( ! $#tail || $#tail < $#RBUFFER )) && break
   buf=$tail
@@ -50,6 +50,7 @@ done
 [[ $LASTWIDGET != $WIDGET ]]
 local -i cycle=$?
 local -i start=$(($#BUFFER - $#buf + 1))
+(( start <= 0 )) && return
 local -i end=$((start + $#word - 1))
 if -z4h-is-valid-list ": $word'"; then
   word+="'"

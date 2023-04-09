@@ -3,8 +3,8 @@
 eval "$_z4h_opt"
 local word buf
 repeat ${NUMERIC:-1}; do
-  buf=$BUFFER
-  for word in ${(Z:n:)BUFFER} ''; do
+  buf=$PREBUFFER$BUFFER
+  for word in ${(Z:n:)buf} ''; do
     (( $#buf < $#RBUFFER )) && break
     buf=${${buf##[[:space:]]#}:$#word}
   done

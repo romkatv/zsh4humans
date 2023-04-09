@@ -4,6 +4,8 @@
 # Prefer quotes with the shorter result or double quotes if there is no
 # difference. If already quoted, change quotes. If there is an unterminated
 # quote, terminate it and quote the resulting word with the same kind of quotes.
+# Keep the cursor on the content it was pointing to before the widget was
+# invoked.
 #
 # Here are a few examples. The caret shows the position of the cursor.
 # *Initial* is the content of the buffer before the widget is executed. 
@@ -27,7 +29,7 @@
 # | 'foo'    | "foo"      | 'foo'      | replace quotes if already quoted
 # |      ^   |      ^     |      ^     |
 # | foo\"    | 'foo"'     | "foo\""    | single quotes because it's shorter
-# |      ^   |       ^    |        ^   | BUG: cursor should be 1 to the left
+# |      ^   |      ^     |       ^    |
 # | "foo     | "foo"      | 'foo'      |
 # |     ^    |     ^      |     ^      |
 # | 'foo     | 'foo'      | "foo"      | single quotes to match
@@ -37,46 +39,35 @@
 # | foo'     | 'foo'      | "foo"      |
 # |     ^    |     ^      |     ^      |
 # | foo"     | "foo"      | 'foo'      |
-# | ^        | ^          | ^          | BUG: cursor should be 1 to the right
+# | ^        |  ^         |  ^         |
 
-eval "$_z4h_opt"
-local word buf=$PREBUFFER$BUFFER
-for word in '' ${(Z:n:)buf}; do
-  tail=${${buf:$#word}##[[:space:]]#}
-  (( ! $#tail || $#tail < $#RBUFFER )) && break
-  buf=$tail
-done
-[[ -z $word ]] && return
-[[ $LASTWIDGET != $WIDGET ]]
-local -i cycle=$?
-local -i start=$(($#BUFFER - $#buf + 1))
+emulate -L zsh
+
+local reply
+-z4h-find-prev-zword || return 0
+
+local -i start='reply[1]'
 (( start <= 0 )) && return
-local -i end=$((start + $#word - 1))
+local -i end='reply[2]'
+local word=$BUFFER[start,end]
+
+local -i q
 if -z4h-is-valid-list ": $word'"; then
   word+="'"
-  (( cycle = 1 ))
-  typeset -gi _z4h_quote_prev_zword=1
+  local -i q=1
 elif -z4h-is-valid-list ": $word\""; then
   word+='"'
-  (( cycle = 1 ))
-  typeset -gi _z4h_quote_prev_zword=0
+  local -i q=2
 fi
+
 local unquoted=${(Q)word}
 local quoted=(${(qq)unquoted} ${(qqq)unquoted})
-if (( cycle )); then
-  (( _z4h_quote_prev_zword = (_z4h_quote_prev_zword + 1) % 2 ))
-elif [[ $quoted[1] != $word ]] && (( $#quoted[1] < $#quoted[2] )) ||
-     [[ $quoted[2] == $word ]]; then
-  typeset -gi _z4h_quote_prev_zword=0
-else
-  typeset -gi _z4h_quote_prev_zword=1
+if (( ! q )); then
+  if [[ $quoted[1] != $word ]] && (( $#quoted[1] < $#quoted[2] )) ||
+      [[ $quoted[2] == $word ]]; then
+    (( q = 1 ))
+  else
+    (( q = 2 ))
+  fi
 fi
-local qword=$quoted[_z4h_quote_prev_zword+1]
-BUFFER[start,end]=$qword
-local -i d=$(($#qword - $#word))
-if (( CURSOR > end )); then
-  (( CURSOR += d ))
-elif (( CURSOR >= start - 1 && d > 0 )); then
-  (( ++CURSOR ))
-fi
-return 0
+-z4h-replace-buf $start $end $quoted[q]

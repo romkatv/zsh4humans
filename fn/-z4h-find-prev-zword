@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+#
+# Usage: -z4h-find-prev-zword
+#
+# Sets reply=(START END) such that BUFFER[START,END] contains the shell word
+# that the cursor is on, or the previous shell word if the cursor is on
+# whitespace. If there are no shell words in $PREBUFFER$BUFFER, return 1
+# without setting reply. START and END can be non-positive, which means that
+# a part of the shell word is in PREBUFFER.
+
+emulate -L zsh -o extended_glob
+local word buf=$PREBUFFER$BUFFER
+for word in '' ${(Z:n:)buf}; do
+  tail=${${buf:$#word}##[[:space:]]#}
+  (( ! $#tail || $#tail < $#RBUFFER )) && break
+  buf=$tail
+done
+[[ -n $word ]] || return
+local -i start=$(($#BUFFER - $#buf + 1))
+local -i end=$((start + $#word - 1))
+typeset -g reply=($start $end)

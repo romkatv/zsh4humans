@@ -1,0 +1,40 @@
+#!/usr/bin/env zsh
+#
+# Usage: -z4h-replace-buf START END REPLACEMENT
+#
+# Replaces BUFFER[START,END] with REPLACEMENT while keeping the cursor
+# pointing to the same content as before.
+
+emulate -L zsh
+
+local -i start=$1 end=$2
+local orig_word=$BUFFER[start,end] new_word=$3
+
+local reply
+if (( $#orig_word * $#new_word <= 10000 )); then
+  -z4h-string-diff "$orig_word" "$new_word"
+else
+  reply=("$orig_word" "$new_word")
+fi
+
+local -i orig_cur='CURSOR - start + 1' cur new_cur
+local src dst
+for src dst in "${reply[@]}"; do
+  (( cur += $#src ))
+  if (( cur < orig_cur )); then
+    (( new_cur += $#dst - $#src ))
+  elif (( cur == orig_cur )); then
+    (( cur == $#orig_word )) && break
+    (( new_cur += $#dst - $#src ))
+  else
+    if (( orig_cur - (cur - $#src) > $#dst )); then
+      (( new_cur -= orig_cur - (cur - $#src) - $#dst ))
+    fi
+    break
+  fi
+done
+
+(( new_cur += CURSOR ))
+BUFFER[start,end]=$new_word
+(( CURSOR = new_cur ))
+return 0

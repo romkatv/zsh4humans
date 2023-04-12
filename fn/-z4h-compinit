@@ -37,7 +37,7 @@ local dump
 zstyle -s ':z4h:compinit' dump-path dump
 : ${dump:=$Z4H/cache/zcompdump-$EUID-$ZSH_VERSION}
 
-local -a stat files=(${^fpath}/^([^_]*|*~|*.zwc)(.N))
+local -a stat files=(${^fpath}/^([^_]*|*~|*.zwc)(-.N))
 (( ! $#files )) || zstat -A stat +mtime -- $files
 local real_sig=($ZSH_VERSION $ZSH_PATCHLEVEL $files $stat)
 real_sig='# '${(V)${(pj:\0:)real_sig}}$'\n'

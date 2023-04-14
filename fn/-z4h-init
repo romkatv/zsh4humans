@@ -119,11 +119,11 @@ if (( _z4h_zle )); then
 else
   -z4h-cmd-bindkey() {}
   function compdef() {}
+  function complete() {}
 fi
 
 function compinit() {}
 function bashcompinit() {}
-function complete() {}
 
 # Aliases.
 if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD

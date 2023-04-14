@@ -123,6 +123,7 @@ fi
 
 function compinit() {}
 function bashcompinit() {}
+function complete() {}
 
 # Aliases.
 if (( $+commands[dircolors] )); then  # proxy for GNU coreutils vs BSD

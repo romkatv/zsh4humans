@@ -90,3 +90,8 @@ done
 if [[ -v commands[aws_completer] && ! -v _comps[aws] ]]; then
   complete -C =aws_completer aws
 fi
+
+if [[ -v commands[gcloud] && ! -v _comps[gcloud] && -n $HOMEBREW_PREFIX &&
+      -r $HOMEBREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc ]]; then
+  source -- $HOMEBREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc
+fi

@@ -103,5 +103,5 @@ if [[ -v commands[gcloud] && ! -v _comps[gcloud] ]]; then
     /opt/google-cloud-sdk
     /opt/local/libexec/google-cloud-sdk
   )
-  source -- $^dirs/completion.zsh.inc(-.Ne.'[[ -r ${REPLY:a} ]]'.) /dev/null
+  source -- $^dirs/completion.zsh.inc(-.Ne'<[[ -r ${REPLY:a} ]]>') /dev/null
 fi

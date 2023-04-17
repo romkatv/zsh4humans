@@ -91,7 +91,17 @@ if [[ -v commands[aws_completer] && ! -v _comps[aws] ]]; then
   complete -C =aws_completer aws
 fi
 
-if [[ -v commands[gcloud] && ! -v _comps[gcloud] && -n $HOMEBREW_PREFIX &&
-      -r $HOMEBREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc ]]; then
-  source -- $HOMEBREW_PREFIX/share/google-cloud-sdk/completion.zsh.inc
+if [[ -v commands[gcloud] && ! -v _comps[gcloud] ]]; then
+  local dirs=(
+    ${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/google-cloud-sdk}
+    ~/google-cloud-sdk
+    /usr/share/google-cloud-sdk
+    /snap/google-cloud-sdk/current
+    /snap/google-cloud-cli/current
+    /usr/lib/google-cloud-sdk
+    /usr/lib64/google-cloud-sdk
+    /opt/google-cloud-sdk
+    /opt/local/libexec/google-cloud-sdk
+  )
+  source -- $^dirs/completion.zsh.inc(-.Ne.'[[ -r ${REPLY:a} ]]'.) /dev/null
 fi

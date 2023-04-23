@@ -216,7 +216,7 @@ function -z4h-cmd-init() {
 
     local -a start_tmux
     local -i install_tmux need_restart
-    if [[ -n $MC_SID ]]; then
+    if [[ -n $MC_TMPDIR ]]; then
       start_tmux=(no)
     else
       # 'integrated', 'system', or 'command' <cmd> [arg]...

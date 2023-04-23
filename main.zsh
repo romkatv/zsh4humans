@@ -215,14 +215,18 @@ function -z4h-cmd-init() {
       true
 
     local -a start_tmux
-    # 'integrated', 'system', or 'command' <cmd> [arg]...
-    zstyle -a :z4h: start-tmux start_tmux || start_tmux=(integrated)
     local -i install_tmux need_restart
-    if (( $#start_tmux == 1 )); then
-      case $start_tmux[1] in
-        integrated|isolated) install_tmux=1;;
-        system)     start_tmux=(command tmux -u);;
-      esac
+    if [[ -n $MC_SID ]]; then
+      start_tmux=(no)
+    else
+      # 'integrated', 'system', or 'command' <cmd> [arg]...
+      zstyle -a :z4h: start-tmux start_tmux || start_tmux=(integrated)
+      if (( $#start_tmux == 1 )); then
+        case $start_tmux[1] in
+          integrated|isolated) install_tmux=1;;
+          system)     start_tmux=(command tmux -u);;
+        esac
+      fi
     fi
 
     if [[ -n $_Z4H_TMUX_TTY && $_Z4H_TMUX_TTY != $TTY ]]; then

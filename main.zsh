@@ -230,7 +230,8 @@ function -z4h-cmd-init() {
     fi
 
     if [[ -n $_Z4H_TMUX_TTY && $_Z4H_TMUX_TTY != $TTY ]]; then
-      unset _Z4H_TMUX _Z4H_TMUX_PANE _Z4H_TMUX_CMD _Z4H_TMUX_TTY TMUX TMUX_PANE
+      [[ $TMUX == $_Z4H_TMUX ]] && unset TMUX TMUX_PANE
+      unset _Z4H_TMUX _Z4H_TMUX_PANE _Z4H_TMUX_CMD _Z4H_TMUX_TTY
     elif [[ -n $_Z4H_TMUX_CMD ]]; then
       install_tmux=1
     fi

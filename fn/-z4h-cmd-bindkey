@@ -40,6 +40,9 @@ for kb in ${@:2}; do
         Ctrl+(Alt|Option)+[A-Z'[]\'])
           seqs=(${^seqs}'^[^'$kb[-1])
         ;;
+        Enter)
+          seqs=(${^seqs}'^M')
+        ;;
         *)
           print -Pru2 -- '%F{3}z4h%f: invalid key binding: %F{1}'${kb//\%/%%}'%f'
           return '_z4h_err()'

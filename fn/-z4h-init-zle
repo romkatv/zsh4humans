@@ -145,6 +145,7 @@ fi
 
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
+zle -N z4h-accept-line
 zle -N z4h-eof
 zle -N z4h-exit
 zle -N z4h-expand

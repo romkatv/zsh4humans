@@ -1047,12 +1047,17 @@ function -z4h-post-init() {
   if [[ -v _z4h_tty_fd ]]; then
     if [[ -v function[__vte_osc7] ]]; then
       builtin functions -c -- -z4h-vte-osc7 __vte_osc7
-    elif { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
-            [[ $TERM != (dumb|linux) ]]; then
+    fi
+    if { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
+         [[ $TERM != (dumb|linux) ]]; then
       builtin functions -c -- -z4h-vte-osc7 __vte_osc7
       if (( ! $precmd_functions[(I)__vte_osc7] )); then
         precmd_functions=(__vte_osc7 $precmd_functions)
         __vte_osc7
+      fi
+      if [[ -v z4h_win_env && -z ${SSH_CONNECTON-} && ${P9K_SSH-} != 1 ]]; then
+        chpwd_functions+=(-z4h-osc9)
+        -z4h-osc9
       fi
     fi
   fi

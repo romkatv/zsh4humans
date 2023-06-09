@@ -1111,3 +1111,80 @@ achieve this without making the default p10k configs more complex.
 When replacing instant prompt with the real thing, it's not necessary to print `ed`. Zsh will do it
 on its own. Removing this `ed` might reduce the magnitude of blinking. It also might make it
 possible to get rid of the function call in `PS1`.
+
+---
+
+Implement rzw (Roman's Zsh Widgets) in a separate repo.
+
+```zsh
+# zwords has an even number of elements, all of which are indices into $PREBUFFER$BUFFER.
+# All odd words (one-based) are whitespace.
+# $zwords[2*izword-1] is the start position of the word the cursor is pointing to.
+# $zwords[2*izword] is the end position.
+# $zword is the actual word. It is technically redundant.
+rzw-parse-buffer -a zwords -i izword -w zword
+
+# Returns 1 if there are no non-whitespace words in $PREBUFFER$BUFFER.
+# Otherwise returns 0 and sets the specified parameters to the current word, or
+# the one before it if the current word is whitespace, or the one after it if
+# there is no previous word.
+rzw-get-prev-zword -s istart -e iend -w zword
+
+# Finds the difference between two strings using Levenshtein distance.
+#
+#   % rzw-string-diff -a parts -- 'sunday!' 'saturday'
+#   % printf '%-5s => %s\n' ${(qq)parts}
+#   's'   => 's'
+#   ''    => 'at'
+#   'u'   => 'u'
+#   'n'   => 'r'
+#   'day' => 'day'
+#   '!'   => ''
+rzw-string-diff -a parts -- s1 s2
+
+# Does nothing if istart lies outside of $BUFFER. Otherwise replaces the
+# specified range with the specified content while keeping the cursor
+# pointing to the same content as before.
+rzw-replace-buffer -d 10000 -- istart iend content
+zstyle :rzw:replace-buffer: max-string-diff-runtime 10000
+
+# Returns 0 if the script is a valid body of a function with the current
+# options, aliases, etc. Otherwise returns 1.
+rzw-is-valid-script -- script
+
+# Quotes the shell word to the left of the cursor with double or single quotes.
+# Prefers quotes with the shorter result or double quotes if there is no
+# difference. If already quoted, changes quotes. If there is an unterminated
+# quote, terminates it and quotes the resulting word with the same kind of
+# quotes. Keeps the cursor on the content it was pointing to before the widget
+# was invoked.
+rzw-quote-prev-zword
+
+# Replaces the shell word to the left of the cursor with the result of the
+# specified transformation. Keeps the cursor on the content it was pointing to
+# before the widget was invoked.
+#
+# Prior to the transformation the shell word is unquoted. Afterwards it is
+# quoted while preferring the same kind of quoting that already existed prior
+# to the transformation.
+#
+#   bar       => /foo/bar
+#   'bar'     => '/foo/bar'
+#   'bar      => '/foo/bar'
+#   $'b\x20r' => $'/foo/b r'
+#   $'b\141r' => $'/foo/bar'
+#
+# Note: Pass the original unquoted word as $2?
+rzw-transform-prev-zword -- 'REPLY=${1:a}'
+
+# Example
+
+function convert-prev-zword-to-abolute-path() {
+  rzw-transform-prev-zword -- 'REPLY=${1:a}'
+}
+
+zle -N convert-prev-zword-to-abolute-path
+bindkey '^A' convert-prev-zword-to-abolute-path
+```
+
+The buffer is always `$PREBUFFER$BUFFER` and all buffer indices are within it.

@@ -1140,13 +1140,35 @@ rzw-get-prev-zword -s istart -e iend -w zword
 #   'n'   => 'r'
 #   'day' => 'day'
 #   '!'   => ''
-rzw-string-diff -a parts -- s1 s2
+#
+# The default values of -m and -M are set like this:
+#
+#   zstyle :rzw:WIDGET: string-diff-max-complexity 10000 1000000
+#
+# If only one value is set, the second defaults to it. If neither is set, the
+# values default to 10000 and 1000000. TODO: verify that the second value is
+# adequate.
+#
+# If -c is not specified, it is fetched like this:
+#
+#   zstyle :rzw:WIDGET: string-diff-cache-file
+#
+# Which in turn defaults to this:
+#
+#   ${XDG_CACHE_HOME:-$HOME/.cache}/rzw-string-diff-$OSTYPE-$CPUTYPE
+rzw-string-diff -m 10000 -M 1000000 -c CACHE -a parts -- s1 s2
+
+# Compile a C implementation of rzw-string-diff into CACHE (a file).
+# Does nothing if CACHE is a readable and executable file.
+#
+# Refuses to create directories whose parent isn't owned by $USER.
+# If -c is not specified, its value is resolved as described above.
+rzw-string-diff -C -c CACHE
 
 # Does nothing if istart lies outside of $BUFFER. Otherwise replaces the
 # specified range with the specified content while keeping the cursor
 # pointing to the same content as before.
-rzw-replace-buffer -d 10000 -- istart iend content
-zstyle :rzw:replace-buffer: max-string-diff-runtime 10000
+rzw-replace-buffer -- istart iend content
 
 # Returns 0 if the script is a valid body of a function with the current
 # options, aliases, etc. Otherwise returns 1.
@@ -1158,7 +1180,6 @@ rzw-is-valid-script -- script
 # quote, terminates it and quotes the resulting word with the same kind of
 # quotes. Keeps the cursor on the content it was pointing to before the widget
 # was invoked.
-rzw-quote-prev-zword
 
 # Replaces the shell word to the left of the cursor with the result of the
 # specified transformation. Keeps the cursor on the content it was pointing to

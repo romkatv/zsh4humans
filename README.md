@@ -20,7 +20,7 @@ If you want a great shell that just works, this project is for you.
   * 5.2. [Completing commands](#completing-commands)
   * 5.3. [Searching command history](#searching-command-history)
   * 5.4. [Interactive search with `fzf`](#interactive-search-with-fzf)
-  * 5.5. [SSH](#SSH)
+  * 5.5. [SSH](#ssh)
 * 6. [Customization](#customization)
   * 6.1. [Customizing prompt](#customizing-prompt)
   * 6.2. [Customizing appearance](#customizing-appearance)

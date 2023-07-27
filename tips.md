@@ -431,7 +431,7 @@ The shebang says to execute this script with `zsh -i`, which makes `z4h`
 function available to it.
 
 After you run this script, it's guaranteed that SSH teleportation will be fast
-and won't perform neither the installation or update.
+and won't perform neither the installation nor update.
 
 To forcefully update Zsh for Humans on the remote machine, replace the last line
 with this:

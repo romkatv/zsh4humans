@@ -219,8 +219,8 @@ function -z4h-cmd-init() {
     if [[ -n $MC_TMPDIR ]]; then
       start_tmux=(no)
     else
-      # 'integrated', 'system', or 'command' <cmd> [arg]...
-      zstyle -a :z4h: start-tmux start_tmux || start_tmux=(integrated)
+      # 'integrated', 'isolated', 'system', or 'command' <cmd> [arg]...
+      zstyle -a :z4h: start-tmux start_tmux || start_tmux=(isolated)
       if (( $#start_tmux == 1 )); then
         case $start_tmux[1] in
           integrated|isolated) install_tmux=1;;

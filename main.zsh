@@ -284,31 +284,33 @@ function -z4h-cmd-init() {
             sock=$TMPDIR
           fi
           if [[ -n $sock ]]; then
-            if [[ -e $Z4H/tmux/stamp ]]; then
-              # Append a unique per-installation number to the socket path to work
-              # around a bug in tmux. See https://github.com/romkatv/zsh4humans/issues/71.
-              local stamp
-              IFS= read -r stamp <$Z4H/tmux/stamp || return
-            else
-              local stamp=0
-            fi
-            sock=${sock%/}/z4h-tmux-$UID-$TERM-${stamp%%.*}
+            local tmux_suf
             local -a cmds=()
+            sock=${sock%/}/z4h-tmux-$UID
             if (( terminfo[colors] >= 256 )); then
               cmds+=(set -g default-terminal tmux-256color ';')
               if [[ $COLORTERM == (24bit|truecolor) ]]; then
                 cmds+=(set -ga terminal-features ',*:RGB:usstyle:overline' ';')
-                sock+='-tc'
+                sock_suf+='-tc'
               fi
             else
               cmds+=(set -g default-terminal screen ';')
             fi
             if zstyle -t :z4h: term-vresize top; then
               cmds+=(set -g history-limit 1024 ';')
-              sock+='-h'
+              sock_suf+='-h'
             fi
             if [[ $start_tmux[1] == isolated ]]; then
               sock+=-$sysparams[pid]
+            else
+              sock+=-$TERM$sock_suf
+              if [[ -e $Z4H/tmux/stamp ]]; then
+                # Append a unique per-installation number to the socket path to work
+                # around a bug in tmux. See https://github.com/romkatv/zsh4humans/issues/71.
+                local stamp
+                IFS= read -r stamp <$Z4H/tmux/stamp || return
+                sock+=-${stamp%%.*}
+              fi
             fi
             if zstyle -t :z4h: propagate-cwd && [[ -n $TTY && $TTY != *(.| )* ]]; then
               if [[ $PWD == /* && $PWD -ef . ]]; then

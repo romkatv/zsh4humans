@@ -164,6 +164,14 @@ without an empty line, add this instead:
 POSTEDIT=$'\n\e[A'
  ```
 
+You can bind `Enter` to `z4h-accept-line` to insert a newline instead of
+displaying the secondary prompt (a.k.a. `PS2`) when the currently typed
+command is incomplete.
+
+```zsh
+z4h bindkey z4h-accept-line Enter
+```
+
 ## Terminal title
 
 Some terminals by default do not allow shell to set tab and window title. This

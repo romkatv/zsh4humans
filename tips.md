@@ -164,6 +164,14 @@ without an empty line, add this instead:
 POSTEDIT=$'\n\e[A'
  ```
 
+You can bind `Enter` to `z4h-accept-line` to insert a newline instead of
+displaying the secondary prompt (a.k.a. `PS2`) when the currently typed
+command is incomplete.
+
+```zsh
+z4h bindkey z4h-accept-line Enter
+```
+
 ## Terminal title
 
 Some terminals by default do not allow shell to set tab and window title. This
@@ -431,7 +439,7 @@ The shebang says to execute this script with `zsh -i`, which makes `z4h`
 function available to it.
 
 After you run this script, it's guaranteed that SSH teleportation will be fast
-and won't perform neither the installation or update.
+and won't perform neither the installation nor update.
 
 To forcefully update Zsh for Humans on the remote machine, replace the last line
 with this:

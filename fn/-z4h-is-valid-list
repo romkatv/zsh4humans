@@ -1,8 +1,12 @@
 #!/usr/bin/env zsh
 #
-# Usage: -z4h-is-valid-list [word]..
-#
-# Succeeds if [word].. is a well-formed command.
+# Succeeds if $1 is a well-formed command.
+
+# If it ends with an odd number of backslashes, it's malformed.
+() {
+  builtin emulate -L zsh -o extended_glob
+  [[ $1 == (|*[^\\])(\\\\)#\\ ]]
+} "$1" && builtin return 1
 
 if [[ -v functions[-z4h-test-func] ]]; then
   builtin unfunction -- -z4h-test-func

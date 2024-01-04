@@ -13,7 +13,7 @@ fi
 function -z4h-set-term-title-preexec() {
   emulate -L zsh
   local _z4h_fmt
-  if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+  if [[ -n $SSH_CONNECTION || $P9K_SSH == 1 ]]; then
     zstyle -s :z4h:term-title:ssh   preexec _z4h_fmt || _z4h_fmt='%n@%m: ${1//\%/%%}'
   else
     zstyle -s :z4h:term-title:local preexec _z4h_fmt || _z4h_fmt='${1//\%/%%}'
@@ -27,7 +27,7 @@ function -z4h-set-term-title-precmd() {
   local -i err=$?
   emulate -L zsh
   local _z4h_fmt
-  if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+  if [[ -n $SSH_CONNECTION || $P9K_SSH == 1 ]]; then
     zstyle -s :z4h:term-title:ssh   precmd _z4h_fmt || _z4h_fmt='%n@%m: %~'
   else
     zstyle -s :z4h:term-title:local precmd _z4h_fmt || _z4h_fmt='%~'
@@ -1055,7 +1055,7 @@ function -z4h-post-init() {
         precmd_functions=(__vte_osc7 $precmd_functions)
         __vte_osc7
       fi
-      if [[ -v z4h_win_env && -z ${SSH_CONNECTON-} && ${P9K_SSH-} != 1 ]]; then
+      if [[ -v z4h_win_env && -z ${SSH_CONNECTION-} && ${P9K_SSH-} != 1 ]]; then
         chpwd_functions+=(-z4h-osc9)
         -z4h-osc9
       fi

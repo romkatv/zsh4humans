@@ -97,8 +97,8 @@ read_choice() {
 >&2 'printf' '\n'
 >&2 'printf' 'What kind of \033[1mkeyboard\033[0m are you using?\n'
 >&2 'printf' '\n'
->&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[33mBackspace\033[0m.\n'
->&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mBackspace\033[0m key(s) and does not have \033[33mOption\033[0m.\n'
+>&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[33mAlt\033[0m.\n'
+>&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mAlt\033[0m key(s) and does not have \033[33mOption\033[0m.\n'
 >&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
 >&2 'printf' '\n'
 while 'true'; do

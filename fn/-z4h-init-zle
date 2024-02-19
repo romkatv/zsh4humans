@@ -499,6 +499,8 @@ fi
 typeset -gA _z4h_key=(
   Tab                         '^I'
   Space                       ' '
+  Enter                       '^M'
+  Escape                      '^['
   Ctrl+/                      '^_'
   Ctrl+_                      '^_'
   Ctrl+Space                  '^ '

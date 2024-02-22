@@ -28,7 +28,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     local opts=(
       --read0
       --no-multi
-      --tiebreak=index
+      --no-sort
       --cycle
       --exact
       --no-mouse
@@ -61,7 +61,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
     local opts=(
       --read0
       --no-multi
-      --tiebreak=index
+      --no-sort
       --cycle
       --exact
       --no-mouse

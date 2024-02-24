@@ -1,0 +1,85 @@
+#!/usr/bin/env zsh
+# Redneck json parsing. Yields correct results for any well-formed json document.
+# Produces random garbage for invalid json.
+
+local data
+local -a params
+
+data=$1; shift; params=( $@ );
+
+data="${${data//$'\r'}##[[:space:]]#}"
+[[ $data == ('{'|'[')* ]] || return
+if [[ $data == '['*']' ]]
+then
+  local arrayitem=''
+  local -a arraycontents
+  local -i depth=1
+  data[1]=
+  while (( depth > 0 ))
+  do
+    data=${data##[[:space:]]#}
+    [[ -n $data ]] || return
+    case $data[1] in
+      '{'|'[')    arrayitem+=$data[1]; data[1]=; (( ++depth )) ;;
+      '}'|']')    arrayitem+=$data[1]; data[1]=
+                  (( --depth == 1 )) && { arraycontents+=($arrayitem); arrayitem='' } ;;
+      ',')        (( depth == 1 )) || arrayitem+=$data[1];
+                  data[1]= ;;
+      ':')        arrayitem+=$data[1] data[1]=  ;;
+      '"'|[[:alnum:].])
+        if [[ $data[1] == '"' ]]; then
+          local tail=${data##\"([^\"\\]|\\?)#\"}
+        else
+          local tail=${data##[[:alnum:].]#}
+        fi
+        [[ $tail == [[:space:][:punct:]]* ]] || return
+        arrayitem+=${data::-$#tail}; data=${tail}
+        ;;
+      *) return 1 ;;
+    esac
+  done
+  (( ${#data##[[:space:]]#} == 0 )) || return
+  echo $arraycontents
+
+elif [[ $data == '{'*'}' ]]
+then
+  local field
+  local -A found
+  local -i depth=1
+  data[1]=
+  while (( depth > 0 ))
+  do
+    data=${data##[[:space:]]#}
+    [[ -n $data ]] || return
+    case $data[1] in
+      '{'|'[')   data[1]=; (( ++depth )) ;;
+      '}'|']')   data[1]=; (( --depth > 0 )) || return ;;
+      ':')       data[1]=  ;;
+      ',')       data[1]=; field=  ;;
+      '"'|[[:alnum:].])
+        if [[ $data[1] == '"' ]]; then
+          local tail=${data##\"([^\"\\]|\\?)#\"}
+        else
+          local tail=${data##[[:alnum:].]#}
+        fi
+        [[ $tail == [[:space:][:punct:]]* ]] || return
+        local s=${data::-$#tail}
+        data=${tail}
+        (( depth == 1 )) || continue
+        if [[ -z $field ]]; then
+          field=${s:-x}
+        elif [[ $field:*params ]]
+        then
+          (( ! $+found[$field] ))   || return
+          [[ -n $s ]]               || return
+          [[ $s != *($'\n'|'\')* ]] || return
+          found[$field]=$s
+          (( $#found == $#params )) && break
+        fi
+        ;;
+      *) return 1 ;;
+    esac
+  done
+  echo ${(Q)found}
+fi
+

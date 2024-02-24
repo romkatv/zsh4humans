@@ -1,0 +1,38 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+setopt cbases
+
+typeset -g REPLY=
+
+[[ -z $1 ]] && return
+(( $#1 % 4 == 0 )) || return 1
+
+local table='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+local c1 c2 c3 c4 res
+local -i16 b1 b2 b3 b4
+
+for c1 c2 c3 c4 in ${(s::)1//=/A}; do
+  ((
+      b1 = $table[(ie)$c1] - 1,
+      b2 = $table[(ie)$c2] - 1,
+      b3 = $table[(ie)$c3] - 1,
+      b4 = $table[(ie)$c4] - 1,
+      b1 = b1 << 2 | b2 >> 4,
+      b2 = (b2 << 4) & 255 | b3 >> 2,
+      b3 = (b3 << 6) & 255 | b4
+  ))
+  res+=($b1 $b2 $b3)
+done
+
+if [[ $1 == *= ]]; then
+  if [[ $1 == *== ]]; then
+    res[-2,-1]=()
+  else
+    res[-1]=()
+  fi
+fi
+
+printf -v REPLY ${(j:\:)res#0}

@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+
+while read -r line; do
+  read -skr
+  print -rn -- $line | xclip -selection clipboard -in
+done

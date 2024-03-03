@@ -1,0 +1,58 @@
+# Let's add an alias to zsh.
+echo 'alias say=echo' >>.zshrc
+exec zsh
+say hi from laptop
+# Let's see what we have on a build server.
+ssh build-server-1 'which zsh'
+ssh build-server-1 'echo $SHELL'
+ssh build-server-1 'whoami'
+# It's bash and there is no zsh.
+# Let's log in.
+ssh build-server-1
+which zsh
+# Missing software was installed to $HOME.
+say hi from build-server-1
+# RC files got copied over, so our alias works.
+exit
+# Prompt doesn't have a highlight.
+# It means we are back on the local machine.
+# Let's ssh again.
+ssh build-server-1
+# It's fast because everything is installed.
+exit
+# Let's try another build server.
+ssh build-server-2
+history
+# History between all build servers is shared.
+say hi from build-server-2
+exit
+# Suppose our build server got wiped and rebuilt.
+ssh build-server-2 'rm -rf ~/* ~/.*'
+ssh build-server-2
+# Everything got installed once again.
+history
+# Our history is still there.
+exit
+# Where did history come from?
+# Didn't we just wipe the machine?
+ls -1 .zsh_history*
+# All history is preserved on the local machine.
+cat .zsh_history.laptop:build-server-2
+# Let's check out the web server.
+ssh web-server
+history
+# History is not shared between build and web servers.
+# That's just how I configured it.
+# You can define which history each machine can see.
+exit
+# Why does ssh command teleport shell environment?
+which ssh
+# Oh, it's a function.
+# Let's bypass it.
+command ssh build-server-1
+# The login shell is still bash.
+# Of course it is.
+# Changing login shell requires password.
+# We were never asked to enter password.
+# Thanks for watching!
+# https://github.com/romkatv/zsh4humans

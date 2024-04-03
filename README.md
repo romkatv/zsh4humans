@@ -92,7 +92,8 @@ changes to the file system. Once you exit Zsh, the image is deleted.
 
 ## Caveats
 
-Zsh for Humans is not a good choice for users who prefer vi bindings in their shell.
+Zsh for Humans does not offer vi bindings out of the box.
+However, you can define your own bindings as mentioned in [tips.md#vi-mode](tips.md#vi-mode).
 
 Zsh for Humans has very little documentation. There is no list of configuration options it
 recognizes and no description of what those options do.

@@ -620,6 +620,7 @@ use Zsh for Humans in vi mode.
 
 - Select *emacs* when asked by the installer about your preferred keymap.
 - Add `bindkey -v` below `z4h init` in `~/.zshrc`.
+- Fix the completion binding that enabling vi mode breaks: `bindkey '^I' z4h-fzf-complete`
 - Add your own bindings with `bindkey` or `z4h bindkey` below `bindkey -v`.
 
 ## Managing dotfiles

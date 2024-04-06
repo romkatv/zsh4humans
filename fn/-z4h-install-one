@@ -116,7 +116,7 @@ local old new
       return 1
     fi
     command tar -C $new -xzf $new/snapshot.tar.gz || return
-    local dirs=($new/${1:t}-*(N/))
+    local dirs=($new/*-*(N/))
     if (( $#dirs != 1 )); then
       print -Pru2 -- "%F{3}z4h%f: invalid content: %F{1}${url//\%/%%}%f"
       return 1

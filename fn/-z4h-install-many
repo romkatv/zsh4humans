@@ -100,7 +100,7 @@ local success
     queue=(${(M)queue:#powerlevel10k} ${queue:#powerlevel10k})
     queue=(${queue:#$omz} ${(M)queue:#$omz})
     for repo in $queue; do
-      if (( $#head + $#tail == 4 )); then
+      if (( $#head + $#tail == 8 )); then
         fd=$head[1]
         <&$fd >&2 || return
         exec {fd}<&- || return

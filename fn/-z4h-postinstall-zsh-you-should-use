@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+local file=$Z4H_PACKAGE_DIR/zsh-you-should-use.plugin.zsh
+[[ -e $file ]] || return 0
+
+local code
+code=$(<$Z4H_PACKAGE_DIR/zsh-you-should-use.plugin.zsh) || return
+
+local orig='
+    NONE="$(tput sgr0)"
+    BOLD="$(tput bold)"
+    RED="$(tput setaf 1)"
+    YELLOW="$(tput setaf 3)"
+    PURPLE="$(tput setaf 5)"
+'
+local sub="
+    NONE=\$'\\e[0m'
+    BOLD=\$'\\e[1m'
+    RED=\$'\\e[31m'
+    YELLOW=\$'\\e[33m'
+    PURPLE=\$'\\e[35m'
+"
+print -r -- ${code/$orig/$sub} >$file

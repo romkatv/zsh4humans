@@ -10,11 +10,17 @@ if [[ $1 == */* ]]; then
     url=https://github.com/$1/archive/master.tar.gz
   fi
   if ! zstyle -s :z4h:$1 postinstall postinstall; then
-    if [[ $1 == ohmyzsh/ohmyzsh ]]; then
-      postinstall=-z4h-postinstall-ohmyzsh
-    else
-      postinstall=
-    fi
+    case $1 in
+      ohmyzsh/ohmyzsh)
+        postinstall=-z4h-postinstall-ohmyzsh
+      ;;
+      MichaelAquilina/zsh-you-should-use)
+        postinstall=-z4h-postinstall-zsh-you-should-use
+      ;;
+      *)
+        postinstall=
+      ;;
+    esac
   fi
 else
   local -a channel

@@ -2,7 +2,7 @@
 
 eval "$_z4h_opt"
 
-local file=$Z4H_PACKAGE_DIR/${Z4H_PACKAGE_NAME:t}
+local file=$Z4H_PACKAGE_DIR/${Z4H_PACKAGE_NAME:t}.zsh
 [[ -e $file ]] || return 0
 
 local code

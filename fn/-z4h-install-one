@@ -20,6 +20,9 @@ if [[ $1 == */* ]]; then
       wfxr/forgit)
         postinstall=-z4h-postinstall-forgit
       ;;
+      changyuheng/fz)
+        postinstall=-z4h-postinstall-fz
+      ;;
       *)
         postinstall=
       ;;

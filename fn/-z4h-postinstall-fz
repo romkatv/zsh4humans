@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+local file=$Z4H_PACKAGE_DIR/fz.plugin.zsh
+[[ -e $file ]] || return 0
+
+local code
+code=$(<$file) || return
+
+local orig='
+__fz_init_zsh_completion() {
+'
+local sub='
+__fz_init_zsh_completion() {
+  [[ -n ${ZSH_SCRIPT+X}${ZSH_EXECUTION_STRING+X} ]] && return
+'
+print -r -- ${code/$orig/$sub} >$file

@@ -8,10 +8,10 @@ local file=$Z4H_PACKAGE_DIR/forgit.plugin.zsh
 local code
 code=$(<$Z4H_PACKAGE_DIR/forgit.plugin.zsh) || return
 
-local orig='
-set | awk -F '=' '{ print $1 }' | grep FORGIT_ | while read -r var; do
-    if ! export | grep -q "\(^$var=\|^export $var=\)"; then
-'
+local orig="
+set | awk -F '=' '{ print \$1 }' | grep FORGIT_ | while read -r var; do
+    if ! export | grep -q \"\\(^\$var=\\|^export \$var=\\)\"; then
+"
 local sub='
 for var in "${(@)parameters[(I)FORGIT_*]}"; do
     if [[ ${parameters[$var]} != *export* ]]; then

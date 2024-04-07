@@ -23,6 +23,9 @@ if [[ $1 == */* ]]; then
       changyuheng/fz)
         postinstall=-z4h-postinstall-fz
       ;;
+      zsh-users/zsh-syntax-highlighting)
+        postinstall=-z4h-postinstall-zsh-syntax-highlighting-ext
+      ;;
       *)
         postinstall=
       ;;

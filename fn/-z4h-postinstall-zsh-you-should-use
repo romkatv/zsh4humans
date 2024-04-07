@@ -6,7 +6,7 @@ local file=$Z4H_PACKAGE_DIR/zsh-you-should-use.plugin.zsh
 [[ -e $file ]] || return 0
 
 local code
-code=$(<$Z4H_PACKAGE_DIR/zsh-you-should-use.plugin.zsh) || return
+code=$(<$file) || return
 
 local orig='
     NONE="$(tput sgr0)"

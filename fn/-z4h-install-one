@@ -17,6 +17,9 @@ if [[ $1 == */* ]]; then
       MichaelAquilina/zsh-you-should-use)
         postinstall=-z4h-postinstall-zsh-you-should-use
       ;;
+      wfxr/forgit)
+        postinstall=-z4h-postinstall-forgit
+      ;;
       *)
         postinstall=
       ;;

@@ -23,11 +23,8 @@ if [[ $1 == */* ]]; then
       changyuheng/fz)
         postinstall=-z4h-postinstall-fz
       ;;
-      zsh-users/zsh-syntax-highlighting)
-        postinstall=-z4h-postinstall-zsh-syntax-highlighting-ext
-      ;;
-      zsh-users/zsh-autosuggestions)
-        postinstall=-z4h-postinstall-zsh-autosuggestions-ext
+      zsh-users/(zsh-syntax-highlighting|zsh-autosuggestions|zsh-history-substring-search))
+        postinstall=-z4h-postinstall-zsh-users
       ;;
       *)
         postinstall=

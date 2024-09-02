@@ -997,7 +997,11 @@ function -z4h-post-init() {
     function _history-substring-search-end() {
       builtin eval "$_z4h_opt"
       if (( _history_substring_search_refresh_display )); then
-        CURSOR=${#BUFFER}
+        if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+          CURSOR=$((${#BUFFER} - 1))
+        else
+          CURSOR=${#BUFFER}
+        fi
       fi
       typeset -g _history_substring_search_result=$BUFFER
       typeset -gi _history_substring_search_cursor=CURSOR
@@ -1015,13 +1019,46 @@ function -z4h-post-init() {
             "$((highlight_start_index - 1)) $((highlight_end_index - 1)) $_history_substring_search_query_highlight")
       done
     }
+
+    # This function is buggy in the original implementation when vicmd is active.
+    _history-substring-search-up-buffer() {
+      builtin eval "$_z4h_opt"
+
+      if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+        # The original implementation is equivalent to this one without this branch.
+        (( CURSOR != ${#BUFFER} - 1 )) || return
+      else
+        (( CURSOR != ${#BUFFER}     )) || return
+      fi
+
+      [[ $LBUFFER == *$'\n'* ]]      || return
+      builtin zle up-line-or-history || true
+    }
+
+    # See _history-substring-search-up-buffer above.
+    _history-substring-search-down-buffer() {
+      builtin eval "$_z4h_opt"
+
+      if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+        (( CURSOR != ${#BUFFER} - 1 )) || return
+      else
+        (( CURSOR != ${#BUFFER}     )) || return
+      fi
+
+      [[ $RBUFFER == *$'\n'* ]]         || return
+      builtin zle down-line-or-history  || true
+    }
   elif (( $+functions[_history-substring-search-end] )); then
     # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
     function _history-substring-search-end() {
       emulate -L zsh
       _history_substring_search_result=$BUFFER
       if (( _history_substring_search_refresh_display )); then
-        CURSOR=${#BUFFER}
+        if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
+          CURSOR=$((${#BUFFER} - 1))
+        else
+          CURSOR=${#BUFFER}
+        fi
       fi
     }
   fi

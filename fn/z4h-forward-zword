@@ -9,7 +9,7 @@ repeat ${NUMERIC:-1}; do
     buf=${${buf##[[:space:]]#}:$#word}
   done
   CURSOR=$(($#BUFFER - $#buf))
-  if [[ $KEYMAP == vicmd ]] && (( CURSOR && CURSOR == $#BUFFER )); then
+  if (( CURSOR > _z4h_cursor_max() )); then
     (( --CURSOR ))
   fi
 done

@@ -16,7 +16,7 @@ else
 fi
 
 region_highlight+=("$#BUFFER $(($#BUFFER + $#POSTDISPLAY)) $style")
-[[ $KEYMAP == vicmd ]] && CURSOR=$(($#BUFFER-1)) || CURSOR=$#BUFFER
+typeset -gi CURSOR='_z4h_cursor_max()'
 
 -z4h-cursor-hide
 zle -R

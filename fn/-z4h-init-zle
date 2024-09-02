@@ -115,11 +115,7 @@ function z4h-backward-kill-zword() { -z4h-move-and-kill z4h-backward-zword }
 
 function z4h-beginning-of-buffer() { CURSOR=0 }
 function z4h-end-of-buffer() {
-  if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-    CURSOR=$((${#BUFFER} - 1))
-  else
-    CURSOR=${#BUFFER}
-  fi
+  typeset -gi CURSOR='_z4h_cursor_max()'
 }
 function z4h-expand() { zle _expand_alias || zle .expand-word || true }
 
@@ -142,6 +138,8 @@ else
   function -z4h-cursor-hide() {}
   function -z4h-cursor-show() {}
 fi
+
+functions -M -- _z4h_cursor_max 0 0
 
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
@@ -814,9 +812,7 @@ if (( _z4h_use[zsh-autosuggestions] )); then
 
   _zsh_autosuggest_widget_accept() {
     -z4h-autosuggest-fetch
-    if [[ -z $POSTDISPLAY ||
-          $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
-          $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
+    if (( ${#POSTDISPLAY} == 0 || CURSOR < _z4h_cursor_max() )); then
       _zsh_autosuggest_invoke_original_widget "$@"
       return
     fi
@@ -826,19 +822,13 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     _zsh_autosuggest_invoke_original_widget "$@"
     local -i ret=$?
     typeset -g _z4h_autosuggest_buffer="$BUFFER"
-    if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-      CURSOR=$((${#BUFFER} - 1))
-    else
-      CURSOR=${#BUFFER}
-    fi
+    typeset -gi CURSOR='_z4h_cursor_max()'
     return ret
   }
 
   _zsh_autosuggest_widget_partial_accept() {
     -z4h-autosuggest-fetch
-    if [[ -z $POSTDISPLAY ||
-          $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
-          $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
+    if (( ${#POSTDISPLAY} == 0 || CURSOR < _z4h_cursor_max() )); then
       _zsh_autosuggest_invoke_original_widget "$@"
       return
     fi
@@ -847,7 +837,9 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     _zsh_autosuggest_invoke_original_widget "$@"
     local -i ret=$?
     local -i cursor=CURSOR
-    [[ $KEYMAP == vicmd ]] && (( ++cursor ))
+    if [[ $KEYMAP == vicmd && -n ${BUFFER##*$'\n'} ]]; then
+      (( ++cursor ))
+    fi
     if (( cursor > buf_len )); then
       BUFFER=${BUFFER:0:$cursor}
       POSTDISPLAY=${POSTDISPLAY:$((cursor - buf_len))}
@@ -997,11 +989,7 @@ function -z4h-post-init() {
     function _history-substring-search-end() {
       builtin eval "$_z4h_opt"
       if (( _history_substring_search_refresh_display )); then
-        if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-          CURSOR=$((${#BUFFER} - 1))
-        else
-          CURSOR=${#BUFFER}
-        fi
+        typeset -gi CURSOR='_z4h_cursor_max()'
       fi
       typeset -g _history_substring_search_result=$BUFFER
       typeset -gi _history_substring_search_cursor=CURSOR
@@ -1024,27 +1012,18 @@ function -z4h-post-init() {
     _history-substring-search-up-buffer() {
       builtin eval "$_z4h_opt"
 
-      if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-        # The original implementation is equivalent to this one without this branch.
-        (( CURSOR != ${#BUFFER} - 1 )) || return
-      else
-        (( CURSOR != ${#BUFFER}     )) || return
-      fi
+      # The original implementation is equivalent to this one with the exception
+      # of the condition on the next line being (( CURSOR != $#BUFFER )).
+      (( CURSOR != _z4h_cursor_max() )) || return
 
-      [[ $LBUFFER == *$'\n'* ]]      || return
-      builtin zle up-line-or-history || true
+      [[ $LBUFFER == *$'\n'* ]]         || return
+      builtin zle up-line-or-history    || true
     }
 
     # See _history-substring-search-up-buffer above.
     _history-substring-search-down-buffer() {
       builtin eval "$_z4h_opt"
-
-      if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-        (( CURSOR != ${#BUFFER} - 1 )) || return
-      else
-        (( CURSOR != ${#BUFFER}     )) || return
-      fi
-
+      (( CURSOR != _z4h_cursor_max() )) || return
       [[ $RBUFFER == *$'\n'* ]]         || return
       builtin zle down-line-or-history  || true
     }
@@ -1054,11 +1033,7 @@ function -z4h-post-init() {
       emulate -L zsh
       _history_substring_search_result=$BUFFER
       if (( _history_substring_search_refresh_display )); then
-        if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-          CURSOR=$((${#BUFFER} - 1))
-        else
-          CURSOR=${#BUFFER}
-        fi
+        typeset -gi CURSOR='_z4h_cursor_max()'
       fi
     }
   fi

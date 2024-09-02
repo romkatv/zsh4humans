@@ -146,11 +146,7 @@ local preview='printf "%s" {} | command cut -f2- -d'$'\1'
       })
     [[ -n $choice ]] || return
     BUFFER=${choice#*$'\n'}
-    if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-      CURSOR=$(($#BUFFER - 1))
-    else
-      CURSOR=$#BUFFER
-    fi
+    typeset -gi CURSOR='_z4h_cursor_max()'
     if (( _z4h_use[zsh-autosuggestions] )); then
       typeset -g _z4h_autosuggest_buffer=$BUFFER
       unset _z4h_autosuggestion POSTDISPLAY

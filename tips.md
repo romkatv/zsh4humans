@@ -618,9 +618,9 @@ The installer refuses to do anything if you select *vi* when asked about your
 preferred keymap. If you don't mind manually defining a few bindings, you can
 use Zsh for Humans in vi mode.
 
-- Select *emacs* when asked by the installer about your preferred keymap.
-- Add `bindkey -v` below `z4h init` in `~/.zshrc`.
-- Add your own bindings with `bindkey` or `z4h bindkey` below `bindkey -v`.
+1. Select *emacs* when asked by the installer about your preferred keymap.
+2. Add `bindkey -v` below `z4h init` in `~/.zshrc`.
+3. Add your own bindings with `bindkey` or `z4h bindkey` below `bindkey -v`.
 
 ## Managing dotfiles
 

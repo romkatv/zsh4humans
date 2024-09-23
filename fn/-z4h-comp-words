@@ -37,8 +37,11 @@
   (( height >= 6 )) || (( height = 6 ))
   (( height <= LINES - 1 )) || (( height = LINES - 1 ))
 
+  local anchor=""
+  zstyle -T :z4h:${WIDGET#z4h-} anchored-match-comp-words && anchor="^"
+
   local opts=(
-    --query=${_z4h_word_prefix:+"^$_z4h_word_prefix"}
+    --query=${_z4h_word_prefix:+"${anchor}$_z4h_word_prefix"}
     --color=hl:201,hl+:201
     --with-nth=2
     --delimiter='\000'

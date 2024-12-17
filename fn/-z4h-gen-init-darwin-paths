@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 local -a stat
-local files=(/usr/libexec/path_helper /etc/{,man}paths{,.d} /etc/paths.d/*(N) /etc/manpaths.d/*(N))
+local files=(/usr/libexec/path_helper)
 zstat -A stat +mtime -- $files 2>/dev/null || return
 
 local script

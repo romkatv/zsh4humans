@@ -97,15 +97,12 @@ fpath=(
 autoload -Uz -- $Z4H/zsh4humans/fn/(|-|_)z4h[^.]#(:t) || return
 functions -Ms _z4h_err
 
-path+=($Z4H/fzf/bin)
-manpath=($manpath $Z4H/fzf/man '')
-
 () {
   path=(${@:|path} $path /snap/bin(-/N))
 } {~/bin,~/.local/bin,~/.cargo/bin,${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin},${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin},/opt/local/sbin,/opt/local/bin,/usr/local/sbin,/usr/local/bin}(-/N)
 
 () {
-  manpath=(${@:|manpath} $manpath '')
+  manpath=(${@:|manpath} "${manpath[@]}" '')
 } {${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/share/man},/opt/local/share/man}(-/N)
 
 () {
@@ -122,6 +119,9 @@ if [[ $ZSH_PATCHLEVEL == zsh-5.8-0-g77d203f && $_z4h_exe == */bin/zsh &&
     manpath=(${_z4h_exe:h:h}/share/man $manpath '')
   fi
 fi
+
+path+=($Z4H/fzf/bin)
+manpath+=($Z4H/fzf/man)
 
 : ${GITSTATUS_CACHE_DIR=$Z4H/cache/gitstatus}
 : ${ZSH=$Z4H/ohmyzsh/ohmyzsh}

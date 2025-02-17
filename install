@@ -301,7 +301,7 @@ url='https://raw.githubusercontent.com/romkatv/zsh4humans/v5'
 if ! err="$($fetch "$z4h" '--' "$url"/z4h.zsh 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
   >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/z4h.zsh
-  'command' 'rm' '-rf' '--' "$Z4H" 2>'/dev/null'
+  'command' 'rm' '-rf' '--' "$z4h" 2>'/dev/null'
   'exit' '1'
 fi
 

@@ -33,9 +33,13 @@
   (( _z4h_can_save_restore_screen )) && pct=100
 
   local -i header_height=0
-  if [[ $_z4h_comp_msg ]] {
-    local header_lines=(${(f)_z4h_comp_msg})
+  if [[ -v _z4h_comp_msg ]] {
+    local -i header_height_max=$(( LINES - 4 ))
+    local header_lines=("${(@f)_z4h_comp_msg%%$'\n'#}")
     header_height+=$#header_lines
+    if (( header_height > header_height_max )); then
+      header_height=$header_height_max
+    fi
   }
 
   local -i height=$(( 100 * ($#indices + 4 + header_height) < pct * LINES ? $#indices + 4 + header_height : pct * LINES / 100 ))

@@ -56,7 +56,7 @@ for k v in ${(kv)keys}; do
   fi
 done
 
-if [[ $_z4h_comp_msg ]]; then
+if [[ -v _z4h_comp_msg ]]; then
   flags=(--header=${(%)_z4h_comp_msg} "${flags[@]}")
 fi
 

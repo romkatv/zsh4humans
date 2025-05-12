@@ -10,7 +10,7 @@ setopt local_options always_to_end no_auto_list no_auto_menu no_auto_param_keys 
        no_auto_remove_slash no_bash_auto_list no_complete_in_word no_list_ambiguous \
        no_list_beep no_list_packed no_list_rows_first no_menu_complete no_rec_exact
 
-local -ra _z4h_shadow_funcs=(_main_complete _multi_parts _path_files _setup compadd zstyle)
+local -ra _z4h_shadow_funcs=(_main_complete _message _multi_parts _path_files _setup compadd zstyle)
 
 local f
 for f in $_z4h_shadow_funcs; do
@@ -78,6 +78,11 @@ done
     # trial completions on the second. We can achieve this by dropping -M.
     # However, this would not allow us to complete f/b, and we want that.
     compadd -M "r:|${_z4h_sep}=** r:|=*" "$@" - "${_z4h_array[@]}"
+  }
+
+  function _message() {
+    # For now, ignore styles and groups.
+    typeset -g _z4h_comp_msg=${@[-1]}
   }
 
   function _path_files() {

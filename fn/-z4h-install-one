@@ -43,7 +43,7 @@ else
       case $1 in
         tmux)                       command=$tmux_cmd;;
         homebrew-command-not-found) command=$brew_cmd;;
-        terminfo)                   url=https://github.com/romkatv/terminfo/archive/v1.3.0.tar.gz;;
+        terminfo)                   url=https://github.com/romkatv/terminfo/archive/v1.4.0.tar.gz;;
         *)                          url=https://github.com/zsh4humans/$1/archive/z4h-$channel[1].tar.gz;;
       esac
     ;;

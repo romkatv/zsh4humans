@@ -83,7 +83,7 @@ starts and upon pressing <kbd>Ctrl+L</kbd>:
 zstyle ':z4h:' prompt-at-bottom 'yes'
 ```
 
-This feature requires that [`start-tmux` is not set to `no`](#tmux).
+This feature requires that [`start-tmux` is set to `yes`](#tmux).
 
 If you have a habit of running `clear` instead of pressing <kbd>Ctrl+L</kbd>,
 you can add this alias:
@@ -166,7 +166,7 @@ POSTEDIT=$'\n\e[A'
 
 You can bind `Enter` to `z4h-accept-line` to insert a newline instead of
 displaying the secondary prompt (a.k.a. `PS2`) when the currently typed
-command is incomplete.
+command is incomplete. See: [issue](https://github.com/romkatv/zsh4humans/issues/10) for more information.
 
 ```zsh
 z4h bindkey z4h-accept-line Enter
@@ -236,6 +236,7 @@ zstyle ':z4h:ssh:*'                   enable no
 zstyle ':z4h:ssh:example-hostname1'   enable yes
 zstyle ':z4h:ssh:*.example-hostname2' enable yes
 ```
+*NOTE*: The shell needs to be reloaded `exec zsh` for .zshrc zstyle changes to take effect.
 
 ### Extra dotfiles
 
@@ -535,7 +536,7 @@ idea execute commands with glob arguments in order to have them this way in
 history. This allows you to re-execute them even when the set of `**/*.orig`
 files changes.)
 
-Try flipping `setup no_auto_menu` to `setopt auto_menu` and see if you like it.
+Try flipping `setopt no_auto_menu` to `setopt auto_menu` and see if you like it.
 This will automatically press <kbd>Tab</kbd> for the second time when the first
 <kbd>Tab</kbd> inserts an unambiguous prefix.
 

@@ -64,7 +64,7 @@ if [[ -v functions[command_not_found_handler] ]]; then
   # Already installed or not needed.
 elif [[ -v commands[brew] &&
         -n $HOMEBREW_REPOSITORY &&
-        -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ||
+        -e $HOMEBREW_REPOSITORY/Library/Homebrew/cmd/which-formula.rb ||
         -x /usr/lib/command-not-found ]]; then
   autoload +X -Uz -- -z4h-command-not-found
   builtin functions -c -- -z4h-command-not-found command_not_found_handler

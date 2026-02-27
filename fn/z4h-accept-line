@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+#
+# z4h-accept-line is just like accept-line except that it inserts \n when
+# accept-line would result in a parse error or PS2.
+
+if -z4h-is-valid-list "$PREBUFFER$BUFFER"; then
+  zle accept-line
+else
+  LBUFFER+=$'\n'
+fi

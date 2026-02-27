@@ -9,7 +9,7 @@ if (( ARGC < 2 )); then
   return 1
 fi
 
-(( _z4h_zle )) || return 0
+(( ${+_z4h_key} )) || return 0
 
 local kb seq seqs new_seqs
 

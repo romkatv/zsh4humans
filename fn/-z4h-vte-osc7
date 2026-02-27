@@ -15,21 +15,12 @@ if [[ $PWD == /* && $PWD -ef . ]]; then
 else
   local cwd=${${:-.}:a}
 fi
-local host=${HOST:-${(%):-%m}}
+local host=$HOST
 [[ -n $cwd && $host != *$'\e'* ]] || return
 
 if [[ $cwd != $_z4h_vte_last_cwd ]]; then
-  if [[ $cwd == [a-zA-Z0-9"/:_.-!'()~ "]# ]]; then
-    typeset -g _z4h_vte_last_encoded_cwd=${cwd// /%20}
-  else
-    local c
-    typeset -g _z4h_vte_last_encoded_cwd=
-    for c in ${(s::)cwd}; do
-      [[ $c == [a-zA-Z0-9"/:_.-!'()~"] ]] || printf -v c '%%%02X' $(( #c ))
-      _z4h_vte_last_encoded_cwd+=$c
-    done
-  fi
-  typeset -g _z4h_vte_last_cwd=$cwd
+  local MATCH MBEGIN MEND
+  typeset -g _z4h_vte_last_encoded_cwd=${cwd//(#m)[^a-zA-Z0-9"\/:_.-!'()~"]/%${(l:2::0:)$(([##16]#MATCH))}}
 fi
 
 -z4h-tmux-bypass '\e]7;file://%s%s\e\' "$host" "$_z4h_vte_last_encoded_cwd"

@@ -13,15 +13,9 @@ if [[ -v _z4h_redraw_fd ]]; then
 fi
 
 if [[ $BUFFER == *' ' ]] &&
-   ! zstyle -t :z4h:history preserve-trailing-whitespace; then
-  if [[ -v functions[-z4h-buffer-func] ]]; then
-    builtin unfunction -- -z4h-buffer-func
-  fi
-  if functions[-z4h-buffer-func]="$PREBUFFER$BUFFER" 2>/dev/null &&
-      [[ -v functions[-z4h-buffer-func] ]]; then
-    builtin unfunction -- -z4h-buffer-func
-    BUFFER=${BUFFER%% #}
-  fi
+   ! zstyle -t :z4h:history preserve-trailing-whitespace &&
+   -z4h-is-valid-list "$PREBUFFER$BUFFER"; then
+  BUFFER=${BUFFER%% #}
 fi
 
 unset POSTDISPLAY _z4h_autosuggest_buffer _z4h_autosuggestion

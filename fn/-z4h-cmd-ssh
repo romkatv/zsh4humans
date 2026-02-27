@@ -314,7 +314,7 @@ fi
   fi
 
   if (( $#indices )); then
-    command tar -C $tmpdir $tar_c_opt -czhf - -- $indices >>$tmpdir/script || return
+    COPYFILE_DISABLE=1 command tar -C $tmpdir $tar_c_opt -czhf - -- $indices >>$tmpdir/script || return
   fi
 
   local args=("$@")

@@ -232,7 +232,7 @@ if command -v 'base64' >'/dev/null' 2>&1 && command -v 'tr' >'/dev/null' 2>&1; t
     case "$_z4h_ssh_tar_v" in
       *'GNU tar'*) _z4h_ssh_tar_opt='--owner=0 --group=0';;
     esac
-    'command' 'tar' '-C' "$_z4h_ssh_tmp" $tar_opt '-czhf' "$_z4h_ssh_tmp"/dump.tar.gz \
+    COPYFILE_DISABLE='1' 'command' 'tar' '-C' "$_z4h_ssh_tmp" $tar_opt '-czhf' "$_z4h_ssh_tmp"/dump.tar.gz \
       '--' $_z4h_ssh_dst_list || 'exit'
     'base64' <"$_z4h_ssh_tmp"/dump.tar.gz >"$_z4h_ssh_tmp"/dump.base64 || 'exit'
     'command' 'tr' '-d' '\n' <"$_z4h_ssh_tmp"/dump.base64 >"$_z4h_ssh_tmp"/dump.base64-sl || 'exit'

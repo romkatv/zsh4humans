@@ -47,7 +47,7 @@ if '[' '-n' "${ZSH_VERSION-}" ']'; then
     'typeset' '-gri' _z4h_zle='1'
 
     PS1="%B%F{2}%n@%m%f %F{4}%~%f
-  %F{%(?.2.1)}%#%f%b "
+%F{%(?.2.1)}%#%f%b "
     RPS1="%B%F{3}z4h recovery mode%f%b"
 
     WORDCHARS=''

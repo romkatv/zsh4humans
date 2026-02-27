@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+#
+# Docs:
+#
+#   https://learn.microsoft.com/en-us/windows/terminal/tutorials/new-tab-same-directory#zsh
+#
+# The recommended code looks like this:
+#
+#   keep_current_path() {
+#     printf "\e]9;9;%s\e\\" "$(wslpath -w "$PWD")"
+#   }
+#   precmd_functions+=(keep_current_path)
+
+emulate -L zsh -o no_multi_byte
+
+[[ -v commands[wslpath] ]] || return
+
+if [[ $PWD == /* && $PWD -ef . ]]; then
+  local cwd=$PWD
+else
+  local cwd=${${:-.}:a}
+fi
+[[ -n $cwd ]] || return
+
+typeset -gA _z4h_lin2win_cwd
+local win_cwd=${_z4h_lin2win_cwd[$cwd]-}
+
+if [[ -z $win_cwd ]]; then
+  win_cwd="$(command wslpath -am . 2>/dev/null)x" || return
+  win_cwd=${win_cwd[1,-2]//$'\e'/$'\e\e'}
+  [[ -n $win_cwd ]] || return
+  _z4h_lin2win_cwd[$cwd]=$win_cwd
+fi
+
+-z4h-tmux-bypass '\e]9;9;%s\e\\' "$win_cwd"

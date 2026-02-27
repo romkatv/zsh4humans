@@ -1,18 +1,27 @@
 #!/usr/bin/env zsh
 
-local -a stat
-local files=(/usr/libexec/path_helper /etc/{,man}paths{,.d} /etc/paths.d/*(N) /etc/manpaths.d/*(N))
+local -a deps=(
+  '/usr/libexec/path_helper'
+  '/etc/paths(N)'
+  '/etc/paths.d/*(N)'
+  '/etc/manpaths(N)'
+  '/etc/manpaths.d/*(N)'
+)
+
+local -a stat files=($~deps)
 zstat -A stat +mtime -- $files 2>/dev/null || return
 
 local script
-script="$(PATH= MANPATH= /usr/libexec/path_helper -s)" || return
+script="$(PATH= MANPATH= $deps[1] -s)" || return
 
 (
   eval "$script" || return
   >$Z4H/cache/init-darwin-paths.tmp.$$ print -r -- '() {
-  local -a stat
-  zstat -A stat +mtime -- '${(j: :)${(@q)files}}' 2>/dev/null &&
-  [[ ${(j: :)stat} == '${(q)${(j: :)stat}}' ]] && {
+  local deps=('${(@q)deps}')
+  local -a stat files=($~deps)
+  [[ ${(j: :)${(@q)files}} == '${(q)${(j: :)${(@q)files}}}' ]] &&
+  zstat -A stat +mtime -- $files 2>/dev/null                   &&
+  [[ ${(j: :)stat} == '${(q)${(j: :)stat}}'                 ]] && {
     local path_dirs=('${(j: :)${(@q)path}}')
     local manpath_dirs=('${(j: :)${(@q)manpath}}')
     path=(${path_dirs:|path} $path)

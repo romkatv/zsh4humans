@@ -25,7 +25,7 @@ fi
   fi
   if [[ -v commands[brew] &&
         -n $HOMEBREW_REPOSITORY &&
-        -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ]]; then
+        -e $HOMEBREW_REPOSITORY/Library/Homebrew/cmd/which-formula.rb ]]; then
     if msg="$(command brew which-formula --explain $1 2>/dev/null)" && [[ -n $msg ]]; then
       print -r -- $msg
       return 127

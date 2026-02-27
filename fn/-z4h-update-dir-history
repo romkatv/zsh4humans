@@ -6,8 +6,9 @@ if (( ${+_z4h_dir_hist_fd} )); then
   unset _z4h_dir_hist_fd
 fi
 
-local dir=${(%):-%~}
-[[ $dir == ${_z4h_last_dir-} ]] && return
+local dir
+zstyle -s :z4h:dir-history: cwd dir || dir=${(%):-%~}
+[[ -z $dir || $dir == ${_z4h_last_dir-} ]] && return
 
 eval "$_z4h_opt"
 

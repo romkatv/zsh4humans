@@ -40,13 +40,12 @@ zstyle ':z4h:' start-tmux no
 
 Several features in Zsh for Humans require knowing the content of the terminal
 screen, and with the above option this condition won't be satisfied. If you
-remove the option altogether, Zsh for Humans will automatically start a
+remove this `zstyle` line, Zsh for Humans will automatically start a
 stripped-down version of `tmux` (referred to as "integrated tmux" in the source
 code and discussions) that should enable the extra features with no other
 visible effects. This used to be the default in Zsh for Humans for a long time
 but eventually it's been changed because there are corner cases where integrated
-tmux can cause issues. Try removing `start-tmux` option and see if everything
-still works.
+tmux can cause issues. Try removing this line and see if everything still works.
 
 If your terminal has a feature that allows it to open a new tab or window in
 the same directory as the current tab, and it doesn't work, add the following
@@ -148,6 +147,9 @@ z4h bindkey z4h-eof Ctrl+D
 setopt ignore_eof
 ```
 
+This preserves the default zsh behavior on Ctrl+D. You can bind `z4h-exit`
+instead of `z4h-eof` if you want Ctrl+D to always exit the shell.
+
 If you are using a two-line prompt with an empty line before it, add this for
 smoother rendering:
 
@@ -161,6 +163,14 @@ without an empty line, add this instead:
 ```zsh
 POSTEDIT=$'\n\e[A'
  ```
+
+You can bind `Enter` to `z4h-accept-line` to insert a newline instead of
+displaying the secondary prompt (a.k.a. `PS2`) when the currently typed
+command is incomplete.
+
+```zsh
+z4h bindkey z4h-accept-line Enter
+```
 
 ## Terminal title
 
@@ -197,6 +207,8 @@ hostname as you typed it on the command line when connecting rather than
 the hostname reported by the remote machine.
 
 ## SSH
+
+[![SSH teleportation](https://asciinema.org/a/542763.svg)](https://asciinema.org/a/542763)
 
 When you connect to a remote host over SSH, your local Zsh for Humans
 environment can be teleported over to it. The first login to a remote host may
@@ -427,7 +439,7 @@ The shebang says to execute this script with `zsh -i`, which makes `z4h`
 function available to it.
 
 After you run this script, it's guaranteed that SSH teleportation will be fast
-and won't perform neither the installation or update.
+and won't perform the installation or update.
 
 To forcefully update Zsh for Humans on the remote machine, replace the last line
 with this:
@@ -592,7 +604,13 @@ files:
 - `~/.p10k*.zsh` (there can be more than one).
 
 You don't need to run Zsh for Humans installer on a new machine. Simply
-copy/restore these files and Zsh for Humans will bootstrap itself.
+copy/restore these files and Zsh for Humans will bootstrap itself. If you don't
+have zsh on the machine, you can bootstrap Zsh for Humans from any Bourne-based
+shell with the following command:
+
+```sh
+Z4H_BOOTSTRAPPING=1 . ~/.zshenv
+```
 
 ## vi mode
 
@@ -600,9 +618,9 @@ The installer refuses to do anything if you select *vi* when asked about your
 preferred keymap. If you don't mind manually defining a few bindings, you can
 use Zsh for Humans in vi mode.
 
-- Select *emacs* when asked by the installer about your preferred keymap.
-- Add `bindkey -v` below `z4h init` in `~/.zshrc`.
-- Add your own bindings with `bindkey` or `z4h bindkey` below `bindkey -v`.
+1. Select *emacs* when asked by the installer about your preferred keymap.
+2. Add `bindkey -v` below `z4h init` in `~/.zshrc`.
+3. Add your own bindings with `bindkey` or `z4h bindkey` below `bindkey -v`.
 
 ## Managing dotfiles
 

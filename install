@@ -97,8 +97,8 @@ read_choice() {
 >&2 'printf' '\n'
 >&2 'printf' 'What kind of \033[1mkeyboard\033[0m are you using?\n'
 >&2 'printf' '\n'
->&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[33mBackspace\033[0m.\n'
->&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mBackspace\033[0m key(s) and does not have \033[33mOption\033[0m.\n'
+>&2 'printf' '  \033[1m(1)\033[0m  Mac. It has \033[32mOption\033[0m key(s) and does not have \033[33mAlt\033[0m.\n'
+>&2 'printf' '  \033[1m(2)\033[0m  PC.  It has \033[32mAlt\033[0m key(s) and does not have \033[33mOption\033[0m.\n'
 >&2 'printf' '  \033[1m(q)\033[0m  Quit and do nothing.\n'
 >&2 'printf' '\n'
 while 'true'; do
@@ -301,7 +301,7 @@ url='https://raw.githubusercontent.com/romkatv/zsh4humans/v5'
 if ! err="$($fetch "$z4h" '--' "$url"/z4h.zsh 2>&1)"; then
   >&2 'printf' "%s\n" "$err"
   >&2 'printf' '\033[33mz4h\033[0m: failed to download \033[31m%s\033[0m\n' "$url"/z4h.zsh
-  'command' 'rm' '-rf' '--' "$Z4H" 2>'/dev/null'
+  'command' 'rm' '-rf' '--' "$z4h" 2>'/dev/null'
   'exit' '1'
 fi
 
@@ -320,7 +320,7 @@ if ! err="$($fetch "$zshrc" '--' "$url"/.zshrc"$zshrc_suffix" 2>&1)"; then
 fi
 
 if '[' "$tmux" '=' '1' ']'; then
-  'command' 'awk' "/Mark up shell's output/ {print \"# Start tmux if not already in tmux.\"; print \"zstyle ':z4h:' start-tmux       command tmux -u new -A -D -t z4h\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
+  'command' 'awk' "/Mark up shell's output/ {print \"# Start tmux if not already in tmux.\"; print \"zstyle ':z4h:' start-tmux command tmux -u new -A -D -t z4h\"; print \"\"; print \"# Whether to move prompt to the bottom when zsh starts and on Ctrl+L.\"; print \"zstyle ':z4h:' prompt-at-bottom 'no'\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
 else
   'command' 'awk' "/Mark up shell's output/ {print \"# Don't start tmux.\"; print \"zstyle ':z4h:' start-tmux       no\"; print \"\"} 1" "$zshrc" >"$zshrc.bak"
 fi

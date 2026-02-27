@@ -20,7 +20,7 @@ If you want a great shell that just works, this project is for you.
   * 5.2. [Completing commands](#completing-commands)
   * 5.3. [Searching command history](#searching-command-history)
   * 5.4. [Interactive search with `fzf`](#interactive-search-with-fzf)
-  * 5.5. [SSH](#SSH)
+  * 5.5. [SSH](#ssh)
 * 6. [Customization](#customization)
   * 6.1. [Customizing prompt](#customizing-prompt)
   * 6.2. [Customizing appearance](#customizing-appearance)
@@ -78,13 +78,13 @@ changes to the file system. Once you exit Zsh, the image is deleted.
 
 - **Alpine Linux**: starts quickly; install additional software with `apk add <package>`
   ```zsh
-  docker run -e TERM -e COLORTERM -e LC_ALL=C.UTF-8 -w /root -it --rm alpine sh -uec '
+  docker run -e TERM -e COLORTERM -e LC_ALL=C.UTF-8 -w /root -it --detach-keys="ctrl-^,ctrl-@" --rm alpine sh -uec '
     apk add zsh curl tmux
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
   ```
 - **Ubuntu**: install additional software with `apt install <package>`:
   ```zsh
-  docker run -e TERM -e COLORTERM -w /root -it --rm ubuntu sh -uec '
+  docker run -e TERM -e COLORTERM -w /root -it --detach-keys="ctrl-^,ctrl-@" --rm ubuntu sh -uec '
     apt-get update
     apt-get install -y zsh curl tmux
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/romkatv/zsh4humans/v5/install)"'
@@ -159,6 +159,8 @@ start with `core` and end with either `go`, `rb`, or `py`.
 See [fzf](https://github.com/junegunn/fzf) homepage for more information.
 
 ### SSH
+
+[![SSH teleportation](https://asciinema.org/a/542763.svg)](https://asciinema.org/a/542763)
 
 When you connect to a remote host over SSH, your local Zsh for Humans environment can be teleported
 over to it. The first login to a remote host may take some time. After that it's as fast as normal

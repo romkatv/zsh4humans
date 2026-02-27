@@ -2,11 +2,7 @@
 
 local -i cursor=CURSOR
 {
-  if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-    CURSOR=$((${#BUFFER} - 1))
-  else
-    CURSOR=${#BUFFER}
-  fi
+  typeset -gi CURSOR='_z4h_cursor_max()'
   zle autosuggest-accept
 } always {
   CURSOR=cursor

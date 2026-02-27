@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 
-builtin zle || builtin exit 0
+local code=$?
+builtin zle || builtin exit code
 if [[ "$CONTEXT" == start && -z "$BUFFER" ]]; then
   typeset -g precmd_functions=(z4h-eof)
   builtin zle -w accept-line

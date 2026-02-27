@@ -8,4 +8,4 @@ local -i cursor_x cursor_y
 builtin print -rnu $_z4h_tty_fd -- "${(pl:$((2 * LINES - cursor_y))::\n:)}"$'\e[H\e[2J'
 builtin zle .reset-prompt
 builtin zle -R
-builtin echoti cnorm >&$_z4h_tty_fd
+-z4h-cursor-show

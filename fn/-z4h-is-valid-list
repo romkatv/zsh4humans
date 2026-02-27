@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+#
+# Succeeds if $1 is a well-formed command.
+
+# If it ends with an odd number of backslashes, it's malformed.
+() {
+  builtin emulate -L zsh -o extended_glob
+  [[ $1 == (|*[^\\])(\\\\)#\\ ]]
+} "$1" && builtin return 1
+
+if [[ -v functions[-z4h-test-func] ]]; then
+  builtin unfunction -- -z4h-test-func
+fi
+functions[-z4h-test-func]="$1" 2>/dev/null              || builtin return 1
+[[ -v functions[-z4h-test-func] ]]                      || builtin return 1
+builtin unfunction -- -z4h-test-func
+# This suffix allows us to detect two tricky cases: "for x" and "<<END".
+# Each of these on their own is a valid function body but neither can
+# be executed as a command in interactive shell.
+functions[-z4h-test-func]="$1"$'\ndo\ndone' 2>/dev/null || builtin return 0
+[[ -v functions[-z4h-test-func] ]]                      || builtin return 0
+builtin unfunction -- -z4h-test-func
+builtin return 1

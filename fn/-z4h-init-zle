@@ -1,7 +1,8 @@
 #!/usr/bin/env zsh
 
 if { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
-   [[ $TERM != (dumb|linux) && $ITERM_SHELL_INTEGRATION_INSTALLED != Yes ]]; then
+   [[ $TERM != (dumb|linux) && $ITERM_SHELL_INTEGRATION_INSTALLED != Yes &&
+      -z $NVIM_LISTEN_ADDRESS && -z $NVIM ]]; then
   -z4h-enable-iterm2-integration
 else
   function -z4h-iterm2-precmd() { }
@@ -12,7 +13,7 @@ fi
 function -z4h-set-term-title-preexec() {
   emulate -L zsh
   local _z4h_fmt
-  if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+  if [[ -n $SSH_CONNECTION || $P9K_SSH == 1 ]]; then
     zstyle -s :z4h:term-title:ssh   preexec _z4h_fmt || _z4h_fmt='%n@%m: ${1//\%/%%}'
   else
     zstyle -s :z4h:term-title:local preexec _z4h_fmt || _z4h_fmt='${1//\%/%%}'
@@ -26,7 +27,7 @@ function -z4h-set-term-title-precmd() {
   local -i err=$?
   emulate -L zsh
   local _z4h_fmt
-  if [[ -n $SSH_CONNECTON || $P9K_SSH == 1 ]]; then
+  if [[ -n $SSH_CONNECTION || $P9K_SSH == 1 ]]; then
     zstyle -s :z4h:term-title:ssh   precmd _z4h_fmt || _z4h_fmt='%n@%m: %~'
   else
     zstyle -s :z4h:term-title:local precmd _z4h_fmt || _z4h_fmt='%~'
@@ -63,7 +64,7 @@ if [[ -v functions[command_not_found_handler] ]]; then
   # Already installed or not needed.
 elif [[ -v commands[brew] &&
         -n $HOMEBREW_REPOSITORY &&
-        -e $HOMEBREW_REPOSITORY/Library/Taps/homebrew/homebrew-command-not-found/cmd/which-formula.rb ||
+        -e $HOMEBREW_REPOSITORY/Library/Homebrew/cmd/which-formula.rb ||
         -x /usr/lib/command-not-found ]]; then
   autoload +X -Uz -- -z4h-command-not-found
   builtin functions -c -- -z4h-command-not-found command_not_found_handler
@@ -114,11 +115,7 @@ function z4h-backward-kill-zword() { -z4h-move-and-kill z4h-backward-zword }
 
 function z4h-beginning-of-buffer() { CURSOR=0 }
 function z4h-end-of-buffer() {
-  if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-    CURSOR=$((${#BUFFER} - 1))
-  else
-    CURSOR=${#BUFFER}
-  fi
+  typeset -gi CURSOR='_z4h_cursor_max()'
 }
 function z4h-expand() { zle _expand_alias || zle .expand-word || true }
 
@@ -129,16 +126,26 @@ function z4h-cd-up() { builtin cd -q .. && -z4h-redraw-prompt }
 function z4h-do-nothing() {}
 
 if (( $+terminfo[civis] && $+terminfo[cnorm] )) && [[ -v _z4h_tty_fd ]]; then
-  function -z4h-cursor-hide() { [[ -t 1 ]] && echoti civis || echoti civis >&$_z4h_tty_fd }
-  function -z4h-cursor-show() { [[ -t 1 ]] && echoti cnorm || echoti cnorm >&$_z4h_tty_fd }
+  function -z4h-cursor-hide() {
+    [[ -t 1 ]] && echoti civis || echoti civis >&$_z4h_tty_fd
+  }
+  function -z4h-cursor-show() {
+    # See https://github.com/romkatv/powerlevel10k/issues/1699.
+    local cnorm=${${terminfo[cnorm]-}:/*$'\e[?25h'(|'\e'*)/$'\e[?25h'}
+    [[ -t 1 ]] && print -rn -- $cnorm || print -rnu $_z4h_tty_fd -- $cnorm
+  }
 else
   function -z4h-cursor-hide() {}
   function -z4h-cursor-show() {}
 fi
 
+functions -M -- _z4h_cursor_max 0 0
+
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search
+zle -N z4h-accept-line
 zle -N z4h-eof
+zle -N z4h-exit
 zle -N z4h-expand
 zle -N z4h-forward-word
 zle -N z4h-kill-word
@@ -148,6 +155,7 @@ zle -N z4h-forward-zword
 zle -N z4h-kill-zword
 zle -N z4h-backward-zword
 zle -N z4h-backward-kill-zword
+zle -N z4h-quote-prev-zword
 zle -N z4h-beginning-of-buffer
 zle -N z4h-end-of-buffer
 zle -N z4h-stash-buffer
@@ -489,6 +497,8 @@ fi
 typeset -gA _z4h_key=(
   Tab                         '^I'
   Space                       ' '
+  Enter                       '^M'
+  Escape                      '^['
   Ctrl+/                      '^_'
   Ctrl+_                      '^_'
   Ctrl+Space                  '^ '
@@ -802,9 +812,7 @@ if (( _z4h_use[zsh-autosuggestions] )); then
 
   _zsh_autosuggest_widget_accept() {
     -z4h-autosuggest-fetch
-    if [[ -z $POSTDISPLAY ||
-          $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
-          $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
+    if (( ${#POSTDISPLAY} == 0 || CURSOR < _z4h_cursor_max() )); then
       _zsh_autosuggest_invoke_original_widget "$@"
       return
     fi
@@ -814,19 +822,13 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     _zsh_autosuggest_invoke_original_widget "$@"
     local -i ret=$?
     typeset -g _z4h_autosuggest_buffer="$BUFFER"
-    if [[ $KEYMAP == vicmd && -n $BUFFER ]]; then
-      CURSOR=$((${#BUFFER} - 1))
-    else
-      CURSOR=${#BUFFER}
-    fi
+    typeset -gi CURSOR='_z4h_cursor_max()'
     return ret
   }
 
   _zsh_autosuggest_widget_partial_accept() {
     -z4h-autosuggest-fetch
-    if [[ -z $POSTDISPLAY ||
-          $CURSOR -lt ${#BUFFER} && $KEYMAP != vicmd ||
-          $CURSOR -lt $((${#BUFFER} - 1)) ]]; then
+    if (( ${#POSTDISPLAY} == 0 || CURSOR < _z4h_cursor_max() )); then
       _zsh_autosuggest_invoke_original_widget "$@"
       return
     fi
@@ -835,7 +837,9 @@ if (( _z4h_use[zsh-autosuggestions] )); then
     _zsh_autosuggest_invoke_original_widget "$@"
     local -i ret=$?
     local -i cursor=CURSOR
-    [[ $KEYMAP == vicmd ]] && (( ++cursor ))
+    if [[ $KEYMAP == vicmd && -n ${BUFFER##*$'\n'} ]]; then
+      (( ++cursor ))
+    fi
     if (( cursor > buf_len )); then
       BUFFER=${BUFFER:0:$cursor}
       POSTDISPLAY=${POSTDISPLAY:$((cursor - buf_len))}
@@ -985,7 +989,7 @@ function -z4h-post-init() {
     function _history-substring-search-end() {
       builtin eval "$_z4h_opt"
       if (( _history_substring_search_refresh_display )); then
-        CURSOR=${#BUFFER}
+        typeset -gi CURSOR='_z4h_cursor_max()'
       fi
       typeset -g _history_substring_search_result=$BUFFER
       typeset -gi _history_substring_search_cursor=CURSOR
@@ -1003,13 +1007,33 @@ function -z4h-post-init() {
             "$((highlight_start_index - 1)) $((highlight_end_index - 1)) $_history_substring_search_query_highlight")
       done
     }
+
+    # This function is buggy in the original implementation when vicmd is active.
+    _history-substring-search-up-buffer() {
+      builtin eval "$_z4h_opt"
+
+      # The original implementation is equivalent to this one with the exception
+      # of the condition on the next line being (( CURSOR != $#BUFFER )).
+      (( CURSOR != _z4h_cursor_max() )) || return
+
+      [[ $LBUFFER == *$'\n'* ]]         || return
+      builtin zle up-line-or-history    || true
+    }
+
+    # See _history-substring-search-up-buffer above.
+    _history-substring-search-down-buffer() {
+      builtin eval "$_z4h_opt"
+      (( CURSOR != _z4h_cursor_max() )) || return
+      [[ $RBUFFER == *$'\n'* ]]         || return
+      builtin zle down-line-or-history  || true
+    }
   elif (( $+functions[_history-substring-search-end] )); then
     # Turn off highlighting in _history-substring-search-end. It doesn't work anyway.
     function _history-substring-search-end() {
       emulate -L zsh
       _history_substring_search_result=$BUFFER
       if (( _history_substring_search_refresh_display )); then
-        CURSOR=${#BUFFER}
+        typeset -gi CURSOR='_z4h_cursor_max()'
       fi
     }
   fi
@@ -1037,12 +1061,17 @@ function -z4h-post-init() {
   if [[ -v _z4h_tty_fd ]]; then
     if [[ -v function[__vte_osc7] ]]; then
       builtin functions -c -- -z4h-vte-osc7 __vte_osc7
-    elif { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
-            [[ $TERM != (dumb|linux) ]]; then
+    fi
+    if { zstyle -t :z4h: term-shell-integration || zstyle -t :z4h: iterm2-integration } &&
+         [[ $TERM != (dumb|linux) ]]; then
       builtin functions -c -- -z4h-vte-osc7 __vte_osc7
       if (( ! $precmd_functions[(I)__vte_osc7] )); then
         precmd_functions=(__vte_osc7 $precmd_functions)
         __vte_osc7
+      fi
+      if [[ -v z4h_win_env && -z ${SSH_CONNECTION-} && ${P9K_SSH-} != 1 ]]; then
+        chpwd_functions+=(-z4h-osc9)
+        -z4h-osc9
       fi
     fi
   fi

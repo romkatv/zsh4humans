@@ -120,3 +120,4 @@
   emulate zsh -c "$(direnv export zsh)"
   emulate zsh -c "$(direnv hook zsh)"
   ```
+- New zle widget: `z4h-quote-prev-zword`.

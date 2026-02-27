@@ -1,0 +1,73 @@
+#!/usr/bin/env zsh
+#
+# Quote the shell word to the left of the cursor with double or single quotes.
+# Prefer quotes with the shorter result or double quotes if there is no
+# difference. If already quoted, change quotes. If there is an unterminated
+# quote, terminate it and quote the resulting word with the same kind of quotes.
+# Keep the cursor on the content it was pointing to before the widget was
+# invoked.
+#
+# Here are a few examples. The caret shows the position of the cursor.
+# *Initial* is the content of the buffer before the widget is executed. 
+# *Once* is the content of the buffer after the widget is executed.
+# *Twice* is the content of the buffer after the widget is executed twice.
+#
+# | Initial  | Once       | Twice      | Note
+# |----------|------------|------------|-------------------
+# | foo      | "foo"      | 'foo'      | prefer double quotes
+# | ^        |  ^         |  ^         |
+# | foo      | "foo"      | 'foo'      | keep cursor on the same word char
+# |   ^      |    ^       |    ^       |
+# | foo      | "foo"      | 'foo'      |
+# |    ^     |     ^      |     ^      |
+# | foo  bar | "foo"  bar | 'foo'  bar | cursor on a space => quote prev word
+# |     ^    |       ^    |       ^    |
+# | foo bar  | foo "bar"  | foo  'bar' |
+# |     ^    |      ^     |       ^    |
+# | "foo"    | 'foo'      | "foo"      | replace quotes if already quoted
+# |      ^   |      ^     |      ^     |
+# | 'foo'    | "foo"      | 'foo'      | replace quotes if already quoted
+# |      ^   |      ^     |      ^     |
+# | foo\"    | 'foo"'     | "foo\""    | single quotes because it's shorter
+# |      ^   |      ^     |       ^    |
+# | "foo     | "foo"      | 'foo'      |
+# |     ^    |     ^      |     ^      |
+# | 'foo     | 'foo'      | "foo"      | single quotes to match
+# |     ^    |     ^      |     ^      |
+# | foo"     | "foo"      | 'foo'      |
+# |     ^    |     ^      |     ^      |
+# | foo'     | 'foo'      | "foo"      |
+# |     ^    |     ^      |     ^      |
+# | foo"     | "foo"      | 'foo'      |
+# | ^        |  ^         |  ^         |
+
+emulate -L zsh
+
+local reply
+-z4h-find-prev-zword || return 0
+
+local -i start='reply[1]'
+(( start <= 0 )) && return
+local -i end='reply[2]'
+local word=$BUFFER[start,end]
+
+local -i q
+if -z4h-is-valid-list ": $word'"; then
+  word+="'"
+  local -i q=1
+elif -z4h-is-valid-list ": $word\""; then
+  word+='"'
+  local -i q=2
+fi
+
+local unquoted=${(Q)word}
+local quoted=(${(qq)unquoted} ${(qqq)unquoted})
+if (( ! q )); then
+  if [[ $quoted[1] != $word ]] && (( $#quoted[1] < $#quoted[2] )) ||
+      [[ $quoted[2] == $word ]]; then
+    (( q = 1 ))
+  else
+    (( q = 2 ))
+  fi
+fi
+-z4h-replace-buf $start $end $quoted[q]

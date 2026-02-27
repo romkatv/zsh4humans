@@ -23,24 +23,6 @@ if (( $#envrc )); then
 fi
 
 if [[ -v DIRENV_WATCHES ]]; then
-  () {
-    local REPLY json
-    -z4h-base64-decode ${${DIRENV_WATCHES//-/+}//_//} || return
-    json=$(printf '\x1f\x8b\x08\x00\x00\x00\x00\x00%s' $REPLY | -z4h-zcat 2>/dev/null) #|| return
-    [[ $json == '['*']' ]] || return
-    # TODO: extract $(jq '.[] | .Path') from $json and append it to deps.
-
-    local -i i=1;
-    local pattern=${:-\"Path\":\"([^\"\\\\]|\\\\?)#\"}
-    local pathmatch;
-    pathmatch=${(*MSI:$i:)json##${~pattern}}
-    while [[ -n $pathmatch ]]; do
-      deps+=${(Q)pathmatch##(*):}
-      pathmatch=${(*MSI:$((++i)):)json##${~pattern}}
-    done
-
-    # TODO: cache those elements with $DIRENV_WATCHES as the key.
-  }
   typeset -gA _z4h_direnv_watch_cache
   if (( ${+_z4h_direnv_watch_cache[$DIRENV_WATCHES]} )); then 
     deps+=${_z4h_direnv_watch_cache[$DIRENV_WATCHES]}

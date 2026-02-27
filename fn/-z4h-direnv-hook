@@ -41,6 +41,53 @@ if [[ -v DIRENV_WATCHES ]]; then
 
     # TODO: cache those elements with $DIRENV_WATCHES as the key.
   }
+  typeset -gA _z4h_direnv_watch_cache
+  if (( ${+_z4h_direnv_watch_cache[$DIRENV_WATCHES]} )); then 
+    deps+=${_z4h_direnv_watch_cache[$DIRENV_WATCHES]}
+  else
+    local -a watchpaths
+    () {    
+      local REPLY json field
+      -z4h-base64-decode ${${DIRENV_WATCHES//-/+}//_//} || return
+      json=$(printf '\x1f\x8b\x08\x00\x00\x00\x00\x00%s' $REPLY | -z4h-zcat 2>/dev/null) || return
+      [[ $json == '['*']' ]] || return
+
+      json=${${json//$'\r'}##[[:space:]]#}
+      json[1]=
+      local -i depth=1
+
+      while true; do
+        json=${json##[[:space:]]#}
+        [[ -n $json ]] || return
+        case $json[1] in
+          '{'|'[')      json[1]=; (( ++depth ));;
+          '}'|']')      json[1]=; (( --depth > 0 )) || return;;
+          ':')          json[1]=;;
+          ',')          json[1]=; field=;;
+          [[:alnum:].]) json=${json##[[:alnum:].]#};;
+          '"')
+            local tail=${json##\"([^\"\\]|\\?)#}
+            [[ $tail == '"'* ]] || return
+            local s=${json:1:-$#tail}
+            json=${tail:1}
+            (( depth == 2 )) || continue 
+            if [[ -z $field ]]; then
+              field=${s:-x}
+            elif [[ $field == Path ]]; then
+              [[ -n $s ]]               || return
+              [[ $s != *($'\n'|'\')* ]] || return
+              watchpaths+=$s
+            fi
+            ;;
+          *) return 1;;
+        esac
+      done
+      return 0
+    }
+    deps+=${watchpaths}
+    _z4h_direnv_watch_cache[$DIRENV_WATCHES]=${(pj:\0:)watchpaths}
+  fi
+  else unset _z4h_direnv_watch_cache
   # TODO: handle errors from the above intelligently.
 fi
 

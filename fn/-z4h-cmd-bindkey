@@ -2,7 +2,7 @@
 
 eval "$_z4h_opt"
 
-zparseopts -D -F -- '' || return '_z4h_err()'
+zparseopts -D -F -- 2>/dev/null || zparseopts -D -F -- '' || return '_z4h_err()'
 
 if (( ARGC < 2 )); then
   -z4h-help-bindkey >&2

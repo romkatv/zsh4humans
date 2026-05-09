@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+
+eval "$_z4h_opt"
+
+local cmd
+for cmd in zcat gzcat 'uncompress -c' 'gunzip -c' 'gzip -cd'; do
+  local words=($=cmd)
+  [[ -v commands[$words[1]] ]] || continue
+  $words || return
+  break
+done

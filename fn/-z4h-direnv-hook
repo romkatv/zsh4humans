@@ -1,5 +1,4 @@
 #!/usr/bin/env zsh
-
 eval "$_z4h_opt"
 
 unset _z4h_direnv_err
@@ -14,33 +13,78 @@ else
   fi
 fi
 
-# { print -n '\x1f\x8b\x08\x00\x00\x00\x00\x00'; base64 -d <<<${${DIRENV_WATCHES//-/+}//_//} } | zcat 2>/dev/null
-
-# zcat
-# gzcat
-# uncompress -c
-# gunzip -c
-# gzip -cd
-
-local sig
+local -a deps
 local envrc=(./(../)#.envrc(NY1:a))
+
 if (( $#envrc )); then
-  local -a deps=(
+  deps+=(
     ${XDG_DATA_HOME:-~/.local/share}/direnv/allow
-    ${XDG_CONFIG_HOME:-~/.config}/{direnv.toml,config.toml})
-  local -a stat
-  local files=($^deps(N))
-  local non_files=(${deps:|files})
-  if zstat -A stat +mtime -- $envrc $files 2>/dev/null; then
-    local sig=$envrc$'\0'${(pj:\0:)stat}
+    ${XDG_CONFIG_HOME:-~/.config}/{,direnv/}{direnv.toml,config.toml,direnvrc})
+fi
+
+if [[ -v DIRENV_WATCHES ]]; then
+  typeset -gA _z4h_direnv_watch_cache
+  if (( ${+_z4h_direnv_watch_cache[$DIRENV_WATCHES]} )); then 
+    deps+=${_z4h_direnv_watch_cache[$DIRENV_WATCHES]}
   else
-    local sig=stat-error
+    local -a watchpaths
+    () {    
+      local REPLY json field
+      -z4h-base64-decode ${${DIRENV_WATCHES//-/+}//_//} || return
+      json=$(printf '\x1f\x8b\x08\x00\x00\x00\x00\x00%s' $REPLY | -z4h-zcat 2>/dev/null) || return
+      [[ $json == '['*']' ]] || return
+
+      json=${${json//$'\r'}##[[:space:]]#}
+      json[1]=
+      local -i depth=1
+
+      while true; do
+        json=${json##[[:space:]]#}
+        [[ -n $json ]] || return
+        case $json[1] in
+          '{'|'[')      json[1]=; (( ++depth ));;
+          '}'|']')      json[1]=; (( --depth > 0 )) || return;;
+          ':')          json[1]=;;
+          ',')          json[1]=; field=;;
+          [[:alnum:].]) json=${json##[[:alnum:].]#};;
+          '"')
+            local tail=${json##\"([^\"\\]|\\?)#}
+            [[ $tail == '"'* ]] || return
+            local s=${json:1:-$#tail}
+            json=${tail:1}
+            (( depth == 2 )) || continue 
+            if [[ -z $field ]]; then
+              field=${s:-x}
+            elif [[ $field == Path ]]; then
+              [[ -n $s ]]               || return
+              [[ $s != *($'\n'|'\')* ]] || return
+              watchpaths+=$s
+            fi
+            ;;
+          *) return 1;;
+        esac
+      done
+      return 0
+    }
+    deps+=${watchpaths}
+    _z4h_direnv_watch_cache[$DIRENV_WATCHES]=${(pj:\0:)watchpaths}
   fi
-elif [[ ! -v DIRENV_WATCHES ]]; then
+  else unset _z4h_direnv_watch_cache
+  # TODO: handle errors from the above intelligently.
+fi
+
+if (( $#envrc + $#deps == 0 )); then
   typeset -g _z4h_direnv_sig=none
   return
+fi
+
+local -a stat
+local files=($^deps(N))
+local non_files=(${deps:|files})
+if zstat -A stat +mtime -- $envrc $files 2>/dev/null; then
+  local sig=$envrc$'\0'${(pj:\0:)stat}
 else
-  local sig=none
+  local sig=stat-error
 fi
 
 [[ $sig == ${_z4h_direnv_sig-} ]] && return

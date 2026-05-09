@@ -58,6 +58,9 @@ TRAPQUIT () {
   return 131
 }
 
+function -z4h-clear-message() { unset _z4h_comp_msg }
+compprefuncs+=(-z4h-clear-message)
+
 funcs=("$compprefuncs[@]")
 compprefuncs=()
 for func in "$funcs[@]"; do

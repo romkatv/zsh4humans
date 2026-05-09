@@ -56,6 +56,10 @@ for k v in ${(kv)keys}; do
   fi
 done
 
+if [[ -v _z4h_comp_msg ]]; then
+  flags=(--header=${(%)_z4h_comp_msg} "${flags[@]}")
+fi
+
 local keymap
 printf -v keymap '%s:%s,' ${(kv)keys}
 local out=$("${cmd[@]}" "$@" --bind=${keymap%,} "${flags[@]}")

@@ -12,9 +12,21 @@ zstyle -a :completion:$curcontext:default list-colors list_colors || return
 
 if [[ ${list_types}${(pj:\0:)list_colors} != $_z4h_last_list_colors ]]; then
   # This takes ~20ms. Can be easily optimized.
+  local -a name_colors mode_colors
+  name_colors=(${(@s:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+  mode_colors=(${(@Ms:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+  # The list-colors style can be set by third-party completion tools (not
+  # just dircolors/LS_COLORS) using zsh's richer match-highlighting syntax
+  # (multiple `=`-separated fields per entry) rather than the simple
+  # "code=value" pairs assumed above. That splits into an odd number of
+  # fields here, which would otherwise crash the `typeset -gA` calls below
+  # with "bad set of key/value pairs for associative array". Bail out
+  # (skip colorization for this value) instead of crashing the completion
+  # widget.
+  (( $#name_colors % 2 == 0 && $#mode_colors % 2 == 0 )) || return 1
   typeset -g _z4h_last_list_colors=${list_types}${(pj:\0:)list_colors}
-  typeset -gA _z4h_name_colors=(${(@s:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
-  typeset -gA _z4h_mode_colors=(${(@Ms:=:)${(@s.:.)list_colors}:#[[:alpha:]][[:alpha:]]=*})
+  typeset -gA _z4h_name_colors=($name_colors)
+  typeset -gA _z4h_mode_colors=($mode_colors)
   typeset -gA _z4h_mode_codes=()
   () {
     local -i8 a b c d
